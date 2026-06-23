@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #f5f3ee;
+  color: #11110f;
+}
+
+::selection {
+  background: #11110f;
+  color: #f5f3ee;
+}
+
+.container-page {
+  @apply mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12;
+}
+
+.eyebrow {
+  @apply text-[10px] font-semibold uppercase tracking-[0.28em] text-neutral-500;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background: #10100f;
+  color: #f1f0ec;
+}
