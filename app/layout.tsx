@@ -21,6 +21,10 @@ const merriweather = Merriweather({
 export const metadata: Metadata = {
   title: "Our Space 𑣲⋆",
   description: "A private daily hub for two people across Vietnam and Singapore.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
