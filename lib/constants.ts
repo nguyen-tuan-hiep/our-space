@@ -10,6 +10,18 @@ export const expenseCategories: ExpenseCategory[] = [
   "Others",
 ];
 
+export const expenseCategoryColors: Record<ExpenseCategory, string> = {
+  "Food & Drinks": "#F09EA7",
+  "Shopping": "#F6CA94",
+  "Travel/Transport": "#FAFABE",
+  "Entertainment": "#C1EBC0",
+  "Groceries": "#C7CAFF",
+  "Utilities": "#CDABEB",
+  "Others": "#F6C2F3",
+};
+
+export const ledgerSeriesColors = ["#99d2e7", "#ff6666"] as const;
+
 export const currencySymbols: Record<CurrencyCode, string> = {
   VND: "VND",
   SGD: "S$",

@@ -40,14 +40,14 @@ import {
 	isInPeriod,
 } from "@/lib/dashboard-utils";
 
-const heroButtonSx = {
-	color: "white",
-	borderColor: "rgba(255, 255, 255, 0.95)",
+	const heroButtonSx = {
+	color: "#fffaf0",
+	borderColor: "rgba(255, 250, 240, 0.95)",
 	backgroundColor: "rgba(17, 17, 15, 0.2)",
 	backdropFilter: "blur(10px)",
 	"&:hover": {
-		borderColor: "rgba(255, 255, 255, 1)",
-		backgroundColor: "white",
+		borderColor: "rgba(255, 250, 240, 1)",
+		backgroundColor: "#fffaf0",
 		color: "#11110f",
 	},
 };
@@ -207,7 +207,7 @@ export function DashboardClient({
 	const periodLabel = filterRange === "week" ? "Week" : "Month";
 
 	return (
-		<main className="min-h-svh overflow-x-clip bg-paper text-ink">
+		<main className="min-h-svh overflow-x-clip bg-[#f5f3ee] text-ink">
 			<section className="relative min-h-[58svh] bg-black text-white">
 				<Image
 					src={heroImageUrl}
@@ -218,19 +218,21 @@ export function DashboardClient({
 				/>
 				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
 				<div className="container-page relative flex min-h-[58svh] flex-col justify-between py-5 sm:py-7">
-					<header className="flex flex-col gap-4 border-b border-white/25 pb-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-						<div className="flex items-center gap-2">
-							<Image
-								src="/icon.svg"
-								alt=""
-								aria-hidden="true"
-								width={28}
-								height={28}
-								className="size-7 shrink-0"
-							/>
-							<p className="font-serif text-2xl tracking-wide sm:text-2xl">
-								Our Space 𑣲⋆
-							</p>
+					<header className="flex flex-col gap-4 border-b border-[#fffaf0]/25 pb-5 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+						<div className="flex items-start gap-4">
+							<div className="flex items-center gap-2">
+								<Image
+									src="/icon.svg"
+									alt=""
+									aria-hidden="true"
+									width={28}
+									height={28}
+									className="size-7 shrink-0"
+								/>
+								<p className="font-serif text-2xl tracking-wide sm:text-2xl">
+									Our Space 𑣲⋆
+								</p>
+							</div>
 						</div>
 						<div className="flex max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
 							<div className="hidden items-center gap-3 sm:flex">
@@ -242,7 +244,7 @@ export function DashboardClient({
 									<p className="text-sm font-semibold">
 										{profile.display_name}
 									</p>
-									<p className="text-xs text-white/65">
+									<p className="text-xs text-[#fffaf0]/70">
 										{profileLocation.flag} {profileLocation.currency}
 									</p>
 								</div>
@@ -276,35 +278,35 @@ export function DashboardClient({
 						</div>
 					</header>
 					<div className="max-w-5xl pb-8 pt-4 sm:pt-0">
-						<p className="eyebrow !text-white/70">
+						<p className="eyebrow !text-[#fffaf0]/70">
 							A little love in every line.
 						</p>
 						<h1 className="mt-4 max-w-[10ch] font-serif text-5xl leading-[0.95] sm:text-5xl lg:text-7xl">
 							A private place for both of us.
 						</h1>
 						<div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
-							<div className="border border-white/25 bg-black/20 p-4 backdrop-blur-sm">
-								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/65">
+								<div className="border border-[#fffaf0]/25 bg-black/20 p-4 backdrop-blur-sm">
+								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#fffaf0]/70">
 									Days together
 								</p>
 								<p className="mt-2 font-serif text-3xl leading-none sm:text-5xl">
 									{relationshipStats.daysTogether}
 								</p>
-								<p className="mt-2 text-sm text-white/70">Since 16 Oct 2025</p>
+								<p className="mt-2 text-sm text-[#fffaf0]/72">Since 16 Oct 2025</p>
 							</div>
-							<div className="border border-white/25 bg-black/20 p-4 backdrop-blur-sm">
-								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/65">
+								<div className="border border-[#fffaf0]/25 bg-black/20 p-4 backdrop-blur-sm">
+								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#fffaf0]/70">
 									Next monthly anniversary
 								</p>
 								<p className="mt-2 font-serif text-3xl leading-none sm:text-5xl">
 									{relationshipStats.countdown}
 								</p>
-								<p className="mt-2 text-sm text-white/70">
+								<p className="mt-2 text-sm text-[#fffaf0]/72">
 									{relationshipStats.nextMonthlyLabel}
 								</p>
 							</div>
 						</div>
-						<div className="pt-8 sm:hidden">
+						<div className="pt-8 sm:block">
 							<Button
 								variant="outlined"
 								startIcon={<ImageUp size={16} />}
@@ -320,14 +322,14 @@ export function DashboardClient({
 			</section>
 
 			<section className="container-page py-6 sm:py-8">
-				<div className="sticky top-0 z-20 -mx-5 border-b border-neutral-200 bg-paper/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
+				<div className="sticky top-0 z-20 -mx-5 border-b border-neutral-200 bg-[#f5f3ee]/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
 					<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
 						<ToggleButtonGroup
 							exclusive
 							value={activeSection}
 							onChange={(_, value) => value && setActiveSection(value)}
 							size="small"
-							className="w-full self-start bg-white sm:w-auto"
+								className="w-full self-start bg-[#fffaf0] sm:w-auto"
 						>
 							<ToggleButton
 								value="notes"
@@ -354,7 +356,7 @@ export function DashboardClient({
 									}
 								}}
 								size="small"
-								className="grid w-full grid-cols-2 bg-white sm:flex sm:w-auto"
+								className="grid w-full grid-cols-2 bg-[#fffaf0] sm:flex sm:w-auto"
 							>
 								<ToggleButton
 									value="week"
@@ -371,7 +373,7 @@ export function DashboardClient({
 							</ToggleButtonGroup>
 							<FormControl
 								size="small"
-								className="w-full bg-white sm:w-72"
+								className="w-full bg-[#fffaf0] sm:w-72"
 							>
 								<InputLabel id="period-select-label">
 									{periodLabel}
@@ -433,7 +435,7 @@ export function DashboardClient({
 									/>
 								))
 							) : (
-								<p className="border border-neutral-200 bg-white p-6 text-neutral-500 md:col-span-2 xl:col-span-3">
+								<p className="border border-neutral-200 bg-[#fffaf0] p-6 text-neutral-500 md:col-span-2 xl:col-span-3">
 									No notes for this {filterRange}.
 								</p>
 							)}

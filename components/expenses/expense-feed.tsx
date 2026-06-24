@@ -9,9 +9,12 @@ import { useSnackbar } from "notistack";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { AvatarIcon } from "@/components/avatar-icon";
-import { formatCurrency } from "@/lib/constants";
+import { expenseCategoryColors, formatCurrency } from "@/lib/constants";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { IndividualExpense } from "@/lib/types";
+
+const actionButtonClassName =
+  "grid size-9 place-items-center rounded-full border border-neutral-200 bg-[#fffaf0] text-ink transition hover:border-neutral-300 hover:bg-[#f5f3ee] hover:shadow-sm";
 
 interface ExpenseFeedProps {
   title: string;
@@ -43,7 +46,7 @@ export function ExpenseFeed({
 
 
   return (
-    <Card className="border border-neutral-200 bg-white p-5">
+    <Card className="border border-neutral-200 bg-[#fffaf0] p-5">
       <div className="mb-5 flex items-center justify-between gap-4">
         <div>
           <p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>
@@ -80,28 +83,35 @@ export function ExpenseFeed({
                   </p>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <Chip size="small" label={expense.category} />
+                  <Chip
+                    size="small"
+                    label={expense.category}
+                    sx={{
+                      backgroundColor: expenseCategoryColors[expense.category],
+                      color: "#11110f",
+                      fontWeight: 700,
+                    }}
+                  />
                   {expense.notes ? (
                     <span className="text-sm text-neutral-500">{expense.notes}</span>
                   ) : null}
                 </div>
                 {canEdit ? (
-                  <div className="mt-3 flex gap-1">
+                  <div className="mt-4 flex gap-2">
                     <Button
-                      size="small"
-                      startIcon={<Edit2 size={15} />}
+                      variant="outlined"
                       onClick={() => onEdit?.(expense)}
+                      className={actionButtonClassName}
                     >
-                      Edit
+                      <Edit2 size={15} />
                     </Button>
                     <Button
-                      size="small"
-                      color="error"
-                      startIcon={<Trash2 size={15} />}
+                      variant="outlined"
                       disabled={pending && deletingId === expense.id}
                       onClick={() => setExpenseToDelete(expense)}
+                      className={`${actionButtonClassName} text-[#c24d5e] hover:border-[#e7bcc4] hover:bg-[#fdecef]`}
                     >
-                      Delete
+                      <Trash2 size={15} className="text-[#c24d5e]" />
                     </Button>
                   </div>
                 ) : null}

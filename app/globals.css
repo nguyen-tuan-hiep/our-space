@@ -4,6 +4,8 @@
 
 :root {
   color-scheme: light;
+  --color-bg: #f5f3ee;
+  --color-paper: #fffaf0;
 }
 
 * {
@@ -15,14 +17,14 @@ html {
 }
 
 body {
-  background: #f5f3ee;
+  background: var(--color-bg);
   color: #11110f;
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 ::selection {
   background: #11110f;
-  color: #f5f3ee;
+  color: var(--color-bg);
 }
 
 .container-page {
@@ -34,11 +36,13 @@ body {
 }
 
 .eyebrow {
-  @apply text-[10px] font-semibold uppercase tracking-[0.28em] text-neutral-500;
+  color: color-mix(in srgb, #11110f 58%, var(--color-bg));
+  @apply text-[10px] font-semibold uppercase tracking-[0.28em];
 }
 
 .form-dialog-title {
-  @apply border-b border-neutral-200 px-6 pb-4 pt-6 font-serif text-3xl leading-none;
+  border-bottom-color: color-mix(in srgb, #11110f 14%, var(--color-bg));
+  @apply border-b px-6 pb-4 pt-6 font-serif text-3xl leading-none;
 }
 
 .form-dialog-content {
@@ -46,19 +50,24 @@ body {
 }
 
 .form-section {
-  @apply grid gap-4 border border-neutral-200 bg-[#ffffff] p-4;
+  border-color: color-mix(in srgb, #11110f 14%, var(--color-bg));
+  background: var(--color-paper);
+  @apply grid gap-4 border p-4;
 }
 
 .form-section-label {
-  @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500;
+  color: color-mix(in srgb, #11110f 58%, var(--color-bg));
+  @apply text-[11px] font-semibold uppercase tracking-[0.18em];
 }
 
 .form-helper {
-  @apply text-xs leading-5 text-neutral-500;
+  color: color-mix(in srgb, #11110f 58%, var(--color-bg));
+  @apply text-xs leading-5;
 }
 
 .form-dialog-actions {
-  @apply border-t border-neutral-200 px-6 py-4;
+  border-top-color: color-mix(in srgb, #11110f 14%, var(--color-bg));
+  @apply border-t px-6 py-4;
 }
 
 .dark {

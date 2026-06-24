@@ -42,8 +42,6 @@ export interface SharedNote {
   recipient_id: string;
   title: string;
   content: string;
-  attachment_url: string | null;
-  attachment_public_id: string | null;
   unlock_at: string | null;
   created_at: string;
   updated_at: string;

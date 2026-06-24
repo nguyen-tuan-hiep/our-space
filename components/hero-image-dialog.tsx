@@ -35,20 +35,20 @@ export function HeroImageDialog({
   };
 
   async function uploadHero(file: File) {
-    const body = new FormData();
-    body.append("file", file);
     setUploading(true);
 
     try {
       const response = await fetch("/api/cloudinary/upload", {
         method: "POST",
-        body,
+        headers: {
+          "content-type": file.type || "image/jpeg",
+        },
+        body: file,
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "Upload failed");
       setHeroUrl(result.secure_url);
       setPublicId(result.public_id);
-      enqueueSnackbar("Hero image uploaded successfully!", { variant: "success" });
     } catch (error) {
       enqueueSnackbar(error instanceof Error ? error.message : "Upload failed", {
         variant: "error",
@@ -61,6 +61,34 @@ export function HeroImageDialog({
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle className="font-serif text-3xl">Edit hero image</DialogTitle>
+      <DialogContent className="grid gap-5 pt-3">
+        <div className="relative aspect-[16/9] overflow-hidden border border-neutral-200 bg-neutral-100">
+          <Image
+            src={heroUrl}
+            alt="Current hero"
+            fill
+            className="object-cover"
+          />
+        </div>
+        <Button
+          component="label"
+          variant="outlined"
+          startIcon={<ImageUp size={17} />}
+          disabled={uploading}
+        >
+          {uploading ? "Uploading..." : "Upload new hero image"}
+          <input
+            aria-label="Upload hero image file"
+            hidden
+            type="file"
+            accept="image/*"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void uploadHero(file);
+            }}
+          />
+        </Button>
+      </DialogContent>
       <form
         action={(formData) => {
           formData.set("hero_image_url", heroUrl);
@@ -74,36 +102,6 @@ export function HeroImageDialog({
           });
         }}
       >
-        <DialogContent className="grid gap-5 pt-3">
-          <div className="relative aspect-[16/9] overflow-hidden border border-neutral-200 bg-neutral-100">
-            <Image
-              src={heroUrl}
-              alt="Current hero"
-              fill
-              className="object-cover"
-            />
-          </div>
-          <Button
-            component="label"
-            variant="outlined"
-            startIcon={<ImageUp size={17} />}
-            disabled={uploading}
-          >
-            {uploading ? "Uploading..." : "Upload new hero image"}
-            <input
-              id="hero-image-file"
-              name="hero-image-file"
-              aria-label="Upload hero image file"
-              hidden
-              type="file"
-              accept="image/*"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) void uploadHero(file);
-              }}
-            />
-          </Button>
-        </DialogContent>
         <DialogActions className="px-6 pb-6">
           <Button onClick={handleClose}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={pending || uploading}>

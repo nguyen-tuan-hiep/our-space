@@ -12,6 +12,9 @@ import { AvatarIcon } from "@/components/avatar-icon";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
 
+const actionButtonClassName =
+  "grid size-9 place-items-center rounded-full border border-neutral-200 bg-[#fffaf0] text-ink transition hover:border-neutral-300 hover:bg-[#f5f3ee] hover:shadow-sm";
+
 function getCountdown(unlockAt: string | null, nowMs: number) {
   if (!unlockAt) return "";
   const diff = new Date(unlockAt).getTime() - nowMs;
@@ -59,7 +62,7 @@ export function NoteCard({
   }, [note.unlock_at]);
 
   return (
-    <Card className="border border-neutral-200 bg-white p-5">
+    <Card className="border border-neutral-200 bg-[#fffaf0] p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
@@ -77,24 +80,23 @@ export function NoteCard({
           <h3 className="mt-2 font-serif text-3xl leading-none">{note.title}</h3>
         </div>
         {canEdit ? (
-          <div className="flex shrink-0 gap-1">
+          <div className="flex shrink-0 gap-2">
             <Button
               aria-label="Edit note"
-              size="small"
+              variant="outlined"
               onClick={() => onEdit(note)}
-              className="min-w-0 px-2"
+              className={actionButtonClassName}
             >
               <Edit2 size={16} />
             </Button>
             <Button
               aria-label="Delete note"
-              size="small"
-              color="error"
+              variant="outlined"
               disabled={pending}
               onClick={() => setConfirmOpen(true)}
-              className="min-w-0 px-2"
+              className={`${actionButtonClassName} text-[#c24d5e] hover:border-[#e7bcc4] hover:bg-[#fdecef]`}
             >
-              <Trash2 size={16} />
+              <Trash2 size={16} className="text-[#c24d5e]" />
             </Button>
           </div>
         ) : null}
@@ -119,7 +121,7 @@ export function NoteCard({
       />
 
       {locked ? (
-        <div className="mt-5 border border-dashed border-neutral-300 bg-neutral-50 p-5">
+        <div className="mt-5 border border-dashed border-neutral-300 bg-[#fffaf0] p-5">
           <p className="eyebrow">Unlocks in</p>
           <p className="mt-2 font-serif text-4xl">{countdown}</p>
           <Box className="mt-4 select-none blur-md">
@@ -132,16 +134,6 @@ export function NoteCard({
         </p>
       )}
 
-      {note.attachment_url && !locked ? (
-        <a
-          href={note.attachment_url}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-5 inline-block text-sm font-semibold text-lagoon underline"
-        >
-          Open attachment
-        </a>
-      ) : null}
     </Card>
   );
 }

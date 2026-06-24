@@ -37,9 +37,6 @@ export function NoteDialog({
 	const [unlockDate, setUnlockDate] = useState<dayjs.Dayjs | null>(dayjs());
 	const [unlockTime, setUnlockTime] = useState<dayjs.Dayjs | null>(dayjs());
 	const [unlockTimezone, setUnlockTimezone] = useState<"VN" | "SG">("SG");
-	const [attachmentUrl, setAttachmentUrl] = useState("");
-	const [attachmentPublicId, setAttachmentPublicId] = useState("");
-	const [uploading, setUploading] = useState(false);
 	const handleClose = () => {
 		if (document.activeElement instanceof HTMLElement) {
 			document.activeElement.blur();
@@ -53,35 +50,7 @@ export function NoteDialog({
 		setUnlockDate(current);
 		setUnlockTime(current);
 		setUnlockTimezone("SG");
-		setAttachmentUrl(note?.attachment_url ?? "");
-		setAttachmentPublicId(note?.attachment_public_id ?? "");
 	}, [note, open]);
-
-	async function uploadAttachment(file: File) {
-		const body = new FormData();
-		body.append("file", file);
-		setUploading(true);
-		try {
-			const response = await fetch("/api/cloudinary/upload", {
-				method: "POST",
-				body,
-			});
-			const result = await response.json();
-			if (!response.ok) throw new Error(result.error ?? "Upload failed");
-			setAttachmentUrl(result.secure_url);
-			setAttachmentPublicId(result.public_id);
-			enqueueSnackbar("File uploaded successfully!", { variant: "success" });
-		} catch (error) {
-			enqueueSnackbar(
-				error instanceof Error ? error.message : "Upload failed",
-				{
-					variant: "error",
-				},
-			);
-		} finally {
-			setUploading(false);
-		}
-	}
 
 	function getUnlockIso() {
 		const offset = unlockTimezone === "VN" ? "+07:00" : "+08:00";
@@ -124,8 +93,6 @@ export function NoteDialog({
 				action={(formData) => {
 					formData.set("recipient_id", recipient.id);
 					formData.set("unlock_at", getUnlockIso());
-					formData.set("attachment_url", attachmentUrl);
-					formData.set("attachment_public_id", attachmentPublicId);
 					if (note) formData.set("id", note.id);
 
 					startTransition(async () => {
@@ -196,45 +163,13 @@ export function NoteDialog({
 							above.
 						</p>
 					</div>
-					<div className="form-section">
-						<p className="form-section-label">Attachment</p>
-						<Button
-							variant="outlined"
-							component="label"
-							disabled={uploading}
-						>
-							{uploading ? "Uploading..." : "Upload attachment"}
-							<input
-								id="note-attachment-file"
-								name="note-attachment-file"
-								aria-label="Upload note attachment"
-								hidden
-								type="file"
-								accept="image/*,.pdf"
-								onChange={(event) => {
-									const file = event.target.files?.[0];
-									if (file) void uploadAttachment(file);
-								}}
-							/>
-						</Button>
-						{attachmentUrl ? (
-							<a
-								className="truncate text-sm text-lagoon underline"
-								href={attachmentUrl}
-								target="_blank"
-								rel="noreferrer"
-							>
-								{attachmentUrl}
-							</a>
-						) : null}
-					</div>
 				</DialogContent>
 				<DialogActions className="form-dialog-actions">
 					<Button onClick={handleClose}>Cancel</Button>
 					<Button
 						type="submit"
 						variant="contained"
-						disabled={pending || uploading}
+						disabled={pending}
 					>
 						{pending ? "Saving..." : "Save note"}
 					</Button>

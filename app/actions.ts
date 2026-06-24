@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { v2 as cloudinary } from "cloudinary";
 import { createClient } from "@/lib/supabase/server";
 import {
   expenseCategories,
@@ -162,6 +163,35 @@ export async function updateHeroImage(formData: FormData) {
     return fail("Please upload a valid hero image.");
   }
 
+  const { data: currentSettings, error: settingsError } = await supabase
+    .from("app_settings")
+    .select("hero_image_public_id")
+    .eq("id", "main")
+    .maybeSingle();
+
+  if (settingsError) return fail(settingsError.message);
+
+  const currentHeroPublicId = currentSettings?.hero_image_public_id ?? null;
+
+  if (
+    currentHeroPublicId &&
+    currentHeroPublicId !== heroImagePublicId &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET &&
+    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+  ) {
+    cloudinary.config({
+      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    await cloudinary.uploader.destroy(currentHeroPublicId, {
+      resource_type: "image",
+      invalidate: true,
+    });
+  }
+
   const { error } = await supabase.from("app_settings").upsert({
     id: "main",
     hero_image_url: heroImageUrl,
@@ -184,8 +214,6 @@ export async function createNote(formData: FormData) {
     recipient_id: recipientId,
     title: stringValue(formData, "title"),
     content: stringValue(formData, "content"),
-    attachment_url: nullableStringValue(formData, "attachment_url"),
-    attachment_public_id: nullableStringValue(formData, "attachment_public_id"),
     unlock_at: unlockAt ? new Date(unlockAt).toISOString() : null,
   });
 
@@ -204,8 +232,6 @@ export async function updateNote(formData: FormData) {
     .update({
       title: stringValue(formData, "title"),
       content: stringValue(formData, "content"),
-      attachment_url: nullableStringValue(formData, "attachment_url"),
-      attachment_public_id: nullableStringValue(formData, "attachment_public_id"),
       unlock_at: unlockAt ? new Date(unlockAt).toISOString() : null,
     })
     .eq("id", noteId);

@@ -10,9 +10,9 @@ interface SetupRequiredProps {
 
 export function SetupRequired({ user, profile, details = [] }: SetupRequiredProps) {
   return (
-    <main className="min-h-svh bg-paper text-ink">
+    <main className="min-h-svh bg-[#f5f3ee] text-ink">
       <section className="container-page grid min-h-svh items-center py-12">
-        <Card className="mx-auto w-full max-w-3xl border border-neutral-200 bg-white p-6 sm:p-8">
+        <Card className="mx-auto w-full max-w-3xl border border-neutral-200 bg-[#fffaf0] p-6 sm:p-8">
           <p className="eyebrow">Setup required</p>
           <h1 className="mt-3 font-serif text-5xl leading-none">
             Profile link is missing
@@ -23,7 +23,7 @@ export function SetupRequired({ user, profile, details = [] }: SetupRequiredProp
             other user through `partner_id`.
           </p>
 
-          <div className="mt-6 grid gap-3 bg-[#f7f7f5] p-4 text-sm">
+          <div className="mt-6 grid gap-3 bg-[#fffaf0] p-4 text-sm">
             <p>
               <span className="font-semibold">Current user id:</span>{" "}
               <code>{user.id}</code>

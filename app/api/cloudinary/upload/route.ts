@@ -11,15 +11,12 @@ cloudinary.config({
 export async function POST(request: Request) {
   await requireAppSession();
 
-  const formData = await request.formData();
-  const file = formData.get("file");
-
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "Missing file." }, { status: 400 });
+  const contentType = request.headers.get("content-type") ?? "";
+  if (!contentType.startsWith("image/")) {
+    return NextResponse.json({ error: "Missing image file." }, { status: 400 });
   }
 
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  const buffer = Buffer.from(await request.arrayBuffer());
 
   try {
     const result = await new Promise<{
@@ -30,8 +27,8 @@ export async function POST(request: Request) {
     }>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
-          folder: "our-space/attachments",
-          resource_type: "auto",
+          folder: "our-space/hero",
+          resource_type: "image",
         },
         (error, uploadResult) => {
           if (error || !uploadResult) reject(error ?? new Error("Upload failed"));

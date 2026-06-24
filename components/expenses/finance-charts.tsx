@@ -19,7 +19,12 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { formatCurrency, supportedCurrencies } from "@/lib/constants";
+import {
+	expenseCategoryColors,
+	ledgerSeriesColors,
+	formatCurrency,
+	supportedCurrencies,
+} from "@/lib/constants";
 import { formatAppDate } from "@/lib/date-format";
 import { AvatarIcon } from "@/components/avatar-icon";
 import {
@@ -28,16 +33,6 @@ import {
 } from "@/lib/finance-chart-utils";
 import type { FilterRange } from "@/lib/dashboard-utils";
 import type { CurrencyCode, IndividualExpense, Profile } from "@/lib/types";
-
-const colors = [
-	"#b76e79",
-	"#3f6f78",
-	"#71816d",
-	"#11110f",
-	"#c6a15b",
-	"#876445",
-	"#727272",
-];
 
 function tooltipFormatter(
 	value: number,
@@ -114,9 +109,8 @@ export function FinanceCharts({
 			}),
 		[displayCurrency, exchangeRateSgdToVnd, expenses, profiles],
 	);
-
 	return (
-		<Card className="border border-neutral-200 bg-white p-5">
+		<Card className="border border-neutral-200 bg-[#fffaf0] p-5">
 			<div className="mb-5 flex flex-wrap items-end justify-between gap-4">
 				<div>
 					<p className="eyebrow">Finance overview</p>
@@ -184,7 +178,7 @@ export function FinanceCharts({
 							width="100%"
 							height="100%"
 						>
-							<BarChart data={chartData}>
+									<BarChart data={chartData}>
 								<CartesianGrid
 									stroke="#e8e3d8"
 									vertical={false}
@@ -210,7 +204,7 @@ export function FinanceCharts({
 										dataKey={profile.id}
 										name={profile.display_name}
 										radius={[4, 4, 0, 0]}
-										fill={colors[index % colors.length]}
+										fill={ledgerSeriesColors[index % ledgerSeriesColors.length]}
 									/>
 								))}
 							</BarChart>
@@ -258,10 +252,10 @@ export function FinanceCharts({
 											outerRadius={82}
 											paddingAngle={2}
 										>
-											{item.categories.map((entry, colorIndex) => (
+											{item.categories.map((entry) => (
 												<Cell
 													key={entry.category}
-													fill={colors[(colorIndex + index) % colors.length]}
+													fill={expenseCategoryColors[entry.category]}
 												/>
 											))}
 										</Pie>

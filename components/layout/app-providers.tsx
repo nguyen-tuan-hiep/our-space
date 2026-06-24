@@ -6,19 +6,17 @@ import { SnackbarProvider } from "notistack";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { RuntimeErrorGuard } from "@/components/layout/runtime-error-guard";
+import { themeColors } from "@/lib/theme-colors";
 
 const theme = createTheme({
   palette: {
     mode: "light",
     background: {
-      default: "#f5f3ee",
-      paper: "#fffaf0",
+      default: themeColors.bg,
+      paper: themeColors.paper,
     },
     primary: {
       main: "#11110f",
-    },
-    secondary: {
-      main: "#b76e79",
     },
   },
   shape: {
@@ -66,7 +64,7 @@ const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          backgroundColor: "#fffefb",
+          backgroundColor: themeColors.paper,
           borderRadius: 8,
         },
       },

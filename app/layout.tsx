@@ -3,6 +3,7 @@ import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
+import { themeColors } from "@/lib/theme-colors";
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -38,6 +39,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       className={`${beVietnamPro.variable} ${merriweather.variable}`}
+      style={
+        {
+          "--color-bg": themeColors.bg,
+          "--color-paper": themeColors.paper,
+        } as React.CSSProperties
+      }
     >
       <body>
         <AppRouterCacheProvider>
