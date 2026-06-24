@@ -142,28 +142,39 @@ export function isAvatarKey(value: string): value is AvatarKey {
   return avatarOptions.includes(value as AvatarKey);
 }
 
+function hasEmojiPresentation(value: string) {
+  return /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(value);
+}
+
+function stripEmojiModifiers(value: string) {
+  return value.replace(/[\uFE0E\uFE0F\u200D]/gu, "");
+}
+
 export function isCustomAvatarEmoji(value: string) {
   const compact = value.trim();
-  const emojiMatches = compact.match(/\p{Extended_Pictographic}/gu) ?? [];
-  const withoutEmojiSyntax = compact
-    .replace(/\p{Extended_Pictographic}/gu, "")
-    .replace(/[\uFE0F\u200D]/gu, "")
-    .trim();
+  const stripped = stripEmojiModifiers(compact);
+  const chars = Array.from(stripped);
 
   return (
     compact.length > 0 &&
     compact.length <= 12 &&
-    /\p{Extended_Pictographic}/u.test(compact) &&
-    emojiMatches.length === 1 &&
-    withoutEmojiSyntax.length === 0
+    hasEmojiPresentation(compact) &&
+    chars.length > 0 &&
+    chars.length <= 4 &&
+    chars.every((char) => !/[A-Za-z0-9]/.test(char))
   );
 }
 
 export function extractEmojiOnly(value: string) {
-  return (
-    value.match(/\p{Extended_Pictographic}(?:\uFE0F|\u200D|\p{Extended_Pictographic})*/u)?.[0] ??
-    ""
-  );
+  const compact = value.trim();
+  if (!compact) return "";
+
+  if (isCustomAvatarEmoji(compact)) {
+    return compact;
+  }
+
+  const firstChar = Array.from(compact)[0] ?? "";
+  return hasEmojiPresentation(firstChar) ? firstChar : "";
 }
 
 export function normalizeGroupedNumberInput(value: string, maxDecimals = 2) {

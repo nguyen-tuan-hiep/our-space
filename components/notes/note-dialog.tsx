@@ -138,6 +138,7 @@ export function NoteDialog({
 							<Select
 								labelId="unlock-timezone-label"
 								id="unlock-timezone"
+								name="unlock_timezone"
 								value={unlockTimezone}
 								label="Timezone"
 								onChange={(event) =>
@@ -162,6 +163,9 @@ export function NoteDialog({
 						>
 							{uploading ? "Uploading..." : "Upload attachment"}
 							<input
+								id="note-attachment-file"
+								name="note-attachment-file"
+								aria-label="Upload note attachment"
 								hidden
 								type="file"
 								accept="image/*,.pdf"

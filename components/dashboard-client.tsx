@@ -39,6 +39,18 @@ import {
 	isInPeriod,
 } from "@/lib/dashboard-utils";
 
+const heroButtonSx = {
+	color: "white",
+	borderColor: "rgba(255, 255, 255, 0.95)",
+	backgroundColor: "rgba(17, 17, 15, 0.2)",
+	backdropFilter: "blur(10px)",
+	"&:hover": {
+		borderColor: "rgba(255, 255, 255, 1)",
+		backgroundColor: "white",
+		color: "#11110f",
+	},
+};
+
 interface DashboardClientProps {
 	profile: Profile;
 	partner: Profile;
@@ -194,7 +206,7 @@ export function DashboardClient({
 	const periodLabel = filterRange === "week" ? "Week" : "Month";
 
 	return (
-		<main className="min-h-svh bg-paper text-ink">
+		<main className="min-h-svh overflow-x-clip bg-paper text-ink">
 			<section className="relative min-h-[58svh] bg-black text-white">
 				<Image
 					src={heroImageUrl}
@@ -204,10 +216,12 @@ export function DashboardClient({
 					className="object-cover opacity-75"
 				/>
 				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
-				<div className="container-page relative flex min-h-[58svh] flex-col justify-between py-7">
-					<header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/25 pb-5">
-						<p className="font-serif text-2xl tracking-wide">Our Space 𑣲⋆</p>
-						<div className="flex max-w-full flex-wrap items-center justify-end gap-2 sm:gap-3">
+				<div className="container-page relative flex min-h-[58svh] flex-col justify-between py-5 sm:py-7">
+					<header className="flex flex-col gap-4 border-b border-white/25 pb-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+						<p className="font-serif text-2xl tracking-wide sm:text-2xl">
+							Our Space 𑣲⋆
+						</p>
+						<div className="flex max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
 							<div className="hidden items-center gap-3 sm:flex">
 								<AvatarIcon
 									value={profile.avatar_url}
@@ -225,7 +239,8 @@ export function DashboardClient({
 							<Button
 								variant="outlined"
 								startIcon={<Settings size={16} />}
-								className="min-h-10 border-white px-3 text-white hover:border-white hover:bg-white hover:text-ink sm:px-4"
+								sx={heroButtonSx}
+								className="min-h-10 w-full px-3 sm:w-auto sm:px-4"
 								onClick={() => setProfileOpen(true)}
 							>
 								Profile
@@ -234,7 +249,8 @@ export function DashboardClient({
 								variant="outlined"
 								startIcon={<LogOut size={16} />}
 								disabled={pending}
-								className="min-h-10 border-white px-3 text-white hover:border-white hover:bg-white hover:text-ink sm:px-4"
+								sx={heroButtonSx}
+								className="min-h-10 w-full px-3 sm:w-auto sm:px-4"
 								onClick={() =>
 									startTransition(async () => {
 										enqueueSnackbar("Logged out successfully!", {
@@ -248,11 +264,11 @@ export function DashboardClient({
 							</Button>
 						</div>
 					</header>
-					<div className="max-w-5xl pb-8">
+					<div className="max-w-5xl pb-8 pt-4 sm:pt-0">
 						<p className="eyebrow !text-white/70">
 							Vietnam / Singapore daily hub
 						</p>
-						<h1 className="mt-4 font-serif text-6xl leading-[0.9] sm:text-8xl lg:text-9xl">
+						<h1 className="mt-4 max-w-[10ch] font-serif text-5xl leading-[0.95] sm:text-7xl lg:text-9xl">
 							A private place for both of us.
 						</h1>
 						<div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
@@ -260,7 +276,7 @@ export function DashboardClient({
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/65">
 									Days together
 								</p>
-								<p className="mt-2 font-serif text-4xl leading-none sm:text-5xl">
+								<p className="mt-2 font-serif text-3xl leading-none sm:text-5xl">
 									{relationshipStats.daysTogether}
 								</p>
 								<p className="mt-2 text-sm text-white/70">Since 16 Oct 2025</p>
@@ -269,7 +285,7 @@ export function DashboardClient({
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/65">
 									Next monthly anniversary
 								</p>
-								<p className="mt-2 font-serif text-4xl leading-none sm:text-5xl">
+								<p className="mt-2 font-serif text-3xl leading-none sm:text-5xl">
 									{relationshipStats.countdown}
 								</p>
 								<p className="mt-2 text-sm text-white/70">
@@ -277,52 +293,47 @@ export function DashboardClient({
 								</p>
 							</div>
 						</div>
-						<Button
-							variant="outlined"
-							startIcon={<ImageUp size={16} />}
-							className="mt-4 border-white bg-black/20 text-white backdrop-blur-sm hover:border-white hover:bg-white hover:text-ink sm:hidden"
-							onClick={() => setHeroOpen(true)}
-						>
-							Edit image
-						</Button>
+						<div className="pt-8 sm:hidden">
+							<Button
+								variant="outlined"
+								startIcon={<ImageUp size={16} />}
+								sx={heroButtonSx}
+								className="w-fit max-w-full"
+								onClick={() => setHeroOpen(true)}
+							>
+								Edit image
+							</Button>
+						</div>
 					</div>
-					<Button
-						variant="outlined"
-						startIcon={<ImageUp size={16} />}
-						className="absolute bottom-7 right-5 hidden border-white bg-black/20 text-white backdrop-blur-sm hover:border-white hover:bg-white hover:text-ink sm:inline-flex sm:right-8 lg:right-12"
-						onClick={() => setHeroOpen(true)}
-					>
-						Edit image
-					</Button>
 				</div>
 			</section>
 
 			<section className="container-page py-6 sm:py-8">
 				<div className="sticky top-0 z-20 -mx-5 border-b border-neutral-200 bg-paper/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
-					<div className="flex flex-wrap items-center justify-between gap-6">
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
 						<ToggleButtonGroup
 							exclusive
 							value={activeSection}
 							onChange={(_, value) => value && setActiveSection(value)}
 							size="small"
-							className="bg-white"
+							className="w-full self-start bg-white sm:w-auto"
 						>
 							<ToggleButton
 								value="notes"
-								className="gap-2 px-3 sm:px-5"
+								className="flex-1 gap-2 px-3 sm:flex-none sm:px-5"
 							>
 								<NotebookPen size={16} />
 								Notes
 							</ToggleButton>
 							<ToggleButton
 								value="financial"
-								className="gap-2 px-3 sm:px-5"
+								className="flex-1 gap-2 px-3 sm:flex-none sm:px-5"
 							>
 								<WalletCards size={16} />
 								Financial
 							</ToggleButton>
 						</ToggleButtonGroup>
-						<div className="flex flex-col gap-6 sm:w-auto sm:flex-row sm:items-center">
+						<div className="flex flex-col gap-6 sm:w-auto sm:flex-row sm:items-center sm:gap-6">
 							<ToggleButtonGroup
 								exclusive
 								value={filterRange}
@@ -332,17 +343,17 @@ export function DashboardClient({
 									}
 								}}
 								size="small"
-								className="bg-white"
+								className="w-full bg-white sm:w-auto"
 							>
 								<ToggleButton
 									value="week"
-									className="px-4"
+									className="flex-1 px-4 sm:flex-none"
 								>
 									Week
 								</ToggleButton>
 								<ToggleButton
 									value="month"
-									className="px-4"
+									className="flex-1 px-4 sm:flex-none"
 								>
 									Month
 								</ToggleButton>
@@ -351,11 +362,14 @@ export function DashboardClient({
 								size="small"
 								className="w-full bg-white sm:w-72"
 							>
-								<InputLabel id="period-select-label">{periodLabel}</InputLabel>
+								<InputLabel id="period-select-label">
+									{periodLabel}
+								</InputLabel>
 
 								<Select
 									labelId="period-select-label"
 									id="period-select"
+									name="selected_period"
 									value={activePeriod}
 									label={periodLabel}
 									onChange={(event) => setSelectedPeriod(event.target.value)}
@@ -376,7 +390,7 @@ export function DashboardClient({
 
 				{activeSection === "notes" ? (
 					<div className="grid gap-6 py-6">
-						<div className="flex flex-wrap items-end justify-between gap-4">
+						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<p className="eyebrow">Shared notes</p>
 								<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
@@ -386,7 +400,7 @@ export function DashboardClient({
 							<Button
 								variant="contained"
 								startIcon={<Plus size={17} />}
-								className="min-h-11 bg-ink px-5 text-white hover:bg-neutral-700"
+								className="min-h-11 w-full bg-ink px-5 text-white hover:bg-neutral-700 sm:w-auto"
 								onClick={() => setNoteOpen(true)}
 							>
 								New note
@@ -416,7 +430,7 @@ export function DashboardClient({
 					</div>
 				) : (
 					<div className="grid gap-6 py-6">
-						<div className="flex flex-wrap items-end justify-between gap-4">
+						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<p className="eyebrow">Financial</p>
 								<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
@@ -428,7 +442,7 @@ export function DashboardClient({
 							<Button
 								variant="contained"
 								startIcon={<Plus size={17} />}
-								className="min-h-11 bg-ink px-5 text-white hover:bg-neutral-700"
+								className="min-h-11 w-full bg-ink px-5 text-white hover:bg-neutral-700 sm:w-auto"
 								onClick={() => setExpenseOpen(true)}
 							>
 								Log expense

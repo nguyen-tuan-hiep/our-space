@@ -140,6 +140,7 @@ export function FinanceCharts({
 						<Select
 							labelId="display-currency-label"
 							id="display-currency"
+							name="display_currency"
 							value={displayCurrency}
 							label="Display currency"
 							onChange={(event) =>

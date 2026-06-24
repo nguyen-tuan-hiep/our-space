@@ -1,6 +1,6 @@
 "use client";
 
-import { StyledEngineProvider, ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { SnackbarProvider } from "notistack";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -76,20 +76,18 @@ const theme = createTheme({
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={theme}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <SnackbarProvider
-            maxSnack={4}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            autoHideDuration={3200}
-          >
-            <CssBaseline />
-            <RuntimeErrorGuard />
-            {children}
-          </SnackbarProvider>
-        </LocalizationProvider>
-      </ThemeProvider>
-    </StyledEngineProvider>
+    <ThemeProvider theme={theme}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <SnackbarProvider
+          maxSnack={4}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          autoHideDuration={3200}
+        >
+          <CssBaseline />
+          <RuntimeErrorGuard />
+          {children}
+        </SnackbarProvider>
+      </LocalizationProvider>
+    </ThemeProvider>
   );
 }

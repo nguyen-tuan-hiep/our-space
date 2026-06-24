@@ -102,6 +102,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 							<Select
 								labelId="default-location-label"
 								id="default-location"
+								name="country_code"
 								value={location}
 								label="Default location"
 								onChange={(event) =>

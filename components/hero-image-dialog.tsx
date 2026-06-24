@@ -85,6 +85,9 @@ export function HeroImageDialog({
           >
             {uploading ? "Uploading..." : "Upload new hero image"}
             <input
+              id="hero-image-file"
+              name="hero-image-file"
+              aria-label="Upload hero image file"
               hidden
               type="file"
               accept="image/*"
