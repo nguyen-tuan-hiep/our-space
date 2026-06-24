@@ -5,6 +5,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { SnackbarProvider } from "notistack";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { RuntimeErrorGuard } from "@/components/layout/runtime-error-guard";
 
 const theme = createTheme({
   palette: {
@@ -50,6 +51,26 @@ const theme = createTheme({
         },
       },
     },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          borderRadius: 8,
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        fullWidth: true,
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#fffefb",
+          borderRadius: 8,
+        },
+      },
+    },
   },
 });
 
@@ -64,6 +85,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
             autoHideDuration={3200}
           >
             <CssBaseline />
+            <RuntimeErrorGuard />
             {children}
           </SnackbarProvider>
         </LocalizationProvider>

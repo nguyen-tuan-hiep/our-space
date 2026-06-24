@@ -3,8 +3,33 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { expenseCategories, isAvatarKey } from "@/lib/constants";
-import type { CurrencyCode, ExpenseCategory } from "@/lib/types";
+import {
+  expenseCategories,
+  isAvatarKey,
+  isCustomAvatarEmoji,
+  locationSettings,
+  normalizeGroupedNumberInput,
+  supportedCurrencies,
+  supportedLocations,
+} from "@/lib/constants";
+import type { CurrencyCode, ExpenseCategory, LocationCode } from "@/lib/types";
+
+type ExpensePayload = {
+  title: string;
+  amount: number;
+  currency: CurrencyCode;
+  transaction_date: string;
+  category: ExpenseCategory;
+  notes: string | null;
+};
+
+function ok(message: string): { ok: true; message: string } {
+  return { ok: true, message };
+}
+
+function fail(message: string): { ok: false; message: string } {
+  return { ok: false, message };
+}
 
 function stringValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -14,6 +39,11 @@ function stringValue(formData: FormData, key: string) {
 function nullableStringValue(formData: FormData, key: string) {
   const value = stringValue(formData, key);
   return value.length ? value : null;
+}
+
+function numberValue(formData: FormData, key: string) {
+  const value = stringValue(formData, key);
+  return Number(normalizeGroupedNumberInput(value));
 }
 
 async function requireUser() {
@@ -26,16 +56,44 @@ async function requireUser() {
   return { supabase, user };
 }
 
+function getExpensePayload(
+  formData: FormData,
+): { ok: true; payload: ExpensePayload } | { ok: false; message: string } {
+  const currency = stringValue(formData, "currency") as CurrencyCode;
+  const amount = numberValue(formData, "amount");
+  const category = stringValue(formData, "category") as ExpenseCategory;
+  const transactionDate = new Date(stringValue(formData, "transaction_date"));
+
+  if (!expenseCategories.includes(category)) return fail("Invalid category.");
+  if (!supportedCurrencies.includes(currency)) return fail("Invalid currency.");
+  if (!Number.isFinite(amount) || amount <= 0) return fail("Invalid amount.");
+  if (Number.isNaN(transactionDate.getTime())) {
+    return fail("Please choose a valid transaction date.");
+  }
+
+  return {
+    ok: true,
+    payload: {
+      title: stringValue(formData, "title"),
+      amount,
+      currency,
+      transaction_date: transactionDate.toISOString(),
+      category,
+      notes: nullableStringValue(formData, "notes"),
+    },
+  };
+}
+
 export async function signInWithPassword(formData: FormData) {
   const supabase = await createClient();
   const email = stringValue(formData, "email");
   const password = stringValue(formData, "password");
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { ok: false, message: error.message };
+  if (error) return fail(error.message);
 
   revalidatePath("/dashboard");
-  return { ok: true, message: "Logged in successfully!" };
+  return ok("Logged in successfully!");
 }
 
 export async function signOut() {
@@ -48,13 +106,18 @@ export async function updateProfile(formData: FormData) {
   const { supabase, user } = await requireUser();
   const displayName = stringValue(formData, "display_name");
   const avatar = stringValue(formData, "avatar");
+  const location = stringValue(formData, "location") as LocationCode;
 
   if (displayName.length < 2 || displayName.length > 80) {
-    return { ok: false, message: "Name must be between 2 and 80 characters." };
+    return fail("Name must be between 2 and 80 characters.");
   }
 
-  if (!isAvatarKey(avatar)) {
-    return { ok: false, message: "Please choose a valid avatar icon." };
+  if (!isAvatarKey(avatar) && !isCustomAvatarEmoji(avatar)) {
+    return fail("Please choose a valid avatar emoji.");
+  }
+
+  if (!supportedLocations.includes(location)) {
+    return fail("Invalid default location.");
   }
 
   const { error } = await supabase
@@ -62,12 +125,14 @@ export async function updateProfile(formData: FormData) {
     .update({
       display_name: displayName,
       avatar_url: avatar,
+      country_code: location,
+      currency: locationSettings[location].currency,
     })
     .eq("id", user.id);
 
-  if (error) return { ok: false, message: error.message };
+  if (error) return fail(error.message);
   revalidatePath("/dashboard");
-  return { ok: true, message: "Profile updated successfully!" };
+  return ok("Profile updated successfully!");
 }
 
 export async function updatePassword(formData: FormData) {
@@ -76,16 +141,16 @@ export async function updatePassword(formData: FormData) {
   const confirmPassword = stringValue(formData, "confirm_password");
 
   if (password.length < 8) {
-    return { ok: false, message: "Password must be at least 8 characters." };
+    return fail("Password must be at least 8 characters.");
   }
 
   if (password !== confirmPassword) {
-    return { ok: false, message: "Passwords do not match." };
+    return fail("Passwords do not match.");
   }
 
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return { ok: false, message: error.message };
-  return { ok: true, message: "Password changed successfully!" };
+  if (error) return fail(error.message);
+  return ok("Password changed successfully!");
 }
 
 export async function updateHeroImage(formData: FormData) {
@@ -94,7 +159,7 @@ export async function updateHeroImage(formData: FormData) {
   const heroImagePublicId = nullableStringValue(formData, "hero_image_public_id");
 
   if (!heroImageUrl.startsWith("https://")) {
-    return { ok: false, message: "Please upload a valid hero image." };
+    return fail("Please upload a valid hero image.");
   }
 
   const { error } = await supabase.from("app_settings").upsert({
@@ -104,9 +169,9 @@ export async function updateHeroImage(formData: FormData) {
     updated_by: user.id,
   });
 
-  if (error) return { ok: false, message: error.message };
+  if (error) return fail(error.message);
   revalidatePath("/dashboard");
-  return { ok: true, message: "Hero image updated successfully!" };
+  return ok("Hero image updated successfully!");
 }
 
 export async function createNote(formData: FormData) {
@@ -124,9 +189,9 @@ export async function createNote(formData: FormData) {
     unlock_at: unlockAt ? new Date(unlockAt).toISOString() : null,
   });
 
-  if (error) return { ok: false, message: error.message };
+  if (error) return fail(error.message);
   revalidatePath("/dashboard");
-  return { ok: true, message: "Note created successfully!" };
+  return ok("Note created successfully!");
 }
 
 export async function updateNote(formData: FormData) {
@@ -145,79 +210,49 @@ export async function updateNote(formData: FormData) {
     })
     .eq("id", noteId);
 
-  if (error) return { ok: false, message: error.message };
+  if (error) return fail(error.message);
   revalidatePath("/dashboard");
-  return { ok: true, message: "Note updated successfully!" };
+  return ok("Note updated successfully!");
 }
 
 export async function deleteNote(noteId: string) {
   const { supabase } = await requireUser();
   const { error } = await supabase.from("notes").delete().eq("id", noteId);
 
-  if (error) return { ok: false, message: error.message };
+  if (error) return fail(error.message);
   revalidatePath("/dashboard");
-  return { ok: true, message: "Note deleted!" };
+  return ok("Note deleted!");
 }
 
 export async function createExpense(formData: FormData) {
   const { supabase, user } = await requireUser();
-  const amount = Number(stringValue(formData, "amount"));
-  const currency = stringValue(formData, "currency") as CurrencyCode;
-  const category = stringValue(formData, "category") as ExpenseCategory;
-  const transactionDate = new Date(stringValue(formData, "transaction_date"));
-
-  if (!expenseCategories.includes(category)) {
-    return { ok: false, message: "Invalid category." };
-  }
-
-  if (Number.isNaN(transactionDate.getTime())) {
-    return { ok: false, message: "Please choose a valid transaction date." };
-  }
+  const expense = getExpensePayload(formData);
+  if (!expense.ok) return expense;
 
   const { error } = await supabase.from("individual_expenses").insert({
     owner_id: user.id,
-    title: stringValue(formData, "title"),
-    amount,
-    currency,
-    transaction_date: transactionDate.toISOString(),
-    category,
-    notes: nullableStringValue(formData, "notes"),
+    ...expense.payload,
   });
 
-  if (error) return { ok: false, message: error.message };
+  if (error) return fail(error.message);
   revalidatePath("/dashboard");
-  return { ok: true, message: "Expense logged successfully!" };
+  return ok("Expense logged successfully!");
 }
 
 export async function updateExpense(formData: FormData) {
   const { supabase } = await requireUser();
   const expenseId = stringValue(formData, "id");
-  const amount = Number(stringValue(formData, "amount"));
-  const category = stringValue(formData, "category") as ExpenseCategory;
-  const transactionDate = new Date(stringValue(formData, "transaction_date"));
-
-  if (!expenseCategories.includes(category)) {
-    return { ok: false, message: "Invalid category." };
-  }
-
-  if (Number.isNaN(transactionDate.getTime())) {
-    return { ok: false, message: "Please choose a valid transaction date." };
-  }
+  const expense = getExpensePayload(formData);
+  if (!expense.ok) return expense;
 
   const { error } = await supabase
     .from("individual_expenses")
-    .update({
-      title: stringValue(formData, "title"),
-      amount,
-      transaction_date: transactionDate.toISOString(),
-      category,
-      notes: nullableStringValue(formData, "notes"),
-    })
+    .update(expense.payload)
     .eq("id", expenseId);
 
-  if (error) return { ok: false, message: error.message };
+  if (error) return fail(error.message);
   revalidatePath("/dashboard");
-  return { ok: true, message: "Transaction updated!" };
+  return ok("Transaction updated!");
 }
 
 export async function deleteExpense(expenseId: string) {
@@ -227,7 +262,7 @@ export async function deleteExpense(expenseId: string) {
     .delete()
     .eq("id", expenseId);
 
-  if (error) return { ok: false, message: error.message };
+  if (error) return fail(error.message);
   revalidatePath("/dashboard");
-  return { ok: true, message: "Transaction removed!" };
+  return ok("Transaction removed!");
 }

@@ -1,6 +1,7 @@
 import type { Session, User } from "@supabase/supabase-js";
 
 export type CurrencyCode = "VND" | "SGD";
+export type LocationCode = "VN" | "SG";
 
 export type ExpenseCategory =
   | "Food & Drinks"
@@ -16,7 +17,7 @@ export interface Profile {
   email: string | null;
   display_name: string;
   avatar_url: string | null;
-  country_code: "VN" | "SG";
+  country_code: LocationCode;
   currency: CurrencyCode;
   partner_id: string | null;
   created_at: string;
@@ -27,6 +28,9 @@ export interface AppSettings {
   id: "main";
   hero_image_url: string | null;
   hero_image_public_id: string | null;
+  exchange_rate_sgd_vnd: number | null;
+  exchange_rate_updated_at: string | null;
+  exchange_rate_source: string | null;
   updated_by: string | null;
   created_at: string;
   updated_at: string;
@@ -66,25 +70,4 @@ export interface AppSession {
   user: User;
   profile: Profile;
   partner: Profile | null;
-}
-
-export interface ExpensePoint {
-  label: string;
-  total: number;
-  currency: CurrencyCode;
-}
-
-export interface CategoryPoint {
-  category: ExpenseCategory;
-  total: number;
-  currency: CurrencyCode;
-}
-
-export interface FinanceAggregate {
-  profile: Profile;
-  week: ExpensePoint[];
-  month: ExpensePoint[];
-  categories: CategoryPoint[];
-  total: number;
-  currency: CurrencyCode;
 }

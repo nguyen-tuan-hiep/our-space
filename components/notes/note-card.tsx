@@ -7,7 +7,8 @@ import Card from "@mui/material/Card";
 import { Edit2, Trash2 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { deleteNote } from "@/app/actions";
-import { formatAppDate } from "@/lib/date-format";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
 
 function getCountdown(unlockAt: string | null, nowMs: number) {
@@ -28,6 +29,7 @@ interface NoteCardProps {
   note: SharedNote;
   currentUserId: string;
   initialNowMs: number;
+  timeZone: string;
   onEdit: (note: SharedNote) => void;
 }
 
@@ -35,10 +37,12 @@ export function NoteCard({
   note,
   currentUserId,
   initialNowMs,
+  timeZone,
   onEdit,
 }: NoteCardProps) {
   const { enqueueSnackbar } = useSnackbar();
   const [now, setNow] = useState(initialNowMs);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const locked = Boolean(note.unlock_at && now < new Date(note.unlock_at).getTime());
   const countdown = useMemo(
@@ -59,7 +63,7 @@ export function NoteCard({
         <div>
           <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500">
             From {note.author?.display_name ?? "Partner"} -{" "}
-            {formatAppDate(note.created_at)}
+            {formatAppDateTime(note.created_at, timeZone)}
           </p>
           <h3 className="mt-2 font-serif text-3xl leading-none">{note.title}</h3>
         </div>
@@ -78,14 +82,7 @@ export function NoteCard({
               size="small"
               color="error"
               disabled={pending}
-              onClick={() =>
-                startTransition(async () => {
-                  const result = await deleteNote(note.id);
-                  enqueueSnackbar(result.message, {
-                    variant: result.ok ? "success" : "error",
-                  });
-                })
-              }
+              onClick={() => setConfirmOpen(true)}
               className="min-w-0 px-2"
             >
               <Trash2 size={16} />
@@ -93,6 +90,24 @@ export function NoteCard({
           </div>
         ) : null}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete note?"
+        description="This note will be permanently removed for both of you."
+        confirmLabel="Delete note"
+        pending={pending}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() =>
+          startTransition(async () => {
+            const result = await deleteNote(note.id);
+            enqueueSnackbar(result.message, {
+              variant: result.ok ? "success" : "error",
+            });
+            if (result.ok) setConfirmOpen(false);
+          })
+        }
+      />
 
       {locked ? (
         <div className="mt-5 border border-dashed border-neutral-300 bg-neutral-50 p-5">

@@ -52,13 +52,15 @@ export default async function DashboardPage() {
       partner={appSession.partner}
       initialNotes={data.notes}
       initialExpenses={data.expenses}
-      aggregates={data.aggregates}
       heroImageUrl={
         data.settings?.hero_image_url ??
         process.env.NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL ??
         "https://res.cloudinary.com/demo/image/upload/sample.jpg"
       }
       currentTimeIso={new Date().toISOString()}
+      exchangeRateSgdToVnd={data.exchangeRate.sgdToVnd}
+      exchangeRateUpdatedAt={data.exchangeRate.updatedAt}
+      exchangeRateSource={data.exchangeRate.source}
     />
   );
 }

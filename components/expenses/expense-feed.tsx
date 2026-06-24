@@ -7,6 +7,7 @@ import Chip from "@mui/material/Chip";
 import { Edit2, Trash2 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { deleteExpense } from "@/app/actions";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { formatCurrency } from "@/lib/constants";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { IndividualExpense } from "@/lib/types";
@@ -16,6 +17,7 @@ interface ExpenseFeedProps {
   expenses: IndividualExpense[];
   currentUserId: string;
   readOnly: boolean;
+  timeZone: string;
   onEdit?: (expense: IndividualExpense) => void;
 }
 
@@ -24,10 +26,14 @@ export function ExpenseFeed({
   expenses,
   currentUserId,
   readOnly,
+  timeZone,
   onEdit,
 }: ExpenseFeedProps) {
   const { enqueueSnackbar } = useSnackbar();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<IndividualExpense | null>(
+    null,
+  );
   const [expanded, setExpanded] = useState(false);
   const [pending, startTransition] = useTransition();
   const visibleExpenses = expanded ? expenses : expenses.slice(0, 5);
@@ -53,7 +59,7 @@ export function ExpenseFeed({
                   <div>
                     <p className="font-semibold">{expense.title}</p>
                     <p className="mt-1 text-sm text-neutral-500">
-                      {formatAppDateTime(expense.transaction_date)}
+                      {formatAppDateTime(expense.transaction_date, timeZone)}
                     </p>
                   </div>
                   <p className="shrink-0 font-semibold">
@@ -80,16 +86,7 @@ export function ExpenseFeed({
                       color="error"
                       startIcon={<Trash2 size={15} />}
                       disabled={pending && deletingId === expense.id}
-                      onClick={() => {
-                        setDeletingId(expense.id);
-                        startTransition(async () => {
-                          const result = await deleteExpense(expense.id);
-                          enqueueSnackbar(result.message, {
-                            variant: result.ok ? "success" : "error",
-                          });
-                          setDeletingId(null);
-                        });
-                      }}
+                      onClick={() => setExpenseToDelete(expense)}
                     >
                       Delete
                     </Button>
@@ -112,6 +109,30 @@ export function ExpenseFeed({
           {expanded ? "Show recent only" : `View all ${expenses.length} transactions`}
         </Button>
       ) : null}
+      <ConfirmDialog
+        open={Boolean(expenseToDelete)}
+        title="Delete transaction?"
+        description={
+          expenseToDelete
+            ? `"${expenseToDelete.title}" will be permanently removed from your ledger.`
+            : "This transaction will be permanently removed from your ledger."
+        }
+        confirmLabel="Delete transaction"
+        pending={pending}
+        onClose={() => setExpenseToDelete(null)}
+        onConfirm={() => {
+          if (!expenseToDelete) return;
+          setDeletingId(expenseToDelete.id);
+          startTransition(async () => {
+            const result = await deleteExpense(expenseToDelete.id);
+            enqueueSnackbar(result.message, {
+              variant: result.ok ? "success" : "error",
+            });
+            setDeletingId(null);
+            if (result.ok) setExpenseToDelete(null);
+          });
+        }}
+      />
     </Card>
   );
 }

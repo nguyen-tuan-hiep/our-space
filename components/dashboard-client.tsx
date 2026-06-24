@@ -13,7 +13,6 @@ import { useSnackbar } from "notistack";
 import { createClient } from "@/lib/supabase/browser";
 import { signOut } from "@/app/actions";
 import type {
-  FinanceAggregate,
   IndividualExpense,
   Profile,
   SharedNote,
@@ -26,20 +25,24 @@ import { FinanceCharts } from "@/components/expenses/finance-charts";
 import { AvatarIcon } from "@/components/avatar-icon";
 import { ProfileDialog } from "@/components/profile-dialog";
 import { HeroImageDialog } from "@/components/hero-image-dialog";
+import { locationSettings } from "@/lib/constants";
 import {
-  formatAppDayMonthYear,
-  formatAppMonthLong,
-  getAppMonthKey,
-} from "@/lib/date-format";
+  type FilterRange,
+  getPeriodOptions,
+  getRelationshipStats,
+  isInPeriod,
+} from "@/lib/dashboard-utils";
 
 interface DashboardClientProps {
   profile: Profile;
   partner: Profile;
   initialNotes: SharedNote[];
   initialExpenses: IndividualExpense[];
-  aggregates: FinanceAggregate[];
   heroImageUrl: string;
   currentTimeIso: string;
+  exchangeRateSgdToVnd: number | null;
+  exchangeRateUpdatedAt: string | null;
+  exchangeRateSource: string | null;
 }
 
 export function DashboardClient({
@@ -47,9 +50,11 @@ export function DashboardClient({
   partner,
   initialNotes,
   initialExpenses,
-  aggregates,
   heroImageUrl,
   currentTimeIso,
+  exchangeRateSgdToVnd,
+  exchangeRateUpdatedAt,
+  exchangeRateSource,
 }: DashboardClientProps) {
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
@@ -60,6 +65,7 @@ export function DashboardClient({
   const [activeSection, setActiveSection] = useState<"notes" | "financial">(
     "notes",
   );
+  const [filterRange, setFilterRange] = useState<FilterRange>("month");
   const initialClock = useMemo(() => new Date(currentTimeIso), [currentTimeIso]);
   const [clock, setClock] = useState(initialClock);
   const [editingNote, setEditingNote] = useState<SharedNote | null>(null);
@@ -67,88 +73,78 @@ export function DashboardClient({
     null,
   );
   const [pending, startTransition] = useTransition();
-  const anniversaryStart = useMemo(() => new Date(2025, 9, 16), []);
-  const relationshipStats = useMemo(() => {
-    const startOfToday = new Date(
-      clock.getFullYear(),
-      clock.getMonth(),
-      clock.getDate(),
-    );
-    const daysTogether = Math.max(
-      0,
-      Math.floor(
-        (startOfToday.getTime() - anniversaryStart.getTime()) / 86400000,
-      ) + 1,
-    );
-    const nextMonthly = new Date(clock.getFullYear(), clock.getMonth(), 16);
-    if (nextMonthly.getTime() <= clock.getTime()) {
-      nextMonthly.setMonth(nextMonthly.getMonth() + 1);
-    }
-    const diff = Math.max(0, nextMonthly.getTime() - clock.getTime());
-    const totalSeconds = Math.floor(diff / 1000);
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-
-    return {
-      daysTogether,
-      nextMonthlyLabel: formatAppDayMonthYear(nextMonthly),
-      countdown: `${days}d ${hours}h ${minutes}m`,
-    };
-  }, [anniversaryStart, clock]);
-
-  const monthOptions = useMemo(() => {
-    const keys = new Map<string, string>();
-    [...initialNotes, ...initialExpenses].forEach((item) => {
-      const dateValue =
-        "transaction_date" in item ? item.transaction_date : item.created_at;
-      const date = new Date(dateValue);
-      const key = getAppMonthKey(date);
-      keys.set(key, formatAppMonthLong(date));
-    });
-
-    const now = initialClock;
-    const currentKey = getAppMonthKey(now);
-    if (!keys.has(currentKey)) {
-      keys.set(currentKey, formatAppMonthLong(now));
-    }
-
-    return Array.from(keys.entries())
-      .map(([value, label]) => ({ value, label }))
-      .sort((a, b) => b.value.localeCompare(a.value));
-  }, [initialClock, initialExpenses, initialNotes]);
-
-  const [selectedMonth, setSelectedMonth] = useState(
-    () => monthOptions[0]?.value ?? "",
+  const profileLocation = locationSettings[profile.country_code];
+  const profileTimeZone = profileLocation.timeZone;
+  const relationshipStats = useMemo(
+    () => getRelationshipStats(clock, profileTimeZone),
+    [clock, profileTimeZone],
   );
 
-  const isInSelectedMonth = (dateValue: string) => {
-    if (!selectedMonth) return true;
-    return getAppMonthKey(dateValue) === selectedMonth;
-  };
+  const periodOptions = useMemo(() => {
+    return getPeriodOptions(
+      initialNotes,
+      initialExpenses,
+      initialClock,
+      profileTimeZone,
+      filterRange,
+    );
+  }, [
+    filterRange,
+    initialClock,
+    initialExpenses,
+    initialNotes,
+    profileTimeZone,
+  ]);
+
+  const [selectedPeriod, setSelectedPeriod] = useState(
+    () => periodOptions[0]?.value ?? "",
+  );
+  const activePeriod = periodOptions.some(
+    (option) => option.value === selectedPeriod,
+  )
+    ? selectedPeriod
+    : periodOptions[0]?.value ?? "";
+
+  useEffect(() => {
+    if (selectedPeriod !== activePeriod) {
+      setSelectedPeriod(activePeriod);
+    }
+  }, [activePeriod, selectedPeriod]);
 
   const filteredNotes = useMemo(
-    () => initialNotes.filter((note) => isInSelectedMonth(note.created_at)),
-    [initialNotes, selectedMonth],
+    () =>
+      initialNotes.filter((note) =>
+        isInPeriod(note.created_at, activePeriod, profileTimeZone, filterRange),
+      ),
+    [activePeriod, filterRange, initialNotes, profileTimeZone],
+  );
+
+  const filteredExpenses = useMemo(
+    () =>
+      initialExpenses.filter((expense) =>
+        isInPeriod(
+          expense.transaction_date,
+          activePeriod,
+          profileTimeZone,
+          filterRange,
+        ),
+      ),
+    [activePeriod, filterRange, initialExpenses, profileTimeZone],
   );
 
   const myExpenses = useMemo(
-    () =>
-      initialExpenses.filter(
-        (expense) =>
-          expense.owner_id === profile.id &&
-          isInSelectedMonth(expense.transaction_date),
-      ),
-    [initialExpenses, profile.id, selectedMonth],
+    () => filteredExpenses.filter((expense) => expense.owner_id === profile.id),
+    [filteredExpenses, profile.id],
   );
   const partnerExpenses = useMemo(
     () =>
-      initialExpenses.filter(
-        (expense) =>
-          expense.owner_id === partner.id &&
-          isInSelectedMonth(expense.transaction_date),
-      ),
-    [initialExpenses, partner.id, selectedMonth],
+      filteredExpenses.filter((expense) => expense.owner_id === partner.id),
+    [filteredExpenses, partner.id],
+  );
+  const chartExpenses = filterRange === "week" ? filteredExpenses : initialExpenses;
+  const coupleProfiles = useMemo<[Profile, Profile]>(
+    () => [profile, partner],
+    [profile, partner],
   );
 
   useEffect(() => {
@@ -209,7 +205,9 @@ export function DashboardClient({
                 />
                 <div className="leading-tight">
                   <p className="text-sm font-semibold">{profile.display_name}</p>
-                  <p className="text-xs text-white/65">{profile.currency}</p>
+                  <p className="text-xs text-white/65">
+                    {profileLocation.flag} {profileLocation.currency}
+                  </p>
                 </div>
               </div>
               <Button
@@ -304,20 +302,40 @@ export function DashboardClient({
                 Financial
               </ToggleButton>
             </ToggleButtonGroup>
-            <TextField
-              select
-              size="small"
-              label="Month"
-              value={selectedMonth}
-              onChange={(event) => setSelectedMonth(event.target.value)}
-              className="w-full bg-white sm:w-56"
-            >
-              {monthOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+              <ToggleButtonGroup
+                exclusive
+                value={filterRange}
+                onChange={(_, value: FilterRange | null) => {
+                  if (value) {
+                    setFilterRange(value);
+                  }
+                }}
+                size="small"
+                className="bg-white"
+              >
+                <ToggleButton value="week" className="px-4">
+                  Week
+                </ToggleButton>
+                <ToggleButton value="month" className="px-4">
+                  Month
+                </ToggleButton>
+              </ToggleButtonGroup>
+              <TextField
+                select
+                size="small"
+                label={filterRange === "week" ? "Week" : "Month"}
+                value={activePeriod}
+                onChange={(event) => setSelectedPeriod(event.target.value)}
+                className="w-full bg-white sm:w-72"
+              >
+                {periodOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </div>
           </div>
         </div>
 
@@ -347,6 +365,7 @@ export function DashboardClient({
                     note={note}
                     currentUserId={profile.id}
                     initialNowMs={initialClock.getTime()}
+                    timeZone={profileTimeZone}
                     onEdit={(selectedNote) => {
                       setEditingNote(selectedNote);
                       setNoteOpen(true);
@@ -355,7 +374,7 @@ export function DashboardClient({
                 ))
               ) : (
                 <p className="border border-neutral-200 bg-white p-6 text-neutral-500 md:col-span-2 xl:col-span-3">
-                  No notes for this month.
+                  No notes for this {filterRange}.
                 </p>
               )}
             </div>
@@ -366,7 +385,7 @@ export function DashboardClient({
               <div>
                 <p className="eyebrow">Financial</p>
                 <h2 className="mt-2 font-serif text-4xl sm:text-5xl">
-                  Monthly ledgers
+                  {filterRange === "week" ? "Weekly ledgers" : "Monthly ledgers"}
                 </h2>
               </div>
               <Button
@@ -378,13 +397,24 @@ export function DashboardClient({
                 Log expense
               </Button>
             </div>
-            <FinanceCharts aggregates={aggregates} />
+            <FinanceCharts
+              expenses={filteredExpenses}
+              barExpenses={chartExpenses}
+              profiles={coupleProfiles}
+              exchangeRateSgdToVnd={exchangeRateSgdToVnd}
+              exchangeRateUpdatedAt={exchangeRateUpdatedAt}
+              exchangeRateSource={exchangeRateSource}
+              timeZone={profileTimeZone}
+              filterRange={filterRange}
+              selectedPeriod={activePeriod}
+            />
             <div className="grid gap-6 xl:grid-cols-2">
               <ExpenseFeed
                 title="My ledger"
                 expenses={myExpenses}
                 currentUserId={profile.id}
                 readOnly={false}
+                timeZone={profileTimeZone}
                 onEdit={(expense) => {
                   setEditingExpense(expense);
                   setExpenseOpen(true);
@@ -395,6 +425,7 @@ export function DashboardClient({
                 expenses={partnerExpenses}
                 currentUserId={profile.id}
                 readOnly
+                timeZone={profileTimeZone}
               />
             </div>
           </div>

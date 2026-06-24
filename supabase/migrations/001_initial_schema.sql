@@ -28,10 +28,6 @@ create table public.profiles (
   partner_id uuid references public.profiles(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint profiles_country_currency_check check (
-    (country_code = 'VN' and currency = 'VND')
-    or (country_code = 'SG' and currency = 'SGD')
-  ),
   constraint profiles_not_own_partner_check check (partner_id is null or partner_id <> id)
 );
 
@@ -70,6 +66,9 @@ create table public.app_settings (
   id text primary key default 'main',
   hero_image_url text,
   hero_image_public_id text,
+  exchange_rate_sgd_vnd numeric(14, 6),
+  exchange_rate_updated_at timestamptz,
+  exchange_rate_source text,
   updated_by uuid references public.profiles(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -123,32 +122,6 @@ as $$
       and (p.partner_id = profile_id or p.id = profile_id)
   );
 $$;
-
-create or replace function public.expense_currency_matches_owner()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  owner_currency public.currency_code;
-begin
-  select currency into owner_currency from public.profiles where id = new.owner_id;
-  if owner_currency is null then
-    raise exception 'Owner profile does not exist';
-  end if;
-
-  if new.currency <> owner_currency then
-    raise exception 'Expense currency must match owner profile currency';
-  end if;
-
-  return new;
-end;
-$$;
-
-create trigger individual_expenses_currency_guard
-before insert or update on public.individual_expenses
-for each row execute function public.expense_currency_matches_owner();
 
 alter table public.profiles enable row level security;
 alter table public.notes enable row level security;
@@ -234,7 +207,6 @@ grant select, insert, update, delete on public.notes to authenticated;
 grant select, insert, update, delete on public.individual_expenses to authenticated;
 grant select, insert, update on public.app_settings to authenticated;
 grant execute on function public.profile_is_partner(uuid) to authenticated;
-grant execute on function public.expense_currency_matches_owner() to authenticated;
 
 insert into public.app_settings (id, hero_image_url)
 values ('main', null)

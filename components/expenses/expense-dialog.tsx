@@ -12,8 +12,14 @@ import TextField from "@mui/material/TextField";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { useSnackbar } from "notistack";
 import { createExpense, updateExpense } from "@/app/actions";
-import { expenseCategories, currencySymbols } from "@/lib/constants";
-import type { IndividualExpense, Profile } from "@/lib/types";
+import {
+  currencySymbols,
+  expenseCategories,
+  formatGroupedNumber,
+  normalizeGroupedNumberInput,
+  supportedCurrencies,
+} from "@/lib/constants";
+import type { CurrencyCode, IndividualExpense, Profile } from "@/lib/types";
 
 interface ExpenseDialogProps {
   open: boolean;
@@ -31,20 +37,43 @@ export function ExpenseDialog({
   const { enqueueSnackbar } = useSnackbar();
   const [pending, startTransition] = useTransition();
   const [date, setDate] = useState<dayjs.Dayjs | null>(dayjs());
+  const [currency, setCurrency] = useState<CurrencyCode>(profile.currency);
+  const [amount, setAmount] = useState("");
+
+  const formatAmountValue = (value: string, selectedCurrency: CurrencyCode) => {
+    return formatGroupedNumber(value, selectedCurrency === "VND" ? 0 : 2);
+  };
+
+  const getAmountPayload = (value = amount) => normalizeGroupedNumberInput(value);
 
   useEffect(() => {
     if (!open) return;
     setDate(expense ? dayjs(expense.transaction_date) : dayjs());
-  }, [expense, open]);
+    const nextCurrency = expense?.currency ?? profile.currency;
+    setCurrency(nextCurrency);
+    setAmount(
+      expense?.amount
+        ? formatGroupedNumber(
+            Number(expense.amount),
+            nextCurrency === "VND" ? 0 : 2,
+          )
+        : "",
+    );
+  }, [expense, open, profile.currency]);
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle className="font-serif text-3xl">
+      <DialogTitle className="form-dialog-title">
         {expense ? "Edit transaction" : "Log expense"}
       </DialogTitle>
       <form
         action={(formData) => {
-          formData.set("currency", profile.currency);
+          const amountDisplay = formData.get("amount_display");
+          formData.set("currency", currency);
+          formData.set(
+            "amount",
+            getAmountPayload(typeof amountDisplay === "string" ? amountDisplay : amount),
+          );
           formData.set("transaction_date", date ? date.toISOString() : dayjs().toISOString());
           if (expense) formData.set("id", expense.id);
 
@@ -59,28 +88,49 @@ export function ExpenseDialog({
           });
         }}
       >
-        <DialogContent className="grid gap-5 pt-3">
+        <DialogContent className="form-dialog-content">
           <TextField
             required
             name="title"
             label="Title"
             defaultValue={expense?.title ?? ""}
           />
-          <div className="grid gap-5 sm:grid-cols-[1fr_140px]">
+          <input type="hidden" name="amount" value={getAmountPayload()} />
+          <div className="grid gap-5 sm:grid-cols-[1fr_150px]">
             <TextField
               required
-              name="amount"
-              label={`Amount (${currencySymbols[profile.currency]})`}
-              type="number"
-              inputProps={{ min: 0, step: profile.currency === "VND" ? 1000 : 0.01 }}
-              defaultValue={expense?.amount ?? ""}
+              name="amount_display"
+              label={`Amount (${currencySymbols[currency]})`}
+              type="text"
+              value={amount}
+              onChange={(event) =>
+                setAmount(formatAmountValue(event.target.value, currency))
+              }
+              slotProps={{
+                htmlInput: {
+                  inputMode: currency === "VND" ? "numeric" : "decimal",
+                },
+              }}
             />
-            <TextField label="Currency" value={profile.currency} disabled />
+            <TextField
+              select
+              label="Currency"
+              value={currency}
+              onChange={(event) => {
+                const nextCurrency = event.target.value as CurrencyCode;
+                setCurrency(nextCurrency);
+                setAmount(formatAmountValue(amount, nextCurrency));
+              }}
+            >
+              {supportedCurrencies.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
           </div>
-          <div className="border border-neutral-200 p-4">
-            <p className="mb-3 text-sm font-semibold text-neutral-700">
-              Transaction date and time
-            </p>
+          <div className="form-section">
+            <p className="form-section-label">Transaction date and time</p>
             <DateTimePicker
               label="Date and time"
               value={date}
@@ -109,7 +159,7 @@ export function ExpenseDialog({
             defaultValue={expense?.notes ?? ""}
           />
         </DialogContent>
-        <DialogActions className="px-6 pb-6">
+        <DialogActions className="form-dialog-actions">
           <Button onClick={onClose}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={pending}>
             {pending ? "Saving..." : "Save expense"}

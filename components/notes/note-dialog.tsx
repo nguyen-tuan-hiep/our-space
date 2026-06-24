@@ -7,6 +7,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { useSnackbar } from "notistack";
@@ -24,6 +25,7 @@ export function NoteDialog({ open, onClose, recipient, note }: NoteDialogProps) 
   const { enqueueSnackbar } = useSnackbar();
   const [pending, startTransition] = useTransition();
   const [unlockAt, setUnlockAt] = useState<dayjs.Dayjs | null>(null);
+  const [unlockTimezone, setUnlockTimezone] = useState<"VN" | "SG">("SG");
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [attachmentPublicId, setAttachmentPublicId] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -31,6 +33,7 @@ export function NoteDialog({ open, onClose, recipient, note }: NoteDialogProps) 
   useEffect(() => {
     if (!open) return;
     setUnlockAt(note?.unlock_at ? dayjs(note.unlock_at) : null);
+    setUnlockTimezone("SG");
     setAttachmentUrl(note?.attachment_url ?? "");
     setAttachmentPublicId(note?.attachment_public_id ?? "");
   }, [note, open]);
@@ -58,15 +61,21 @@ export function NoteDialog({ open, onClose, recipient, note }: NoteDialogProps) 
     }
   }
 
+  function getUnlockIso() {
+    if (!unlockAt) return "";
+    const offset = unlockTimezone === "VN" ? "+07:00" : "+08:00";
+    return dayjs(`${unlockAt.format("YYYY-MM-DDTHH:mm:ss")}${offset}`).toISOString();
+  }
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle className="font-serif text-3xl">
+      <DialogTitle className="form-dialog-title">
         {note ? "Edit note" : `Write to ${recipient.display_name}`}
       </DialogTitle>
       <form
         action={(formData) => {
           formData.set("recipient_id", recipient.id);
-          formData.set("unlock_at", unlockAt ? unlockAt.toISOString() : "");
+          formData.set("unlock_at", getUnlockIso());
           formData.set("attachment_url", attachmentUrl);
           formData.set("attachment_public_id", attachmentPublicId);
           if (note) formData.set("id", note.id);
@@ -82,7 +91,7 @@ export function NoteDialog({ open, onClose, recipient, note }: NoteDialogProps) 
           });
         }}
       >
-        <DialogContent className="grid gap-5 pt-3">
+        <DialogContent className="form-dialog-content">
           <TextField
             required
             name="title"
@@ -97,13 +106,31 @@ export function NoteDialog({ open, onClose, recipient, note }: NoteDialogProps) 
             label="Content"
             defaultValue={note?.content ?? ""}
           />
-          <DateTimePicker
-            label="Unlock at (optional)"
-            value={unlockAt}
-            onChange={(value) => setUnlockAt(value)}
-            slotProps={{ textField: { fullWidth: true } }}
-          />
-          <div className="grid gap-2">
+          <div className="form-section sm:grid-cols-[1fr_170px]">
+            <p className="form-section-label sm:col-span-2">Time lock</p>
+            <DateTimePicker
+              label="Unlock at (optional)"
+              value={unlockAt}
+              onChange={(value) => setUnlockAt(value)}
+              slotProps={{ textField: { fullWidth: true } }}
+            />
+            <TextField
+              select
+              label="Timezone"
+              value={unlockTimezone}
+              onChange={(event) =>
+                setUnlockTimezone(event.target.value as "VN" | "SG")
+              }
+            >
+              <MenuItem value="VN">Vietnam (UTC+7)</MenuItem>
+              <MenuItem value="SG">Singapore (UTC+8)</MenuItem>
+            </TextField>
+            <p className="form-helper sm:col-span-2">
+              The selected date and time will be interpreted in the timezone above.
+            </p>
+          </div>
+          <div className="form-section">
+            <p className="form-section-label">Attachment</p>
             <Button variant="outlined" component="label" disabled={uploading}>
               {uploading ? "Uploading..." : "Upload attachment"}
               <input
@@ -128,7 +155,7 @@ export function NoteDialog({ open, onClose, recipient, note }: NoteDialogProps) 
             ) : null}
           </div>
         </DialogContent>
-        <DialogActions className="px-6 pb-6">
+        <DialogActions className="form-dialog-actions">
           <Button onClick={onClose}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={pending || uploading}>
             {pending ? "Saving..." : "Save note"}

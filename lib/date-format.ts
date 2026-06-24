@@ -1,49 +1,49 @@
 export const appTimeZone = "Asia/Singapore";
 
-export function formatAppDate(value: string | Date) {
+export function formatAppDate(value: string | Date, timeZone = appTimeZone) {
   return new Intl.DateTimeFormat("en-SG", {
     day: "2-digit",
     month: "short",
     year: "numeric",
-    timeZone: appTimeZone,
+    timeZone,
   }).format(new Date(value));
 }
 
-export function formatAppDateTime(value: string | Date) {
+export function formatAppDateTime(value: string | Date, timeZone = appTimeZone) {
   return new Intl.DateTimeFormat("en-SG", {
     day: "2-digit",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: appTimeZone,
+    timeZone,
   }).format(new Date(value));
 }
 
-export function formatAppMonthLong(value: string | Date) {
+export function formatAppMonthLong(value: string | Date, timeZone = appTimeZone) {
   return new Intl.DateTimeFormat("en-SG", {
     month: "long",
     year: "numeric",
-    timeZone: appTimeZone,
+    timeZone,
   }).format(new Date(value));
 }
 
-export function getAppMonthKey(value: string | Date) {
+export function getAppMonthKey(value: string | Date, timeZone = appTimeZone) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
     month: "2-digit",
-    timeZone: appTimeZone,
+    timeZone,
   }).formatToParts(new Date(value));
   const year = parts.find((part) => part.type === "year")?.value;
   const month = parts.find((part) => part.type === "month")?.value;
   return `${year}-${month}`;
 }
 
-export function formatAppDayMonthYear(value: string | Date) {
+export function formatAppDayMonthYear(value: string | Date, timeZone = appTimeZone) {
   return new Intl.DateTimeFormat("en-SG", {
     day: "2-digit",
     month: "long",
     year: "numeric",
-    timeZone: appTimeZone,
+    timeZone,
   }).format(new Date(value));
 }
