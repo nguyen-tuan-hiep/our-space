@@ -19,7 +19,7 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  title: "Our Space 𑣲⋆",
+  title: "Our Space",
   description: "A private daily hub for two people across Vietnam and Singapore.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
@@ -28,10 +28,7 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
   },
   icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-    ],
+    icon: "/icon.svg",
     apple: "/apple-touch-icon.png",
   },
 };
