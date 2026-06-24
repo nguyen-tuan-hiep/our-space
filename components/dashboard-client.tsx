@@ -219,9 +219,19 @@ export function DashboardClient({
 				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
 				<div className="container-page relative flex min-h-[58svh] flex-col justify-between py-5 sm:py-7">
 					<header className="flex flex-col gap-4 border-b border-white/25 pb-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-						<p className="font-serif text-2xl tracking-wide sm:text-2xl">
-							Our Space 𑣲⋆
-						</p>
+						<div className="flex items-center gap-2">
+							<Image
+								src="/icon.svg"
+								alt=""
+								aria-hidden="true"
+								width={28}
+								height={28}
+								className="size-7 shrink-0"
+							/>
+							<p className="font-serif text-2xl tracking-wide sm:text-2xl">
+								Our Space 𑣲⋆
+							</p>
+						</div>
 						<div className="flex max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
 							<div className="hidden items-center gap-3 sm:flex">
 								<AvatarIcon

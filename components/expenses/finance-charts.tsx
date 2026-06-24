@@ -21,7 +21,7 @@ import {
 } from "recharts";
 import { formatCurrency, supportedCurrencies } from "@/lib/constants";
 import { formatAppDate } from "@/lib/date-format";
-import { NameWithAvatar } from "@/components/name-with-avatar";
+import { AvatarIcon } from "@/components/avatar-icon";
 import {
 	buildFinanceBreakdowns,
 	buildFinanceChartData,
@@ -226,12 +226,16 @@ export function FinanceCharts({
 							>
 							<div className="mb-4 flex items-center justify-between gap-3">
 								<div>
-									<NameWithAvatar
-										value={item.profile.avatar_url}
-										label={item.profile.display_name}
-										className="flex flex-nowrap items-center gap-2 whitespace-nowrap"
-										nameClassName="text-sm font-semibold"
-									/>
+									<div className="flex items-center gap-1.5 whitespace-nowrap">
+										<span className="text-sm font-semibold">
+											{item.profile.display_name}
+										</span>
+										<AvatarIcon
+											value={item.profile.avatar_url}
+											label={item.profile.display_name}
+											className="grid size-4 shrink-0 place-items-center rounded-full text-[10px] leading-none"
+										/>
+									</div>
 									<p className="text-sm text-neutral-500">
 										{formatCurrency(item.total, displayCurrency)}
 									</p>

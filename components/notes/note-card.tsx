@@ -8,7 +8,7 @@ import { Edit2, Trash2 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { deleteNote } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { NameWithAvatar } from "@/components/name-with-avatar";
+import { AvatarIcon } from "@/components/avatar-icon";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
 
@@ -64,11 +64,13 @@ export function NoteCard({
         <div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
             <span>From</span>
-            <NameWithAvatar
+            <span className="font-semibold">
+              {note.author?.display_name ?? "Partner"}
+            </span>
+            <AvatarIcon
               value={note.author?.avatar_url ?? null}
               label={note.author?.display_name ?? "Partner"}
-              className="flex items-center gap-1.5"
-              nameClassName="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500"
+              className="grid size-4 shrink-0 place-items-center rounded-full text-[10px] leading-none"
             />
             <span>- {formatAppDateTime(note.created_at, timeZone)}</span>
           </div>

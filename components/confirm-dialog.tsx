@@ -25,14 +25,26 @@ export function ConfirmDialog({
   onClose,
   onConfirm,
 }: ConfirmDialogProps) {
+  const handleClose = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onClose={pending ? undefined : onClose} fullWidth maxWidth="xs">
+    <Dialog
+      open={open}
+      onClose={pending ? undefined : handleClose}
+      fullWidth
+      maxWidth="xs"
+    >
       <DialogTitle className="font-serif text-3xl">{title}</DialogTitle>
       <DialogContent>
         <p className="text-sm leading-7 text-neutral-600">{description}</p>
       </DialogContent>
       <DialogActions className="px-6 pb-6">
-        <Button onClick={onClose} disabled={pending}>
+        <Button onClick={handleClose} disabled={pending}>
           Cancel
         </Button>
         <Button

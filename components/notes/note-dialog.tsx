@@ -12,10 +12,11 @@ import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
 import { useSnackbar } from "notistack";
 import { createNote, updateNote } from "@/app/actions";
-import { NameWithAvatar } from "@/components/name-with-avatar";
+import { AvatarIcon } from "@/components/avatar-icon";
 import type { Profile, SharedNote } from "@/lib/types";
 
 interface NoteDialogProps {
@@ -33,15 +34,24 @@ export function NoteDialog({
 }: NoteDialogProps) {
 	const { enqueueSnackbar } = useSnackbar();
 	const [pending, startTransition] = useTransition();
-	const [unlockAt, setUnlockAt] = useState<dayjs.Dayjs | null>(null);
+	const [unlockDate, setUnlockDate] = useState<dayjs.Dayjs | null>(dayjs());
+	const [unlockTime, setUnlockTime] = useState<dayjs.Dayjs | null>(dayjs());
 	const [unlockTimezone, setUnlockTimezone] = useState<"VN" | "SG">("SG");
 	const [attachmentUrl, setAttachmentUrl] = useState("");
 	const [attachmentPublicId, setAttachmentPublicId] = useState("");
 	const [uploading, setUploading] = useState(false);
+	const handleClose = () => {
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+		onClose();
+	};
 
 	useEffect(() => {
 		if (!open) return;
-		setUnlockAt(note?.unlock_at ? dayjs(note.unlock_at) : null);
+		const current = note?.unlock_at ? dayjs(note.unlock_at) : dayjs();
+		setUnlockDate(current);
+		setUnlockTime(current);
 		setUnlockTimezone("SG");
 		setAttachmentUrl(note?.attachment_url ?? "");
 		setAttachmentPublicId(note?.attachment_public_id ?? "");
@@ -74,17 +84,23 @@ export function NoteDialog({
 	}
 
 	function getUnlockIso() {
-		if (!unlockAt) return "";
 		const offset = unlockTimezone === "VN" ? "+07:00" : "+08:00";
+		const dateBase = unlockDate ?? dayjs();
+		const timeBase = unlockTime ?? dayjs();
 		return dayjs(
-			`${unlockAt.format("YYYY-MM-DDTHH:mm:ss")}${offset}`,
+			`${dateBase
+				.hour(timeBase.hour())
+				.minute(timeBase.minute())
+				.second(timeBase.second())
+				.millisecond(0)
+				.format("YYYY-MM-DDTHH:mm:ss")}${offset}`,
 		).toISOString();
 	}
 
 	return (
 			<Dialog
 				open={open}
-				onClose={onClose}
+				onClose={handleClose}
 				fullWidth
 				maxWidth="sm"
 			>
@@ -92,12 +108,16 @@ export function NoteDialog({
 				{note ? (
 					"Edit note"
 				) : (
-					<NameWithAvatar
-						value={recipient.avatar_url}
-						label={`Write to ${recipient.display_name}`}
-						className="items-center gap-2"
-						nameClassName="font-serif text-3xl leading-none"
-					/>
+					<div className="flex items-center gap-1.5">
+						<span className="font-serif text-2xl leading-none whitespace-nowrap">
+							Write to {recipient.display_name}
+						</span>
+						<AvatarIcon
+							value={recipient.avatar_url}
+							label={recipient.display_name}
+							className="grid size-6 shrink-0 place-items-center rounded-full text-sm leading-none"
+						/>
+					</div>
 				)}
 			</DialogTitle>
 			<form
@@ -115,7 +135,7 @@ export function NoteDialog({
 						enqueueSnackbar(result.message, {
 							variant: result.ok ? "success" : "error",
 						});
-						if (result.ok) onClose();
+						if (result.ok) handleClose();
 					});
 				}}
 			>
@@ -134,31 +154,43 @@ export function NoteDialog({
 						label="Content"
 						defaultValue={note?.content ?? ""}
 					/>
-					<div className="form-section sm:grid-cols-[1fr_170px]">
+					<div className="form-section">
 						<p className="form-section-label sm:col-span-2">Time lock</p>
-						<DateTimePicker
-							label="Unlock at (optional)"
-							value={unlockAt}
-							onChange={(value) => setUnlockAt(value)}
-							slotProps={{ textField: { fullWidth: true } }}
-						/>
-						<FormControl fullWidth>
-							<InputLabel id="unlock-timezone-label">Timezone</InputLabel>
+						<div className="grid gap-5">
+							<DatePicker
+								format="DD/MM/YYYY"
+								label="Unlock date"
+								value={unlockDate}
+								onChange={(value) => setUnlockDate(value)}
+								slotProps={{ textField: { fullWidth: true } }}
+							/>
+							<div className="grid gap-5 grid-cols-[minmax(0,1fr)_140px]">
+								<DesktopTimePicker
+									format="HH:mm"
+									label="Unlock time"
+									value={unlockTime}
+									onChange={(value) => setUnlockTime(value)}
+									slotProps={{ textField: { fullWidth: true } }}
+								/>
+								<FormControl fullWidth>
+									<InputLabel id="unlock-timezone-label">Timezone</InputLabel>
 
-							<Select
-								labelId="unlock-timezone-label"
-								id="unlock-timezone"
-								name="unlock_timezone"
-								value={unlockTimezone}
-								label="Timezone"
-								onChange={(event) =>
-									setUnlockTimezone(event.target.value as "VN" | "SG")
-								}
-							>
-								<MenuItem value="VN">Vietnam (UTC+7)</MenuItem>
-								<MenuItem value="SG">Singapore (UTC+8)</MenuItem>
-							</Select>
-						</FormControl>
+									<Select
+										labelId="unlock-timezone-label"
+										id="unlock-timezone"
+										name="unlock_timezone"
+										value={unlockTimezone}
+										label="Timezone"
+										onChange={(event) =>
+											setUnlockTimezone(event.target.value as "VN" | "SG")
+										}
+									>
+										<MenuItem value="VN">Vietnam (UTC+7)</MenuItem>
+										<MenuItem value="SG">Singapore (UTC+8)</MenuItem>
+									</Select>
+								</FormControl>
+							</div>
+						</div>
 						<p className="form-helper sm:col-span-2">
 							The selected date and time will be interpreted in the timezone
 							above.
@@ -198,7 +230,7 @@ export function NoteDialog({
 					</div>
 				</DialogContent>
 				<DialogActions className="form-dialog-actions">
-					<Button onClick={onClose}>Cancel</Button>
+					<Button onClick={handleClose}>Cancel</Button>
 					<Button
 						type="submit"
 						variant="contained"

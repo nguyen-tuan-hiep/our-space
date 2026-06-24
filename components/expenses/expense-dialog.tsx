@@ -9,7 +9,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
 import { useSnackbar } from "notistack";
 import { createExpense, updateExpense } from "@/app/actions";
 import {
@@ -37,9 +38,20 @@ export function ExpenseDialog({
 }: ExpenseDialogProps) {
   const { enqueueSnackbar } = useSnackbar();
   const [pending, startTransition] = useTransition();
-  const [date, setDate] = useState<dayjs.Dayjs | null>(dayjs());
+  const [transactionDate, setTransactionDate] = useState<dayjs.Dayjs | null>(
+    dayjs(),
+  );
+  const [transactionTime, setTransactionTime] = useState<dayjs.Dayjs | null>(
+    dayjs(),
+  );
   const [currency, setCurrency] = useState<CurrencyCode>(profile.currency);
   const [amount, setAmount] = useState("");
+  const handleClose = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    onClose();
+  };
 
   const getAmountPayload = (
     value = amount,
@@ -51,12 +63,27 @@ export function ExpenseDialog({
     );
   };
 
+  function getTransactionIso() {
+    const dateBase = transactionDate ?? dayjs();
+    const timeBase = transactionTime ?? dayjs();
+
+    return dateBase
+      .hour(timeBase.hour())
+      .minute(timeBase.minute())
+      .second(timeBase.second())
+      .millisecond(0)
+      .toISOString();
+  }
+
   useEffect(() => {
     if (!open) return;
 
     const nextCurrency = expense?.currency ?? profile.currency;
 
-    setDate(expense ? dayjs(expense.transaction_date) : dayjs());
+    const current = expense ? dayjs(expense.transaction_date) : dayjs();
+
+    setTransactionDate(current);
+    setTransactionTime(current);
     setCurrency(nextCurrency);
     setAmount(
       expense?.amount !== undefined && expense?.amount !== null
@@ -66,7 +93,7 @@ export function ExpenseDialog({
   }, [expense, open, profile.currency]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle className="form-dialog-title">
         {expense ? "Edit transaction" : "Log expense"}
       </DialogTitle>
@@ -80,10 +107,7 @@ export function ExpenseDialog({
 
           formData.set("currency", currency);
           formData.set("amount", getAmountPayload(displayAmount, currency));
-          formData.set(
-            "transaction_date",
-            date ? date.toISOString() : dayjs().toISOString(),
-          );
+          formData.set("transaction_date", getTransactionIso());
 
           if (expense) {
             formData.set("id", expense.id);
@@ -99,7 +123,7 @@ export function ExpenseDialog({
             });
 
             if (result.ok) {
-              onClose();
+              handleClose();
             }
           });
         }}
@@ -162,17 +186,32 @@ export function ExpenseDialog({
           <div className="form-section">
             <p className="form-section-label">Transaction date and time</p>
 
-            <DateTimePicker
-              label="Date and time"
-              value={date}
-              onChange={(value) => setDate(value)}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  required: true,
-                },
-              }}
-            />
+            <div className="grid gap-5 sm:grid-cols-2">
+              <DatePicker
+                format="DD/MM/YYYY"
+                label="Date"
+                value={transactionDate}
+                onChange={(value) => setTransactionDate(value)}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    required: true,
+                  },
+                }}
+              />
+              <DesktopTimePicker
+                format="HH:mm"
+                label="Time"
+                value={transactionTime}
+                onChange={(value) => setTransactionTime(value)}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    required: true,
+                  },
+                }}
+              />
+            </div>
           </div>
 
           <TextField
@@ -199,7 +238,7 @@ export function ExpenseDialog({
         </DialogContent>
 
         <DialogActions className="form-dialog-actions">
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleClose}>Cancel</Button>
 
           <Button type="submit" variant="contained" disabled={pending}>
             {pending ? "Saving..." : "Save expense"}

@@ -27,6 +27,12 @@ export function HeroImageDialog({
   const [uploading, setUploading] = useState(false);
   const [heroUrl, setHeroUrl] = useState(currentUrl);
   const [publicId, setPublicId] = useState("");
+  const handleClose = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    onClose();
+  };
 
   async function uploadHero(file: File) {
     const body = new FormData();
@@ -53,7 +59,7 @@ export function HeroImageDialog({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle className="font-serif text-3xl">Edit hero image</DialogTitle>
       <form
         action={(formData) => {
@@ -64,7 +70,7 @@ export function HeroImageDialog({
             enqueueSnackbar(result.message, {
               variant: result.ok ? "success" : "error",
             });
-            if (result.ok) onClose();
+            if (result.ok) handleClose();
           });
         }}
       >
@@ -99,7 +105,7 @@ export function HeroImageDialog({
           </Button>
         </DialogContent>
         <DialogActions className="px-6 pb-6">
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleClose}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={pending || uploading}>
             {pending ? "Saving..." : "Save hero"}
           </Button>

@@ -41,6 +41,12 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 	const customAvatarInvalid =
 		!isAvatarKey(avatar) && !isCustomAvatarEmoji(avatar);
 	const [pending, startTransition] = useTransition();
+	const handleClose = () => {
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+		onClose();
+	};
 
 	useEffect(() => {
 		if (!open) return;
@@ -51,7 +57,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 	return (
 		<Dialog
 			open={open}
-			onClose={onClose}
+			onClose={handleClose}
 			fullWidth
 			maxWidth="sm"
 		>
@@ -84,7 +90,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 								enqueueSnackbar(result.message, {
 									variant: result.ok ? "success" : "error",
 								});
-								if (result.ok) onClose();
+								if (result.ok) handleClose();
 							});
 						}}
 					>
@@ -200,8 +206,8 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 					</form>
 				)}
 			</DialogContent>
-			<DialogActions className="px-6 pb-6">
-				<Button onClick={onClose}>Cancel</Button>
+				<DialogActions className="px-6 pb-6">
+				<Button onClick={handleClose}>Cancel</Button>
 				<Button
 					type="submit"
 					form={tab === "profile" ? "profile-form" : "password-form"}

@@ -8,7 +8,7 @@ import { Edit2, Trash2 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { NameWithAvatar } from "@/components/name-with-avatar";
+import { AvatarIcon } from "@/components/avatar-icon";
 import { formatCurrency } from "@/lib/constants";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { IndividualExpense } from "@/lib/types";
@@ -47,13 +47,16 @@ export function ExpenseFeed({
       <div className="mb-5 flex items-center justify-between gap-4">
         <div>
           <p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>
-          <NameWithAvatar
-            value={titleAvatarValue ?? null}
-            label={title}
-            className="mt-2 flex max-w-full flex-nowrap items-center gap-1.5"
-            nameClassName="font-serif text-2xl leading-none"
-            iconClassName="grid size-7 shrink-0 place-items-center rounded-full text-2xl leading-none"
-          />
+          <div className="mt-2 flex items-center gap-1.5">
+            <span className="font-serif text-2xl leading-none whitespace-nowrap">
+              {title}
+            </span>
+            <AvatarIcon
+              value={titleAvatarValue ?? null}
+              label={title}
+              className="grid size-6 shrink-0 place-items-center rounded-full text-sm leading-none"
+            />
+          </div>
         </div>
       </div>
       <div className="grid gap-3 pr-1">
