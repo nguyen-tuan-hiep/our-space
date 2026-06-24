@@ -8,12 +8,14 @@ import { Edit2, Trash2 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { NameWithAvatar } from "@/components/name-with-avatar";
 import { formatCurrency } from "@/lib/constants";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { IndividualExpense } from "@/lib/types";
 
 interface ExpenseFeedProps {
   title: string;
+  titleAvatarValue?: string | null;
   expenses: IndividualExpense[];
   currentUserId: string;
   readOnly: boolean;
@@ -23,6 +25,7 @@ interface ExpenseFeedProps {
 
 export function ExpenseFeed({
   title,
+  titleAvatarValue,
   expenses,
   currentUserId,
   readOnly,
@@ -44,7 +47,13 @@ export function ExpenseFeed({
       <div className="mb-5 flex items-center justify-between gap-4">
         <div>
           <p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>
-          <h3 className="mt-2 font-serif text-3xl">{title}</h3>
+          <NameWithAvatar
+            value={titleAvatarValue ?? null}
+            label={title}
+            className="mt-2 flex max-w-full flex-nowrap items-center gap-1.5"
+            nameClassName="font-serif text-2xl leading-none"
+            iconClassName="grid size-7 shrink-0 place-items-center rounded-full text-2xl leading-none"
+          />
         </div>
       </div>
       <div className="grid gap-3 pr-1">

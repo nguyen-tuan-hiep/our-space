@@ -31,6 +31,7 @@ import { FinanceCharts } from "@/components/expenses/finance-charts";
 import { AvatarIcon } from "@/components/avatar-icon";
 import { ProfileDialog } from "@/components/profile-dialog";
 import { HeroImageDialog } from "@/components/hero-image-dialog";
+import { NameWithAvatar } from "@/components/name-with-avatar";
 import { locationSettings } from "@/lib/constants";
 import {
 	type FilterRange,
@@ -266,9 +267,9 @@ export function DashboardClient({
 					</header>
 					<div className="max-w-5xl pb-8 pt-4 sm:pt-0">
 						<p className="eyebrow !text-white/70">
-							Vietnam / Singapore daily hub
+							A little love in every line.
 						</p>
-						<h1 className="mt-4 max-w-[10ch] font-serif text-5xl leading-[0.95] sm:text-7xl lg:text-9xl">
+						<h1 className="mt-4 max-w-[10ch] font-serif text-5xl leading-[0.95] sm:text-5xl lg:text-7xl">
 							A private place for both of us.
 						</h1>
 						<div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
@@ -462,6 +463,7 @@ export function DashboardClient({
 						<div className="grid gap-6 xl:grid-cols-2">
 							<ExpenseFeed
 								title="My ledger"
+								titleAvatarValue={profile.avatar_url}
 								expenses={myExpenses}
 								currentUserId={profile.id}
 								readOnly={false}
@@ -473,6 +475,7 @@ export function DashboardClient({
 							/>
 							<ExpenseFeed
 								title={`${partner.display_name}'s ledger`}
+								titleAvatarValue={partner.avatar_url}
 								expenses={partnerExpenses}
 								currentUserId={profile.id}
 								readOnly

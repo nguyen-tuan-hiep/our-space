@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { formatCurrency, supportedCurrencies } from "@/lib/constants";
 import { formatAppDate } from "@/lib/date-format";
+import { NameWithAvatar } from "@/components/name-with-avatar";
 import {
 	buildFinanceBreakdowns,
 	buildFinanceChartData,
@@ -218,16 +219,19 @@ export function FinanceCharts({
 				</div>
 
 				<div className="grid gap-6 xl:grid-cols-2">
-					{perPerson.map((item, index) => (
-						<div
-							key={item.profile.id}
-							className="border border-neutral-200 p-4"
-						>
+						{perPerson.map((item, index) => (
+							<div
+								key={item.profile.id}
+								className="border border-neutral-200 p-4"
+							>
 							<div className="mb-4 flex items-center justify-between gap-3">
 								<div>
-									<p className="text-sm font-semibold">
-										{item.profile.display_name}
-									</p>
+									<NameWithAvatar
+										value={item.profile.avatar_url}
+										label={item.profile.display_name}
+										className="flex flex-nowrap items-center gap-2 whitespace-nowrap"
+										nameClassName="text-sm font-semibold"
+									/>
 									<p className="text-sm text-neutral-500">
 										{formatCurrency(item.total, displayCurrency)}
 									</p>

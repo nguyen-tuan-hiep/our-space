@@ -15,6 +15,7 @@ import Select from "@mui/material/Select";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { useSnackbar } from "notistack";
 import { createNote, updateNote } from "@/app/actions";
+import { NameWithAvatar } from "@/components/name-with-avatar";
 import type { Profile, SharedNote } from "@/lib/types";
 
 interface NoteDialogProps {
@@ -81,14 +82,23 @@ export function NoteDialog({
 	}
 
 	return (
-		<Dialog
-			open={open}
-			onClose={onClose}
-			fullWidth
-			maxWidth="sm"
-		>
+			<Dialog
+				open={open}
+				onClose={onClose}
+				fullWidth
+				maxWidth="sm"
+			>
 			<DialogTitle className="form-dialog-title">
-				{note ? "Edit note" : `Write to ${recipient.display_name}`}
+				{note ? (
+					"Edit note"
+				) : (
+					<NameWithAvatar
+						value={recipient.avatar_url}
+						label={`Write to ${recipient.display_name}`}
+						className="items-center gap-2"
+						nameClassName="font-serif text-3xl leading-none"
+					/>
+				)}
 			</DialogTitle>
 			<form
 				action={(formData) => {

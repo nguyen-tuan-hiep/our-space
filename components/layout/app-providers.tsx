@@ -25,12 +25,12 @@ const theme = createTheme({
     borderRadius: 8,
   },
   typography: {
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+    fontFamily: "var(--font-sans), ui-sans-serif, system-ui, sans-serif",
     h1: {
-      fontFamily: "Iowan Old Style, Baskerville, Times New Roman, serif",
+      fontFamily: "var(--font-serif), Georgia, Times New Roman, serif",
     },
     h2: {
-      fontFamily: "Iowan Old Style, Baskerville, Times New Roman, serif",
+      fontFamily: "var(--font-serif), Georgia, Times New Roman, serif",
     },
   },
   components: {

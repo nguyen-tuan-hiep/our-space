@@ -11,12 +11,11 @@ export default async function LoginPage() {
       <section className="container-page grid min-h-svh items-center gap-10 py-10 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="max-w-3xl">
           <p className="eyebrow">Private couple hub</p>
-          <h1 className="mt-5 font-serif text-6xl leading-[0.9] sm:text-8xl lg:text-9xl">
+          <h1 className="mt-5 font-serif text-6xl leading-[0.9] sm:text-8xl lg:text-8xl">
             Our Space 𑣲⋆
           </h1>
           <p className="mt-8 max-w-xl text-lg leading-8 text-neutral-600">
-            Shared notes, private ledgers, and a quiet dashboard for two lives
-            in Vietnam and Singapore.
+            A private place for both of us to share our thoughts, memories, and moments together.
           </p>
         </div>
         <LoginForm />

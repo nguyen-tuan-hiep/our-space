@@ -17,6 +17,7 @@ html {
 body {
   background: #f5f3ee;
   color: #11110f;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 ::selection {
@@ -26,6 +27,10 @@ body {
 
 .container-page {
   @apply mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12;
+}
+
+.font-serif {
+  font-family: var(--font-serif), Georgia, Times New Roman, serif;
 }
 
 .eyebrow {
