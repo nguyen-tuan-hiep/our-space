@@ -333,7 +333,7 @@ export function DashboardClient({
 								Financial
 							</ToggleButton>
 						</ToggleButtonGroup>
-						<div className="flex flex-col gap-6 sm:w-auto sm:flex-row sm:items-center sm:gap-6">
+						<div className="flex flex-col w-full gap-6 sm:w-auto sm:flex-row sm:items-center sm:gap-6">
 							<ToggleButtonGroup
 								exclusive
 								value={filterRange}
@@ -343,17 +343,17 @@ export function DashboardClient({
 									}
 								}}
 								size="small"
-								className="w-full bg-white sm:w-auto"
+								className="grid w-full grid-cols-2 bg-white sm:flex sm:w-auto"
 							>
 								<ToggleButton
 									value="week"
-									className="flex-1 px-4 sm:flex-none"
+									className="min-w-0 w-full px-4"
 								>
 									Week
 								</ToggleButton>
 								<ToggleButton
 									value="month"
-									className="flex-1 px-4 sm:flex-none"
+									className="min-w-0 w-full px-4"
 								>
 									Month
 								</ToggleButton>
