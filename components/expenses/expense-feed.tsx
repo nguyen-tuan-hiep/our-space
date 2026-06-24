@@ -38,6 +38,7 @@ export function ExpenseFeed({
   const [pending, startTransition] = useTransition();
   const visibleExpenses = expanded ? expenses : expenses.slice(0, 5);
 
+
   return (
     <Card className="border border-neutral-200 bg-white p-5">
       <div className="mb-5 flex items-center justify-between gap-4">
@@ -63,7 +64,7 @@ export function ExpenseFeed({
                     </p>
                   </div>
                   <p className="shrink-0 font-semibold">
-                    {formatCurrency(Number(expense.amount), expense.currency)}
+                    {formatCurrency(expense.amount, expense.currency)}
                   </p>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">

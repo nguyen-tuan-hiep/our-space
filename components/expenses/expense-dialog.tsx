@@ -15,7 +15,8 @@ import { createExpense, updateExpense } from "@/app/actions";
 import {
   currencySymbols,
   expenseCategories,
-  formatGroupedNumber,
+  formatCurrencyInputValue,
+  formatStoredAmountForInput,
   normalizeGroupedNumberInput,
   supportedCurrencies,
 } from "@/lib/constants";
@@ -40,23 +41,26 @@ export function ExpenseDialog({
   const [currency, setCurrency] = useState<CurrencyCode>(profile.currency);
   const [amount, setAmount] = useState("");
 
-  const formatAmountValue = (value: string, selectedCurrency: CurrencyCode) => {
-    return formatGroupedNumber(value, selectedCurrency === "VND" ? 0 : 2);
+  const getAmountPayload = (
+    value = amount,
+    selectedCurrency: CurrencyCode = currency,
+  ) => {
+    return normalizeGroupedNumberInput(
+      value,
+      selectedCurrency === "VND" ? 0 : 2,
+    );
   };
-
-  const getAmountPayload = (value = amount) => normalizeGroupedNumberInput(value);
 
   useEffect(() => {
     if (!open) return;
-    setDate(expense ? dayjs(expense.transaction_date) : dayjs());
+
     const nextCurrency = expense?.currency ?? profile.currency;
+
+    setDate(expense ? dayjs(expense.transaction_date) : dayjs());
     setCurrency(nextCurrency);
     setAmount(
-      expense?.amount
-        ? formatGroupedNumber(
-            Number(expense.amount),
-            nextCurrency === "VND" ? 0 : 2,
-          )
+      expense?.amount !== undefined && expense?.amount !== null
+        ? formatStoredAmountForInput(expense.amount, nextCurrency)
         : "",
     );
   }, [expense, open, profile.currency]);
@@ -66,25 +70,37 @@ export function ExpenseDialog({
       <DialogTitle className="form-dialog-title">
         {expense ? "Edit transaction" : "Log expense"}
       </DialogTitle>
+
       <form
         action={(formData) => {
           const amountDisplay = formData.get("amount_display");
+
+          const displayAmount =
+            typeof amountDisplay === "string" ? amountDisplay : amount;
+
           formData.set("currency", currency);
+          formData.set("amount", getAmountPayload(displayAmount, currency));
           formData.set(
-            "amount",
-            getAmountPayload(typeof amountDisplay === "string" ? amountDisplay : amount),
+            "transaction_date",
+            date ? date.toISOString() : dayjs().toISOString(),
           );
-          formData.set("transaction_date", date ? date.toISOString() : dayjs().toISOString());
-          if (expense) formData.set("id", expense.id);
+
+          if (expense) {
+            formData.set("id", expense.id);
+          }
 
           startTransition(async () => {
             const result = expense
               ? await updateExpense(formData)
               : await createExpense(formData);
+
             enqueueSnackbar(result.message, {
               variant: result.ok ? "success" : "error",
             });
-            if (result.ok) onClose();
+
+            if (result.ok) {
+              onClose();
+            }
           });
         }}
       >
@@ -95,7 +111,13 @@ export function ExpenseDialog({
             label="Title"
             defaultValue={expense?.title ?? ""}
           />
-          <input type="hidden" name="amount" value={getAmountPayload()} />
+
+          <input
+            type="hidden"
+            name="amount"
+            value={getAmountPayload(amount, currency)}
+          />
+
           <div className="grid gap-5 sm:grid-cols-[1fr_150px]">
             <TextField
               required
@@ -103,23 +125,30 @@ export function ExpenseDialog({
               label={`Amount (${currencySymbols[currency]})`}
               type="text"
               value={amount}
-              onChange={(event) =>
-                setAmount(formatAmountValue(event.target.value, currency))
-              }
+              onChange={(event) => {
+                setAmount(formatCurrencyInputValue(event.target.value, currency));
+              }}
               slotProps={{
                 htmlInput: {
-                  inputMode: currency === "VND" ? "numeric" : "decimal",
+                  inputMode: "numeric",
                 },
               }}
             />
+
             <TextField
               select
               label="Currency"
               value={currency}
               onChange={(event) => {
                 const nextCurrency = event.target.value as CurrencyCode;
+                const currentPayload = getAmountPayload(amount, currency);
+
                 setCurrency(nextCurrency);
-                setAmount(formatAmountValue(amount, nextCurrency));
+                setAmount(
+                  currentPayload
+                    ? formatStoredAmountForInput(currentPayload, nextCurrency)
+                    : "",
+                );
               }}
             >
               {supportedCurrencies.map((option) => (
@@ -129,15 +158,23 @@ export function ExpenseDialog({
               ))}
             </TextField>
           </div>
+
           <div className="form-section">
             <p className="form-section-label">Transaction date and time</p>
+
             <DateTimePicker
               label="Date and time"
               value={date}
               onChange={(value) => setDate(value)}
-              slotProps={{ textField: { fullWidth: true, required: true } }}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  required: true,
+                },
+              }}
             />
           </div>
+
           <TextField
             required
             select
@@ -151,6 +188,7 @@ export function ExpenseDialog({
               </MenuItem>
             ))}
           </TextField>
+
           <TextField
             multiline
             minRows={3}
@@ -159,8 +197,10 @@ export function ExpenseDialog({
             defaultValue={expense?.notes ?? ""}
           />
         </DialogContent>
+
         <DialogActions className="form-dialog-actions">
           <Button onClick={onClose}>Cancel</Button>
+
           <Button type="submit" variant="contained" disabled={pending}>
             {pending ? "Saving..." : "Save expense"}
           </Button>

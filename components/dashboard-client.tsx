@@ -302,7 +302,7 @@ export function DashboardClient({
                 Financial
               </ToggleButton>
             </ToggleButtonGroup>
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+            <div className="flex w-full flex-col gap-6 sm:w-auto sm:flex-row sm:items-center">
               <ToggleButtonGroup
                 exclusive
                 value={filterRange}
