@@ -70,9 +70,11 @@ export function FinanceCharts({
 	selectedPeriod,
 }: FinanceChartsProps) {
 	const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>("SGD");
+
 	const needsExchangeRate = [...expenses, ...barExpenses].some(
 		(expense) => expense.currency !== displayCurrency,
 	);
+
 	const rateLabel = exchangeRateSgdToVnd
 		? `1 SGD = ${formatCurrency(exchangeRateSgdToVnd, "VND")}`
 		: "Exchange rate unavailable";
@@ -109,10 +111,18 @@ export function FinanceCharts({
 			}),
 		[displayCurrency, exchangeRateSgdToVnd, expenses, profiles],
 	);
+
+	const areaChartMinWidth = useMemo(() => {
+		const yAxisSpace = displayCurrency === "VND" ? 120 : 90;
+		const pointSpace = displayCurrency === "VND" ? 110 : 95;
+
+		return Math.max(420, chartData.length * pointSpace + yAxisSpace);
+	}, [chartData.length, displayCurrency]);
+
 	return (
-		<Card className="border border-neutral-200 bg-[#fffaf0] p-5">
-			<div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-				<div>
+		<Card className="w-full min-w-0 border border-neutral-200 bg-[#fffaf0] p-5">
+			<div className="mb-5 flex min-w-0 flex-wrap items-end justify-between gap-4">
+				<div className="min-w-0">
 					<p className="eyebrow">Finance overview</p>
 					<h2 className="mt-2 font-serif text-4xl">Shared currency view</h2>
 					<p className="mt-2 text-sm text-neutral-500">
@@ -123,6 +133,7 @@ export function FinanceCharts({
 						{exchangeRateSource ? ` - ${exchangeRateSource}` : ""}
 					</p>
 				</div>
+
 				<div className="flex flex-wrap gap-3">
 					<FormControl
 						size="small"
@@ -163,8 +174,8 @@ export function FinanceCharts({
 				</div>
 			) : null}
 
-			<div className="grid gap-6">
-				<div className="border border-neutral-200 p-4">
+			<div className="grid min-w-0 gap-6">
+				<div className="min-w-0 border border-neutral-200 p-4">
 					<div className="mb-4">
 						<p className="eyebrow">
 							{filterRange === "week" ? "Weekly area" : "Monthly area"}
@@ -173,56 +184,68 @@ export function FinanceCharts({
 							Both ledgers in {displayCurrency}
 						</h3>
 					</div>
-					<div className="h-72">
-						<ResponsiveContainer
-							width="100%"
-							height="100%"
+
+					<div className="w-full max-w-full overflow-x-auto overflow-y-hidden pb-2">
+						<div
+							className="h-72"
+							style={{
+								width: `max(100%, ${areaChartMinWidth}px)`,
+							}}
 						>
-							<AreaChart data={chartData}>
-								<CartesianGrid
-									stroke="#e8e3d8"
-									strokeDasharray="4 4"
-								/>
-								<XAxis
-									dataKey="label"
-									tickLine={false}
-									axisLine={false}
-									fontSize={11}
-								/>
-								<YAxis
-									tickLine={false}
-									axisLine={false}
-									fontSize={11}
-									width={displayCurrency === "VND" ? 95 : 70}
-									tickFormatter={axisTickFormatter(displayCurrency)}
-								/>
-								<Tooltip formatter={tooltipFormatter} />
-								<Legend />
-								{profiles.map((profile, index) => (
-									<Area
-										key={profile.id}
-										dataKey={profile.id}
-										name={profile.display_name}
-										type="monotone"
-										stroke={ledgerSeriesColors[index % ledgerSeriesColors.length]}
-										fill={ledgerSeriesColors[index % ledgerSeriesColors.length]}
-										fillOpacity={0.18}
-										strokeWidth={2}
+							<ResponsiveContainer
+								width="100%"
+								height="100%"
+							>
+								<AreaChart data={chartData}>
+									<CartesianGrid
+										stroke="#e8e3d8"
+										strokeDasharray="4 4"
 									/>
-								))}
-							</AreaChart>
-						</ResponsiveContainer>
+									<XAxis
+										dataKey="label"
+										tickLine={false}
+										axisLine={false}
+										fontSize={11}
+									/>
+									<YAxis
+										tickLine={false}
+										axisLine={false}
+										fontSize={11}
+										width={displayCurrency === "VND" ? 95 : 70}
+										tickFormatter={axisTickFormatter(displayCurrency)}
+									/>
+									<Tooltip formatter={tooltipFormatter} />
+									<Legend />
+									{profiles.map((profile, index) => (
+										<Area
+											key={profile.id}
+											dataKey={profile.id}
+											name={profile.display_name}
+											type="monotone"
+											stroke={
+												ledgerSeriesColors[index % ledgerSeriesColors.length]
+											}
+											fill={
+												ledgerSeriesColors[index % ledgerSeriesColors.length]
+											}
+											fillOpacity={0.18}
+											strokeWidth={2}
+										/>
+									))}
+								</AreaChart>
+							</ResponsiveContainer>
+						</div>
 					</div>
 				</div>
 
-				<div className="grid gap-6 xl:grid-cols-2">
+				<div className="grid min-w-0 gap-6 xl:grid-cols-2">
 					{perPerson.map((item) => (
 						<div
 							key={item.profile.id}
-							className="border border-neutral-200 p-4"
+							className="min-w-0 overflow-hidden border border-neutral-200 p-4"
 						>
 							<div className="mb-4 flex items-center justify-between gap-3">
-								<div>
+								<div className="min-w-0">
 									<div className="flex items-center gap-1.5 whitespace-nowrap">
 										<span className="text-sm font-semibold">
 											{item.profile.display_name}
@@ -237,11 +260,13 @@ export function FinanceCharts({
 										{formatCurrency(item.total, displayCurrency)}
 									</p>
 								</div>
+
 								<span className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">
 									{displayCurrency}
 								</span>
 							</div>
-							<div className="h-56">
+
+							<div className="h-56 w-full min-w-0">
 								<ResponsiveContainer
 									width="100%"
 									height="100%"
