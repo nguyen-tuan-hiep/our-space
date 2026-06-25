@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -7,7 +8,6 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
@@ -23,14 +23,8 @@ import { useSnackbar } from "notistack";
 import { createClient } from "@/lib/supabase/browser";
 import { signOut } from "@/app/actions";
 import type { IndividualExpense, Profile, SharedNote } from "@/lib/types";
-import { NoteDialog } from "@/components/notes/note-dialog";
 import { NoteCard } from "@/components/notes/note-card";
-import { ExpenseDialog } from "@/components/expenses/expense-dialog";
-import { ExpenseFeed } from "@/components/expenses/expense-feed";
-import { FinanceCharts } from "@/components/expenses/finance-charts";
 import { AvatarIcon } from "@/components/avatar-icon";
-import { ProfileDialog } from "@/components/profile-dialog";
-import { HeroImageDialog } from "@/components/hero-image-dialog";
 import { locationSettings } from "@/lib/constants";
 import { themeColors } from "@/lib/theme-colors";
 import {
@@ -39,6 +33,46 @@ import {
 	getRelationshipStats,
 	isInPeriod,
 } from "@/lib/dashboard-utils";
+
+const NoteDialog = dynamic(
+	() => import("@/components/notes/note-dialog").then((mod) => mod.NoteDialog),
+	{ ssr: false },
+);
+
+const ExpenseDialog = dynamic(
+	() =>
+		import("@/components/expenses/expense-dialog").then(
+			(mod) => mod.ExpenseDialog,
+		),
+	{ ssr: false },
+);
+
+const FinanceCharts = dynamic(
+	() =>
+		import("@/components/expenses/finance-charts").then(
+			(mod) => mod.FinanceCharts,
+		),
+	{ ssr: false },
+);
+
+const ExpenseFeed = dynamic(
+	() =>
+		import("@/components/expenses/expense-feed").then((mod) => mod.ExpenseFeed),
+	{ ssr: false },
+);
+
+const ProfileDialog = dynamic(
+	() => import("@/components/profile-dialog").then((mod) => mod.ProfileDialog),
+	{ ssr: false },
+);
+
+const HeroImageDialog = dynamic(
+	() =>
+		import("@/components/hero-image-dialog").then(
+			(mod) => mod.HeroImageDialog,
+		),
+	{ ssr: false },
+);
 
 const heroButtonSx = {
 	color: themeColors.paper,
@@ -214,6 +248,7 @@ export function DashboardClient({
 					alt="Our Space hero"
 					fill
 					priority
+					sizes="100vw"
 					className="object-cover opacity-75"
 				/>
 				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
@@ -503,34 +538,42 @@ export function DashboardClient({
 				)}
 			</section>
 
-			<NoteDialog
-				open={noteOpen}
-				onClose={() => {
-					setNoteOpen(false);
-					setEditingNote(null);
-				}}
-				recipient={partner}
-				note={editingNote}
-			/>
-			<ExpenseDialog
-				open={expenseOpen}
-				onClose={() => {
-					setExpenseOpen(false);
-					setEditingExpense(null);
-				}}
-				profile={profile}
-				expense={editingExpense}
-			/>
-			<ProfileDialog
-				open={profileOpen}
-				onClose={() => setProfileOpen(false)}
-				profile={profile}
-			/>
-			<HeroImageDialog
-				open={heroOpen}
-				onClose={() => setHeroOpen(false)}
-				currentUrl={heroImageUrl}
-			/>
+			{noteOpen ? (
+				<NoteDialog
+					open={noteOpen}
+					onClose={() => {
+						setNoteOpen(false);
+						setEditingNote(null);
+					}}
+					recipient={partner}
+					note={editingNote}
+				/>
+			) : null}
+			{expenseOpen ? (
+				<ExpenseDialog
+					open={expenseOpen}
+					onClose={() => {
+						setExpenseOpen(false);
+						setEditingExpense(null);
+					}}
+					profile={profile}
+					expense={editingExpense}
+				/>
+			) : null}
+			{profileOpen ? (
+				<ProfileDialog
+					open={profileOpen}
+					onClose={() => setProfileOpen(false)}
+					profile={profile}
+				/>
+			) : null}
+			{heroOpen ? (
+				<HeroImageDialog
+					open={heroOpen}
+					onClose={() => setHeroOpen(false)}
+					currentUrl={heroImageUrl}
+				/>
+			) : null}
 		</main>
 	);
 }

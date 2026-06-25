@@ -73,7 +73,7 @@ export function NoteDialog({
 			fullWidth
 			maxWidth="sm"
 		>
-			<DialogTitle sx={{ p: 0, px: 3, py: 3}}>
+			<DialogTitle sx={{ px: 3, pt: 3, pb: 0 }}>
 				{note ? (
 					"Edit note"
 				) : (
@@ -106,7 +106,7 @@ export function NoteDialog({
 					});
 				}}
 			>
-				<DialogContent sx={{ p: 0, px: 3 }}>
+				<DialogContent sx={{ p: 3 }}>
 					<div className="grid gap-4">
 						<TextField
 							required
@@ -161,7 +161,7 @@ export function NoteDialog({
 						</p>
 					</div>
 				</DialogContent>
-				<DialogActions sx={{ p: 0, px: 3, py: 3 }}>
+				<DialogActions sx={{ px: 3, pt: 0, pb: 3 }}>
 					<Button onClick={handleClose}>Cancel</Button>
 					<Button
 						type="submit"
