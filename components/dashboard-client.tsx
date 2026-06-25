@@ -68,9 +68,7 @@ const ProfileDialog = dynamic(
 
 const HeroImageDialog = dynamic(
 	() =>
-		import("@/components/hero-image-dialog").then(
-			(mod) => mod.HeroImageDialog,
-		),
+		import("@/components/hero-image-dialog").then((mod) => mod.HeroImageDialog),
 	{ ssr: false },
 );
 
@@ -115,8 +113,9 @@ export function DashboardClient({
 	const [expenseOpen, setExpenseOpen] = useState(false);
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [heroOpen, setHeroOpen] = useState(false);
-	const [mobileMenuAnchor, setMobileMenuAnchor] =
-		useState<HTMLElement | null>(null);
+	const [mobileMenuAnchor, setMobileMenuAnchor] = useState<HTMLElement | null>(
+		null,
+	);
 	const [activeSection, setActiveSection] = useState<"notes" | "financial">(
 		"notes",
 	);
@@ -279,7 +278,7 @@ export function DashboardClient({
 
 	return (
 		<main className="min-h-svh overflow-x-clip bg-bg">
-			<section className="relative min-h-[58svh] bg-black text-white">
+			<section className="relative min-h-[50svh] bg-black text-white">
 				<Image
 					src={heroImageUrl}
 					alt="Our Space hero"
@@ -289,8 +288,8 @@ export function DashboardClient({
 					sizes="100vw"
 					className="object-cover opacity-75"
 				/>
-				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
-				<div className="container-page relative flex min-h-[58svh] flex-col justify-between py-5 sm:py-7">
+				{/* <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/20 to-black/30" /> */}
+				<div className="container-page relative flex min-h-[50svh] flex-col justify-between py-5 sm:py-7">
 					<header className="flex items-center justify-between gap-4 border-b border-paper/25 pb-5 sm:items-start">
 						<div className="flex min-w-0 items-start gap-4">
 							<div className="flex items-center gap-2">
@@ -399,30 +398,28 @@ export function DashboardClient({
 							</Button>
 						</div>
 					</header>
-					<div className="max-w-5xl pb-8 pt-4 sm:pt-0">
+					<div className="max-w-5xl pt-4 sm:pt-0">
 						<p className="eyebrow !text-paper/70">
 							A little love in every line.
 						</p>
-						<h1 className="mt-4 max-w-[10ch] font-serif text-5xl leading-[0.95] sm:text-5xl lg:text-7xl">
+						<h1 className="mt-4 max-w-[10ch] font-serif text-3xl lg:text-7xl leading-[0.95] ">
 							A private place for both of us.
 						</h1>
-						<div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
-							<div className="bg-black/20 p-4 backdrop-blur-sm">
+						<div className="mt-20 grid max-w-3xl gap-3 grid-cols-2">
+							<div className="bg-black/20 p-4 backdrop-blur-sm rounded-lg">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Days together
 								</p>
-								<p className="mt-2 font-serif text-3xl leading-none sm:text-5xl">
+								<p className="mt-2 font-serif text-2xl leading-none sm:text-5xl">
 									{relationshipStats.daysTogether}
 								</p>
-								<p className="mt-2 text-sm text-paper/70">
-									Since 16 Oct 2025
-								</p>
+								<p className="mt-2 text-sm text-paper/70">Since 16 Oct 2025</p>
 							</div>
-							<div className="bg-black/20 p-4 backdrop-blur-sm">
+							<div className="bg-black/20 p-4 backdrop-blur-sm rounded-lg">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
-									Next monthly anniversary
+									Next anniversary
 								</p>
-								<p className="mt-2 font-serif text-3xl leading-none sm:text-5xl">
+								<p className="mt-2 font-serif text-2xl leading-none sm:text-5xl">
 									{relationshipStats.countdown}
 								</p>
 								<p className="mt-2 text-sm text-paper/70">
@@ -430,7 +427,7 @@ export function DashboardClient({
 								</p>
 							</div>
 						</div>
-						<div className="pt-8 sm:block">
+						<div className="pt-6 sm:block">
 							<Button
 								variant="outlined"
 								startIcon={<ImageUp size={16} />}

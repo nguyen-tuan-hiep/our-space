@@ -66,8 +66,8 @@ export function NoteCard({
   }, [note.unlock_at]);
 
   return (
-    <Card className="flex h-[22rem] flex-col overflow-hidden border border-neutral-200 bg-paper p-5">
-      <div className="flex items-start justify-between gap-4">
+    <Card className="flex h-[18rem] flex-col overflow-hidden border border-neutral-200 bg-paper p-5">
+      <div>
         <div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
             <span>From</span>
@@ -83,27 +83,6 @@ export function NoteCard({
           </div>
           <h3 className="mt-2 font-serif text-3xl leading-none">{note.title}</h3>
         </div>
-        {canEdit ? (
-          <div className="flex shrink-0 gap-2">
-            <Button
-              aria-label="Edit note"
-              variant="outlined"
-              onClick={() => onEdit(note)}
-              className={actionButtonClassName}
-            >
-              <Edit2 size={16} />
-            </Button>
-            <Button
-              aria-label="Delete note"
-              variant="outlined"
-              disabled={pending}
-              onClick={() => setConfirmOpen(true)}
-              className={`${actionButtonClassName} text-danger hover:border-danger hover:bg-danger-bg`}
-            >
-              <Trash2 size={16} className="text-danger" />
-            </Button>
-          </div>
-        ) : null}
       </div>
 
       {confirmOpen ? (
@@ -131,7 +110,7 @@ export function NoteCard({
           <p className="eyebrow">Unlocks in</p>
           <p className="mt-2 font-serif text-4xl">{countdown}</p>
           <div className="relative mt-4 min-h-0 flex-1 overflow-hidden select-none blur-md">
-            <div className="h-full overflow-y-auto pr-1 pb-10">
+            <div className="h-full overflow-y-auto">
               <p className="whitespace-pre-line text-sm leading-7">{note.content}</p>
             </div>
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-paper to-transparent" />
@@ -139,7 +118,7 @@ export function NoteCard({
         </div>
       ) : (
         <div className="relative mt-5 min-h-0 flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto pr-1 pb-10">
+          <div className="h-full overflow-y-auto">
             <p className="whitespace-pre-line text-sm leading-7 text-neutral-700">
               {note.content}
             </p>
@@ -148,6 +127,27 @@ export function NoteCard({
         </div>
       )}
 
+      {canEdit ? (
+        <div className="mt-4 flex shrink-0 justify-start gap-2">
+          <Button
+            aria-label="Edit note"
+            variant="outlined"
+            onClick={() => onEdit(note)}
+            className={actionButtonClassName}
+          >
+            <Edit2 size={16} />
+          </Button>
+          <Button
+            aria-label="Delete note"
+            variant="outlined"
+            disabled={pending}
+            onClick={() => setConfirmOpen(true)}
+            className={`${actionButtonClassName} text-danger hover:border-danger hover:bg-danger-bg`}
+          >
+            <Trash2 size={16} className="text-danger" />
+          </Button>
+        </div>
+      ) : null}
     </Card>
   );
 }

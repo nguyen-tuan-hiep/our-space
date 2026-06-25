@@ -42,7 +42,7 @@ export function ExpenseFeed({
   );
   const [expanded, setExpanded] = useState(false);
   const [pending, startTransition] = useTransition();
-  const visibleExpenses = expanded ? expenses : expenses.slice(0, 5);
+  const visibleExpenses = expanded ? expenses : expenses.slice(0, 3);
 
 
   return (
@@ -122,7 +122,7 @@ export function ExpenseFeed({
           <p className="py-10 text-center text-neutral-500">No transactions yet.</p>
         )}
       </div>
-      {expenses.length > 5 ? (
+      {expenses.length > 3 ? (
         <Button
           fullWidth
           className="mt-4"
