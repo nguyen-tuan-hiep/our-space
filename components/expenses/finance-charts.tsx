@@ -6,6 +6,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import {
 	Area,
 	AreaChart,
@@ -70,6 +71,7 @@ export function FinanceCharts({
 	selectedPeriod,
 }: FinanceChartsProps) {
 	const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>("SGD");
+	const isSmallDevice = useMediaQuery("(max-width: 640px)");
 
 	const needsExchangeRate = [...expenses, ...barExpenses].some(
 		(expense) => expense.currency !== displayCurrency,
@@ -114,10 +116,14 @@ export function FinanceCharts({
 
 	const areaChartMinWidth = useMemo(() => {
 		const yAxisSpace = displayCurrency === "VND" ? 120 : 90;
-		const pointSpace = displayCurrency === "VND" ? 110 : 95;
+		const pointSpace = isSmallDevice
+			? 74
+			: displayCurrency === "VND"
+				? 110
+				: 95;
 
-		return Math.max(420, chartData.length * pointSpace + yAxisSpace);
-	}, [chartData.length, displayCurrency]);
+		return Math.max(360, chartData.length * pointSpace + yAxisSpace);
+	}, [chartData.length, displayCurrency, isSmallDevice]);
 
 	return (
 		<Card className="w-full min-w-0 border border-neutral-200 bg-[#fffaf0] p-5">

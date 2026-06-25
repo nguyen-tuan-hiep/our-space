@@ -2,7 +2,7 @@ import type { IndividualExpense, SharedNote } from "@/lib/types";
 import {
   formatAppDate,
   formatAppDayMonthYear,
-  formatAppMonthLong,
+  formatAppMonthShort,
   getAppMonthKey,
 } from "@/lib/date-format";
 
@@ -108,7 +108,7 @@ export function formatPeriodLabel(
 ) {
   return range === "week"
     ? formatWeekLabel(value, timeZone)
-    : formatAppMonthLong(`${value}-01T00:00:00.000Z`, timeZone);
+    : formatAppMonthShort(`${value}-01T00:00:00.000Z`, timeZone);
 }
 
 export function getPeriodOptions(
