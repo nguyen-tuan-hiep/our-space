@@ -12,6 +12,8 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
 import { useSnackbar } from "notistack";
@@ -96,12 +98,13 @@ export function ExpenseDialog({
 	}, [expense, open, profile.currency]);
 
 	return (
-		<Dialog
-			open={open}
-			onClose={handleClose}
-			fullWidth
-			maxWidth="sm"
-		>
+		<LocalizationProvider dateAdapter={AdapterDayjs}>
+			<Dialog
+				open={open}
+				onClose={handleClose}
+				fullWidth
+				maxWidth="sm"
+			>
 			<DialogTitle sx={{ px: 3, pt: 3, pb: 0 }}>
 				{expense ? "Edit transaction" : "Log expense"}
 			</DialogTitle>
@@ -204,35 +207,31 @@ export function ExpenseDialog({
 							</FormControl>
 						</div>
 
-						<div>
-							{/* <p className="form-section-label">Transaction date and time</p> */}
-
-							<div className="grid gap-3 grid-cols-2">
-								<DatePicker
-									format="DD/MM/YYYY"
-									label="Date"
-									value={transactionDate}
-									onChange={(value) => setTransactionDate(value)}
-									slotProps={{
-										textField: {
-											fullWidth: true,
-											required: true,
-										},
-									}}
-								/>
-								<DesktopTimePicker
-									format="HH:mm"
-									label="Time"
-									value={transactionTime}
-									onChange={(value) => setTransactionTime(value)}
-									slotProps={{
-										textField: {
-											fullWidth: true,
-											required: true,
-										},
-									}}
-								/>
-							</div>
+						<div className="grid gap-3 grid-cols-2">
+							<DatePicker
+								format="DD/MM/YYYY"
+								label="Date"
+								value={transactionDate}
+								onChange={(value) => setTransactionDate(value)}
+								slotProps={{
+									textField: {
+										fullWidth: true,
+										required: true,
+									},
+								}}
+							/>
+							<DesktopTimePicker
+								format="HH:mm"
+								label="Time"
+								value={transactionTime}
+								onChange={(value) => setTransactionTime(value)}
+								slotProps={{
+									textField: {
+										fullWidth: true,
+										required: true,
+									},
+								}}
+							/>
 						</div>
 
 						<FormControl
@@ -279,6 +278,7 @@ export function ExpenseDialog({
 					</Button>
 				</DialogActions>
 			</form>
-		</Dialog>
+			</Dialog>
+		</LocalizationProvider>
 	);
 }

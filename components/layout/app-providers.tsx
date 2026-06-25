@@ -3,8 +3,6 @@
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { SnackbarProvider } from "notistack";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { RuntimeErrorGuard } from "@/components/layout/runtime-error-guard";
 import { themeColors } from "@/lib/theme-colors";
 
@@ -124,17 +122,15 @@ const theme = createTheme({
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider theme={theme}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <SnackbarProvider
-          maxSnack={4}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          autoHideDuration={3200}
-        >
-          <CssBaseline />
-          <RuntimeErrorGuard />
-          {children}
-        </SnackbarProvider>
-      </LocalizationProvider>
+      <SnackbarProvider
+        maxSnack={4}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        autoHideDuration={3200}
+      >
+        <CssBaseline />
+        <RuntimeErrorGuard />
+        {children}
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }

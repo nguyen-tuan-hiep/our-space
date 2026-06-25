@@ -1,16 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import { Edit2, Trash2 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { deleteNote } from "@/app/actions";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { AvatarIcon } from "@/components/avatar-icon";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/confirm-dialog").then((mod) => mod.ConfirmDialog),
+  { ssr: false },
+);
 
 const actionButtonClassName =
   "grid size-9 place-items-center rounded-full border border-neutral-200 bg-paper transition hover:border-neutral-300 hover:bg-bg hover:shadow-sm";
@@ -102,34 +106,36 @@ export function NoteCard({
         ) : null}
       </div>
 
-      <ConfirmDialog
-        open={confirmOpen}
-        title="Delete note?"
-        description="This note will be permanently removed for both of you."
-        confirmLabel="Delete note"
-        pending={pending}
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={() =>
-          startTransition(async () => {
-            const result = await deleteNote(note.id);
-            enqueueSnackbar(result.message, {
-              variant: result.ok ? "success" : "error",
-            });
-            if (result.ok) setConfirmOpen(false);
-          })
-        }
-      />
+      {confirmOpen ? (
+        <ConfirmDialog
+          open={confirmOpen}
+          title="Delete note?"
+          description="This note will be permanently removed for both of you."
+          confirmLabel="Delete note"
+          pending={pending}
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={() =>
+            startTransition(async () => {
+              const result = await deleteNote(note.id);
+              enqueueSnackbar(result.message, {
+                variant: result.ok ? "success" : "error",
+              });
+              if (result.ok) setConfirmOpen(false);
+            })
+          }
+        />
+      ) : null}
 
       {locked ? (
         <div className="mt-5 flex min-h-0 flex-1 flex-col border border-dashed border-neutral-300 bg-paper p-5">
           <p className="eyebrow">Unlocks in</p>
           <p className="mt-2 font-serif text-4xl">{countdown}</p>
-          <Box className="relative mt-4 min-h-0 flex-1 overflow-hidden select-none blur-md">
+          <div className="relative mt-4 min-h-0 flex-1 overflow-hidden select-none blur-md">
             <div className="h-full overflow-y-auto pr-1 pb-10">
               <p className="whitespace-pre-line text-sm leading-7">{note.content}</p>
             </div>
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-paper to-transparent" />
-          </Box>
+          </div>
         </div>
       ) : (
         <div className="relative mt-5 min-h-0 flex-1 overflow-hidden">

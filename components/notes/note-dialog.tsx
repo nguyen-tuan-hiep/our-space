@@ -12,6 +12,8 @@ import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
 import { useSnackbar } from "notistack";
@@ -67,12 +69,13 @@ export function NoteDialog({
 	}
 
 	return (
-		<Dialog
-			open={open}
-			onClose={handleClose}
-			fullWidth
-			maxWidth="sm"
-		>
+		<LocalizationProvider dateAdapter={AdapterDayjs}>
+			<Dialog
+				open={open}
+				onClose={handleClose}
+				fullWidth
+				maxWidth="sm"
+			>
 			<DialogTitle sx={{ px: 3, pt: 3, pb: 0 }}>
 				{note ? (
 					"Edit note"
@@ -172,6 +175,7 @@ export function NoteDialog({
 					</Button>
 				</DialogActions>
 			</form>
-		</Dialog>
+			</Dialog>
+		</LocalizationProvider>
 	);
 }

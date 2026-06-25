@@ -36,23 +36,10 @@ body {
   @apply text-[10px] font-semibold uppercase tracking-[0.28em];
 }
 
-
-.form-section {
-  /* border-color: color-mix(in srgb, var(--color-bg)); */
-  background: var(--color-paper);
-  @apply grid gap-4 border p-4;
-}
-
-.form-section-label {
-  color: color-mix(in srgb, var(--color-bg));
-  @apply text-[11px] font-semibold uppercase tracking-[0.18em];
-}
-
 .form-helper {
   color: color-mix(in srgb, var(--color-bg));
   @apply text-xs leading-5;
 }
-
 
 .dark {
   color-scheme: dark;

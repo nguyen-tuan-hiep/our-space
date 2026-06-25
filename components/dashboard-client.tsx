@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -20,7 +21,6 @@ import {
 	WalletCards,
 } from "lucide-react";
 import { useSnackbar } from "notistack";
-import { createClient } from "@/lib/supabase/browser";
 import { signOut } from "@/app/actions";
 import type { IndividualExpense, Profile, SharedNote } from "@/lib/types";
 import { NoteCard } from "@/components/notes/note-card";
@@ -115,6 +115,8 @@ export function DashboardClient({
 	const [expenseOpen, setExpenseOpen] = useState(false);
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [heroOpen, setHeroOpen] = useState(false);
+	const [mobileMenuAnchor, setMobileMenuAnchor] =
+		useState<HTMLElement | null>(null);
 	const [activeSection, setActiveSection] = useState<"notes" | "financial">(
 		"notes",
 	);
@@ -203,33 +205,59 @@ export function DashboardClient({
 	);
 
 	useEffect(() => {
-		const supabase = createClient();
-		const channel = supabase
-			.channel("couple-dashboard")
-			.on(
-				"postgres_changes",
-				{ event: "*", schema: "public", table: "notes" },
-				() => router.refresh(),
-			)
-			.on(
-				"postgres_changes",
-				{ event: "*", schema: "public", table: "individual_expenses" },
-				() => router.refresh(),
-			)
-			.on(
-				"postgres_changes",
-				{ event: "*", schema: "public", table: "profiles" },
-				() => router.refresh(),
-			)
-			.on(
-				"postgres_changes",
-				{ event: "*", schema: "public", table: "app_settings" },
-				() => router.refresh(),
-			)
-			.subscribe();
+		let cleanup: (() => void) | undefined;
+		let cancelled = false;
+		let cancelScheduledConnect: (() => void) | undefined;
+
+		const connectRealtime = () => {
+			import("@/lib/supabase/browser").then(({ createClient }) => {
+				if (cancelled) return;
+
+				const supabase = createClient();
+				const channel = supabase
+					.channel("couple-dashboard")
+					.on(
+						"postgres_changes",
+						{ event: "*", schema: "public", table: "notes" },
+						() => router.refresh(),
+					)
+					.on(
+						"postgres_changes",
+						{ event: "*", schema: "public", table: "individual_expenses" },
+						() => router.refresh(),
+					)
+					.on(
+						"postgres_changes",
+						{ event: "*", schema: "public", table: "profiles" },
+						() => router.refresh(),
+					)
+					.on(
+						"postgres_changes",
+						{ event: "*", schema: "public", table: "app_settings" },
+						() => router.refresh(),
+					)
+					.subscribe();
+
+				cleanup = () => {
+					supabase.removeChannel(channel);
+				};
+			});
+		};
+
+		if ("requestIdleCallback" in window) {
+			const idleId = window.requestIdleCallback(connectRealtime, {
+				timeout: 3000,
+			});
+			cancelScheduledConnect = () => window.cancelIdleCallback(idleId);
+		} else {
+			const timeoutId = globalThis.setTimeout(connectRealtime, 1000);
+			cancelScheduledConnect = () => globalThis.clearTimeout(timeoutId);
+		}
 
 		return () => {
-			supabase.removeChannel(channel);
+			cancelled = true;
+			cancelScheduledConnect?.();
+			cleanup?.();
 		};
 	}, [router]);
 
@@ -239,6 +267,15 @@ export function DashboardClient({
 	}, []);
 
 	const periodLabel = filterRange === "week" ? "Week" : "Month";
+	const mobileMenuOpen = Boolean(mobileMenuAnchor);
+	const handleSignOut = () => {
+		startTransition(async () => {
+			enqueueSnackbar("Logged out successfully!", {
+				variant: "success",
+			});
+			await signOut();
+		});
+	};
 
 	return (
 		<main className="min-h-svh overflow-x-clip bg-bg">
@@ -253,8 +290,8 @@ export function DashboardClient({
 				/>
 				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
 				<div className="container-page relative flex min-h-[58svh] flex-col justify-between py-5 sm:py-7">
-					<header className="flex flex-col gap-4 border-b border-paper/25 pb-5 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-						<div className="flex items-start gap-4">
+					<header className="flex items-center justify-between gap-4 border-b border-paper/25 pb-5 sm:items-start">
+						<div className="flex min-w-0 items-start gap-4">
 							<div className="flex items-center gap-2">
 								<Image
 									src="/icon.svg"
@@ -269,26 +306,79 @@ export function DashboardClient({
 								</p>
 							</div>
 						</div>
-						<div className="flex max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
-							<div className="hidden items-center gap-3 sm:flex">
+						<div className="flex min-w-0 items-center justify-end gap-2 sm:gap-3">
+							<div className="flex min-w-0 items-center gap-2 sm:gap-3">
 								<AvatarIcon
 									value={profile.avatar_url}
 									label={profile.display_name}
+									className="hidden size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl shadow-md backdrop-blur-md sm:grid"
 								/>
-								<div className="leading-tight">
-									<p className="text-sm font-semibold">
+								<div className="min-w-0 text-right leading-tight sm:text-left">
+									<p className="truncate font-serif text-sm font-semibold">
 										{profile.display_name}
 									</p>
 									<p className="text-xs text-paper/70">
-										{profileLocation.flag} {profileLocation.currency}
+										{profileLocation.flag} {profileLocation.label}
 									</p>
 								</div>
+								<button
+									type="button"
+									aria-label="Open profile menu"
+									aria-controls={mobileMenuOpen ? "mobile-nav-menu" : undefined}
+									aria-expanded={mobileMenuOpen ? "true" : undefined}
+									aria-haspopup="menu"
+									onClick={(event) => setMobileMenuAnchor(event.currentTarget)}
+									className="grid size-9 shrink-0 place-items-center rounded-full border border-paper/70 bg-black/35 p-0 shadow-lg transition hover:bg-black/50 sm:hidden"
+								>
+									<AvatarIcon
+										value={profile.avatar_url}
+										label={profile.display_name}
+										className="grid size-full place-items-center rounded-full text-xl leading-none"
+									/>
+								</button>
 							</div>
+							<Menu
+								id="mobile-nav-menu"
+								anchorEl={mobileMenuAnchor}
+								open={mobileMenuOpen}
+								onClose={() => setMobileMenuAnchor(null)}
+								anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+								transformOrigin={{ vertical: "top", horizontal: "right" }}
+							>
+								<MenuItem
+									onClick={() => {
+										setMobileMenuAnchor(null);
+										setProfileOpen(true);
+									}}
+								>
+									<Settings
+										size={16}
+										className="mr-2"
+									/>
+									Profile
+								</MenuItem>
+								<MenuItem
+									disabled={pending}
+									onClick={() => {
+										setMobileMenuAnchor(null);
+										handleSignOut();
+									}}
+								>
+									<LogOut
+										size={16}
+										className="mr-2"
+									/>
+									Logout
+								</MenuItem>
+							</Menu>
 							<Button
 								variant="outlined"
 								startIcon={<Settings size={16} />}
-								sx={heroButtonSx}
-								className="min-h-10 w-full px-3 sm:w-auto sm:px-4"
+								sx={{
+									...heroButtonSx,
+									display: { xs: "none", sm: "inline-flex" },
+								}}
+								className="min-h-10 px-4"
 								onClick={() => setProfileOpen(true)}
 							>
 								Profile
@@ -297,16 +387,12 @@ export function DashboardClient({
 								variant="outlined"
 								startIcon={<LogOut size={16} />}
 								disabled={pending}
-								sx={heroButtonSx}
-								className="min-h-10 w-full px-3 sm:w-auto sm:px-4"
-								onClick={() =>
-									startTransition(async () => {
-										enqueueSnackbar("Logged out successfully!", {
-											variant: "success",
-										});
-										await signOut();
-									})
-								}
+								sx={{
+									...heroButtonSx,
+									display: { xs: "none", sm: "inline-flex" },
+								}}
+								className="min-h-10 px-4"
+								onClick={handleSignOut}
 							>
 								Logout
 							</Button>
@@ -320,7 +406,7 @@ export function DashboardClient({
 							A private place for both of us.
 						</h1>
 						<div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
-							<div className="border border-paper/25 bg-black/20 p-4 backdrop-blur-sm">
+							<div className="bg-black/20 p-4 backdrop-blur-sm">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Days together
 								</p>
@@ -331,7 +417,7 @@ export function DashboardClient({
 									Since 16 Oct 2025
 								</p>
 							</div>
-							<div className="border border-paper/25 bg-black/20 p-4 backdrop-blur-sm">
+							<div className="bg-black/20 p-4 backdrop-blur-sm">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Next monthly anniversary
 								</p>

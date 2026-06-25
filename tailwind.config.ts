@@ -20,9 +20,6 @@ export default {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         serif: ["Iowan Old Style", "Baskerville", "Times New Roman", "serif"],
       },
-      boxShadow: {
-        soft: `0 22px 70px ${themeColors.shadowSoft}`,
-      },
     },
   },
   plugins: [],
