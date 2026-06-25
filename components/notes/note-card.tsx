@@ -62,7 +62,7 @@ export function NoteCard({
   }, [note.unlock_at]);
 
   return (
-    <Card className="border border-neutral-200 bg-[#fffaf0] p-5">
+    <Card className="flex h-[22rem] flex-col overflow-hidden border border-neutral-200 bg-[#fffaf0] p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
@@ -121,17 +121,25 @@ export function NoteCard({
       />
 
       {locked ? (
-        <div className="mt-5 border border-dashed border-neutral-300 bg-[#fffaf0] p-5">
+        <div className="mt-5 flex min-h-0 flex-1 flex-col border border-dashed border-neutral-300 bg-[#fffaf0] p-5">
           <p className="eyebrow">Unlocks in</p>
           <p className="mt-2 font-serif text-4xl">{countdown}</p>
-          <Box className="mt-4 select-none blur-md">
-            <p className="text-sm leading-7">{note.content}</p>
+          <Box className="relative mt-4 min-h-0 flex-1 overflow-hidden select-none blur-md">
+            <div className="h-full overflow-y-auto pr-1 pb-10">
+              <p className="whitespace-pre-line text-sm leading-7">{note.content}</p>
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#fffaf0] to-transparent" />
           </Box>
         </div>
       ) : (
-        <p className="mt-5 whitespace-pre-line text-sm leading-7 text-neutral-700">
-          {note.content}
-        </p>
+        <div className="relative mt-5 min-h-0 flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto pr-1 pb-10">
+            <p className="whitespace-pre-line text-sm leading-7 text-neutral-700">
+              {note.content}
+            </p>
+          </div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#fffaf0] to-transparent" />
+        </div>
       )}
 
     </Card>

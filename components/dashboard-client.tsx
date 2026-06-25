@@ -40,7 +40,7 @@ import {
 	isInPeriod,
 } from "@/lib/dashboard-utils";
 
-	const heroButtonSx = {
+const heroButtonSx = {
 	color: "#fffaf0",
 	borderColor: "rgba(255, 250, 240, 0.95)",
 	backgroundColor: "rgba(17, 17, 15, 0.2)",
@@ -285,16 +285,18 @@ export function DashboardClient({
 							A private place for both of us.
 						</h1>
 						<div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
-								<div className="border border-[#fffaf0]/25 bg-black/20 p-4 backdrop-blur-sm">
+							<div className="border border-[#fffaf0]/25 bg-black/20 p-4 backdrop-blur-sm">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#fffaf0]/70">
 									Days together
 								</p>
 								<p className="mt-2 font-serif text-3xl leading-none sm:text-5xl">
 									{relationshipStats.daysTogether}
 								</p>
-								<p className="mt-2 text-sm text-[#fffaf0]/72">Since 16 Oct 2025</p>
+								<p className="mt-2 text-sm text-[#fffaf0]/72">
+									Since 16 Oct 2025
+								</p>
 							</div>
-								<div className="border border-[#fffaf0]/25 bg-black/20 p-4 backdrop-blur-sm">
+							<div className="border border-[#fffaf0]/25 bg-black/20 p-4 backdrop-blur-sm">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#fffaf0]/70">
 									Next monthly anniversary
 								</p>
@@ -329,7 +331,7 @@ export function DashboardClient({
 							value={activeSection}
 							onChange={(_, value) => value && setActiveSection(value)}
 							size="small"
-								className="w-full self-start bg-[#fffaf0] sm:w-auto"
+							className="w-full self-start bg-[#fffaf0] sm:w-auto"
 						>
 							<ToggleButton
 								value="notes"
@@ -375,9 +377,7 @@ export function DashboardClient({
 								size="small"
 								className="w-full bg-[#fffaf0] sm:w-72"
 							>
-								<InputLabel id="period-select-label">
-									{periodLabel}
-								</InputLabel>
+								<InputLabel id="period-select-label">{periodLabel}</InputLabel>
 
 								<Select
 									labelId="period-select-label"
@@ -419,7 +419,7 @@ export function DashboardClient({
 								New note
 							</Button>
 						</div>
-						<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+						<div className="grid gap-5 md:grid-cols-3 xl:grid-cols-4">
 							{filteredNotes.length ? (
 								filteredNotes.map((note) => (
 									<NoteCard
@@ -435,7 +435,7 @@ export function DashboardClient({
 									/>
 								))
 							) : (
-								<p className="border border-neutral-200 bg-[#fffaf0] p-6 text-neutral-500 md:col-span-2 xl:col-span-3">
+								<p className="border border-neutral-200 bg-[#fffaf0] p-6 text-neutral-500 md:col-span-3 xl:col-span-4">
 									No notes for this {filterRange}.
 								</p>
 							)}
