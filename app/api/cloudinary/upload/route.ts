@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { requireAppSession } from "@/lib/auth";
+import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -28,7 +29,16 @@ export async function POST(request: Request) {
       const stream = cloudinary.uploader.upload_stream(
         {
           folder: "our-space/hero",
+          format: "jpg",
+          quality: "auto:good",
           resource_type: "image",
+          transformation: [
+            {
+              crop: "limit",
+              height: 1290,
+              width: 1920,
+            },
+          ],
         },
         (error, uploadResult) => {
           if (error || !uploadResult) reject(error ?? new Error("Upload failed"));
@@ -39,7 +49,10 @@ export async function POST(request: Request) {
       stream.end(buffer);
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      ...result,
+      secure_url: getOptimizedHeroImageUrl(result.secure_url),
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Upload failed." },
