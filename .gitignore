@@ -33,3 +33,5 @@ next-env.d.ts
 .temp/
 supabase/.branches/
 supabase/.temp/
+
+test/
