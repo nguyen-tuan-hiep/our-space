@@ -66,7 +66,7 @@ export function NoteCard({
   }, [note.unlock_at]);
 
   return (
-    <Card className="flex h-[18rem] flex-col overflow-hidden border border-neutral-200 bg-paper p-5">
+    <Card className="flex h-[20rem] flex-col overflow-hidden border border-neutral-200 bg-paper p-5">
       <div>
         <div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
@@ -108,7 +108,7 @@ export function NoteCard({
       {locked ? (
         <div className="mt-5 flex min-h-0 flex-1 flex-col border border-dashed border-neutral-300 bg-paper p-5">
           <p className="eyebrow">Unlocks in</p>
-          <p className="mt-2 font-serif text-4xl">{countdown}</p>
+          <p className="mt-2 font-serif text-3xl">{countdown}</p>
           <div className="relative mt-4 min-h-0 flex-1 overflow-hidden select-none blur-md">
             <div className="h-full overflow-y-auto">
               <p className="whitespace-pre-line text-sm leading-7">{note.content}</p>
