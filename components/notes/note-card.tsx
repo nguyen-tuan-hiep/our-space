@@ -13,7 +13,7 @@ import { formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
 
 const actionButtonClassName =
-  "grid size-9 place-items-center rounded-full border border-neutral-200 bg-[#fffaf0] text-ink transition hover:border-neutral-300 hover:bg-[#f5f3ee] hover:shadow-sm";
+  "grid size-9 place-items-center rounded-full border border-neutral-200 bg-paper transition hover:border-neutral-300 hover:bg-bg hover:shadow-sm";
 
 function getCountdown(unlockAt: string | null, nowMs: number) {
   if (!unlockAt) return "";
@@ -62,7 +62,7 @@ export function NoteCard({
   }, [note.unlock_at]);
 
   return (
-    <Card className="flex h-[22rem] flex-col overflow-hidden border border-neutral-200 bg-[#fffaf0] p-5">
+    <Card className="flex h-[22rem] flex-col overflow-hidden border border-neutral-200 bg-paper p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
@@ -94,9 +94,9 @@ export function NoteCard({
               variant="outlined"
               disabled={pending}
               onClick={() => setConfirmOpen(true)}
-              className={`${actionButtonClassName} text-[#c24d5e] hover:border-[#e7bcc4] hover:bg-[#fdecef]`}
+              className={`${actionButtonClassName} text-danger hover:border-danger hover:bg-danger-bg`}
             >
-              <Trash2 size={16} className="text-[#c24d5e]" />
+              <Trash2 size={16} className="text-danger" />
             </Button>
           </div>
         ) : null}
@@ -121,14 +121,14 @@ export function NoteCard({
       />
 
       {locked ? (
-        <div className="mt-5 flex min-h-0 flex-1 flex-col border border-dashed border-neutral-300 bg-[#fffaf0] p-5">
+        <div className="mt-5 flex min-h-0 flex-1 flex-col border border-dashed border-neutral-300 bg-paper p-5">
           <p className="eyebrow">Unlocks in</p>
           <p className="mt-2 font-serif text-4xl">{countdown}</p>
           <Box className="relative mt-4 min-h-0 flex-1 overflow-hidden select-none blur-md">
             <div className="h-full overflow-y-auto pr-1 pb-10">
               <p className="whitespace-pre-line text-sm leading-7">{note.content}</p>
             </div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#fffaf0] to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-paper to-transparent" />
           </Box>
         </div>
       ) : (
@@ -138,7 +138,7 @@ export function NoteCard({
               {note.content}
             </p>
           </div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#fffaf0] to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-paper to-transparent" />
         </div>
       )}
 

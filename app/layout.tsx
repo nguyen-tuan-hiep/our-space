@@ -43,6 +43,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {
           "--color-bg": themeColors.bg,
           "--color-paper": themeColors.paper,
+          "--color-dark-bg": themeColors.darkBg,
+          "--color-dark-text": themeColors.darkText,
         } as React.CSSProperties
       }
     >

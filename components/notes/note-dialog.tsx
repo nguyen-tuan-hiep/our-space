@@ -67,13 +67,13 @@ export function NoteDialog({
 	}
 
 	return (
-			<Dialog
-				open={open}
-				onClose={handleClose}
-				fullWidth
-				maxWidth="sm"
-			>
-			<DialogTitle className="form-dialog-title">
+		<Dialog
+			open={open}
+			onClose={handleClose}
+			fullWidth
+			maxWidth="sm"
+		>
+			<DialogTitle sx={{ p: 0, px: 3, py: 3}}>
 				{note ? (
 					"Edit note"
 				) : (
@@ -106,65 +106,62 @@ export function NoteDialog({
 					});
 				}}
 			>
-				<DialogContent className="form-dialog-content">
-					<TextField
-						required
-						name="title"
-						label="Title"
-						defaultValue={note?.title ?? ""}
-					/>
-					<TextField
-						required
-						multiline
-						minRows={5}
-						name="content"
-						label="Content"
-						defaultValue={note?.content ?? ""}
-					/>
-					<div className="form-section">
-						<p className="form-section-label sm:col-span-2">Time lock</p>
-						<div className="grid gap-5">
-							<DatePicker
-								format="DD/MM/YYYY"
-								label="Unlock date"
-								value={unlockDate}
-								onChange={(value) => setUnlockDate(value)}
+				<DialogContent sx={{ p: 0, px: 3 }}>
+					<div className="grid gap-4">
+						<TextField
+							required
+							name="title"
+							label="Title"
+							defaultValue={note?.title ?? ""}
+						/>
+						<TextField
+							required
+							multiline
+							minRows={5}
+							name="content"
+							label="Content"
+							defaultValue={note?.content ?? ""}
+						/>
+						<DatePicker
+							format="DD/MM/YYYY"
+							label="Unlock date"
+							value={unlockDate}
+							onChange={(value) => setUnlockDate(value)}
+							slotProps={{ textField: { fullWidth: true } }}
+						/>
+						<div className="grid grid-cols-2 gap-3">
+							<DesktopTimePicker
+								format="HH:mm"
+								label="Unlock time"
+								value={unlockTime}
+								onChange={(value) => setUnlockTime(value)}
 								slotProps={{ textField: { fullWidth: true } }}
 							/>
-							<div className="grid gap-5 grid-cols-[minmax(0,1fr)_140px]">
-								<DesktopTimePicker
-									format="HH:mm"
-									label="Unlock time"
-									value={unlockTime}
-									onChange={(value) => setUnlockTime(value)}
-									slotProps={{ textField: { fullWidth: true } }}
-								/>
-								<FormControl fullWidth>
-									<InputLabel id="unlock-timezone-label">Timezone</InputLabel>
+							<FormControl fullWidth>
+								<InputLabel id="unlock-timezone-label">Timezone</InputLabel>
 
-									<Select
-										labelId="unlock-timezone-label"
-										id="unlock-timezone"
-										name="unlock_timezone"
-										value={unlockTimezone}
-										label="Timezone"
-										onChange={(event) =>
-											setUnlockTimezone(event.target.value as "VN" | "SG")
-										}
-									>
-										<MenuItem value="VN">Vietnam (UTC+7)</MenuItem>
-										<MenuItem value="SG">Singapore (UTC+8)</MenuItem>
-									</Select>
-								</FormControl>
-							</div>
+								<Select
+									labelId="unlock-timezone-label"
+									id="unlock-timezone"
+									name="unlock_timezone"
+									value={unlockTimezone}
+									label="Timezone"
+									onChange={(event) =>
+										setUnlockTimezone(event.target.value as "VN" | "SG")
+									}
+								>
+									<MenuItem value="VN">Vietnam (UTC+7)</MenuItem>
+									<MenuItem value="SG">Singapore (UTC+8)</MenuItem>
+								</Select>
+							</FormControl>
 						</div>
-						<p className="form-helper sm:col-span-2">
+						<p className="form-helper">
 							The selected date and time will be interpreted in the timezone
 							above.
 						</p>
 					</div>
 				</DialogContent>
-				<DialogActions className="form-dialog-actions">
+				<DialogActions sx={{ p: 0, px: 3, py: 3 }}>
 					<Button onClick={handleClose}>Cancel</Button>
 					<Button
 						type="submit"

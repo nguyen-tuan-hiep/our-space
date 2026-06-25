@@ -93,7 +93,7 @@ export async function signInWithPassword(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return fail(error.message);
 
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   return ok("Logged in successfully!");
 }
 
@@ -132,7 +132,7 @@ export async function updateProfile(formData: FormData) {
     .eq("id", user.id);
 
   if (error) return fail(error.message);
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   return ok("Profile updated successfully!");
 }
 
@@ -200,7 +200,7 @@ export async function updateHeroImage(formData: FormData) {
   });
 
   if (error) return fail(error.message);
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   return ok("Hero image updated successfully!");
 }
 
@@ -218,7 +218,7 @@ export async function createNote(formData: FormData) {
   });
 
   if (error) return fail(error.message);
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   return ok("Note created successfully!");
 }
 
@@ -237,7 +237,7 @@ export async function updateNote(formData: FormData) {
     .eq("id", noteId);
 
   if (error) return fail(error.message);
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   return ok("Note updated successfully!");
 }
 
@@ -246,7 +246,7 @@ export async function deleteNote(noteId: string) {
   const { error } = await supabase.from("notes").delete().eq("id", noteId);
 
   if (error) return fail(error.message);
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   return ok("Note deleted!");
 }
 
@@ -261,7 +261,7 @@ export async function createExpense(formData: FormData) {
   });
 
   if (error) return fail(error.message);
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   return ok("Expense logged successfully!");
 }
 
@@ -277,7 +277,7 @@ export async function updateExpense(formData: FormData) {
     .eq("id", expenseId);
 
   if (error) return fail(error.message);
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   return ok("Transaction updated!");
 }
 
@@ -289,6 +289,6 @@ export async function deleteExpense(expenseId: string) {
     .eq("id", expenseId);
 
   if (error) return fail(error.message);
-  revalidatePath("/dashboard");
+  revalidatePath("/");
   return ok("Transaction removed!");
 }

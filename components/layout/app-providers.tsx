@@ -16,7 +16,7 @@ const theme = createTheme({
       paper: themeColors.paper,
     },
     primary: {
-      main: "#11110f",
+      main: themeColors.mui,
     },
   },
   shape: {
@@ -39,13 +39,27 @@ const theme = createTheme({
           textTransform: "none",
           fontWeight: 700,
         },
+        outlinedPrimary: {
+          borderColor: themeColors.mui,
+          color: themeColors.mui,
+          "&:hover": {
+            borderColor: themeColors.mui,
+            backgroundColor: `color-mix(in srgb, ${themeColors.mui} 10%, transparent)`,
+          },
+        },
+        textPrimary: {
+          color: themeColors.mui,
+          "&:hover": {
+            backgroundColor: `color-mix(in srgb, ${themeColors.mui} 10%, transparent)`,
+          },
+        },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
           borderRadius: 8,
-          boxShadow: "0 22px 70px rgba(17, 17, 15, 0.10)",
+          boxShadow: `0 22px 70px ${themeColors.shadowCard}`,
         },
       },
     },
@@ -61,11 +75,46 @@ const theme = createTheme({
         fullWidth: true,
       },
     },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          "&.Mui-focused": {
+            color: themeColors.mui,
+          },
+        },
+      },
+    },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
           backgroundColor: themeColors.paper,
           borderRadius: 8,
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: themeColors.mui,
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        icon: {
+          ".Mui-focused &": {
+            color: themeColors.mui,
+          },
+        },
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: {
+          "&.Mui-selected": {
+            borderColor: themeColors.mui,
+            color: themeColors.mui,
+            backgroundColor: `color-mix(in srgb, ${themeColors.mui} 12%, transparent)`,
+          },
+          "&.Mui-selected:hover": {
+            backgroundColor: `color-mix(in srgb, ${themeColors.mui} 18%, transparent)`,
+          },
         },
       },
     },

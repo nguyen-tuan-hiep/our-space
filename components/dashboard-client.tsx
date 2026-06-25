@@ -31,8 +31,8 @@ import { FinanceCharts } from "@/components/expenses/finance-charts";
 import { AvatarIcon } from "@/components/avatar-icon";
 import { ProfileDialog } from "@/components/profile-dialog";
 import { HeroImageDialog } from "@/components/hero-image-dialog";
-import { NameWithAvatar } from "@/components/name-with-avatar";
 import { locationSettings } from "@/lib/constants";
+import { themeColors } from "@/lib/theme-colors";
 import {
 	type FilterRange,
 	getPeriodOptions,
@@ -41,14 +41,14 @@ import {
 } from "@/lib/dashboard-utils";
 
 const heroButtonSx = {
-	color: "#fffaf0",
-	borderColor: "rgba(255, 250, 240, 0.95)",
-	backgroundColor: "rgba(17, 17, 15, 0.2)",
+	color: themeColors.paper,
+	borderColor: themeColors.heroButtonBorder,
+	backgroundColor: themeColors.heroButtonBg,
 	backdropFilter: "blur(10px)",
 	"&:hover": {
-		borderColor: "rgba(255, 250, 240, 1)",
-		backgroundColor: "#fffaf0",
-		color: "#11110f",
+		borderColor: themeColors.heroButtonBorderHover,
+		backgroundColor: themeColors.paper,
+		color: themeColors.mui,
 	},
 };
 
@@ -207,7 +207,7 @@ export function DashboardClient({
 	const periodLabel = filterRange === "week" ? "Week" : "Month";
 
 	return (
-		<main className="min-h-svh overflow-x-clip bg-[#f5f3ee] text-ink">
+		<main className="min-h-svh overflow-x-clip bg-bg">
 			<section className="relative min-h-[58svh] bg-black text-white">
 				<Image
 					src={heroImageUrl}
@@ -218,7 +218,7 @@ export function DashboardClient({
 				/>
 				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
 				<div className="container-page relative flex min-h-[58svh] flex-col justify-between py-5 sm:py-7">
-					<header className="flex flex-col gap-4 border-b border-[#fffaf0]/25 pb-5 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+					<header className="flex flex-col gap-4 border-b border-paper/25 pb-5 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
 						<div className="flex items-start gap-4">
 							<div className="flex items-center gap-2">
 								<Image
@@ -244,7 +244,7 @@ export function DashboardClient({
 									<p className="text-sm font-semibold">
 										{profile.display_name}
 									</p>
-									<p className="text-xs text-[#fffaf0]/70">
+									<p className="text-xs text-paper/70">
 										{profileLocation.flag} {profileLocation.currency}
 									</p>
 								</div>
@@ -278,32 +278,32 @@ export function DashboardClient({
 						</div>
 					</header>
 					<div className="max-w-5xl pb-8 pt-4 sm:pt-0">
-						<p className="eyebrow !text-[#fffaf0]/70">
+						<p className="eyebrow !text-paper/70">
 							A little love in every line.
 						</p>
 						<h1 className="mt-4 max-w-[10ch] font-serif text-5xl leading-[0.95] sm:text-5xl lg:text-7xl">
 							A private place for both of us.
 						</h1>
 						<div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
-							<div className="border border-[#fffaf0]/25 bg-black/20 p-4 backdrop-blur-sm">
-								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#fffaf0]/70">
+							<div className="border border-paper/25 bg-black/20 p-4 backdrop-blur-sm">
+								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Days together
 								</p>
 								<p className="mt-2 font-serif text-3xl leading-none sm:text-5xl">
 									{relationshipStats.daysTogether}
 								</p>
-								<p className="mt-2 text-sm text-[#fffaf0]/72">
+								<p className="mt-2 text-sm text-paper/70">
 									Since 16 Oct 2025
 								</p>
 							</div>
-							<div className="border border-[#fffaf0]/25 bg-black/20 p-4 backdrop-blur-sm">
-								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#fffaf0]/70">
+							<div className="border border-paper/25 bg-black/20 p-4 backdrop-blur-sm">
+								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Next monthly anniversary
 								</p>
 								<p className="mt-2 font-serif text-3xl leading-none sm:text-5xl">
 									{relationshipStats.countdown}
 								</p>
-								<p className="mt-2 text-sm text-[#fffaf0]/72">
+								<p className="mt-2 text-sm text-paper/70">
 									{relationshipStats.nextMonthlyLabel}
 								</p>
 							</div>
@@ -324,14 +324,14 @@ export function DashboardClient({
 			</section>
 
 			<section className="container-page py-6 sm:py-8">
-				<div className="sticky top-0 z-20 -mx-5 border-b border-neutral-200 bg-[#f5f3ee]/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
+				<div className="sticky top-0 z-20 -mx-5 border-b border-neutral-200 bg-bg/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
 					<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
 						<ToggleButtonGroup
 							exclusive
 							value={activeSection}
 							onChange={(_, value) => value && setActiveSection(value)}
 							size="small"
-							className="w-full self-start bg-[#fffaf0] sm:w-auto"
+							className="w-full self-start bg-paper sm:w-auto"
 						>
 							<ToggleButton
 								value="notes"
@@ -358,7 +358,7 @@ export function DashboardClient({
 									}
 								}}
 								size="small"
-								className="grid w-full grid-cols-2 bg-[#fffaf0] sm:flex sm:w-auto"
+								className="grid w-full grid-cols-2 bg-paper sm:flex sm:w-auto"
 							>
 								<ToggleButton
 									value="week"
@@ -375,16 +375,21 @@ export function DashboardClient({
 							</ToggleButtonGroup>
 							<FormControl
 								size="small"
-								className="w-full bg-[#fffaf0] sm:w-72"
+								className="w-full rounded-lg bg-paper sm:w-72"
 							>
 								<InputLabel id="period-select-label">{periodLabel}</InputLabel>
-
 								<Select
 									labelId="period-select-label"
 									id="period-select"
 									name="selected_period"
 									value={activePeriod}
 									label={periodLabel}
+									sx={{
+										borderRadius: 1,
+										"& .MuiOutlinedInput-notchedOutline": {
+											borderRadius: 1,
+										},
+									}}
 									onChange={(event) => setSelectedPeriod(event.target.value)}
 								>
 									{periodOptions.map((option) => (
@@ -413,7 +418,7 @@ export function DashboardClient({
 							<Button
 								variant="contained"
 								startIcon={<Plus size={17} />}
-								className="min-h-11 w-full bg-ink px-5 text-white hover:bg-neutral-700 sm:w-auto"
+								className="min-h-11 w-full px-5 text-white hover:bg-neutral-700 sm:w-auto"
 								onClick={() => setNoteOpen(true)}
 							>
 								New note
@@ -435,7 +440,7 @@ export function DashboardClient({
 									/>
 								))
 							) : (
-								<p className="border border-neutral-200 bg-[#fffaf0] p-6 text-neutral-500 md:col-span-3 xl:col-span-4">
+								<p className="border border-neutral-200 bg-paper p-6 text-neutral-500 md:col-span-3 xl:col-span-4">
 									No notes for this {filterRange}.
 								</p>
 							)}
@@ -455,7 +460,7 @@ export function DashboardClient({
 							<Button
 								variant="contained"
 								startIcon={<Plus size={17} />}
-								className="min-h-11 w-full bg-ink px-5 text-white hover:bg-neutral-700 sm:w-auto"
+								className="min-h-11 w-full px-5 text-white hover:bg-neutral-700 sm:w-auto"
 								onClick={() => setExpenseOpen(true)}
 							>
 								Log expense

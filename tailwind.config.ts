@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { themeColors } from "./lib/theme-colors";
 
 export default {
   darkMode: "class",
@@ -9,19 +10,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: "#11110f",
-        paper: "#f5f3ee",
-        stone: "#d9d5cc",
-        sage: "#71816d",
-        rose: "#b76e79",
-        lagoon: "#3f6f78",
+        bg: themeColors.bg,
+        paper: themeColors.paper,
+        mui: themeColors.mui,
+        danger: themeColors.danger,
+        "danger-bg": themeColors.dangerBg,
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         serif: ["Iowan Old Style", "Baskerville", "Times New Roman", "serif"],
       },
       boxShadow: {
-        soft: "0 22px 70px rgba(17, 17, 15, 0.12)",
+        soft: `0 22px 70px ${themeColors.shadowSoft}`,
       },
     },
   },

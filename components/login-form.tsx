@@ -14,7 +14,7 @@ export function LoginForm() {
   const [pending, startTransition] = useTransition();
 
   return (
-    <Card className="border border-neutral-200 bg-[#fffaf0] p-6 sm:p-8">
+    <Card className="border border-neutral-200 bg-paper p-6 sm:p-8">
       <p className="eyebrow">Sign in</p>
       <h2 className="mt-3 font-serif text-4xl leading-none">Welcome back</h2>
       <form
@@ -25,7 +25,7 @@ export function LoginForm() {
             enqueueSnackbar(result.message, {
               variant: result.ok ? "success" : "error",
             });
-            if (result.ok) router.push("/dashboard");
+            if (result.ok) router.push("/");
             router.refresh();
           });
         }}
@@ -51,7 +51,7 @@ export function LoginForm() {
           variant="contained"
           size="large"
           disabled={pending}
-          className="min-h-12 bg-ink text-white hover:bg-neutral-700"
+          className="min-h-12 text-white hover:bg-neutral-700"
         >
           {pending ? "Signing in..." : "Sign in"}
         </Button>

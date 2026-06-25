@@ -1,4 +1,5 @@
 import type { CurrencyCode, ExpenseCategory, LocationCode } from "@/lib/types";
+import { themeColors } from "@/lib/theme-colors";
 
 export const expenseCategories: ExpenseCategory[] = [
   "Food & Drinks",
@@ -10,17 +11,10 @@ export const expenseCategories: ExpenseCategory[] = [
   "Others",
 ];
 
-export const expenseCategoryColors: Record<ExpenseCategory, string> = {
-  "Food & Drinks": "#F09EA7",
-  "Shopping": "#F6CA94",
-  "Travel/Transport": "#FAFABE",
-  "Entertainment": "#C1EBC0",
-  "Groceries": "#C7CAFF",
-  "Utilities": "#CDABEB",
-  "Others": "#F6C2F3",
-};
+export const expenseCategoryColors: Record<ExpenseCategory, string> =
+  themeColors.expenseCategories;
 
-export const ledgerSeriesColors = ["#99d2e7", "#ff6666"] as const;
+export const ledgerSeriesColors = themeColors.ledgerSeries;
 
 export const currencySymbols: Record<CurrencyCode, string> = {
   VND: "VND",
@@ -153,40 +147,45 @@ export type AvatarKey = (typeof avatarOptions)[number];
 export function isAvatarKey(value: string): value is AvatarKey {
   return avatarOptions.includes(value as AvatarKey);
 }
-
 function hasEmojiPresentation(value: string) {
   return /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(value);
 }
 
-function stripEmojiModifiers(value: string) {
-  return value.replace(/[\uFE0E\uFE0F\u200D]/gu, "");
+function getGraphemes(value: string) {
+  if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
+    const segmenter = new Intl.Segmenter(undefined, {
+      granularity: "grapheme",
+    });
+
+    return Array.from(segmenter.segment(value), (part) => part.segment);
+  }
+
+  return Array.from(value);
 }
 
 export function isCustomAvatarEmoji(value: string) {
   const compact = value.trim();
-  const stripped = stripEmojiModifiers(compact);
-  const chars = Array.from(stripped);
+
+  if (!compact) return false;
+
+  const graphemes = getGraphemes(compact);
 
   return (
-    compact.length > 0 &&
-    compact.length <= 12 &&
+    graphemes.length === 1 &&
     hasEmojiPresentation(compact) &&
-    chars.length > 0 &&
-    chars.length <= 4 &&
-    chars.every((char) => !/[A-Za-z0-9]/.test(char))
+    !/[A-Za-z0-9]/.test(compact)
   );
 }
 
 export function extractEmojiOnly(value: string) {
   const compact = value.trim();
+
   if (!compact) return "";
 
-  if (isCustomAvatarEmoji(compact)) {
-    return compact;
-  }
+  const graphemes = getGraphemes(compact);
+  const firstEmoji = graphemes.find((item) => hasEmojiPresentation(item));
 
-  const firstChar = Array.from(compact)[0] ?? "";
-  return hasEmojiPresentation(firstChar) ? firstChar : "";
+  return firstEmoji && isCustomAvatarEmoji(firstEmoji) ? firstEmoji : "";
 }
 
 export function normalizeGroupedNumberInput(value: string, maxDecimals = 2) {

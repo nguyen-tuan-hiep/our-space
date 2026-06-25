@@ -14,7 +14,7 @@ import { formatAppDateTime } from "@/lib/date-format";
 import type { IndividualExpense } from "@/lib/types";
 
 const actionButtonClassName =
-  "grid size-9 place-items-center rounded-full border border-neutral-200 bg-[#fffaf0] text-ink transition hover:border-neutral-300 hover:bg-[#f5f3ee] hover:shadow-sm";
+  "grid size-9 place-items-center rounded-full border border-neutral-200 bg-paper transition hover:border-neutral-300 hover:bg-bg hover:shadow-sm";
 
 interface ExpenseFeedProps {
   title: string;
@@ -46,7 +46,7 @@ export function ExpenseFeed({
 
 
   return (
-    <Card className="border border-neutral-200 bg-[#fffaf0] p-5">
+    <Card className="border border-neutral-200 bg-paper p-5">
       <div className="mb-5 flex items-center justify-between gap-4">
         <div>
           <p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>
@@ -88,7 +88,7 @@ export function ExpenseFeed({
                     label={expense.category}
                     sx={{
                       backgroundColor: expenseCategoryColors[expense.category],
-                      color: "#11110f",
+
                       fontWeight: 700,
                     }}
                   />
@@ -109,9 +109,9 @@ export function ExpenseFeed({
                       variant="outlined"
                       disabled={pending && deletingId === expense.id}
                       onClick={() => setExpenseToDelete(expense)}
-                      className={`${actionButtonClassName} text-[#c24d5e] hover:border-[#e7bcc4] hover:bg-[#fdecef]`}
+                      className={`${actionButtonClassName} hover:border-danger hover:bg-danger-bg`}
                     >
-                      <Trash2 size={15} className="text-[#c24d5e]" />
+                      <Trash2 size={15} className="text-danger" />
                     </Button>
                   </div>
                 ) : null}

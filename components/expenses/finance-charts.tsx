@@ -26,6 +26,7 @@ import {
 	formatCurrency,
 	supportedCurrencies,
 } from "@/lib/constants";
+import { themeColors } from "@/lib/theme-colors";
 import { formatAppDate } from "@/lib/date-format";
 import { AvatarIcon } from "@/components/avatar-icon";
 import {
@@ -126,7 +127,7 @@ export function FinanceCharts({
 	}, [chartData.length, displayCurrency, isSmallDevice]);
 
 	return (
-		<Card className="w-full min-w-0 border border-neutral-200 bg-[#fffaf0] p-5">
+		<Card className="w-full min-w-0 border border-neutral-200 bg-paper p-5">
 			<div className="mb-5 flex min-w-0 flex-wrap items-end justify-between gap-4">
 				<div className="min-w-0">
 					<p className="eyebrow">Finance overview</p>
@@ -204,7 +205,7 @@ export function FinanceCharts({
 							>
 								<AreaChart data={chartData}>
 									<CartesianGrid
-										stroke="#e8e3d8"
+										stroke={themeColors.chartGrid}
 										strokeDasharray="4 4"
 									/>
 									<XAxis

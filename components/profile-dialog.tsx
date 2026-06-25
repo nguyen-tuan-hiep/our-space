@@ -39,7 +39,9 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 	const [avatar, setAvatar] = useState(profile.avatar_url || "heart");
 	const [location, setLocation] = useState<LocationCode>(profile.country_code);
 	const customAvatarInvalid =
-		!isAvatarKey(avatar) && !isCustomAvatarEmoji(avatar);
+		avatar.trim().length > 0 &&
+		!isAvatarKey(avatar) &&
+		!isCustomAvatarEmoji(avatar);
 	const [pending, startTransition] = useTransition();
 	const handleClose = () => {
 		if (document.activeElement instanceof HTMLElement) {
@@ -61,8 +63,10 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 			fullWidth
 			maxWidth="sm"
 		>
-			<DialogTitle className="font-serif text-3xl">Edit profile</DialogTitle>
-			<DialogContent className="pt-0">
+			<DialogTitle sx={{ p: 3, pb: 0 }}>
+				<span className="font-serif text-3xl">Edit profile</span>
+			</DialogTitle>
+			<DialogContent sx={{ px: 3, py: 0 }}>
 				<Tabs
 					value={tab}
 					onChange={(_, value) => setTab(value)}
@@ -94,12 +98,6 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 							});
 						}}
 					>
-						<TextField
-							required
-							name="display_name"
-							label="Display name"
-							defaultValue={profile.display_name}
-						/>
 						<FormControl fullWidth>
 							<InputLabel id="default-location-label">
 								Default location
@@ -127,28 +125,36 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 							</Select>
 						</FormControl>
 						<p className="-mt-3 text-xs leading-5 text-neutral-500">
-							Time display and default expense currency use this location.
+							Default time zone and currency by location.
 						</p>
+
+						<TextField
+							required
+							name="display_name"
+							label="Display name"
+							defaultValue={profile.display_name}
+						/>
+						<TextField
+							label="Custom emoji"
+							value={isAvatarKey(avatar) ? "" : avatar}
+							onChange={(event) =>
+								setAvatar(extractEmojiOnly(event.target.value))
+							}
+							placeholder="Paste emoji"
+							error={customAvatarInvalid}
+							helperText={
+								customAvatarInvalid
+									? "Please enter one emoji only."
+									: "Paste an emoji, or choose one below."
+							}
+							className="mb-4"
+						/>
+
 						<div>
-							<p className="mb-3 text-sm font-semibold text-neutral-700">
+							{/* <p className="mb-3 text-sm font-semibold text-neutral-700">
 								Avatar emoji
-							</p>
-							<TextField
-								label="Custom emoji"
-								value={isAvatarKey(avatar) ? "" : avatar}
-								onChange={(event) =>
-									setAvatar(extractEmojiOnly(event.target.value))
-								}
-								placeholder="Paste any emoji"
-								inputProps={{ maxLength: 12 }}
-								error={customAvatarInvalid}
-								helperText={
-									customAvatarInvalid
-										? "Please enter an emoji, not text."
-										: "Paste an emoji you like, or choose one below."
-								}
-								className="mb-4"
-							/>
+							</p> */}
+
 							<div className="grid max-h-72 grid-cols-5 gap-3 overflow-auto pr-1 sm:grid-cols-8">
 								{avatarOptions.map((option) => {
 									const selected = avatar === option;
@@ -160,8 +166,8 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 											onClick={() => setAvatar(option)}
 											className={`grid aspect-square place-items-center border transition ${
 												selected
-													? "border-ink bg-ink text-white"
-													: "border-neutral-200 text-ink hover:border-neutral-400"
+													? "border-[color-mix(in_srgb,#000000_48%,transparent)] bg-[color-mix(in_srgb,#000000_12%,transparent)] text-white"
+													: "border-bg-[color-mix(in_srgb,#000000_12%,transparent)] bg-paper hover:border-[color-mix(in_srgb,#000000_48%,transparent)]"
 											}`}
 										>
 											<AvatarIcon
@@ -178,7 +184,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 				) : (
 					<form
 						id="password-form"
-						className="grid gap-5"
+						className="grid gap-4"
 						action={(formData) => {
 							startTransition(async () => {
 								const result = await updatePassword(formData);
@@ -206,7 +212,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 					</form>
 				)}
 			</DialogContent>
-				<DialogActions className="px-6 pb-6">
+			<DialogActions sx={{ p: 0, px: 3, py: 3 }}>
 				<Button onClick={handleClose}>Cancel</Button>
 				<Button
 					type="submit"
