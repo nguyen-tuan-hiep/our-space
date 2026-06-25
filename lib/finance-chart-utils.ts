@@ -4,7 +4,6 @@ import {
   formatPeriodLabel,
   getPeriodKey,
 } from "@/lib/dashboard-utils";
-import { formatAppDate } from "@/lib/date-format";
 import type {
   CurrencyCode,
   ExpenseCategory,
@@ -23,6 +22,14 @@ function convertedAmount(
     displayCurrency,
     exchangeRateSgdToVnd,
   );
+}
+
+function formatChartDate(value: string | Date, timeZone: string) {
+  return new Intl.DateTimeFormat("en-SG", {
+    day: "2-digit",
+    month: "short",
+    timeZone,
+  }).format(new Date(value));
 }
 
 function getLocalDayKey(value: string | Date, timeZone: string) {
@@ -74,7 +81,7 @@ function seedWeekRows({
       key,
       createEmptyChartRow(
         key,
-        formatAppDate(date, timeZone),
+        formatChartDate(date, timeZone),
         profiles,
         displayCurrency,
       ),
@@ -113,7 +120,7 @@ export function buildFinanceChartData({
         : getPeriodKey(expense.transaction_date, timeZone, range);
     const label =
       range === "week"
-        ? formatAppDate(expense.transaction_date, timeZone)
+        ? formatChartDate(expense.transaction_date, timeZone)
         : formatPeriodLabel(key, timeZone, range);
     const profile = profiles.find((person) => person.id === expense.owner_id);
     const converted = convertedAmount(

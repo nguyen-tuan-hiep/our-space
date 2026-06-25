@@ -7,8 +7,8 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import {
-	Bar,
-	BarChart,
+	Area,
+	AreaChart,
 	CartesianGrid,
 	Cell,
 	Legend,
@@ -167,7 +167,7 @@ export function FinanceCharts({
 				<div className="border border-neutral-200 p-4">
 					<div className="mb-4">
 						<p className="eyebrow">
-							{filterRange === "week" ? "Weekly bars" : "Monthly bars"}
+							{filterRange === "week" ? "Weekly area" : "Monthly area"}
 						</p>
 						<h3 className="mt-2 font-serif text-3xl">
 							Both ledgers in {displayCurrency}
@@ -178,10 +178,10 @@ export function FinanceCharts({
 							width="100%"
 							height="100%"
 						>
-									<BarChart data={chartData}>
+							<AreaChart data={chartData}>
 								<CartesianGrid
 									stroke="#e8e3d8"
-									vertical={false}
+									strokeDasharray="4 4"
 								/>
 								<XAxis
 									dataKey="label"
@@ -199,25 +199,28 @@ export function FinanceCharts({
 								<Tooltip formatter={tooltipFormatter} />
 								<Legend />
 								{profiles.map((profile, index) => (
-									<Bar
+									<Area
 										key={profile.id}
 										dataKey={profile.id}
 										name={profile.display_name}
-										radius={[4, 4, 0, 0]}
+										type="monotone"
+										stroke={ledgerSeriesColors[index % ledgerSeriesColors.length]}
 										fill={ledgerSeriesColors[index % ledgerSeriesColors.length]}
+										fillOpacity={0.18}
+										strokeWidth={2}
 									/>
 								))}
-							</BarChart>
+							</AreaChart>
 						</ResponsiveContainer>
 					</div>
 				</div>
 
 				<div className="grid gap-6 xl:grid-cols-2">
-						{perPerson.map((item, index) => (
-							<div
-								key={item.profile.id}
-								className="border border-neutral-200 p-4"
-							>
+					{perPerson.map((item) => (
+						<div
+							key={item.profile.id}
+							className="border border-neutral-200 p-4"
+						>
 							<div className="mb-4 flex items-center justify-between gap-3">
 								<div>
 									<div className="flex items-center gap-1.5 whitespace-nowrap">
