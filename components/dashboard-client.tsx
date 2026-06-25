@@ -84,7 +84,7 @@ export function DashboardClient({
 	const [activeSection, setActiveSection] = useState<"notes" | "financial">(
 		"notes",
 	);
-	const [filterRange, setFilterRange] = useState<FilterRange>("month");
+	const [filterRange, setFilterRange] = useState<FilterRange>("week");
 	const initialClock = useMemo(
 		() => new Date(currentTimeIso),
 		[currentTimeIso],
