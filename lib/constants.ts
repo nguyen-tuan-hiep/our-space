@@ -183,9 +183,11 @@ export function extractEmojiOnly(value: string) {
   if (!compact) return "";
 
   const graphemes = getGraphemes(compact);
-  const firstEmoji = graphemes.find((item) => hasEmojiPresentation(item));
+  const lastEmoji = graphemes
+    .filter((item) => hasEmojiPresentation(item))
+    .at(-1);
 
-  return firstEmoji && isCustomAvatarEmoji(firstEmoji) ? firstEmoji : "";
+  return lastEmoji && isCustomAvatarEmoji(lastEmoji) ? lastEmoji : "";
 }
 
 export function normalizeGroupedNumberInput(value: string, maxDecimals = 2) {
