@@ -21,7 +21,8 @@ const merriweather = Merriweather({
 
 export const metadata: Metadata = {
   title: "Our Space 𑣲⋆",
-  description: "A private daily hub for two people across Vietnam and Singapore.",
+  description:
+    "A private daily hub for two people across Vietnam and Singapore.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -34,7 +35,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"

@@ -9,7 +9,10 @@ export function formatAppDate(value: string | Date, timeZone = appTimeZone) {
   }).format(new Date(value));
 }
 
-export function formatAppDateTime(value: string | Date, timeZone = appTimeZone) {
+export function formatAppDateTime(
+  value: string | Date,
+  timeZone = appTimeZone,
+) {
   return new Intl.DateTimeFormat("en-SG", {
     day: "2-digit",
     month: "short",
@@ -20,7 +23,10 @@ export function formatAppDateTime(value: string | Date, timeZone = appTimeZone) 
   }).format(new Date(value));
 }
 
-export function formatAppMonthLong(value: string | Date, timeZone = appTimeZone) {
+export function formatAppMonthLong(
+  value: string | Date,
+  timeZone = appTimeZone,
+) {
   return new Intl.DateTimeFormat("en-SG", {
     month: "long",
     year: "numeric",
@@ -28,7 +34,10 @@ export function formatAppMonthLong(value: string | Date, timeZone = appTimeZone)
   }).format(new Date(value));
 }
 
-export function formatAppMonthShort(value: string | Date, timeZone = appTimeZone) {
+export function formatAppMonthShort(
+  value: string | Date,
+  timeZone = appTimeZone,
+) {
   return new Intl.DateTimeFormat("en-SG", {
     month: "short",
     year: "numeric",
@@ -47,7 +56,10 @@ export function getAppMonthKey(value: string | Date, timeZone = appTimeZone) {
   return `${year}-${month}`;
 }
 
-export function formatAppDayMonthYear(value: string | Date, timeZone = appTimeZone) {
+export function formatAppDayMonthYear(
+  value: string | Date,
+  timeZone = appTimeZone,
+) {
   return new Intl.DateTimeFormat("en-SG", {
     day: "2-digit",
     month: "long",

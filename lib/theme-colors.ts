@@ -10,7 +10,6 @@ export const themeColors = {
   danger: "#c24d5e",
   dangerBg: "#fdecef",
 
-
   chartGrid: "#e8e3d8",
   darkBg: "#10100f",
   darkText: "#f1f0ec",

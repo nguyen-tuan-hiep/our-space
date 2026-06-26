@@ -15,7 +15,8 @@ export default async function LoginPage() {
             Our Space 𑣲⋆
           </h1>
           <p className="mt-8 max-w-xl text-lg leading-8 text-neutral-600">
-            A private place for both of us to share our thoughts, memories, and moments together.
+            A private place for both of us to share our thoughts, memories, and
+            moments together.
           </p>
         </div>
         <LoginForm />

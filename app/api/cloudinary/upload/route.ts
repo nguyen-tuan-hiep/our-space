@@ -41,7 +41,8 @@ export async function POST(request: Request) {
           ],
         },
         (error, uploadResult) => {
-          if (error || !uploadResult) reject(error ?? new Error("Upload failed"));
+          if (error || !uploadResult)
+            reject(error ?? new Error("Upload failed"));
           else resolve(uploadResult);
         },
       );

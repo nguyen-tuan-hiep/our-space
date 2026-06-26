@@ -157,7 +157,10 @@ export async function updatePassword(formData: FormData) {
 export async function updateHeroImage(formData: FormData) {
   const { supabase, user } = await requireUser();
   const heroImageUrl = stringValue(formData, "hero_image_url");
-  const heroImagePublicId = nullableStringValue(formData, "hero_image_public_id");
+  const heroImagePublicId = nullableStringValue(
+    formData,
+    "hero_image_public_id",
+  );
 
   if (!heroImageUrl.startsWith("https://")) {
     return fail("Please upload a valid hero image.");

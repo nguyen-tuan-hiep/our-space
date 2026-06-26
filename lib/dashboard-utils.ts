@@ -28,19 +28,17 @@ export function getRelationshipStats(clock: Date, timeZone: string) {
 
   const start = Date.UTC(2025, 9, 16);
   const today = Date.UTC(year, month - 1, day);
-  const daysTogether = Math.max(
-    0,
-    Math.floor((today - start) / 86400000) + 1,
-  );
+  const daysTogether = Math.max(0, Math.floor((today - start) / 86400000) + 1);
 
-  const nextMonth = day > 16 || (day === 16 && (hour > 0 || minute > 0))
-    ? month
-    : month - 1;
+  const nextMonth =
+    day > 16 || (day === 16 && (hour > 0 || minute > 0)) ? month : month - 1;
   const nextMonthly = new Date(Date.UTC(year, nextMonth, 16));
 
   const totalSeconds = Math.floor(
-    Math.max(0, nextMonthly.getTime() - today - (hour * 3600 + minute * 60) * 1000) /
-      1000,
+    Math.max(
+      0,
+      nextMonthly.getTime() - today - (hour * 3600 + minute * 60) * 1000,
+    ) / 1000,
   );
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);

@@ -7,7 +7,10 @@ import type {
 import { getExchangeRate } from "@/lib/exchange-rates";
 import { createClient } from "@/lib/supabase/server";
 
-export async function getDashboardData(profile: Profile, partner: Profile | null) {
+export async function getDashboardData(
+  profile: Profile,
+  partner: Profile | null,
+) {
   const supabase = await createClient();
   const participantIds = [profile.id, partner?.id].filter(Boolean) as string[];
 

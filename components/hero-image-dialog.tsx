@@ -50,9 +50,12 @@ export function HeroImageDialog({
       setHeroUrl(result.secure_url);
       setPublicId(result.public_id);
     } catch (error) {
-      enqueueSnackbar(error instanceof Error ? error.message : "Upload failed", {
-        variant: "error",
-      });
+      enqueueSnackbar(
+        error instanceof Error ? error.message : "Upload failed",
+        {
+          variant: "error",
+        },
+      );
     } finally {
       setUploading(false);
     }
@@ -104,7 +107,11 @@ export function HeroImageDialog({
       >
         <DialogActions className="px-6 pb-6">
           <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="contained" disabled={pending || uploading}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={pending || uploading}
+          >
             {pending ? "Saving..." : "Save hero"}
           </Button>
         </DialogActions>

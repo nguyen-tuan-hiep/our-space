@@ -175,11 +175,13 @@ export function buildFinanceBreakdowns({
     return {
       profile,
       total,
-      categories: Array.from(categoryMap.entries()).map(([category, value]) => ({
-        category,
-        value,
-        currency: displayCurrency,
-      })),
+      categories: Array.from(categoryMap.entries()).map(
+        ([category, value]) => ({
+          category,
+          value,
+          currency: displayCurrency,
+        }),
+      ),
     };
   });
 }

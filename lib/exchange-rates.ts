@@ -20,9 +20,12 @@ function isFresh(value: string | null) {
 }
 
 async function fetchSgdToVndRate() {
-  const response = await fetch(process.env.EXCHANGE_RATE_API_URL ?? defaultRateUrl, {
-    cache: "no-store",
-  });
+  const response = await fetch(
+    process.env.EXCHANGE_RATE_API_URL ?? defaultRateUrl,
+    {
+      cache: "no-store",
+    },
+  );
   if (!response.ok) return null;
 
   const payload = (await response.json()) as ExchangeRatePayload;
@@ -36,7 +39,10 @@ async function fetchSgdToVndRate() {
 }
 
 export async function getExchangeRate(settings: AppSettings | null) {
-  if (settings?.exchange_rate_sgd_vnd && isFresh(settings.exchange_rate_updated_at)) {
+  if (
+    settings?.exchange_rate_sgd_vnd &&
+    isFresh(settings.exchange_rate_updated_at)
+  ) {
     return {
       sgdToVnd: Number(settings.exchange_rate_sgd_vnd),
       updatedAt: settings.exchange_rate_updated_at,
