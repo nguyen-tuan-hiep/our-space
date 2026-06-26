@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
+import Script from "next/script";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
 import { OneSignalBootstrap } from "@/components/notifications/onesignal-bootstrap";
+import { ONESIGNAL_WEB_APP_ID } from "@/lib/onesignal-web";
 import { themeColors } from "@/lib/theme-colors";
 
 const beVietnamPro = Be_Vietnam_Pro({
@@ -54,6 +56,50 @@ export default function RootLayout({
         } as React.CSSProperties
       }
     >
+      <Script
+        id="onesignal-deferred"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.OneSignalDeferred = window.OneSignalDeferred || [];
+            window.__oneSignalInitPromise = new Promise(function(resolve, reject) {
+              window.OneSignalDeferred.push(async function(OneSignal) {
+                try {
+                  await OneSignal.init({
+                    appId: "${ONESIGNAL_WEB_APP_ID}",
+                    serviceWorkerPath: "OneSignalSDKWorker.js",
+                    serviceWorkerParam: { scope: "/" },
+                    notifyButton: { enable: false },
+                    welcomeNotification: { disable: true },
+                    promptOptions: {
+                      slidedown: {
+                        prompts: [{
+                          type: "push",
+                          autoPrompt: false,
+                          text: {
+                            actionMessage: "Allow private note and finance notifications?",
+                            acceptButton: "Allow",
+                            cancelButton: "Not now"
+                          }
+                        }]
+                      }
+                    }
+                  });
+                  window.__oneSignalInitialized = true;
+                  resolve(OneSignal);
+                } catch (error) {
+                  reject(error);
+                }
+              });
+            });
+          `,
+        }}
+      />
+      <Script
+        id="onesignal-sdk"
+        src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+        strategy="afterInteractive"
+      />
       <body>
         <AppRouterCacheProvider>
           <AppProviders>

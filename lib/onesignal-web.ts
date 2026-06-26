@@ -56,16 +56,20 @@ export interface OneSignalWebSdk {
 declare global {
   interface Window {
     OneSignalDeferred?: OneSignalDeferredQueue;
+    __oneSignalInitPromise?: Promise<OneSignalWebSdk>;
+    __oneSignalInitialized?: boolean;
   }
 }
 
-const oneSignalAppId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
+export const ONESIGNAL_WEB_APP_ID =
+  process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID ??
+  "4a57e90e-433d-465c-a3d1-99d6c1a0c5df";
 
 let oneSignalScriptPromise: Promise<void> | null = null;
 let oneSignalInitPromise: Promise<OneSignalWebSdk> | null = null;
 
 export function isOneSignalConfigured() {
-  return Boolean(oneSignalAppId);
+  return Boolean(ONESIGNAL_WEB_APP_ID);
 }
 
 function loadOneSignalScript() {
@@ -105,7 +109,7 @@ function runWhenOneSignalReady<T>(
 }
 
 export async function getOneSignal(userId?: string) {
-  if (!oneSignalAppId) {
+  if (!ONESIGNAL_WEB_APP_ID) {
     throw new Error("NEXT_PUBLIC_ONESIGNAL_APP_ID is not configured.");
   }
 
@@ -113,8 +117,11 @@ export async function getOneSignal(userId?: string) {
     throw new Error("This browser does not support service workers.");
   }
 
-  if (oneSignalInitPromise) {
-    const oneSignal = await oneSignalInitPromise;
+  const existingInitPromise =
+    oneSignalInitPromise ?? window.__oneSignalInitPromise;
+
+  if (existingInitPromise) {
+    const oneSignal = await existingInitPromise;
     if (userId) await oneSignal.login(userId);
     return oneSignal;
   }
@@ -124,7 +131,7 @@ export async function getOneSignal(userId?: string) {
 
   oneSignalInitPromise = runWhenOneSignalReady(async (oneSignal) => {
     await oneSignal.init({
-      appId: oneSignalAppId,
+      appId: ONESIGNAL_WEB_APP_ID,
       serviceWorkerPath: "OneSignalSDKWorker.js",
       serviceWorkerParam: { scope: "/" },
       notifyButton: { enable: false },
@@ -146,6 +153,7 @@ export async function getOneSignal(userId?: string) {
       },
     });
 
+    window.__oneSignalInitialized = true;
     if (userId) await oneSignal.login(userId);
     return oneSignal;
   });
