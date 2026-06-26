@@ -10,20 +10,6 @@ export interface OneSignalWebSdk {
     serviceWorkerPath?: string;
     serviceWorkerParam?: { scope: string };
     notifyButton?: { enable: boolean };
-    welcomeNotification?: { disable: boolean };
-    promptOptions?: {
-      slidedown?: {
-        prompts?: Array<{
-          type: "push";
-          autoPrompt: boolean;
-          text?: {
-            actionMessage?: string;
-            acceptButton?: string;
-            cancelButton?: string;
-          };
-        }>;
-      };
-    };
   }): Promise<void>;
   login(externalId: string): Promise<void>;
   Slidedown: {
@@ -134,23 +120,7 @@ export async function getOneSignal(userId?: string) {
       appId: ONESIGNAL_WEB_APP_ID,
       serviceWorkerPath: "OneSignalSDKWorker.js",
       serviceWorkerParam: { scope: "/" },
-      notifyButton: { enable: false },
-      welcomeNotification: { disable: true },
-      promptOptions: {
-        slidedown: {
-          prompts: [
-            {
-              type: "push",
-              autoPrompt: false,
-              text: {
-                actionMessage: "Allow private note and finance notifications?",
-                acceptButton: "Allow",
-                cancelButton: "Not now",
-              },
-            },
-          ],
-        },
-      },
+      notifyButton: { enable: true },
     });
 
     window.__oneSignalInitialized = true;

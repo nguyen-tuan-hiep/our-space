@@ -226,7 +226,7 @@ They import OneSignal's Web SDK worker from the CDN and are served from the site
 
 ### Frontend Flow
 
-`components/notifications/onesignal-bootstrap.tsx` initializes the OneSignal Web SDK on every page so OneSignal can verify the installation. The dashboard still renders an `Enable notifications` button, because iOS requires a direct user gesture before the native notification permission prompt can appear.
+`components/notifications/onesignal-bootstrap.tsx` initializes the OneSignal Web SDK on every page so OneSignal can verify the installation. The root layout also enables OneSignal's floating notify button, which is useful for creating the first subscription during OneSignal setup. The dashboard still renders an `Enable notifications` button, because iOS requires a direct user gesture before the native notification permission prompt can appear.
 
 When the user taps the button:
 

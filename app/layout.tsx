@@ -73,21 +73,7 @@ export default function RootLayout({
                     appId: "${ONESIGNAL_WEB_APP_ID}",
                     serviceWorkerPath: "OneSignalSDKWorker.js",
                     serviceWorkerParam: { scope: "/" },
-                    notifyButton: { enable: false },
-                    welcomeNotification: { disable: true },
-                    promptOptions: {
-                      slidedown: {
-                        prompts: [{
-                          type: "push",
-                          autoPrompt: false,
-                          text: {
-                            actionMessage: "Allow private note and finance notifications?",
-                            acceptButton: "Allow",
-                            cancelButton: "Not now"
-                          }
-                        }]
-                      }
-                    }
+                    notifyButton: { enable: true }
                   });
                   window.__oneSignalInitialized = true;
                   resolve(OneSignal);
