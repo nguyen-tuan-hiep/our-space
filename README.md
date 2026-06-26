@@ -65,7 +65,7 @@ CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_ONESIGNAL_APP_ID=4a57e90e-433d-465c-a3d1-99d6c1a0c5df
+NEXT_PUBLIC_ONESIGNAL_APP_ID=d27ba552-6618-4673-9914-6cb8e637d287
 ```
 
 `NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL` should be a high-quality Cloudinary URL for the couple hero image. Cloudinary uploads from note attachments are stored under `our-space/attachments`.
@@ -212,7 +212,7 @@ This app uses OneSignal Web Push, Supabase Database Webhooks, and a Supabase Edg
 1. Create a OneSignal Web Push app.
 2. Configure the site URL as your production Vercel domain.
 3. For iOS PWA support, make sure the app is installed from Safari with Add to Home Screen. iOS only supports Web Push for installed standalone web apps.
-4. Copy the OneSignal App ID into `NEXT_PUBLIC_ONESIGNAL_APP_ID` in Vercel. Current app ID: `4a57e90e-433d-465c-a3d1-99d6c1a0c5df`.
+4. Copy the OneSignal App ID into `NEXT_PUBLIC_ONESIGNAL_APP_ID` in Vercel. Current app ID: `d27ba552-6618-4673-9914-6cb8e637d287`.
 5. Copy the OneSignal REST API key into the Supabase secret `ONESIGNAL_REST_API_KEY`.
 
 The required OneSignal service worker files live in `public/`:

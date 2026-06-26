@@ -49,7 +49,7 @@ declare global {
 
 export const ONESIGNAL_WEB_APP_ID =
   process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID ??
-  "4a57e90e-433d-465c-a3d1-99d6c1a0c5df";
+  "d27ba552-6618-4673-9914-6cb8e637d287";
 
 let oneSignalScriptPromise: Promise<void> | null = null;
 let oneSignalInitPromise: Promise<OneSignalWebSdk> | null = null;
@@ -118,8 +118,6 @@ export async function getOneSignal(userId?: string) {
   oneSignalInitPromise = runWhenOneSignalReady(async (oneSignal) => {
     await oneSignal.init({
       appId: ONESIGNAL_WEB_APP_ID,
-      serviceWorkerPath: "OneSignalSDKWorker.js",
-      serviceWorkerParam: { scope: "/" },
       notifyButton: { enable: true },
     });
 

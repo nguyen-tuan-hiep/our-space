@@ -71,8 +71,6 @@ export default function RootLayout({
                 try {
                   await OneSignal.init({
                     appId: "${ONESIGNAL_WEB_APP_ID}",
-                    serviceWorkerPath: "OneSignalSDKWorker.js",
-                    serviceWorkerParam: { scope: "/" },
                     notifyButton: { enable: true }
                   });
                   window.__oneSignalInitialized = true;
