@@ -3,6 +3,7 @@ import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
+import { OneSignalBootstrap } from "@/components/notifications/onesignal-bootstrap";
 import { themeColors } from "@/lib/theme-colors";
 
 const beVietnamPro = Be_Vietnam_Pro({
@@ -55,7 +56,10 @@ export default function RootLayout({
     >
       <body>
         <AppRouterCacheProvider>
-          <AppProviders>{children}</AppProviders>
+          <AppProviders>
+            <OneSignalBootstrap />
+            {children}
+          </AppProviders>
         </AppRouterCacheProvider>
       </body>
     </html>
