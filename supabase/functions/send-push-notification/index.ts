@@ -122,7 +122,7 @@ async function buildNotification(payload: WebhookPayload) {
     return {
       subscriptionId: partner.onesignal_subscription_id,
       title: "New transaction",
-      body: `${owner.display_name} created ${expenseTitle}.`,
+      body: `${owner.display_name} created a new transaction: "${expenseTitle}".`,
       url: `${appUrl}/?expense=${expenseId ?? ""}`,
       data: {
         type: "expense",
