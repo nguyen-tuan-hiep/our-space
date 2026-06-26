@@ -14,7 +14,7 @@ export function LoginForm() {
   const [pending, startTransition] = useTransition();
 
   return (
-    <Card className="border border-neutral-200 bg-paper p-6 sm:p-8">
+    <Card className="border border-neutral-200 bg-paper p-6 sm:p-8 !shadow-2xl">
       <p className="eyebrow">Sign in</p>
       <h2 className="mt-3 font-serif text-4xl leading-none">Welcome back</h2>
       <form

@@ -127,7 +127,7 @@ export function FinanceCharts({
 	}, [chartData.length, displayCurrency, isSmallDevice]);
 
 	return (
-		<Card className="w-full min-w-0 border border-neutral-200 bg-paper p-5">
+		<Card className="w-full min-w-0 border border-neutral-200 bg-paper p-5 !shadow-lg">
 			<div className="mb-5 flex min-w-0 flex-wrap items-end justify-between gap-4">
 				<div className="min-w-0">
 					<p className="eyebrow">Finance overview</p>

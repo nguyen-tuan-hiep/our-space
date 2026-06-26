@@ -311,7 +311,7 @@ export function DashboardClient({
 								<AvatarIcon
 									value={profile.avatar_url}
 									label={profile.display_name}
-									className="hidden size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl shadow-md backdrop-blur-md sm:grid"
+									className="hidden size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl shadow-lg backdrop-blur-md sm:grid"
 								/>
 								<div className="min-w-0 text-right leading-tight sm:text-left">
 									<p className="truncate font-serif text-sm font-semibold">
@@ -442,8 +442,8 @@ export function DashboardClient({
 				</div>
 			</section>
 
-			<section className="container-page py-6 sm:py-8">
-				<div className="sticky top-0 z-20 -mx-5 border-b border-neutral-200 bg-bg/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
+			<section className="container-page p-5 sm:py-8">
+				<div className="sticky top-0 z-20 -mx-5 border-b border-neutral-200 bg-bg/95 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
 					<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
 						<ToggleButtonGroup
 							exclusive
@@ -467,7 +467,7 @@ export function DashboardClient({
 								Financial
 							</ToggleButton>
 						</ToggleButtonGroup>
-						<div className="flex flex-col w-full gap-6 sm:w-auto sm:flex-row sm:items-center sm:gap-6">
+						<div className="flex flex-col w-full gap-5 sm:w-auto sm:flex-row sm:items-center sm:gap-5">
 							<ToggleButtonGroup
 								exclusive
 								value={filterRange}
@@ -526,8 +526,8 @@ export function DashboardClient({
 				</div>
 
 				{activeSection === "notes" ? (
-					<div className="grid gap-6 py-6">
-						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+					<div className="grid gap-5 pt-3">
+						<div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<p className="eyebrow">Shared notes</p>
 								<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
@@ -546,17 +546,19 @@ export function DashboardClient({
 						<div className="grid gap-5 md:grid-cols-3 xl:grid-cols-4">
 							{filteredNotes.length ? (
 								filteredNotes.map((note) => (
-									<NoteCard
-										key={note.id}
-										note={note}
-										currentUserId={profile.id}
-										initialNowMs={initialClock.getTime()}
-										timeZone={profileTimeZone}
-										onEdit={(selectedNote) => {
-											setEditingNote(selectedNote);
-											setNoteOpen(true);
-										}}
-									/>
+									// <div className="shadow-lg">
+										<NoteCard
+											key={note.id}
+											note={note}
+											currentUserId={profile.id}
+											initialNowMs={initialClock.getTime()}
+											timeZone={profileTimeZone}
+											onEdit={(selectedNote) => {
+												setEditingNote(selectedNote);
+												setNoteOpen(true);
+											}}
+										/>
+									// </div>
 								))
 							) : (
 								<p className="border border-neutral-200 bg-paper p-6 text-neutral-500 md:col-span-3 xl:col-span-4">
@@ -566,8 +568,8 @@ export function DashboardClient({
 						</div>
 					</div>
 				) : (
-					<div className="grid gap-6 py-6">
-						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+					<div className="grid gap-5 pt-3">
+						<div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<p className="eyebrow">Financial</p>
 								<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
