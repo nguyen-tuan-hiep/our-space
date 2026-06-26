@@ -23,6 +23,7 @@ create table public.profiles (
   email text,
   display_name text not null,
   avatar_url text,
+  onesignal_subscription_id text,
   country_code public.country_code not null,
   currency public.currency_code not null,
   partner_id uuid references public.profiles(id) on delete set null,

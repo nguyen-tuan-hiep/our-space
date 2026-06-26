@@ -25,6 +25,7 @@ import { signOut } from "@/app/actions";
 import type { IndividualExpense, Profile, SharedNote } from "@/lib/types";
 import { NoteCard } from "@/components/notes/note-card";
 import { AvatarIcon } from "@/components/avatar-icon";
+import { NotificationPermissionButton } from "@/components/notifications/notification-permission-button";
 import { locationSettings } from "@/lib/constants";
 import { themeColors } from "@/lib/theme-colors";
 import {
@@ -468,6 +469,10 @@ export function DashboardClient({
 							</ToggleButton>
 						</ToggleButtonGroup>
 						<div className="flex flex-col w-full gap-5 sm:w-auto sm:flex-row sm:items-center sm:gap-5">
+							<NotificationPermissionButton
+								userId={profile.id}
+								initialSubscriptionId={profile.onesignal_subscription_id}
+							/>
 							<ToggleButtonGroup
 								exclusive
 								value={filterRange}

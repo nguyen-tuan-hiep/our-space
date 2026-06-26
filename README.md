@@ -65,9 +65,20 @@ CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_ONESIGNAL_APP_ID=
 ```
 
 `NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL` should be a high-quality Cloudinary URL for the couple hero image. Cloudinary uploads from note attachments are stored under `our-space/attachments`.
+
+Supabase Edge Function secrets for push notifications:
+
+```bash
+supabase secrets set \
+  ONESIGNAL_APP_ID=your-onesignal-app-id \
+  ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key \
+  APP_URL=https://your-vercel-domain.com \
+  NOTIFICATION_WEBHOOK_SECRET=a-long-random-shared-secret
+```
 
 ## Install and Run
 
@@ -115,6 +126,8 @@ The schema defines:
 - `profiles`: user identity, country, fixed currency, partner link
 - `notes`: shared note CRUD with optional `unlock_at`, attachments, author/recipient
 - `individual_expenses`: owner-only writes, partner-readable rows, category enum, currency enum
+
+Run `supabase/migrations/002_add_onesignal_subscription.sql` if your database was created before push notifications were added. It stores the OneSignal browser subscription ID for the signed-in profile.
 
 RLS rules enforce:
 
@@ -189,3 +202,89 @@ The dashboard intentionally does not convert currencies, because the product req
 - Use Cloudinary upload presets or folder restrictions for production governance.
 - Add error monitoring before deployment.
 - For stricter note privacy, encrypt note content client-side before saving it to Supabase. Current RLS prevents partner-external reads but stores plaintext in PostgreSQL.
+
+## Push Notifications
+
+This app uses OneSignal Web Push, Supabase Database Webhooks, and a Supabase Edge Function to send iPhone PWA lock-screen notifications when one partner creates a note or transaction.
+
+### OneSignal Setup
+
+1. Create a OneSignal Web Push app.
+2. Configure the site URL as your production Vercel domain.
+3. For iOS PWA support, make sure the app is installed from Safari with Add to Home Screen. iOS only supports Web Push for installed standalone web apps.
+4. Copy the OneSignal App ID into `NEXT_PUBLIC_ONESIGNAL_APP_ID` in Vercel.
+5. Copy the OneSignal REST API key into the Supabase secret `ONESIGNAL_REST_API_KEY`.
+
+The required OneSignal service worker files live in `public/`:
+
+```txt
+public/OneSignalSDKWorker.js
+public/OneSignalSDKUpdaterWorker.js
+```
+
+They import OneSignal's Web SDK worker from the CDN and are served from the site root, which lets OneSignal register a root-scoped service worker for the PWA.
+
+### Frontend Flow
+
+`components/notifications/notification-permission-button.tsx` loads the OneSignal Web SDK only in the browser. The dashboard renders an `Enable notifications` button, because iOS requires a direct user gesture before the native notification permission prompt can appear.
+
+When the user taps the button:
+
+1. OneSignal initializes with `NEXT_PUBLIC_ONESIGNAL_APP_ID`.
+2. The SDK calls `OneSignal.login(profile.id)` to link the web subscription to the Supabase user ID.
+3. The OneSignal prompt and native browser permission prompt are shown.
+4. The current `OneSignal.User.PushSubscription.id` is saved to `profiles.onesignal_subscription_id`.
+5. Future subscription changes update the same profile column.
+
+### Edge Function Deploy
+
+Deploy the function:
+
+```bash
+supabase functions deploy send-push-notification
+```
+
+Set secrets:
+
+```bash
+supabase secrets set \
+  ONESIGNAL_APP_ID=your-onesignal-app-id \
+  ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key \
+  APP_URL=https://your-vercel-domain.com \
+  NOTIFICATION_WEBHOOK_SECRET=a-long-random-shared-secret
+```
+
+The function URL will look like:
+
+```txt
+https://PROJECT_REF.functions.supabase.co/send-push-notification
+```
+
+### Database Webhook Setup
+
+Create two Database Webhooks in the Supabase Dashboard:
+
+1. Go to `Database` -> `Webhooks` -> `Create a new hook`.
+2. Name the first hook `notify-on-note-insert`.
+3. Set table to `public.notes`.
+4. Set events to `Insert`.
+5. Set type to `HTTP Request`.
+6. Set method to `POST`.
+7. Set URL to your Edge Function URL.
+8. Add header `x-webhook-secret` with the same value as `NOTIFICATION_WEBHOOK_SECRET`.
+9. Save the hook.
+10. Repeat for `public.individual_expenses`, naming it `notify-on-expense-insert`.
+
+When a note row is inserted, the function reads `record.recipient_id`, fetches that profile's `onesignal_subscription_id`, and sends `[author display name] just wrote you a new note!`.
+
+When an expense row is inserted, the function reads `record.owner_id`, finds that owner's `partner_id`, fetches the partner's `onesignal_subscription_id`, and sends a transaction notification.
+
+### Testing
+
+1. Deploy the frontend to HTTPS on Vercel.
+2. Open the site on iPhone Safari and add it to the Home Screen.
+3. Launch it from the Home Screen, not Safari.
+4. Sign in and tap `Enable notifications`.
+5. Confirm that `profiles.onesignal_subscription_id` is populated in Supabase.
+6. Sign in as the other partner and create a note or transaction.
+7. Lock the receiving iPhone and confirm the notification appears.
