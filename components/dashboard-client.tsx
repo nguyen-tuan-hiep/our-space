@@ -573,9 +573,10 @@ export function DashboardClient({
 							<div>
 								{/* <p className="eyebrow">Finance</p> */}
 								<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
-									{filterRange === "week"
+									{/* {filterRange === "week"
 										? "Weekly ledgers"
-										: "Monthly ledgers"}
+											: "Monthly ledgers"} */}
+										Finance overview
 								</h2>
 							</div>
 							<Button
