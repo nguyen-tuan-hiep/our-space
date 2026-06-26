@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Button from "@mui/material/Button";
+import MenuItem from "@mui/material/MenuItem";
 import { Bell, BellOff } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { createClient } from "@/lib/supabase/browser";
@@ -10,6 +11,8 @@ import { getOneSignal, isOneSignalConfigured } from "@/lib/onesignal-web";
 interface NotificationPermissionButtonProps {
   userId: string;
   initialSubscriptionId: string | null;
+  variant?: "button" | "menu-item";
+  onDone?: () => void;
 }
 
 async function saveSubscription(userId: string, subscriptionId: string | null) {
@@ -25,6 +28,8 @@ async function saveSubscription(userId: string, subscriptionId: string | null) {
 export function NotificationPermissionButton({
   userId,
   initialSubscriptionId,
+  variant = "button",
+  onDone,
 }: NotificationPermissionButtonProps) {
   const { enqueueSnackbar } = useSnackbar();
   const [subscriptionId, setSubscriptionId] = useState(initialSubscriptionId);
@@ -73,7 +78,9 @@ export function NotificationPermissionButton({
           if (!granted) void persistCurrentSubscription(null);
         });
       })
-      .catch(() => setSupported(false));
+      .catch((error) => {
+        console.warn("OneSignal subscription state check failed", error);
+      });
 
     return () => {
       cancelled = true;
@@ -117,6 +124,7 @@ export function NotificationPermissionButton({
       subscriptionIdRef.current = currentSubscriptionId;
       setSubscriptionId(currentSubscriptionId);
       enqueueSnackbar("Notifications enabled.", { variant: "success" });
+      onDone?.();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Could not enable notifications.";
@@ -124,7 +132,54 @@ export function NotificationPermissionButton({
     } finally {
       setPending(false);
     }
-  }, [enqueueSnackbar, userId]);
+  }, [enqueueSnackbar, onDone, userId]);
+
+  const handleDisableNotifications = useCallback(async () => {
+    setPending(true);
+
+    try {
+      const oneSignal = await getOneSignal(userId);
+
+      if (oneSignal.User.PushSubscription.optedIn) {
+        await oneSignal.User.PushSubscription.optOut();
+      }
+
+      await saveSubscription(userId, null);
+      subscriptionIdRef.current = null;
+      setSubscriptionId(null);
+      enqueueSnackbar("Notifications turned off.", { variant: "success" });
+      onDone?.();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not turn off notifications.";
+      enqueueSnackbar(message, { variant: "error" });
+    } finally {
+      setPending(false);
+    }
+  }, [enqueueSnackbar, onDone, userId]);
+
+  const handleToggleNotifications = enabled
+    ? handleDisableNotifications
+    : handleEnableNotifications;
+
+  if (variant === "menu-item") {
+    const Icon = enabled ? BellOff : Bell;
+
+    return (
+      <MenuItem
+        disabled={pending}
+        onClick={handleToggleNotifications}
+      >
+        <Icon
+          size={16}
+          className="mr-2"
+        />
+        {enabled ? "Turn off notifications" : "Enable notifications"}
+      </MenuItem>
+    );
+  }
 
   if (!supported) return null;
 
@@ -134,11 +189,11 @@ export function NotificationPermissionButton({
       variant="outlined"
       size="small"
       startIcon={enabled ? <Bell size={16} /> : <BellOff size={16} />}
-      disabled={pending || enabled}
-      onClick={handleEnableNotifications}
+      disabled={pending}
+      onClick={handleToggleNotifications}
       className="min-h-10 bg-paper"
     >
-      {enabled ? "Notifications on" : "Enable notifications"}
+      {enabled ? "Turn off notifications" : "Enable notifications"}
     </Button>
   );
 }

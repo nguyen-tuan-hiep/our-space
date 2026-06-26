@@ -358,6 +358,12 @@ export function DashboardClient({
 									/>
 									Profile
 								</MenuItem>
+								<NotificationPermissionButton
+									userId={profile.id}
+									initialSubscriptionId={profile.onesignal_subscription_id}
+									variant="menu-item"
+									onDone={() => setMobileMenuAnchor(null)}
+								/>
 								<MenuItem
 									disabled={pending}
 									onClick={() => {

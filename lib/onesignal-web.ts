@@ -29,6 +29,7 @@ export interface OneSignalWebSdk {
       id: string | null;
       optedIn: boolean;
       optIn(): Promise<void>;
+      optOut(): Promise<void>;
       addEventListener(
         event: "change",
         callback: (event: {
