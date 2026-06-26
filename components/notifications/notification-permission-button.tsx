@@ -138,10 +138,16 @@ export function NotificationPermissionButton({
     setPending(true);
 
     try {
-      const oneSignal = await getOneSignal(userId);
+      if ("serviceWorker" in navigator) {
+        try {
+          const oneSignal = await getOneSignal(userId);
 
-      if (oneSignal.User.PushSubscription.optedIn) {
-        await oneSignal.User.PushSubscription.optOut();
+          if (oneSignal.User.PushSubscription.optedIn) {
+            await oneSignal.User.PushSubscription.optOut();
+          }
+        } catch (error) {
+          console.warn("OneSignal opt-out failed; clearing local subscription", error);
+        }
       }
 
       await saveSubscription(userId, null);

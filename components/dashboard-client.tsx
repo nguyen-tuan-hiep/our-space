@@ -475,10 +475,12 @@ export function DashboardClient({
 							</ToggleButton>
 						</ToggleButtonGroup>
 						<div className="flex flex-col w-full gap-5 sm:w-auto sm:flex-row sm:items-center sm:gap-5">
-							<NotificationPermissionButton
-								userId={profile.id}
-								initialSubscriptionId={profile.onesignal_subscription_id}
-							/>
+							<div className="hidden sm:block">
+								<NotificationPermissionButton
+									userId={profile.id}
+									initialSubscriptionId={profile.onesignal_subscription_id}
+								/>
+							</div>
 							<ToggleButtonGroup
 								exclusive
 								value={filterRange}
