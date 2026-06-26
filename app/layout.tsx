@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
-import Script from "next/script";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
@@ -56,11 +55,16 @@ export default function RootLayout({
         } as React.CSSProperties
       }
     >
-      <Script
-        id="onesignal-deferred"
-        strategy="beforeInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
+      <head>
+        <script
+          id="onesignal-sdk"
+          src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+          defer
+        />
+        <script
+          id="onesignal-init"
+          dangerouslySetInnerHTML={{
+            __html: `
             window.OneSignalDeferred = window.OneSignalDeferred || [];
             window.__oneSignalInitPromise = new Promise(function(resolve, reject) {
               window.OneSignalDeferred.push(async function(OneSignal) {
@@ -93,13 +97,9 @@ export default function RootLayout({
               });
             });
           `,
-        }}
-      />
-      <Script
-        id="onesignal-sdk"
-        src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
-        strategy="afterInteractive"
-      />
+          }}
+        />
+      </head>
       <body>
         <AppRouterCacheProvider>
           <AppProviders>
