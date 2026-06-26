@@ -42,7 +42,9 @@ export interface OneSignalWebSdk {
 
 declare global {
   interface Window {
+    OneSignal?: OneSignalWebSdk;
     OneSignalDeferred?: OneSignalDeferredQueue;
+    __oneSignal?: OneSignalWebSdk;
     __oneSignalInitPromise?: Promise<OneSignalWebSdk>;
     __oneSignalInitialized?: boolean;
   }
@@ -122,6 +124,8 @@ export async function getOneSignal(userId?: string) {
       notifyButton: { enable: true },
     });
 
+    window.OneSignal = oneSignal;
+    window.__oneSignal = oneSignal;
     window.__oneSignalInitialized = true;
     if (userId) await oneSignal.login(userId);
     return oneSignal;

@@ -74,10 +74,10 @@ Supabase Edge Function secrets for push notifications:
 
 ```bash
 supabase secrets set \
-  ONESIGNAL_APP_ID=your-onesignal-app-id \
+  ONESIGNAL_APP_ID=d27ba552-6618-4673-9914-6cb8e637d287 \
   ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key \
-  APP_URL=https://your-vercel-domain.com \
-  NOTIFICATION_WEBHOOK_SECRET=a-long-random-shared-secret
+  APP_URL=https://dailymoments.vercel.app \
+  NOTIFICATION_WEBHOOK_SECRET=your-webhook-secret
 ```
 
 ## Install and Run
@@ -207,10 +207,21 @@ The dashboard intentionally does not convert currencies, because the product req
 
 This app uses OneSignal Web Push, Supabase Database Webhooks, and a Supabase Edge Function to send iPhone PWA lock-screen notifications when one partner creates a note or transaction.
 
+Current production values:
+
+```txt
+App URL: https://dailymoments.vercel.app
+Supabase project ref: uojaxhmrfhbtthypugwq
+OneSignal App ID: d27ba552-6618-4673-9914-6cb8e637d287
+Edge Function: send-push-notification
+Edge Function URL: https://uojaxhmrfhbtthypugwq.functions.supabase.co/send-push-notification
+Webhook secret: 89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d
+```
+
 ### OneSignal Setup
 
 1. Create a OneSignal Web Push app.
-2. Configure the site URL as your production Vercel domain.
+2. Configure the site URL as `https://dailymoments.vercel.app`.
 3. For iOS PWA support, make sure the app is installed from Safari with Add to Home Screen. iOS only supports Web Push for installed standalone web apps.
 4. Copy the OneSignal App ID into `NEXT_PUBLIC_ONESIGNAL_APP_ID` in Vercel. Current app ID: `d27ba552-6618-4673-9914-6cb8e637d287`.
 5. Copy the OneSignal REST API key into the Supabase secret `ONESIGNAL_REST_API_KEY`.
@@ -224,6 +235,13 @@ public/OneSignalSDKUpdaterWorker.js
 
 They import OneSignal's Web SDK worker from the CDN and are served from the site root, which lets OneSignal register a root-scoped service worker for the PWA.
 
+Verify these URLs return JavaScript:
+
+```txt
+https://dailymoments.vercel.app/OneSignalSDKWorker.js
+https://dailymoments.vercel.app/OneSignalSDKUpdaterWorker.js
+```
+
 ### Frontend Flow
 
 `components/notifications/onesignal-bootstrap.tsx` initializes the OneSignal Web SDK on every page so OneSignal can verify the installation. The root layout also enables OneSignal's floating notify button, which is useful for creating the first subscription during OneSignal setup. The dashboard still renders an `Enable notifications` button, because iOS requires a direct user gesture before the native notification permission prompt can appear.
@@ -236,28 +254,80 @@ When the user taps the button:
 4. The current `OneSignal.User.PushSubscription.id` is saved to `profiles.onesignal_subscription_id`.
 5. Future subscription changes update the same profile column.
 
+The mobile notification option lives in the avatar menu. The desktop/tablet notification button lives in the dashboard toolbar. Turning notifications off calls OneSignal `optOut()` when available and clears `profiles.onesignal_subscription_id`.
+
 ### Edge Function Deploy
 
-Deploy the function:
+Install and link Supabase CLI:
 
 ```bash
-supabase functions deploy send-push-notification
+npm install -g supabase
+supabase login
+supabase link --project-ref uojaxhmrfhbtthypugwq
 ```
 
 Set secrets:
 
 ```bash
 supabase secrets set \
-  ONESIGNAL_APP_ID=your-onesignal-app-id \
+  ONESIGNAL_APP_ID=d27ba552-6618-4673-9914-6cb8e637d287 \
   ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key \
-  APP_URL=https://your-vercel-domain.com \
-  NOTIFICATION_WEBHOOK_SECRET=a-long-random-shared-secret
+  APP_URL=https://dailymoments.vercel.app \
+  NOTIFICATION_WEBHOOK_SECRET=89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d \
+  --project-ref uojaxhmrfhbtthypugwq
 ```
 
-The function URL will look like:
+Deploy the function without JWT verification. Database Webhooks do not send a Supabase Auth JWT, so `--no-verify-jwt` is required:
+
+```bash
+supabase functions deploy send-push-notification \
+  --project-ref uojaxhmrfhbtthypugwq \
+  --no-verify-jwt
+```
+
+Verify function settings:
+
+```bash
+supabase functions list --project-ref uojaxhmrfhbtthypugwq
+```
+
+The function must show `verify_jwt: false`.
+
+Smoke-test the function with the webhook secret:
+
+```bash
+curl -sS -X POST \
+  'https://uojaxhmrfhbtthypugwq.functions.supabase.co/send-push-notification?x-webhook-secret=89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d' \
+  -H 'Content-Type: application/json' \
+  -d '{"type":"INSERT","table":"unknown","schema":"public","record":{}}'
+```
+
+Expected response:
+
+```json
+{"ok":true,"skipped":true}
+```
+
+The production function URL is:
 
 ```txt
-https://PROJECT_REF.functions.supabase.co/send-push-notification
+https://uojaxhmrfhbtthypugwq.functions.supabase.co/send-push-notification
+```
+
+### Database Grants
+
+The Edge Function uses `SUPABASE_SERVICE_ROLE_KEY` to fetch sender and receiver profiles. Make sure the remote database has these grants:
+
+```sql
+grant select, update on public.profiles to service_role;
+grant select on public.notes to service_role;
+grant select on public.individual_expenses to service_role;
+```
+
+If the function returns this error, the grants are missing:
+
+```txt
+permission denied for table profiles
 ```
 
 ### Database Webhook Setup
@@ -270,10 +340,28 @@ Create two Database Webhooks in the Supabase Dashboard:
 4. Set events to `Insert`.
 5. Set type to `HTTP Request`.
 6. Set method to `POST`.
-7. Set URL to your Edge Function URL.
-8. Add header `x-webhook-secret` with the same value as `NOTIFICATION_WEBHOOK_SECRET`.
+7. Set URL to the Edge Function URL.
+8. Prefer adding header `x-webhook-secret` with the same value as `NOTIFICATION_WEBHOOK_SECRET`.
 9. Save the hook.
 10. Repeat for `public.individual_expenses`, naming it `notify-on-expense-insert`.
+
+Recommended webhook URL:
+
+```txt
+https://uojaxhmrfhbtthypugwq.functions.supabase.co/send-push-notification
+```
+
+Recommended webhook header:
+
+```txt
+x-webhook-secret: 89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d
+```
+
+The function also accepts the secret as a query parameter, which is useful if the Dashboard webhook UI cannot set custom headers:
+
+```txt
+https://uojaxhmrfhbtthypugwq.functions.supabase.co/send-push-notification?x-webhook-secret=89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d
+```
 
 When a note row is inserted, the function reads `record.recipient_id`, fetches that profile's `onesignal_subscription_id`, and sends `[author display name] just wrote you a new note!`.
 
@@ -282,9 +370,51 @@ When an expense row is inserted, the function reads `record.owner_id`, finds tha
 ### Testing
 
 1. Deploy the frontend to HTTPS on Vercel.
-2. Open the site on iPhone Safari and add it to the Home Screen.
-3. Launch it from the Home Screen, not Safari.
+2. Confirm Vercel has `NEXT_PUBLIC_ONESIGNAL_APP_ID=d27ba552-6618-4673-9914-6cb8e637d287`.
+3. Open `https://dailymoments.vercel.app` on a supported browser.
 4. Sign in and tap `Enable notifications`.
 5. Confirm that `profiles.onesignal_subscription_id` is populated in Supabase.
-6. Sign in as the other partner and create a note or transaction.
-7. Lock the receiving iPhone and confirm the notification appears.
+6. Confirm OneSignal Dashboard -> Audience -> Subscriptions shows the device as subscribed.
+7. Sign in as the other partner and create a note or transaction.
+8. Lock the receiving device and confirm the notification appears.
+
+Useful SQL checks:
+
+```sql
+select id, display_name, onesignal_subscription_id
+from public.profiles;
+```
+
+Useful browser console checks:
+
+```js
+const oneSignal = await window.__oneSignalInitPromise
+oneSignal.Notifications.permission
+oneSignal.User.PushSubscription.id
+window.OneSignal?.User.PushSubscription.id
+```
+
+On iPhone, Web Push works only in an installed standalone PWA:
+
+1. Use Safari, not Chrome, Zalo, Messenger, or an in-app browser.
+2. Open `https://dailymoments.vercel.app`.
+3. Share -> Add to Home Screen.
+4. Open the installed Home Screen icon, not the Safari tab.
+5. Confirm:
+
+```js
+window.navigator.standalone === true
+"serviceWorker" in navigator === true
+```
+
+If `window.navigator.standalone` is `false`, the app is still running in Safari and iOS will not show the native Apple notification permission popup.
+
+If `"serviceWorker" in navigator` is `false`, the current iPhone browser context cannot subscribe to Web Push.
+
+### Troubleshooting
+
+- `POST 401` from the Edge Function: the webhook secret is missing or wrong. Use the `x-webhook-secret` header or the `?x-webhook-secret=...` query parameter.
+- `permission denied for table profiles`: run the service role grants in the Database Grants section.
+- `App not configured for web push`: the OneSignal App ID does not have Web Push configured for `https://dailymoments.vercel.app`, or the frontend is using an App ID from a different OneSignal app.
+- Supabase function returns `oneSignalResponse.id`: OneSignal accepted the send request. If the device still does not receive it, debug the specific device subscription in OneSignal Dashboard.
+- Mac can subscribe but iPhone cannot: the iPhone is usually not running the Home Screen PWA in standalone mode, or it is below iOS 16.4.

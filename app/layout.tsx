@@ -73,6 +73,8 @@ export default function RootLayout({
                     appId: "${ONESIGNAL_WEB_APP_ID}",
                     notifyButton: { enable: true }
                   });
+                  window.OneSignal = OneSignal;
+                  window.__oneSignal = OneSignal;
                   window.__oneSignalInitialized = true;
                   resolve(OneSignal);
                 } catch (error) {
