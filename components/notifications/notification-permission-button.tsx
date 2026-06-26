@@ -34,10 +34,14 @@ export function NotificationPermissionButton({
   const { enqueueSnackbar } = useSnackbar();
   const [subscriptionId, setSubscriptionId] = useState(initialSubscriptionId);
   const subscriptionIdRef = useRef(initialSubscriptionId);
+  const [optedIn, setOptedIn] = useState(Boolean(initialSubscriptionId));
   const [supported, setSupported] = useState(true);
   const [pending, setPending] = useState(false);
 
-  const enabled = useMemo(() => Boolean(subscriptionId), [subscriptionId]);
+  const enabled = useMemo(
+    () => Boolean(subscriptionId) && optedIn,
+    [optedIn, subscriptionId],
+  );
 
   useEffect(() => {
     if (!isOneSignalConfigured() || !("serviceWorker" in navigator)) {
@@ -56,26 +60,36 @@ export function NotificationPermissionButton({
 
         setSupported(oneSignal.Notifications.isPushSupported());
 
-        const persistCurrentSubscription = async (id: string | null) => {
+        const persistCurrentSubscription = async (
+          id: string | null,
+          isOptedIn: boolean,
+        ) => {
           if (cancelled) return;
+          setOptedIn(isOptedIn);
           subscriptionIdRef.current = id;
           setSubscriptionId(id);
-          await saveSubscription(userId, id);
+          await saveSubscription(userId, isOptedIn ? id : null);
         };
 
         const currentId = oneSignal.User.PushSubscription.id;
-        if (currentId && currentId !== subscriptionIdRef.current) {
-          void persistCurrentSubscription(currentId);
+        const currentOptedIn = oneSignal.User.PushSubscription.optedIn;
+        setOptedIn(currentOptedIn);
+        if (
+          currentId !== subscriptionIdRef.current ||
+          currentOptedIn !== Boolean(subscriptionIdRef.current)
+        ) {
+          void persistCurrentSubscription(currentId, currentOptedIn);
         }
 
         oneSignal.User.PushSubscription.addEventListener("change", (event) => {
           void persistCurrentSubscription(
-            event.current.optedIn ? event.current.id : null,
+            event.current.id,
+            event.current.optedIn,
           );
         });
 
         oneSignal.Notifications.addEventListener("permissionChange", (granted) => {
-          if (!granted) void persistCurrentSubscription(null);
+          if (!granted) void persistCurrentSubscription(null, false);
         });
       })
       .catch((error) => {
@@ -123,6 +137,7 @@ export function NotificationPermissionButton({
       await saveSubscription(userId, currentSubscriptionId);
       subscriptionIdRef.current = currentSubscriptionId;
       setSubscriptionId(currentSubscriptionId);
+      setOptedIn(true);
       enqueueSnackbar("Notifications enabled.", { variant: "success" });
       onDone?.();
     } catch (error) {
@@ -153,6 +168,7 @@ export function NotificationPermissionButton({
       await saveSubscription(userId, null);
       subscriptionIdRef.current = null;
       setSubscriptionId(null);
+      setOptedIn(false);
       enqueueSnackbar("Notifications turned off.", { variant: "success" });
       onDone?.();
     } catch (error) {
