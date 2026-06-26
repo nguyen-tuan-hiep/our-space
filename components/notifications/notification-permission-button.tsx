@@ -25,6 +25,21 @@ async function saveSubscription(userId: string, subscriptionId: string | null) {
   if (error) throw error;
 }
 
+async function waitForSubscriptionId(
+  getSubscriptionId: () => string | null,
+  timeoutMs = 10000,
+) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const subscriptionId = getSubscriptionId();
+    if (subscriptionId) return subscriptionId;
+    await new Promise((resolve) => window.setTimeout(resolve, 500));
+  }
+
+  return null;
+}
+
 export function NotificationPermissionButton({
   userId,
   initialSubscriptionId,
@@ -129,9 +144,13 @@ export function NotificationPermissionButton({
         await oneSignal.User.PushSubscription.optIn();
       }
 
-      const currentSubscriptionId = oneSignal.User.PushSubscription.id;
+      const currentSubscriptionId = await waitForSubscriptionId(
+        () => oneSignal.User.PushSubscription.id,
+      );
       if (!currentSubscriptionId) {
-        throw new Error("OneSignal did not return a subscription ID yet.");
+        throw new Error(
+          "OneSignal is still creating this device subscription. Please try again in a few seconds.",
+        );
       }
 
       await saveSubscription(userId, currentSubscriptionId);
