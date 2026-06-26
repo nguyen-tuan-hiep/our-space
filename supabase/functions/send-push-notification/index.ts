@@ -55,11 +55,12 @@ function getString(record: Record<string, unknown>, key: string) {
 function isAuthorized(request: Request) {
   if (!webhookSecret) return true;
 
+  const urlSecret = new URL(request.url).searchParams.get("x-webhook-secret");
   const headerSecret =
     request.headers.get("x-webhook-secret") ??
     request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
 
-  return headerSecret === webhookSecret;
+  return headerSecret === webhookSecret || urlSecret === webhookSecret;
 }
 
 async function getProfile(id: string) {
@@ -71,7 +72,7 @@ async function getProfile(id: string) {
     .eq("id", id)
     .maybeSingle<Profile>();
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return data;
 }
 
@@ -204,7 +205,7 @@ Deno.serve(async (request) => {
     return jsonResponse({ ok: true, oneSignalResponse });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Unexpected notification error.";
+      error instanceof Error ? error.message : JSON.stringify(error);
     console.error(message);
     return jsonResponse({ error: message }, 500);
   }
