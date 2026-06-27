@@ -2,8 +2,6 @@
 
 Our Space is a private Next.js application for exactly two users living in Vietnam and Singapore. It combines shared time-locked notes with two separate personal expense ledgers, dual-currency display, realtime Supabase sync, Cloudinary media uploads, MUI forms, Tailwind layouts, and Recharts visualization.
 
-The visual direction follows the sibling `portfolio` project: warm paper background, full-bleed photographic hero, serif display headings, restrained cards, and dense dashboard sections.
-
 ## Stack
 
 - Next.js App Router with TypeScript strict mode
@@ -363,7 +361,7 @@ The function also accepts the secret as a query parameter, which is useful if th
 https://uojaxhmrfhbtthypugwq.functions.supabase.co/send-push-notification?x-webhook-secret=89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d
 ```
 
-When a note row is inserted, the function reads `record.recipient_id`, fetches that profile's `onesignal_subscription_id`, and sends `[author display name] just wrote you a new note!`.
+When a note row is inserted, the function reads `record.recipient_id`, fetches that profile's `onesignal_subscription_id`, and sends `[author display name] just wrote a new note for you!`.
 
 When an expense row is inserted, the function reads `record.owner_id`, finds that owner's `partner_id`, fetches the partner's `onesignal_subscription_id`, and sends a transaction notification.
 

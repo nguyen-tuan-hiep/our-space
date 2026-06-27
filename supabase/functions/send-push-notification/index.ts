@@ -11,6 +11,7 @@ type WebhookPayload = {
 type Profile = {
   id: string;
   display_name: string;
+  avatar_url: string | null;
   partner_id: string | null;
   onesignal_subscription_id: string | null;
 };
@@ -20,7 +21,7 @@ const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const oneSignalAppId = Deno.env.get("ONESIGNAL_APP_ID");
 const oneSignalRestApiKey = Deno.env.get("ONESIGNAL_REST_API_KEY");
 const webhookSecret = Deno.env.get("NOTIFICATION_WEBHOOK_SECRET");
-const appUrl = Deno.env.get("APP_URL") ?? "https://your-domain.vercel.app";
+const appUrl = Deno.env.get("APP_URL") ?? "https://dailymoments.vercel.app";
 
 const requiredEnv = {
   SUPABASE_URL: supabaseUrl,
@@ -68,12 +69,16 @@ async function getProfile(id: string) {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, partner_id, onesignal_subscription_id")
+    .select("id, display_name, avatar_url, partner_id, onesignal_subscription_id")
     .eq("id", id)
     .maybeSingle<Profile>();
 
   if (error) throw new Error(error.message);
   return data;
+}
+
+function getProfileLabel(profile: Profile) {
+  return [profile.display_name, profile.avatar_url].filter(Boolean).join(" ");
 }
 
 async function buildNotification(payload: WebhookPayload) {
@@ -96,7 +101,7 @@ async function buildNotification(payload: WebhookPayload) {
     return {
       subscriptionId: recipient.onesignal_subscription_id,
       title: "New note",
-      body: `${author.display_name} just wrote you a new note!`,
+      body: `${getProfileLabel(author)} just wrote a new note for you!`,
       url: `${appUrl}/?note=${noteId ?? ""}`,
       data: {
         type: "note",
@@ -122,7 +127,7 @@ async function buildNotification(payload: WebhookPayload) {
     return {
       subscriptionId: partner.onesignal_subscription_id,
       title: "New transaction",
-      body: `${owner.display_name} created a new transaction "${expenseTitle}"!`,
+      body: `${getProfileLabel(owner)} created a new transaction "${expenseTitle}"!`,
       url: `${appUrl}/?expense=${expenseId ?? ""}`,
       data: {
         type: "expense",
