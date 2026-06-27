@@ -176,7 +176,7 @@ export function NoteCard({
       ) : null}
 
       {locked ? (
-        <div className="mt-5 flex min-h-0 flex-1 flex-col border border-dashed border-neutral-400 bg-paper p-5">
+        <div className="flex min-h-0 flex-1 flex-col border border-dashed border-neutral-400 bg-paper p-5">
           <p className="eyebrow">Unlocks in</p>
           <p className="mt-2 font-serif text-3xl">{countdown}</p>
           <div className="relative mt-4 min-h-0 flex-1 overflow-hidden select-none blur-md">

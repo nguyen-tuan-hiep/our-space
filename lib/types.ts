@@ -1,7 +1,7 @@
 import type { Session, User } from "@supabase/supabase-js";
 
-export type CurrencyCode = "VND" | "SGD";
-export type LocationCode = "VN" | "SG";
+export type CurrencyCode = string;
+export type LocationCode = string;
 
 export type ExpenseCategory =
   | "Food & Drinks"
@@ -20,16 +20,31 @@ export interface Profile {
   onesignal_subscription_id: string | null;
   country_code: LocationCode;
   currency: CurrencyCode;
+  time_zone: string;
+  pair_code: string | null;
   partner_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
+export interface PairingRequest {
+  id: string;
+  requester_id: string;
+  recipient_id: string;
+  status: "pending" | "accepted" | "declined" | "cancelled";
+  created_at: string;
+  updated_at: string;
+  requester?: Pick<Profile, "id" | "display_name" | "avatar_url" | "pair_code">;
+  recipient?: Pick<Profile, "id" | "display_name" | "avatar_url" | "pair_code">;
+}
+
 export interface AppSettings {
-  id: "main";
+  id: string;
   hero_image_url: string | null;
   hero_image_public_id: string | null;
-  exchange_rate_sgd_vnd: number | null;
+  anniversary_date: string | null;
+  exchange_rates_base: string | null;
+  exchange_rates: Record<string, number> | null;
   exchange_rate_updated_at: string | null;
   exchange_rate_source: string | null;
   updated_by: string | null;

@@ -2,15 +2,14 @@ import type { AppSettings } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 
 const rateMaxAgeMs = 6 * 60 * 60 * 1000;
-const defaultRateUrl = "https://open.er-api.com/v6/latest/SGD";
+const defaultRateBase = "USD";
 
 type ExchangeRatePayload = {
   result?: string;
   provider?: string;
   time_last_update_utc?: string;
-  rates?: {
-    VND?: number;
-  };
+  base_code?: string;
+  rates?: Record<string, number>;
 };
 
 function isFresh(value: string | null) {
@@ -19,9 +18,13 @@ function isFresh(value: string | null) {
   return Number.isFinite(time) && Date.now() - time < rateMaxAgeMs;
 }
 
-async function fetchSgdToVndRate() {
+async function fetchExchangeRates() {
+  const baseCurrency = process.env.EXCHANGE_RATE_BASE ?? defaultRateBase;
+  const rateUrl =
+    process.env.EXCHANGE_RATE_API_URL ??
+    `https://open.er-api.com/v6/latest/${baseCurrency}`;
   const response = await fetch(
-    process.env.EXCHANGE_RATE_API_URL ?? defaultRateUrl,
+    rateUrl,
     {
       cache: "no-store",
     },
@@ -29,35 +32,40 @@ async function fetchSgdToVndRate() {
   if (!response.ok) return null;
 
   const payload = (await response.json()) as ExchangeRatePayload;
-  const rate = payload.rates?.VND;
-  if (!rate || !Number.isFinite(rate) || rate <= 0) return null;
+  if (!payload.rates || !Object.keys(payload.rates).length) return null;
 
   return {
-    rate,
+    base: payload.base_code ?? baseCurrency,
+    rates: payload.rates,
     source: payload.provider ?? "open.er-api.com",
   };
 }
 
-export async function getExchangeRate(settings: AppSettings | null) {
+export async function getExchangeRate(
+  settings: AppSettings | null,
+  settingsId = settings?.id ?? "main",
+) {
   if (
-    settings?.exchange_rate_sgd_vnd &&
+    settings?.exchange_rates &&
     isFresh(settings.exchange_rate_updated_at)
   ) {
     return {
-      sgdToVnd: Number(settings.exchange_rate_sgd_vnd),
+      ratesBase: settings.exchange_rates_base ?? defaultRateBase,
+      rates: settings.exchange_rates,
       updatedAt: settings.exchange_rate_updated_at,
       source: settings.exchange_rate_source,
     };
   }
 
   try {
-    const fresh = await fetchSgdToVndRate();
+    const fresh = await fetchExchangeRates();
     if (fresh) {
       const updatedAt = new Date().toISOString();
       const supabase = await createClient();
       await supabase.from("app_settings").upsert({
-        id: "main",
-        exchange_rate_sgd_vnd: fresh.rate,
+        id: settingsId,
+        exchange_rates_base: fresh.base,
+        exchange_rates: fresh.rates,
         exchange_rate_updated_at: updatedAt,
         exchange_rate_source: fresh.source,
         hero_image_url: settings?.hero_image_url ?? null,
@@ -66,7 +74,8 @@ export async function getExchangeRate(settings: AppSettings | null) {
       });
 
       return {
-        sgdToVnd: fresh.rate,
+        ratesBase: fresh.base,
+        rates: fresh.rates,
         updatedAt,
         source: fresh.source,
       };
@@ -75,16 +84,9 @@ export async function getExchangeRate(settings: AppSettings | null) {
     // Keep the dashboard usable with the last cached rate below.
   }
 
-  if (settings?.exchange_rate_sgd_vnd) {
-    return {
-      sgdToVnd: Number(settings.exchange_rate_sgd_vnd),
-      updatedAt: settings.exchange_rate_updated_at,
-      source: settings.exchange_rate_source,
-    };
-  }
-
   return {
-    sgdToVnd: null,
+    ratesBase: settings?.exchange_rates_base ?? defaultRateBase,
+    rates: settings?.exchange_rates ?? null,
     updatedAt: null,
     source: null,
   };

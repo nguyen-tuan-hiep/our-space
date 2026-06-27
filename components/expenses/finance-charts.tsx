@@ -24,7 +24,7 @@ import {
 	expenseCategoryColors,
 	ledgerSeriesColors,
 	formatCurrency,
-	supportedCurrencies,
+	getSupportedCurrencyCodes,
 } from "@/lib/constants";
 import { themeColors } from "@/lib/theme-colors";
 import { formatAppDate } from "@/lib/date-format";
@@ -40,18 +40,31 @@ function tooltipFormatter(
 	_name: string,
 	item: { payload?: { currency?: CurrencyCode } },
 ) {
-	return formatCurrency(value, item.payload?.currency ?? "SGD");
+	return item.payload?.currency
+		? formatCurrency(value, item.payload.currency)
+		: value.toLocaleString("en-US");
 }
 
 function axisTickFormatter(currency: CurrencyCode) {
 	return (value: number | string) => formatCurrency(Number(value), currency);
 }
 
+function getAxisWidth(currency: CurrencyCode, values: number[]) {
+	const maxValue = Math.max(0, ...values.map((value) => Math.abs(value)));
+	const samples = [0, maxValue, maxValue * 1.1].map((value) =>
+		formatCurrency(value, currency),
+	);
+	const longestLabel = Math.max(...samples.map((sample) => sample.length));
+
+	return Math.min(140, Math.max(70, longestLabel * 8));
+}
+
 interface FinanceChartsProps {
 	expenses: IndividualExpense[];
 	barExpenses: IndividualExpense[];
 	profiles: [Profile, Profile];
-	exchangeRateSgdToVnd: number | null;
+	exchangeRatesBase: string | null;
+	exchangeRates: Record<string, number> | null;
 	exchangeRateUpdatedAt: string | null;
 	exchangeRateSource: string | null;
 	timeZone: string;
@@ -63,22 +76,52 @@ export function FinanceCharts({
 	expenses,
 	barExpenses,
 	profiles,
-	exchangeRateSgdToVnd,
+	exchangeRatesBase,
+	exchangeRates,
 	exchangeRateUpdatedAt,
 	exchangeRateSource,
 	timeZone,
 	filterRange,
 	selectedPeriod,
 }: FinanceChartsProps) {
-	const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>("SGD");
+	const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>(
+		profiles[0]?.currency ?? "USD",
+	);
 	const isSmallDevice = useMediaQuery("(max-width: 640px)");
+	const supportedCurrencies = useMemo(() => getSupportedCurrencyCodes(), []);
+	const profileCurrencyOptions = useMemo(() => {
+		return Array.from(
+			profiles.reduce<Map<string, string[]>>((map, profile) => {
+				const names = map.get(profile.currency) ?? [];
+				names.push(profile.display_name);
+				map.set(profile.currency, names);
+				return map;
+			}, new Map()),
+		).map(([currency, names]) => ({
+			currency,
+			label: `${currency} - ${names.join(" & ")}`,
+		}));
+	}, [profiles]);
+	const otherCurrencyOptions = useMemo(() => {
+		const profileCurrencies = new Set(
+			profileCurrencyOptions.map((option) => option.currency),
+		);
+
+		return Array.from(
+			new Set([
+				...expenses.map((expense) => expense.currency),
+				...barExpenses.map((expense) => expense.currency),
+				...supportedCurrencies,
+			]),
+		).filter((currency) => !profileCurrencies.has(currency));
+	}, [barExpenses, expenses, profileCurrencyOptions, supportedCurrencies]);
 
 	const needsExchangeRate = [...expenses, ...barExpenses].some(
 		(expense) => expense.currency !== displayCurrency,
 	);
 
-	const rateLabel = exchangeRateSgdToVnd
-		? `1 SGD = ${formatCurrency(exchangeRateSgdToVnd, "VND")}`
+	const rateLabel = exchangeRates
+		? "Exchange rates available"
 		: "Exchange rate unavailable";
 
 	const chartData = useMemo(
@@ -89,12 +132,14 @@ export function FinanceCharts({
 				range: filterRange,
 				selectedPeriod,
 				displayCurrency,
-				exchangeRateSgdToVnd,
+				exchangeRates,
+				exchangeRatesBase,
 				timeZone,
 			}),
 		[
 			displayCurrency,
-			exchangeRateSgdToVnd,
+			exchangeRates,
+			exchangeRatesBase,
 			barExpenses,
 			filterRange,
 			profiles,
@@ -109,21 +154,37 @@ export function FinanceCharts({
 				expenses,
 				profiles,
 				displayCurrency,
-				exchangeRateSgdToVnd,
+				exchangeRates,
+				exchangeRatesBase,
 			}),
-		[displayCurrency, exchangeRateSgdToVnd, expenses, profiles],
+		[
+			displayCurrency,
+			exchangeRates,
+			exchangeRatesBase,
+			expenses,
+			profiles,
+		],
 	);
 
+	const chartValueTotals = useMemo(
+		() =>
+			chartData.map((row) =>
+				profiles.reduce((sum, profile) => {
+					const value = row[profile.id];
+					return sum + (typeof value === "number" ? value : 0);
+				}, 0),
+			),
+		[chartData, profiles],
+	);
+	const yAxisWidth = useMemo(
+		() => getAxisWidth(displayCurrency, chartValueTotals),
+		[chartValueTotals, displayCurrency],
+	);
 	const areaChartMinWidth = useMemo(() => {
-		const yAxisSpace = displayCurrency === "VND" ? 120 : 90;
-		const pointSpace = isSmallDevice
-			? 74
-			: displayCurrency === "VND"
-				? 110
-				: 95;
+		const pointSpace = isSmallDevice ? 74 : Math.max(95, yAxisWidth + 25);
 
-		return Math.max(360, chartData.length * pointSpace + yAxisSpace);
-	}, [chartData.length, displayCurrency, isSmallDevice]);
+		return Math.max(360, chartData.length * pointSpace + yAxisWidth);
+	}, [chartData.length, isSmallDevice, yAxisWidth]);
 
 	return (
 		<Card className="w-full min-w-0 border border-neutral-200 bg-paper p-5 !shadow-lg">
@@ -161,7 +222,15 @@ export function FinanceCharts({
 								setDisplayCurrency(event.target.value as CurrencyCode)
 							}
 						>
-							{supportedCurrencies.map((currency) => (
+							{profileCurrencyOptions.map((option) => (
+								<MenuItem
+									key={option.currency}
+									value={option.currency}
+								>
+									{option.label}
+								</MenuItem>
+							))}
+							{otherCurrencyOptions.map((currency) => (
 								<MenuItem
 									key={currency}
 									value={currency}
@@ -174,7 +243,7 @@ export function FinanceCharts({
 				</div>
 			</div>
 
-			{needsExchangeRate && !exchangeRateSgdToVnd ? (
+			{needsExchangeRate && !exchangeRates ? (
 				<div className="mb-5 border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
 					Live exchange rate is not available yet, so mixed-currency charts
 					cannot be converted. Refresh later or check the server network/API
@@ -219,7 +288,7 @@ export function FinanceCharts({
 										tickLine={false}
 										axisLine={false}
 										fontSize={11}
-										width={displayCurrency === "VND" ? 95 : 70}
+										width={yAxisWidth}
 										tickFormatter={axisTickFormatter(displayCurrency)}
 									/>
 									<Tooltip formatter={tooltipFormatter} />

@@ -15,6 +15,8 @@ import Select from "@mui/material/Select";
 import {
 	ImageUp,
 	LogOut,
+	CalendarHeart,
+	Menu as MenuIcon,
 	NotebookPen,
 	Plus,
 	Settings,
@@ -25,8 +27,6 @@ import { signOut } from "@/app/actions";
 import type { IndividualExpense, Profile, SharedNote } from "@/lib/types";
 import { NoteCard } from "@/components/notes/note-card";
 import { NotificationPermissionButton } from "@/components/notifications/notification-permission-button";
-import { locationSettings } from "@/lib/constants";
-import { themeColors } from "@/lib/theme-colors";
 import {
 	type FilterRange,
 	getPeriodOptions,
@@ -72,17 +72,13 @@ const HeroImageDialog = dynamic(
 	{ ssr: false },
 );
 
-const heroButtonSx = {
-	color: themeColors.paper,
-	borderColor: themeColors.heroButtonBorder,
-	backgroundColor: themeColors.heroButtonBg,
-	backdropFilter: "blur(10px)",
-	"&:hover": {
-		borderColor: themeColors.heroButtonBorderHover,
-		backgroundColor: themeColors.paper,
-		color: themeColors.mui,
-	},
-};
+const AnniversaryDialog = dynamic(
+	() =>
+		import("@/components/anniversary-dialog").then(
+			(mod) => mod.AnniversaryDialog,
+		),
+	{ ssr: false },
+);
 
 interface DashboardClientProps {
 	profile: Profile;
@@ -90,8 +86,10 @@ interface DashboardClientProps {
 	initialNotes: SharedNote[];
 	initialExpenses: IndividualExpense[];
 	heroImageUrl: string;
+	anniversaryDate: string;
 	currentTimeIso: string;
-	exchangeRateSgdToVnd: number | null;
+	exchangeRatesBase: string | null;
+	exchangeRates: Record<string, number> | null;
 	exchangeRateUpdatedAt: string | null;
 	exchangeRateSource: string | null;
 }
@@ -102,8 +100,10 @@ export function DashboardClient({
 	initialNotes,
 	initialExpenses,
 	heroImageUrl,
+	anniversaryDate,
 	currentTimeIso,
-	exchangeRateSgdToVnd,
+	exchangeRatesBase,
+	exchangeRates,
 	exchangeRateUpdatedAt,
 	exchangeRateSource,
 }: DashboardClientProps) {
@@ -113,6 +113,7 @@ export function DashboardClient({
 	const [expenseOpen, setExpenseOpen] = useState(false);
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [heroOpen, setHeroOpen] = useState(false);
+	const [anniversaryOpen, setAnniversaryOpen] = useState(false);
 	const [mobileMenuAnchor, setMobileMenuAnchor] = useState<HTMLElement | null>(
 		null,
 	);
@@ -129,14 +130,21 @@ export function DashboardClient({
 	const [editingExpense, setEditingExpense] =
 		useState<IndividualExpense | null>(null);
 	const [pending, startTransition] = useTransition();
-	const profileLocation = locationSettings[profile.country_code];
-	const profileTimeZone = profileLocation.timeZone;
+	const profileTimeZone = profile.time_zone;
 	const profileAvatar = profile.avatar_url ?? "🙂";
 	const partnerAvatar = partner.avatar_url ?? "🙂";
 	const relationshipStats = useMemo(
-		() => getRelationshipStats(clock, profileTimeZone),
-		[clock, profileTimeZone],
+		() => getRelationshipStats(clock, profileTimeZone, anniversaryDate),
+		[anniversaryDate, clock, profileTimeZone],
 	);
+	const anniversaryLabel = useMemo(() => {
+		return new Intl.DateTimeFormat("en-SG", {
+			day: "2-digit",
+			month: "short",
+			year: "numeric",
+			timeZone: profileTimeZone,
+		}).format(new Date(`${anniversaryDate}T00:00:00.000Z`));
+	}, [anniversaryDate, profileTimeZone]);
 
 	const periodOptions = useMemo(() => {
 		return getPeriodOptions(
@@ -309,7 +317,7 @@ export function DashboardClient({
 						</div>
 						<div className="flex min-w-0 items-center justify-end gap-2 sm:gap-3">
 							<div className="flex min-w-0 items-center gap-2 sm:gap-3">
-								<div className="hidden size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl shadow-lg backdrop-blur-md sm:grid">
+								<div className="grid size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl shadow-lg backdrop-blur-md">
 									{profileAvatar}
 								</div>
 								<div className="min-w-0 text-right leading-tight sm:text-left">
@@ -317,7 +325,7 @@ export function DashboardClient({
 										{profile.display_name}
 									</p>
 									<p className="text-xs text-paper/70">
-										{profileLocation.flag} {profileLocation.label}
+										{profile.country_code} · {profile.currency}
 									</p>
 								</div>
 								<button
@@ -327,9 +335,9 @@ export function DashboardClient({
 									aria-expanded={mobileMenuOpen ? "true" : undefined}
 									aria-haspopup="menu"
 									onClick={(event) => setMobileMenuAnchor(event.currentTarget)}
-									className="grid size-9 shrink-0 place-items-center rounded-full border border-paper/70 bg-black/35 p-0 shadow-lg transition hover:bg-black/50 sm:hidden"
+									className="grid size-9 shrink-0 place-items-center rounded-full border border-paper/70 bg-black/35 p-0 shadow-lg transition hover:bg-black/50"
 								>
-									{profileAvatar}
+									<MenuIcon size={18} />
 								</button>
 							</div>
 							<Menu
@@ -352,6 +360,30 @@ export function DashboardClient({
 									/>
 									Profile
 								</MenuItem>
+								<MenuItem
+									onClick={() => {
+										setMobileMenuAnchor(null);
+										setHeroOpen(true);
+									}}
+								>
+									<ImageUp
+										size={16}
+										className="mr-2"
+									/>
+									Edit image
+								</MenuItem>
+								<MenuItem
+									onClick={() => {
+										setMobileMenuAnchor(null);
+										setAnniversaryOpen(true);
+									}}
+								>
+									<CalendarHeart
+										size={16}
+										className="mr-2"
+									/>
+									Edit anniversary
+								</MenuItem>
 								<NotificationPermissionButton
 									userId={profile.id}
 									initialSubscriptionId={profile.onesignal_subscription_id}
@@ -372,31 +404,6 @@ export function DashboardClient({
 									Logout
 								</MenuItem>
 							</Menu>
-							<Button
-								variant="outlined"
-								startIcon={<Settings size={16} />}
-								sx={{
-									...heroButtonSx,
-									display: { xs: "none", sm: "inline-flex" },
-								}}
-								className="min-h-10 px-4"
-								onClick={() => setProfileOpen(true)}
-							>
-								Profile
-							</Button>
-							<Button
-								variant="outlined"
-								startIcon={<LogOut size={16} />}
-								disabled={pending}
-								sx={{
-									...heroButtonSx,
-									display: { xs: "none", sm: "inline-flex" },
-								}}
-								className="min-h-10 px-4"
-								onClick={handleSignOut}
-							>
-								Logout
-							</Button>
 						</div>
 					</header>
 					<div className="max-w-5xl pt-4 sm:pt-0">
@@ -414,7 +421,9 @@ export function DashboardClient({
 								<p className="mt-2 font-serif text-2xl leading-none sm:text-5xl">
 									{relationshipStats.daysTogether}
 								</p>
-								<p className="mt-2 text-sm text-paper/70">Since 16 Oct 2025</p>
+								<p className="mt-2 text-sm text-paper/70">
+									Since {anniversaryLabel}
+								</p>
 							</div>
 							<div className="bg-black/20 p-4 backdrop-blur-sm rounded-lg">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
@@ -428,23 +437,12 @@ export function DashboardClient({
 								</p>
 							</div>
 						</div>
-						<div className="pt-6 sm:block">
-							<Button
-								variant="outlined"
-								startIcon={<ImageUp size={16} />}
-								sx={heroButtonSx}
-								className="w-fit max-w-full"
-								onClick={() => setHeroOpen(true)}
-							>
-								Edit image
-							</Button>
-						</div>
 					</div>
 				</div>
 			</section>
 
 			<section className="container-page p-5 sm:py-8">
-				<div className="sticky top-0 z-20 -mx-5 border-b border-neutral-200 bg-bg/95 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
+				<div className="-mx-5 border-b border-neutral-200 bg-bg/95 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
 					<div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
 						<ToggleButtonGroup
 							exclusive
@@ -469,12 +467,6 @@ export function DashboardClient({
 							</ToggleButton>
 						</ToggleButtonGroup>
 						<div className="flex flex-col w-full gap-5 sm:w-auto sm:flex-row sm:items-center sm:gap-5">
-							<div className="hidden sm:block">
-								<NotificationPermissionButton
-									userId={profile.id}
-									initialSubscriptionId={profile.onesignal_subscription_id}
-								/>
-							</div>
 							<ToggleButtonGroup
 								exclusive
 								value={filterRange}
@@ -592,7 +584,8 @@ export function DashboardClient({
 							expenses={filteredExpenses}
 							barExpenses={chartExpenses}
 							profiles={coupleProfiles}
-							exchangeRateSgdToVnd={exchangeRateSgdToVnd}
+							exchangeRatesBase={exchangeRatesBase}
+							exchangeRates={exchangeRates}
 							exchangeRateUpdatedAt={exchangeRateUpdatedAt}
 							exchangeRateSource={exchangeRateSource}
 							timeZone={profileTimeZone}
@@ -657,6 +650,13 @@ export function DashboardClient({
 					open={heroOpen}
 					onClose={() => setHeroOpen(false)}
 					currentUrl={heroImageUrl}
+				/>
+			) : null}
+			{anniversaryOpen ? (
+				<AnniversaryDialog
+					open={anniversaryOpen}
+					onClose={() => setAnniversaryOpen(false)}
+					currentDate={anniversaryDate}
 				/>
 			) : null}
 		</main>

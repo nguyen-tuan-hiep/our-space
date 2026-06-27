@@ -1,4 +1,4 @@
-import type { CurrencyCode, ExpenseCategory, LocationCode } from "@/lib/types";
+import type { CurrencyCode, ExpenseCategory } from "@/lib/types";
 import { themeColors } from "@/lib/theme-colors";
 
 export const expenseCategories: ExpenseCategory[] = [
@@ -16,44 +16,409 @@ export const expenseCategoryColors: Record<ExpenseCategory, string> =
 
 export const ledgerSeriesColors = themeColors.ledgerSeries;
 
-export const currencySymbols: Record<CurrencyCode, string> = {
-  VND: "VND",
-  SGD: "S$",
-};
+export const defaultCountryCode = "SG";
+export const defaultCurrency = "SGD";
+export const defaultTimeZone = "UTC";
 
-export const supportedCurrencies: CurrencyCode[] = ["VND", "SGD"];
+export const commonCurrencies: CurrencyCode[] = [
+  "USD",
+  "EUR",
+  "GBP",
+  "JPY",
+  "CNY",
+  "KRW",
+  "THB",
+  "MYR",
+  "IDR",
+  "PHP",
+  "AUD",
+  "CAD",
+  "SGD",
+  "VND",
+];
 
-export const supportedLocations: LocationCode[] = ["VN", "SG"];
+export const supportedCountryCodes = [
+  "AF",
+  "AX",
+  "AL",
+  "DZ",
+  "AS",
+  "AD",
+  "AO",
+  "AI",
+  "AQ",
+  "AG",
+  "AR",
+  "AM",
+  "AW",
+  "AU",
+  "AT",
+  "AZ",
+  "BS",
+  "BH",
+  "BD",
+  "BB",
+  "BY",
+  "BE",
+  "BZ",
+  "BJ",
+  "BM",
+  "BT",
+  "BO",
+  "BQ",
+  "BA",
+  "BW",
+  "BV",
+  "BR",
+  "IO",
+  "BN",
+  "BG",
+  "BF",
+  "BI",
+  "KH",
+  "CM",
+  "CA",
+  "CV",
+  "KY",
+  "CF",
+  "TD",
+  "CL",
+  "CN",
+  "CX",
+  "CC",
+  "CO",
+  "KM",
+  "CG",
+  "CD",
+  "CK",
+  "CR",
+  "CI",
+  "HR",
+  "CU",
+  "CW",
+  "CY",
+  "CZ",
+  "DK",
+  "DJ",
+  "DM",
+  "DO",
+  "EC",
+  "EG",
+  "SV",
+  "GQ",
+  "ER",
+  "EE",
+  "SZ",
+  "ET",
+  "FK",
+  "FO",
+  "FJ",
+  "FI",
+  "FR",
+  "GF",
+  "PF",
+  "TF",
+  "GA",
+  "GM",
+  "GE",
+  "DE",
+  "GH",
+  "GI",
+  "GR",
+  "GL",
+  "GD",
+  "GP",
+  "GU",
+  "GT",
+  "GG",
+  "GN",
+  "GW",
+  "GY",
+  "HT",
+  "HM",
+  "VA",
+  "HN",
+  "HK",
+  "HU",
+  "IS",
+  "IN",
+  "ID",
+  "IR",
+  "IQ",
+  "IE",
+  "IM",
+  "IL",
+  "IT",
+  "JM",
+  "JP",
+  "JE",
+  "JO",
+  "KZ",
+  "KE",
+  "KI",
+  "KP",
+  "KR",
+  "KW",
+  "KG",
+  "LA",
+  "LV",
+  "LB",
+  "LS",
+  "LR",
+  "LY",
+  "LI",
+  "LT",
+  "LU",
+  "MO",
+  "MG",
+  "MW",
+  "MY",
+  "MV",
+  "ML",
+  "MT",
+  "MH",
+  "MQ",
+  "MR",
+  "MU",
+  "YT",
+  "MX",
+  "FM",
+  "MD",
+  "MC",
+  "MN",
+  "ME",
+  "MS",
+  "MA",
+  "MZ",
+  "MM",
+  "NA",
+  "NR",
+  "NP",
+  "NL",
+  "NC",
+  "NZ",
+  "NI",
+  "NE",
+  "NG",
+  "NU",
+  "NF",
+  "MK",
+  "MP",
+  "NO",
+  "OM",
+  "PK",
+  "PW",
+  "PS",
+  "PA",
+  "PG",
+  "PY",
+  "PE",
+  "PH",
+  "PN",
+  "PL",
+  "PT",
+  "PR",
+  "QA",
+  "RE",
+  "RO",
+  "RU",
+  "RW",
+  "BL",
+  "SH",
+  "KN",
+  "LC",
+  "MF",
+  "PM",
+  "VC",
+  "WS",
+  "SM",
+  "ST",
+  "SA",
+  "SN",
+  "RS",
+  "SC",
+  "SL",
+  "SG",
+  "SX",
+  "SK",
+  "SI",
+  "SB",
+  "SO",
+  "ZA",
+  "GS",
+  "SS",
+  "ES",
+  "LK",
+  "SD",
+  "SR",
+  "SJ",
+  "SE",
+  "CH",
+  "SY",
+  "TW",
+  "TJ",
+  "TZ",
+  "TH",
+  "TL",
+  "TG",
+  "TK",
+  "TO",
+  "TT",
+  "TN",
+  "TR",
+  "TM",
+  "TC",
+  "TV",
+  "UG",
+  "UA",
+  "AE",
+  "GB",
+  "US",
+  "UM",
+  "UY",
+  "UZ",
+  "VU",
+  "VE",
+  "VN",
+  "VG",
+  "VI",
+  "WF",
+  "EH",
+  "YE",
+  "ZM",
+  "ZW",
+] as const;
 
-export const locationSettings: Record<
-  LocationCode,
-  { label: string; flag: string; timeZone: string; currency: CurrencyCode }
-> = {
-  VN: {
-    label: "VN",
-    flag: "🇻🇳",
-    timeZone: "Asia/Ho_Chi_Minh",
-    currency: "VND",
-  },
-  SG: {
-    label: "SG",
-    flag: "🇸🇬",
-    timeZone: "Asia/Singapore",
-    currency: "SGD",
-  },
-};
+export function getSupportedCurrencyCodes() {
+  if (typeof Intl.supportedValuesOf === "function") {
+    return Intl.supportedValuesOf("currency");
+  }
+
+  return commonCurrencies;
+}
+
+export function getSupportedTimeZones() {
+  return getUtcTimeZoneOptions().map((option) => option.value);
+}
+
+export function getUtcTimeZoneOptions() {
+  return Array.from({ length: 27 }, (_, index) => {
+    const offset = index - 12;
+    const sign = offset >= 0 ? "+" : "-";
+    const absoluteOffset = Math.abs(offset);
+    const label = `UTC${sign}${String(absoluteOffset).padStart(2, "0")}:00`;
+
+    return {
+      label,
+      value: offset === 0 ? "UTC" : `Etc/GMT${offset > 0 ? "-" : "+"}${absoluteOffset}`,
+    };
+  });
+}
+
+export function normalizeTimeZoneValue(value: string) {
+  const compact = value.trim();
+  if (!compact) return defaultTimeZone;
+
+  if (compact === "UTC" || compact.startsWith("Etc/GMT")) return compact;
+
+  const offset = getTimeZoneOffsetHours(compact);
+  const option = getUtcTimeZoneOptions().find((item) => {
+    return getTimeZoneOffsetHours(item.value) === offset;
+  });
+
+  return option?.value ?? defaultTimeZone;
+}
+
+function getTimeZoneOffsetHours(timeZone: string) {
+  try {
+    const now = new Date();
+    const utcParts = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      hourCycle: "h23",
+      timeZone: "UTC",
+    }).formatToParts(now);
+    const zonedParts = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      hourCycle: "h23",
+      timeZone,
+    }).formatToParts(now);
+    const getPart = (
+      parts: Intl.DateTimeFormatPart[],
+      type: Intl.DateTimeFormatPartTypes,
+    ) => Number(parts.find((part) => part.type === type)?.value ?? 0);
+    const utcDate = Date.UTC(
+      getPart(utcParts, "year"),
+      getPart(utcParts, "month") - 1,
+      getPart(utcParts, "day"),
+      getPart(utcParts, "hour"),
+    );
+    const zonedDate = Date.UTC(
+      getPart(zonedParts, "year"),
+      getPart(zonedParts, "month") - 1,
+      getPart(zonedParts, "day"),
+      getPart(zonedParts, "hour"),
+    );
+
+    return Math.round((zonedDate - utcDate) / 3600000);
+  } catch {
+    return 8;
+  }
+}
+
+export function normalizeCurrencyCode(value: string) {
+  return value.trim().toUpperCase();
+}
+
+export function getCurrencyFractionDigits(currency: CurrencyCode) {
+  try {
+    const fractionDigits = new Intl.NumberFormat("en", {
+      style: "currency",
+      currency: normalizeCurrencyCode(currency),
+    }).resolvedOptions().maximumFractionDigits;
+    return typeof fractionDigits === "number" ? fractionDigits : 2;
+  } catch {
+    return 2;
+  }
+}
+
+export function normalizeCountryCode(value: string) {
+  return value.trim().toUpperCase();
+}
+
+export function isValidCurrencyCode(value: string) {
+  return /^[A-Z]{3}$/.test(normalizeCurrencyCode(value));
+}
+
+export function isValidCountryCode(value: string) {
+  return /^[A-Z]{2}$/.test(normalizeCountryCode(value));
+}
 
 export function convertCurrency(
   amount: number,
   from: CurrencyCode,
   to: CurrencyCode,
-  exchangeRateSgdToVnd: number | null,
+  exchangeRates: Record<string, number> | null,
+  exchangeRatesBase = "USD",
 ) {
-  if (from === to) return amount;
-  if (!exchangeRateSgdToVnd || exchangeRateSgdToVnd <= 0) return null;
-  if (from === "SGD" && to === "VND") return amount * exchangeRateSgdToVnd;
-  if (from === "VND" && to === "SGD") return amount / exchangeRateSgdToVnd;
-  return null;
+  const fromCurrency = normalizeCurrencyCode(from);
+  const toCurrency = normalizeCurrencyCode(to);
+  const baseCurrency = normalizeCurrencyCode(exchangeRatesBase);
+
+  if (fromCurrency === toCurrency) return amount;
+  if (!exchangeRates) return null;
+
+  const fromRate = fromCurrency === baseCurrency ? 1 : exchangeRates[fromCurrency];
+  const toRate = toCurrency === baseCurrency ? 1 : exchangeRates[toCurrency];
+
+  if (!fromRate || !toRate || fromRate <= 0 || toRate <= 0) return null;
+
+  return (amount / fromRate) * toRate;
 }
 
 export const avatarOptions = [
@@ -278,19 +643,19 @@ export function formatCurrencyInputValue(
   value: string,
   currency: CurrencyCode,
 ) {
-  if (currency === "VND") {
-    return formatGroupedNumber(value, 0);
-  }
+  const fractionDigits = getCurrencyFractionDigits(currency);
+
+  if (fractionDigits === 0) return formatGroupedNumber(value, 0);
 
   const digits = value.replace(/\D/g, "");
 
   if (!digits) return "";
 
   const normalizedDigits = digits.replace(/^0+/, "") || "0";
-  const paddedDigits = normalizedDigits.padStart(3, "0");
+  const paddedDigits = normalizedDigits.padStart(fractionDigits + 1, "0");
 
-  const integerDigits = paddedDigits.slice(0, -2);
-  const decimalDigits = paddedDigits.slice(-2);
+  const integerDigits = paddedDigits.slice(0, -fractionDigits);
+  const decimalDigits = paddedDigits.slice(-fractionDigits);
 
   return `${groupIntegerDigits(integerDigits)},${decimalDigits}`;
 }
@@ -299,34 +664,47 @@ export function formatStoredAmountForInput(
   value: number | string,
   currency: CurrencyCode,
 ) {
-  if (currency === "VND") {
+  const fractionDigits = getCurrencyFractionDigits(currency);
+
+  if (fractionDigits === 0) {
     const numericValue =
       typeof value === "number"
         ? value
-        : Number(normalizeGroupedNumberInput(String(value), 2));
+        : Number(normalizeGroupedNumberInput(String(value), fractionDigits));
 
     return Number.isFinite(numericValue)
       ? formatGroupedNumber(numericValue, 0)
       : formatGroupedNumber(String(value), 0);
   }
 
-  return formatGroupedNumber(value, 2, true);
+  return formatGroupedNumber(value, fractionDigits, true);
 }
 
 export function formatCurrency(
   amount: number | string,
   currency: CurrencyCode,
 ) {
-  const formattedAmount =
-    currency === "VND"
-      ? formatGroupedNumber(amount, 0)
-      : formatGroupedNumber(amount, 2, true);
+  const normalizedCurrency = normalizeCurrencyCode(currency);
+  const fractionDigits = getCurrencyFractionDigits(normalizedCurrency);
+  const numericAmount =
+    typeof amount === "number"
+      ? amount
+      : Number(normalizeGroupedNumberInput(String(amount), fractionDigits));
+  const formattedAmount = formatGroupedNumber(
+    amount,
+    fractionDigits,
+    fractionDigits > 0,
+  );
 
   if (!formattedAmount) return "";
 
-  if (currency === "VND") {
-    return `${formattedAmount} VND`;
+  try {
+    return new Intl.NumberFormat("en", {
+      style: "currency",
+      currency: normalizedCurrency,
+      currencyDisplay: "narrowSymbol",
+    }).format(Number.isFinite(numericAmount) ? numericAmount : 0);
+  } catch {
+    return `${formattedAmount} ${normalizedCurrency}`;
   }
-
-  return `${currencySymbols[currency] ?? currency}${formattedAmount}`;
 }

@@ -1,28 +1,30 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
 import { useSnackbar } from "notistack";
 import { updatePassword, updateProfile } from "@/app/actions";
 import {
 	avatarOptions,
 	extractEmojiOnly,
+	getSupportedCurrencyCodes,
+	getUtcTimeZoneOptions,
 	isCustomAvatarEmoji,
-	locationSettings,
-	supportedLocations,
+	normalizeTimeZoneValue,
+	supportedCountryCodes,
 } from "@/lib/constants";
-import type { LocationCode, Profile } from "@/lib/types";
+import type { Profile } from "@/lib/types";
 
 interface ProfileDialogProps {
 	open: boolean;
@@ -34,7 +36,11 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 	const { enqueueSnackbar } = useSnackbar();
 	const [tab, setTab] = useState<"profile" | "password">("profile");
 	const [avatar, setAvatar] = useState(profile.avatar_url || "💖");
-	const [location, setLocation] = useState<LocationCode>(profile.country_code);
+	const countryNames = useMemo(() => {
+		return new Intl.DisplayNames(["en"], { type: "region" });
+	}, []);
+	const currencyOptions = useMemo(() => getSupportedCurrencyCodes(), []);
+	const timeZoneOptions = useMemo(() => getUtcTimeZoneOptions(), []);
 	const customAvatarInvalid =
 		avatar.trim().length > 0 && !isCustomAvatarEmoji(avatar);
 	const [pending, startTransition] = useTransition();
@@ -48,8 +54,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 	useEffect(() => {
 		if (!open) return;
 		setAvatar(profile.avatar_url || "💖");
-		setLocation(profile.country_code);
-	}, [open, profile.avatar_url, profile.country_code]);
+	}, [open, profile.avatar_url]);
 
 	return (
 		<Dialog
@@ -83,7 +88,6 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 						className="grid gap-5"
 						action={(formData) => {
 							formData.set("avatar", avatar);
-							formData.set("location", location);
 							startTransition(async () => {
 								const result = await updateProfile(formData);
 								enqueueSnackbar(result.message, {
@@ -93,42 +97,68 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 							});
 						}}
 					>
-						<FormControl fullWidth>
-							<InputLabel id="default-location-label">
-								Default location
-							</InputLabel>
-
-							<Select
-								labelId="default-location-label"
-								id="default-location"
-								name="country_code"
-								value={location}
-								label="Default location"
-								onChange={(event) =>
-									setLocation(event.target.value as LocationCode)
-								}
-							>
-								{supportedLocations.map((option) => (
-									<MenuItem
-										key={option}
-										value={option}
-									>
-										{locationSettings[option].flag}{" "}
-										{locationSettings[option].label}
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
-						<p className="-mt-3 text-xs leading-5 text-neutral-500">
-							Default time zone and currency by location.
-						</p>
-
 						<TextField
 							required
 							name="display_name"
 							label="Display name"
 							defaultValue={profile.display_name}
 						/>
+						<div className="grid gap-3 sm:grid-cols-3">
+							<FormControl fullWidth>
+								<InputLabel id="profile-country-label">Country</InputLabel>
+								<Select
+									labelId="profile-country-label"
+									name="country_code"
+									label="Country"
+									defaultValue={profile.country_code}
+								>
+									{supportedCountryCodes.map((country) => (
+										<MenuItem
+											key={country}
+											value={country}
+										>
+											{country} - {countryNames.of(country)}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+							<FormControl fullWidth>
+								<InputLabel id="profile-currency-label">Currency</InputLabel>
+								<Select
+									labelId="profile-currency-label"
+									name="currency"
+									label="Currency"
+									defaultValue={profile.currency}
+								>
+									{currencyOptions.map((currency) => (
+										<MenuItem
+											key={currency}
+											value={currency}
+										>
+											{currency}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+							<FormControl fullWidth>
+								<InputLabel id="profile-time-zone-label">Time zone</InputLabel>
+								<Select
+									labelId="profile-time-zone-label"
+									name="time_zone"
+									label="Time zone"
+									defaultValue={normalizeTimeZoneValue(profile.time_zone)}
+								>
+									{timeZoneOptions.map((timeZone) => (
+										<MenuItem
+											key={timeZone.value}
+											value={timeZone.value}
+										>
+											{timeZone.label}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</div>
 						<TextField
 							label="Custom emoji"
 							value={avatar}

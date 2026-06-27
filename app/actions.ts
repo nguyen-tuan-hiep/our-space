@@ -4,15 +4,20 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { v2 as cloudinary } from "cloudinary";
 import { createClient } from "@/lib/supabase/server";
+import { getCoupleSettingsId } from "@/lib/couple-settings";
 import {
+  defaultCountryCode,
+  defaultCurrency,
+  defaultTimeZone,
   expenseCategories,
   isCustomAvatarEmoji,
-  locationSettings,
+  isValidCountryCode,
+  isValidCurrencyCode,
+  normalizeCountryCode,
+  normalizeCurrencyCode,
   normalizeGroupedNumberInput,
-  supportedCurrencies,
-  supportedLocations,
 } from "@/lib/constants";
-import type { CurrencyCode, ExpenseCategory, LocationCode } from "@/lib/types";
+import type { CurrencyCode, ExpenseCategory } from "@/lib/types";
 
 type ExpensePayload = {
   title: string;
@@ -59,13 +64,13 @@ async function requireUser() {
 function getExpensePayload(
   formData: FormData,
 ): { ok: true; payload: ExpensePayload } | { ok: false; message: string } {
-  const currency = stringValue(formData, "currency") as CurrencyCode;
+  const currency = normalizeCurrencyCode(stringValue(formData, "currency"));
   const amount = numberValue(formData, "amount");
   const category = stringValue(formData, "category") as ExpenseCategory;
   const transactionDate = new Date(stringValue(formData, "transaction_date"));
 
   if (!expenseCategories.includes(category)) return fail("Invalid category.");
-  if (!supportedCurrencies.includes(currency)) return fail("Invalid currency.");
+  if (!isValidCurrencyCode(currency)) return fail("Invalid currency.");
   if (!Number.isFinite(amount) || amount <= 0) return fail("Invalid amount.");
   if (Number.isNaN(transactionDate.getTime())) {
     return fail("Please choose a valid transaction date.");
@@ -96,17 +101,44 @@ export async function signInWithPassword(formData: FormData) {
   return ok("Logged in successfully!");
 }
 
+export async function signUpWithPassword(formData: FormData) {
+  const supabase = await createClient();
+  const email = stringValue(formData, "email").toLowerCase();
+  const password = stringValue(formData, "password");
+
+  if (password.length < 8) {
+    return fail("Password must be at least 8 characters.");
+  }
+
+  const { error } = await supabase.auth.signUp({ email, password });
+
+  if (error) return fail(error.message);
+
+  revalidatePath("/");
+  return ok("Account created. Please sign in to continue.");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
 }
 
-export async function updateProfile(formData: FormData) {
+export async function createMissingProfile(formData: FormData) {
   const { supabase, user } = await requireUser();
-  const displayName = stringValue(formData, "display_name");
-  const avatar = stringValue(formData, "avatar");
-  const location = stringValue(formData, "location") as LocationCode;
+  const displayName =
+    stringValue(formData, "display_name") ||
+    user.user_metadata.display_name ||
+    user.email?.split("@")[0] ||
+    "New user";
+  const avatar = stringValue(formData, "avatar") || "💖";
+  const countryCode = normalizeCountryCode(
+    stringValue(formData, "country_code") || defaultCountryCode,
+  );
+  const currency = normalizeCurrencyCode(
+    stringValue(formData, "currency") || defaultCurrency,
+  );
+  const timeZone = stringValue(formData, "time_zone") || defaultTimeZone;
 
   if (displayName.length < 2 || displayName.length > 80) {
     return fail("Name must be between 2 and 80 characters.");
@@ -116,8 +148,59 @@ export async function updateProfile(formData: FormData) {
     return fail("Please choose a valid avatar emoji.");
   }
 
-  if (!supportedLocations.includes(location)) {
-    return fail("Invalid default location.");
+  if (!isValidCountryCode(countryCode)) {
+    return fail("Please enter a valid 2-letter country code.");
+  }
+
+  if (!isValidCurrencyCode(currency)) {
+    return fail("Please enter a valid 3-letter currency code.");
+  }
+
+  if (!timeZone || timeZone.length > 80) {
+    return fail("Please enter a valid time zone.");
+  }
+
+  const { error } = await supabase.from("profiles").insert({
+    id: user.id,
+    email: user.email ?? null,
+    display_name: displayName,
+    avatar_url: avatar,
+    country_code: countryCode,
+    currency,
+    time_zone: timeZone,
+  });
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return ok("Profile created successfully.");
+}
+
+export async function updateProfile(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const displayName = stringValue(formData, "display_name");
+  const avatar = stringValue(formData, "avatar");
+  const countryCode = normalizeCountryCode(stringValue(formData, "country_code"));
+  const currency = normalizeCurrencyCode(stringValue(formData, "currency"));
+  const timeZone = stringValue(formData, "time_zone");
+
+  if (displayName.length < 2 || displayName.length > 80) {
+    return fail("Name must be between 2 and 80 characters.");
+  }
+
+  if (!isCustomAvatarEmoji(avatar)) {
+    return fail("Please choose a valid avatar emoji.");
+  }
+
+  if (!isValidCountryCode(countryCode)) {
+    return fail("Please enter a valid 2-letter country code.");
+  }
+
+  if (!isValidCurrencyCode(currency)) {
+    return fail("Please enter a valid 3-letter currency code.");
+  }
+
+  if (!timeZone || timeZone.length > 80) {
+    return fail("Please enter a valid time zone.");
   }
 
   const { error } = await supabase
@@ -125,14 +208,49 @@ export async function updateProfile(formData: FormData) {
     .update({
       display_name: displayName,
       avatar_url: avatar,
-      country_code: location,
-      currency: locationSettings[location].currency,
+      country_code: countryCode,
+      currency,
+      time_zone: timeZone,
     })
     .eq("id", user.id);
 
   if (error) return fail(error.message);
   revalidatePath("/");
   return ok("Profile updated successfully!");
+}
+
+export async function pairWithCode(formData: FormData) {
+  const { supabase } = await requireUser();
+  const pairCode = stringValue(formData, "pair_code");
+
+  if (!/^[A-Za-z0-9]{6,16}$/.test(pairCode)) {
+    return fail("Please enter a valid pairing code.");
+  }
+
+  const { error } = await supabase.rpc("request_pairing_with_code", {
+    target_pair_code: pairCode,
+  });
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return ok("Pairing request sent. Your partner needs to accept it.");
+}
+
+export async function acceptPairingRequest(formData: FormData) {
+  const { supabase } = await requireUser();
+  const requestId = stringValue(formData, "request_id");
+
+  if (!requestId) {
+    return fail("Missing pairing request.");
+  }
+
+  const { error } = await supabase.rpc("accept_pairing_request", {
+    pairing_request_id: requestId,
+  });
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return ok("Pairing accepted!");
 }
 
 export async function updatePassword(formData: FormData) {
@@ -165,10 +283,23 @@ export async function updateHeroImage(formData: FormData) {
     return fail("Please upload a valid hero image.");
   }
 
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, partner_id")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; partner_id: string | null }>();
+
+  if (profileError) return fail(profileError.message);
+  if (!profile?.partner_id) {
+    return fail("Please pair with your partner before changing the hero image.");
+  }
+
+  const settingsId = getCoupleSettingsId(profile, { id: profile.partner_id });
+
   const { data: currentSettings, error: settingsError } = await supabase
     .from("app_settings")
     .select("hero_image_public_id")
-    .eq("id", "main")
+    .eq("id", settingsId)
     .maybeSingle();
 
   if (settingsError) return fail(settingsError.message);
@@ -195,7 +326,7 @@ export async function updateHeroImage(formData: FormData) {
   }
 
   const { error } = await supabase.from("app_settings").upsert({
-    id: "main",
+    id: settingsId,
     hero_image_url: heroImageUrl,
     hero_image_public_id: heroImagePublicId,
     updated_by: user.id,
@@ -204,6 +335,37 @@ export async function updateHeroImage(formData: FormData) {
   if (error) return fail(error.message);
   revalidatePath("/");
   return ok("Hero image updated successfully!");
+}
+
+export async function updateAnniversary(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const anniversaryDate = stringValue(formData, "anniversary_date");
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(anniversaryDate)) {
+    return fail("Please choose a valid anniversary date.");
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, partner_id")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; partner_id: string | null }>();
+
+  if (profileError) return fail(profileError.message);
+  if (!profile?.partner_id) {
+    return fail("Please pair with your partner before editing anniversary.");
+  }
+
+  const settingsId = getCoupleSettingsId(profile, { id: profile.partner_id });
+  const { error } = await supabase.from("app_settings").upsert({
+    id: settingsId,
+    anniversary_date: anniversaryDate,
+    updated_by: user.id,
+  });
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return ok("Anniversary updated successfully!");
 }
 
 export async function createNote(formData: FormData) {

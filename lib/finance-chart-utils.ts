@@ -14,13 +14,15 @@ import type {
 function convertedAmount(
   expense: IndividualExpense,
   displayCurrency: CurrencyCode,
-  exchangeRateSgdToVnd: number | null,
+  exchangeRates: Record<string, number> | null,
+  exchangeRatesBase: string | null,
 ) {
   return convertCurrency(
     Number(expense.amount),
     expense.currency,
     displayCurrency,
-    exchangeRateSgdToVnd,
+    exchangeRates,
+    exchangeRatesBase ?? "USD",
   );
 }
 
@@ -97,7 +99,8 @@ export function buildFinanceChartData({
   range,
   selectedPeriod,
   displayCurrency,
-  exchangeRateSgdToVnd,
+  exchangeRates,
+  exchangeRatesBase,
   timeZone,
 }: {
   expenses: IndividualExpense[];
@@ -105,7 +108,8 @@ export function buildFinanceChartData({
   range: FilterRange;
   selectedPeriod?: string;
   displayCurrency: CurrencyCode;
-  exchangeRateSgdToVnd: number | null;
+  exchangeRates: Record<string, number> | null;
+  exchangeRatesBase: string | null;
   timeZone: string;
 }) {
   const rows =
@@ -126,7 +130,8 @@ export function buildFinanceChartData({
     const converted = convertedAmount(
       expense,
       displayCurrency,
-      exchangeRateSgdToVnd,
+      exchangeRates,
+      exchangeRatesBase,
     );
 
     if (!profile || converted === null) return;
@@ -147,12 +152,14 @@ export function buildFinanceBreakdowns({
   expenses,
   profiles,
   displayCurrency,
-  exchangeRateSgdToVnd,
+  exchangeRates,
+  exchangeRatesBase,
 }: {
   expenses: IndividualExpense[];
   profiles: [Profile, Profile];
   displayCurrency: CurrencyCode;
-  exchangeRateSgdToVnd: number | null;
+  exchangeRates: Record<string, number> | null;
+  exchangeRatesBase: string | null;
 }) {
   return profiles.map((profile) => {
     const categoryMap = new Map<ExpenseCategory, number>();
@@ -162,7 +169,8 @@ export function buildFinanceBreakdowns({
         const converted = convertedAmount(
           expense,
           displayCurrency,
-          exchangeRateSgdToVnd,
+          exchangeRates,
+          exchangeRatesBase,
         );
         if (converted === null) return sum;
         categoryMap.set(

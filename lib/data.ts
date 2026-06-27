@@ -6,6 +6,7 @@ import type {
 } from "@/lib/types";
 import { getExchangeRate } from "@/lib/exchange-rates";
 import { createClient } from "@/lib/supabase/server";
+import { getCoupleSettingsId } from "@/lib/couple-settings";
 
 export async function getDashboardData(
   profile: Profile,
@@ -13,6 +14,7 @@ export async function getDashboardData(
 ) {
   const supabase = await createClient();
   const participantIds = [profile.id, partner?.id].filter(Boolean) as string[];
+  const settingsId = partner ? getCoupleSettingsId(profile, partner) : null;
 
   const [{ data: notes }, { data: expenses }, { data: settings }] =
     await Promise.all([
@@ -33,7 +35,7 @@ export async function getDashboardData(
       supabase
         .from("app_settings")
         .select("*")
-        .eq("id", "main")
+        .eq("id", settingsId ?? "main")
         .maybeSingle<AppSettings>(),
     ]);
 
@@ -41,6 +43,6 @@ export async function getDashboardData(
     notes: notes ?? [],
     expenses: expenses ?? [],
     settings: settings ?? null,
-    exchangeRate: await getExchangeRate(settings ?? null),
+    exchangeRate: await getExchangeRate(settings ?? null, settingsId ?? "main"),
   };
 }

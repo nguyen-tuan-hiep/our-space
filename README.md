@@ -1,6 +1,6 @@
 # Our Space
 
-Our Space is a private Next.js application for exactly two users living in Vietnam and Singapore. It combines shared time-locked notes with two separate personal expense ledgers, dual-currency display, realtime Supabase sync, Cloudinary media uploads, MUI forms, Tailwind layouts, and Recharts visualization.
+Our Space is a private Next.js application for a couple. It combines shared time-locked notes with two separate personal expense ledgers, dual-currency display, realtime Supabase sync, Cloudinary media uploads, MUI forms, Tailwind layouts, and Recharts visualization.
 
 ## Stack
 
@@ -176,7 +176,7 @@ When `unlock_at` is in the future, `NoteCard` shows metadata and a countdown whi
 
 ### Expenses
 
-Each profile has a fixed currency:
+Each profile has a currency:
 
 - Vietnam profile: `VND`
 - Singapore profile: `SGD`

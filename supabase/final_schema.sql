@@ -1,3 +1,6 @@
+-- Fresh database only. This drops and recreates the public schema.
+-- Do not run this on a database that contains data you want to keep.
+
 drop schema public cascade;
 create schema public;
 
@@ -169,6 +172,8 @@ begin
 end;
 $$;
 
+drop trigger if exists on_auth_user_created_create_profile on auth.users;
+
 create trigger on_auth_user_created_create_profile
 after insert on auth.users
 for each row execute function public.handle_new_user_profile();
@@ -194,107 +199,6 @@ as $$
   );
 $$;
 
-alter table public.profiles enable row level security;
-alter table public.notes enable row level security;
-alter table public.individual_expenses enable row level security;
-alter table public.pairing_requests enable row level security;
-alter table public.app_settings enable row level security;
-
-create policy "Users can read their profile and partner profile"
-on public.profiles for select
-using (public.profile_is_partner(id));
-
-create policy "Users can update only their own profile"
-on public.profiles for update
-using (id = auth.uid())
-with check (id = auth.uid());
-
-create policy "Users can create their own profile"
-on public.profiles for insert
-with check (id = auth.uid());
-
-create policy "Users can read notes between the couple"
-on public.notes for select
-using (
-  author_id = auth.uid()
-  or recipient_id = auth.uid()
-);
-
-create policy "Users can create notes for their partner"
-on public.notes for insert
-with check (
-  author_id = auth.uid()
-  and public.profile_is_partner(recipient_id)
-  and recipient_id <> auth.uid()
-);
-
-create policy "Users can update notes they authored"
-on public.notes for update
-using (author_id = auth.uid())
-with check (
-  author_id = auth.uid()
-  and public.profile_is_partner(recipient_id)
-  and recipient_id <> auth.uid()
-);
-
-create policy "Users can delete notes they authored"
-on public.notes for delete
-using (author_id = auth.uid());
-
-create policy "Users can read their and partner expenses"
-on public.individual_expenses for select
-using (public.profile_is_partner(owner_id));
-
-create policy "Users can insert only their own expenses"
-on public.individual_expenses for insert
-with check (owner_id = auth.uid());
-
-create policy "Users can update only their own expenses"
-on public.individual_expenses for update
-using (owner_id = auth.uid())
-with check (owner_id = auth.uid());
-
-create policy "Users can delete only their own expenses"
-on public.individual_expenses for delete
-using (owner_id = auth.uid());
-
-create policy "Users can read their pairing requests"
-on public.pairing_requests for select
-using (requester_id = auth.uid() or recipient_id = auth.uid());
-
-create policy "Users can create outgoing pairing requests"
-on public.pairing_requests for insert
-with check (requester_id = auth.uid() and recipient_id <> auth.uid());
-
-create policy "Couple can read app settings"
-on public.app_settings for select
-using (auth.role() = 'authenticated');
-
-create policy "Couple can update app settings"
-on public.app_settings for update
-using (auth.role() = 'authenticated')
-with check (auth.role() = 'authenticated');
-
-create policy "Couple can create app settings"
-on public.app_settings for insert
-with check (auth.role() = 'authenticated');
-
-alter publication supabase_realtime add table public.profiles;
-alter publication supabase_realtime add table public.notes;
-alter publication supabase_realtime add table public.individual_expenses;
-alter publication supabase_realtime add table public.pairing_requests;
-alter publication supabase_realtime add table public.app_settings;
-
-grant usage on schema public to anon, authenticated;
-grant select on public.profiles to authenticated;
-grant insert on public.profiles to authenticated;
-grant update on public.profiles to authenticated;
-grant select, insert, update, delete on public.notes to authenticated;
-grant select, insert, update, delete on public.individual_expenses to authenticated;
-grant select, insert on public.pairing_requests to authenticated;
-grant select, insert, update on public.app_settings to authenticated;
-grant execute on function public.profile_is_partner(uuid) to authenticated;
-
 create or replace function public.request_pairing_with_code(target_pair_code text)
 returns uuid
 language plpgsql
@@ -315,8 +219,7 @@ begin
   select *
   into current_profile
   from public.profiles
-  where id = auth.uid()
-  for update;
+  where id = auth.uid();
 
   if current_profile.id is null then
     raise exception 'Your profile does not exist.';
@@ -441,9 +344,109 @@ begin
 end;
 $$;
 
+alter table public.profiles enable row level security;
+alter table public.notes enable row level security;
+alter table public.individual_expenses enable row level security;
+alter table public.pairing_requests enable row level security;
+alter table public.app_settings enable row level security;
+
+create policy "Users can read their profile and partner profile"
+on public.profiles for select
+using (public.profile_is_partner(id));
+
+create policy "Users can update only their own profile"
+on public.profiles for update
+using (id = auth.uid())
+with check (id = auth.uid());
+
+create policy "Users can create their own profile"
+on public.profiles for insert
+with check (id = auth.uid());
+
+create policy "Users can read notes between the couple"
+on public.notes for select
+using (
+  author_id = auth.uid()
+  or recipient_id = auth.uid()
+);
+
+create policy "Users can create notes for their partner"
+on public.notes for insert
+with check (
+  author_id = auth.uid()
+  and public.profile_is_partner(recipient_id)
+  and recipient_id <> auth.uid()
+);
+
+create policy "Users can update notes they authored"
+on public.notes for update
+using (author_id = auth.uid())
+with check (
+  author_id = auth.uid()
+  and public.profile_is_partner(recipient_id)
+  and recipient_id <> auth.uid()
+);
+
+create policy "Users can delete notes they authored"
+on public.notes for delete
+using (author_id = auth.uid());
+
+create policy "Users can read their and partner expenses"
+on public.individual_expenses for select
+using (public.profile_is_partner(owner_id));
+
+create policy "Users can insert only their own expenses"
+on public.individual_expenses for insert
+with check (owner_id = auth.uid());
+
+create policy "Users can update only their own expenses"
+on public.individual_expenses for update
+using (owner_id = auth.uid())
+with check (owner_id = auth.uid());
+
+create policy "Users can delete only their own expenses"
+on public.individual_expenses for delete
+using (owner_id = auth.uid());
+
+create policy "Users can read their pairing requests"
+on public.pairing_requests for select
+using (requester_id = auth.uid() or recipient_id = auth.uid());
+
+create policy "Users can create outgoing pairing requests"
+on public.pairing_requests for insert
+with check (requester_id = auth.uid() and recipient_id <> auth.uid());
+
+create policy "Couple can read app settings"
+on public.app_settings for select
+using (auth.role() = 'authenticated');
+
+create policy "Couple can update app settings"
+on public.app_settings for update
+using (auth.role() = 'authenticated')
+with check (auth.role() = 'authenticated');
+
+create policy "Couple can create app settings"
+on public.app_settings for insert
+with check (auth.role() = 'authenticated');
+
+alter publication supabase_realtime add table public.profiles;
+alter publication supabase_realtime add table public.notes;
+alter publication supabase_realtime add table public.individual_expenses;
+alter publication supabase_realtime add table public.pairing_requests;
+alter publication supabase_realtime add table public.app_settings;
+
+grant usage on schema public to anon, authenticated;
+grant select on public.profiles to authenticated;
+grant insert on public.profiles to authenticated;
+grant update on public.profiles to authenticated;
+grant select, insert, update, delete on public.notes to authenticated;
+grant select, insert, update, delete on public.individual_expenses to authenticated;
+grant select, insert on public.pairing_requests to authenticated;
+grant select, insert, update on public.app_settings to authenticated;
+grant execute on function public.profile_is_partner(uuid) to authenticated;
 grant execute on function public.request_pairing_with_code(text) to authenticated;
 grant execute on function public.accept_pairing_request(uuid) to authenticated;
 
-insert into public.app_settings (id, hero_image_url)
-values ('main', null)
+insert into public.app_settings (id, hero_image_url, anniversary_date)
+values ('main', null, current_date)
 on conflict (id) do nothing;

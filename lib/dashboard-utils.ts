@@ -8,7 +8,11 @@ import {
 
 export type FilterRange = "week" | "month";
 
-export function getRelationshipStats(clock: Date, timeZone: string) {
+export function getRelationshipStats(
+  clock: Date,
+  timeZone: string,
+  anniversaryDate: string,
+) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
     month: "2-digit",
@@ -26,13 +30,17 @@ export function getRelationshipStats(clock: Date, timeZone: string) {
   const hour = getPart("hour");
   const minute = getPart("minute");
 
-  const start = Date.UTC(2025, 9, 16);
+  const [startYear = year, startMonth = month, startDay = day] =
+    anniversaryDate.split("-").map(Number);
+  const start = Date.UTC(startYear, startMonth - 1, startDay);
   const today = Date.UTC(year, month - 1, day);
   const daysTogether = Math.max(0, Math.floor((today - start) / 86400000) + 1);
 
   const nextMonth =
-    day > 16 || (day === 16 && (hour > 0 || minute > 0)) ? month : month - 1;
-  const nextMonthly = new Date(Date.UTC(year, nextMonth, 16));
+    day > startDay || (day === startDay && (hour > 0 || minute > 0))
+      ? month
+      : month - 1;
+  const nextMonthly = new Date(Date.UTC(year, nextMonth, startDay));
 
   const totalSeconds = Math.floor(
     Math.max(

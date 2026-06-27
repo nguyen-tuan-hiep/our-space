@@ -1,4 +1,4 @@
-export const appTimeZone = "Asia/Singapore";
+export const appTimeZone = "UTC";
 
 export function formatAppDate(value: string | Date, timeZone = appTimeZone) {
   return new Intl.DateTimeFormat("en-SG", {

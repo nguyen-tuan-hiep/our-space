@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import dayjs from "dayjs";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -19,12 +19,13 @@ import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
 import { useSnackbar } from "notistack";
 import { createExpense, updateExpense } from "@/app/actions";
 import {
-  currencySymbols,
   expenseCategories,
   formatCurrencyInputValue,
   formatStoredAmountForInput,
+  getCurrencyFractionDigits,
+  getSupportedCurrencyCodes,
   normalizeGroupedNumberInput,
-  supportedCurrencies,
+  normalizeCurrencyCode,
 } from "@/lib/constants";
 import type { CurrencyCode, IndividualExpense, Profile } from "@/lib/types";
 
@@ -51,6 +52,7 @@ export function ExpenseDialog({
   );
   const [currency, setCurrency] = useState<CurrencyCode>(profile.currency);
   const [amount, setAmount] = useState("");
+  const currencyOptions = useMemo(() => getSupportedCurrencyCodes(), []);
   const handleClose = () => {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
@@ -64,7 +66,7 @@ export function ExpenseDialog({
   ) => {
     return normalizeGroupedNumberInput(
       value,
-      selectedCurrency === "VND" ? 0 : 2,
+      getCurrencyFractionDigits(selectedCurrency),
     );
   };
 
@@ -153,7 +155,7 @@ export function ExpenseDialog({
                 <TextField
                   required
                   name="amount_display"
-                  label={`Amount (${currencySymbols[currency]})`}
+                  label={`Amount (${currency})`}
                   type="text"
                   value={amount}
                   onChange={(event) => {
@@ -176,7 +178,9 @@ export function ExpenseDialog({
                     value={currency}
                     label="Currency"
                     onChange={(event) => {
-                      const nextCurrency = event.target.value as CurrencyCode;
+                      const nextCurrency = normalizeCurrencyCode(
+                        event.target.value,
+                      );
                       const currentPayload = getAmountPayload(amount, currency);
 
                       setCurrency(nextCurrency);
@@ -190,7 +194,7 @@ export function ExpenseDialog({
                       );
                     }}
                   >
-                    {supportedCurrencies.map((option) => (
+                    {Array.from(new Set([currency, ...currencyOptions])).map((option) => (
                       <MenuItem key={option} value={option}>
                         {option}
                       </MenuItem>

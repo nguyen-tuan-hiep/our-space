@@ -23,8 +23,7 @@ const merriweather = Merriweather({
 
 export const metadata: Metadata = {
   title: "Our Space 𑣲⋆",
-  description:
-    "A private daily hub for two people across Vietnam and Singapore.",
+  description: "A private daily hub for two people, wherever they are.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
