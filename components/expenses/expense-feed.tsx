@@ -82,7 +82,7 @@ export function ExpenseFeed({
 				<div>
 					<p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>
 					<div className="mt-2 flex items-center gap-1.5">
-						<span className="font-serif text-2xl leading-none whitespace-nowrap">
+						<span className="font-serif text-2xl leading-1">
 							{title}
 						</span>
 					</div>

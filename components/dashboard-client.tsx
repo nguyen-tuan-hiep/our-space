@@ -624,6 +624,7 @@ export function DashboardClient({
 						setEditingNote(null);
 					}}
 					recipient={partner}
+					senderTimeZone={profileTimeZone}
 					note={editingNote}
 				/>
 			) : null}
