@@ -439,6 +439,7 @@ grant usage on schema public to anon, authenticated;
 grant select on public.profiles to authenticated;
 grant insert on public.profiles to authenticated;
 grant update on public.profiles to authenticated;
+grant select, update on public.profiles to service_role;
 grant select, insert, update, delete on public.notes to authenticated;
 grant select, insert, update, delete on public.individual_expenses to authenticated;
 grant select, insert on public.pairing_requests to authenticated;

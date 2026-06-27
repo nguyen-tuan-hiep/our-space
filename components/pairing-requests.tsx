@@ -8,69 +8,79 @@ import { acceptPairingRequest } from "@/app/actions";
 import type { PairingRequest } from "@/lib/types";
 
 interface PairingRequestsProps {
-  profileId: string;
-  requests: PairingRequest[];
+	profileId: string;
+	requests: PairingRequest[];
 }
 
 export function PairingRequests({ profileId, requests }: PairingRequestsProps) {
-  const router = useRouter();
-  const { enqueueSnackbar } = useSnackbar();
-  const [pending, startTransition] = useTransition();
+	const router = useRouter();
+	const { enqueueSnackbar } = useSnackbar();
+	const [pending, startTransition] = useTransition();
 
-  if (!requests.length) return null;
+	if (!requests.length) return null;
 
-  return (
-    <div className="grid gap-3">
-      {requests.map((request) => {
-        const incoming = request.recipient_id === profileId;
-        const otherProfile = incoming ? request.requester : request.recipient;
-        const label = otherProfile
-          ? `${otherProfile.display_name} ${otherProfile.avatar_url ?? "🙂"}`
-          : "Your partner";
+	return (
+		<div className="grid gap-4">
+			{requests.map((request) => {
+				const incoming = request.recipient_id === profileId;
+				const otherProfile = incoming ? request.requester : request.recipient;
+				const label = otherProfile
+					? `${otherProfile.display_name} ${otherProfile.avatar_url ?? "🙂"}`
+					: "Your partner";
 
-        return (
-          <div
-            key={request.id}
-            className="grid gap-3 border border-neutral-300 bg-paper p-4 sm:grid-cols-[1fr_auto] sm:items-center mb-5"
-          >
-            <div>
-              <p className="font-semibold">
-                {incoming
-                  ? `${label} wants to pair with you.`
-                  : `Waiting for ${label} to accept.`}
-              </p>
-              <p className="mt-1 text-sm text-neutral-500">
-                {incoming
-                  ? "Accepting will link both profiles."
-                  : "They will see this request on their setup screen."}
-              </p>
-            </div>
-            {incoming ? (
-              <form
-                action={(formData) => {
-                  startTransition(async () => {
-                    const result = await acceptPairingRequest(formData);
-                    enqueueSnackbar(result.message, {
-                      variant: result.ok ? "success" : "error",
-                    });
-                    if (result.ok) router.refresh();
-                  });
-                }}
-              >
-                <input type="hidden" name="request_id" value={request.id} />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={pending}
-                  className="min-h-11 px-5 text-white hover:bg-neutral-700"
-                >
-                  {pending ? "Accepting..." : "Accept"}
-                </Button>
-              </form>
-            ) : null}
-          </div>
-        );
-      })}
-    </div>
-  );
+				return (
+					<div
+						key={request.id}
+						className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+					>
+						<div className="min-w-0">
+							<p className="font-semibold leading-6 text-neutral-900">
+								{incoming
+									? `${label} wants to pair with you.`
+									: `Waiting for ${label} to accept.`}
+							</p>
+
+							<p className="mt-1 text-sm leading-6 text-neutral-500">
+								{incoming
+									? "Accepting will link both profiles."
+									: "They will see this request on their setup screen."}
+							</p>
+						</div>
+
+						{incoming ? (
+							<form
+								className="w-full sm:w-auto"
+								action={(formData) => {
+									startTransition(async () => {
+										const result = await acceptPairingRequest(formData);
+
+										enqueueSnackbar(result.message, {
+											variant: result.ok ? "success" : "error",
+										});
+
+										if (result.ok) router.refresh();
+									});
+								}}
+							>
+								<input
+									type="hidden"
+									name="request_id"
+									value={request.id}
+								/>
+
+								<Button
+									type="submit"
+									variant="contained"
+									disabled={pending}
+									className="min-h-11 w-full text-white hover:bg-neutral-700 sm:w-36"
+								>
+									{pending ? "Accepting..." : "Accept"}
+								</Button>
+							</form>
+						) : null}
+					</div>
+				);
+			})}
+		</div>
+	);
 }

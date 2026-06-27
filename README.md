@@ -405,6 +405,14 @@ window.navigator.standalone === true
 "serviceWorker" in navigator === true
 ```
 
+If the body of notification message is changed, redeploy the Edge Function and test again using command:
+
+```bash
+supabase functions deploy send-push-notification \
+    --project-ref uojaxhmrfhbtthypugwq \
+    --no-verify-jwt
+```
+
 If `window.navigator.standalone` is `false`, the app is still running in Safari and iOS will not show the native Apple notification permission popup.
 
 If `"serviceWorker" in navigator` is `false`, the current iPhone browser context cannot subscribe to Web Push.
