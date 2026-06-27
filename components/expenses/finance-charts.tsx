@@ -28,7 +28,6 @@ import {
 } from "@/lib/constants";
 import { themeColors } from "@/lib/theme-colors";
 import { formatAppDate } from "@/lib/date-format";
-import { AvatarIcon } from "@/components/avatar-icon";
 import {
 	buildFinanceBreakdowns,
 	buildFinanceChartData,
@@ -229,7 +228,7 @@ export function FinanceCharts({
 										<Area
 											key={profile.id}
 											dataKey={profile.id}
-											name={profile.display_name}
+											name={`${profile.display_name} ${profile.avatar_url ?? "🙂"}`}
 											type="monotone"
 											stroke={
 												ledgerSeriesColors[index % ledgerSeriesColors.length]
@@ -257,13 +256,9 @@ export function FinanceCharts({
 								<div className="min-w-0">
 									<div className="flex items-center gap-1.5 whitespace-nowrap">
 										<span className="text-sm font-semibold">
-											{item.profile.display_name}
+											{item.profile.display_name}{" "}
+											{item.profile.avatar_url ?? "🙂"}
 										</span>
-										<AvatarIcon
-											value={item.profile.avatar_url}
-											label={item.profile.display_name}
-											className="grid size-4 shrink-0 place-items-center rounded-full text-[10px] leading-none"
-										/>
 									</div>
 									<p className="text-sm text-neutral-500">
 										{formatCurrency(item.total, displayCurrency)}

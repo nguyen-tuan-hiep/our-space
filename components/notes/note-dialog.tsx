@@ -18,7 +18,6 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
 import { useSnackbar } from "notistack";
 import { createNote, updateNote } from "@/app/actions";
-import { AvatarIcon } from "@/components/avatar-icon";
 import type { Profile, SharedNote } from "@/lib/types";
 
 interface NoteDialogProps {
@@ -77,13 +76,8 @@ export function NoteDialog({
           ) : (
             <div className="flex items-center gap-1.5">
               <span className="font-serif text-2xl leading-none whitespace-nowrap">
-                Write to {recipient.display_name}
+                Write to {recipient.display_name} {recipient.avatar_url ?? "🙂"}
               </span>
-              <AvatarIcon
-                value={recipient.avatar_url}
-                label={recipient.display_name}
-                className="grid size-6 shrink-0 place-items-center rounded-full text-sm leading-none"
-              />
             </div>
           )}
         </DialogTitle>

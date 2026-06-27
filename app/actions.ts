@@ -6,7 +6,6 @@ import { v2 as cloudinary } from "cloudinary";
 import { createClient } from "@/lib/supabase/server";
 import {
   expenseCategories,
-  isAvatarKey,
   isCustomAvatarEmoji,
   locationSettings,
   normalizeGroupedNumberInput,
@@ -113,7 +112,7 @@ export async function updateProfile(formData: FormData) {
     return fail("Name must be between 2 and 80 characters.");
   }
 
-  if (!isAvatarKey(avatar) && !isCustomAvatarEmoji(avatar)) {
+  if (!isCustomAvatarEmoji(avatar)) {
     return fail("Please choose a valid avatar emoji.");
   }
 

@@ -1,12 +1,10 @@
 import type { ExpenseCategory } from "@/lib/types";
 
 export const themeColors = {
-  // colors for the app's main theme
   bg: "#e8e5df",
   paper: "#f5f3ee",
   mui: "#000000",
 
-  // colors for danger states, used in the delete button
   danger: "#c24d5e",
   dangerBg: "#fdecef",
 
@@ -17,7 +15,6 @@ export const themeColors = {
   heroButtonBorderHover: "rgba(255, 250, 240, 1)",
   heroButtonBg: "rgba(17, 17, 15, 0.2)",
 
-  // colors for expense categories, used in the chart and other places
   expenseCategories: {
     "Food & Drinks": "#F09EA7",
     Shopping: "#F6CA94",
@@ -28,6 +25,5 @@ export const themeColors = {
     Others: "#F6C2F3",
   } satisfies Record<ExpenseCategory, string>,
 
-  // colors for each user in the ledger, used in the chart
-  ledgerSeries: ["#99d2e7", "#ff6666"],
+  ledgerSeries: ["#5dc1ff", "#ff7474"],
 } as const;

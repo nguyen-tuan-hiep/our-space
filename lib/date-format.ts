@@ -23,17 +23,6 @@ export function formatAppDateTime(
   }).format(new Date(value));
 }
 
-export function formatAppMonthLong(
-  value: string | Date,
-  timeZone = appTimeZone,
-) {
-  return new Intl.DateTimeFormat("en-SG", {
-    month: "long",
-    year: "numeric",
-    timeZone,
-  }).format(new Date(value));
-}
-
 export function formatAppMonthShort(
   value: string | Date,
   timeZone = appTimeZone,

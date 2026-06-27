@@ -13,14 +13,12 @@ import { Edit2, Trash2, EllipsisVertical } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { AvatarIcon } from "@/components/avatar-icon";
 import { expenseCategoryColors, formatCurrency } from "@/lib/constants";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { IndividualExpense } from "@/lib/types";
 
 interface ExpenseFeedProps {
 	title: string;
-	titleAvatarValue?: string | null;
 	expenses: IndividualExpense[];
 	currentUserId: string;
 	readOnly: boolean;
@@ -30,7 +28,6 @@ interface ExpenseFeedProps {
 
 export function ExpenseFeed({
 	title,
-	titleAvatarValue,
 	expenses,
 	currentUserId,
 	readOnly,
@@ -44,7 +41,6 @@ export function ExpenseFeed({
 	const [expanded, setExpanded] = useState(false);
 	const [pending, startTransition] = useTransition();
 
-	// State quản lý Menu cho từng hàng chi tiêu
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const [activeExpense, setActiveExpense] = useState<IndividualExpense | null>(
 		null,
@@ -89,11 +85,6 @@ export function ExpenseFeed({
 						<span className="font-serif text-2xl leading-none whitespace-nowrap">
 							{title}
 						</span>
-						<AvatarIcon
-							value={titleAvatarValue ?? null}
-							label={title}
-							className="grid size-6 place-items-center rounded-full text-lg leading-6"
-						/>
 					</div>
 				</div>
 			</div>
@@ -122,7 +113,6 @@ export function ExpenseFeed({
 											{formatCurrency(expense.amount, expense.currency)}
 										</p>
 
-										{/* Menu 3 chấm dọc thay thế cho cụm button cũ */}
 										{canEdit && (
 											<IconButton
 												aria-label="more"
@@ -152,7 +142,7 @@ export function ExpenseFeed({
 									</div>
 								</div>
 
-								<div className="my-2	 flex flex-wrap items-center gap-2">
+								<div className="my-2 flex flex-wrap items-center gap-2">
 									<Chip
 										size="small"
 										label={expense.category}
@@ -177,40 +167,41 @@ export function ExpenseFeed({
 				)}
 			</div>
 
-			{/* Menu Dropdown dùng chung cho toàn bộ list */}
-			<Menu
-				id="expense-menu"
-				anchorEl={anchorEl}
-				open={menuOpen}
-				onClose={handleMenuClose}
-				anchorOrigin={{
-					vertical: "bottom",
-					horizontal: "right",
-				}}
-				transformOrigin={{
-					vertical: "top",
-					horizontal: "right",
-				}}
-			>
-				<MenuItem onClick={handleEditClick}>
-					<ListItemIcon>
-						<Edit2 size={15} />
-					</ListItemIcon>
-					<ListItemText>Edit</ListItemText>
-				</MenuItem>
-				<MenuItem
-					onClick={handleDeleteClick}
-					className="text-danger"
+			{!readOnly ? (
+				<Menu
+					id="expense-menu"
+					anchorEl={anchorEl}
+					open={menuOpen}
+					onClose={handleMenuClose}
+					anchorOrigin={{
+						vertical: "bottom",
+						horizontal: "right",
+					}}
+					transformOrigin={{
+						vertical: "top",
+						horizontal: "right",
+					}}
 				>
-					<ListItemIcon>
-						<Trash2
-							size={15}
-							className="text-danger"
-						/>
-					</ListItemIcon>
-					<ListItemText>Delete</ListItemText>
-				</MenuItem>
-			</Menu>
+					<MenuItem onClick={handleEditClick}>
+						<ListItemIcon>
+							<Edit2 size={15} />
+						</ListItemIcon>
+						<ListItemText>Edit</ListItemText>
+					</MenuItem>
+					<MenuItem
+						onClick={handleDeleteClick}
+						className="text-danger"
+					>
+						<ListItemIcon>
+							<Trash2
+								size={15}
+								className="text-danger"
+							/>
+						</ListItemIcon>
+						<ListItemText>Delete</ListItemText>
+					</MenuItem>
+				</Menu>
+			) : null}
 
 			{expenses.length > 3 ? (
 				<div className="mt-5">

@@ -24,7 +24,6 @@ import { useSnackbar } from "notistack";
 import { signOut } from "@/app/actions";
 import type { IndividualExpense, Profile, SharedNote } from "@/lib/types";
 import { NoteCard } from "@/components/notes/note-card";
-import { AvatarIcon } from "@/components/avatar-icon";
 import { NotificationPermissionButton } from "@/components/notifications/notification-permission-button";
 import { locationSettings } from "@/lib/constants";
 import { themeColors } from "@/lib/theme-colors";
@@ -117,7 +116,7 @@ export function DashboardClient({
 	const [mobileMenuAnchor, setMobileMenuAnchor] = useState<HTMLElement | null>(
 		null,
 	);
-	const [activeSection, setActiveSection] = useState<"notes" | "finance">(
+	const [activeSection, setActiveSection] = useState<"notes" | "finances">(
 		"notes",
 	);
 	const [filterRange, setFilterRange] = useState<FilterRange>("week");
@@ -132,6 +131,8 @@ export function DashboardClient({
 	const [pending, startTransition] = useTransition();
 	const profileLocation = locationSettings[profile.country_code];
 	const profileTimeZone = profileLocation.timeZone;
+	const profileAvatar = profile.avatar_url ?? "🙂";
+	const partnerAvatar = partner.avatar_url ?? "🙂";
 	const relationshipStats = useMemo(
 		() => getRelationshipStats(clock, profileTimeZone),
 		[clock, profileTimeZone],
@@ -289,7 +290,6 @@ export function DashboardClient({
 					sizes="100vw"
 					className="object-cover opacity-75"
 				/>
-				{/* <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/20 to-black/30" /> */}
 				<div className="container-page relative flex min-h-[50svh] flex-col justify-between py-5 sm:py-7">
 					<header className="flex items-center justify-between gap-4 border-b border-paper/25 pb-5 sm:items-start">
 						<div className="flex min-w-0 items-start gap-4">
@@ -309,11 +309,9 @@ export function DashboardClient({
 						</div>
 						<div className="flex min-w-0 items-center justify-end gap-2 sm:gap-3">
 							<div className="flex min-w-0 items-center gap-2 sm:gap-3">
-								<AvatarIcon
-									value={profile.avatar_url}
-									label={profile.display_name}
-									className="hidden size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl shadow-lg backdrop-blur-md sm:grid"
-								/>
+								<div className="hidden size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl shadow-lg backdrop-blur-md sm:grid">
+									{profileAvatar}
+								</div>
 								<div className="min-w-0 text-right leading-tight sm:text-left">
 									<p className="font-serif text-sm font-semibold">
 										{profile.display_name}
@@ -331,11 +329,7 @@ export function DashboardClient({
 									onClick={(event) => setMobileMenuAnchor(event.currentTarget)}
 									className="grid size-9 shrink-0 place-items-center rounded-full border border-paper/70 bg-black/35 p-0 shadow-lg transition hover:bg-black/50 sm:hidden"
 								>
-									<AvatarIcon
-										value={profile.avatar_url}
-										label={profile.display_name}
-										className="grid size-full place-items-center rounded-full text-xl leading-none"
-									/>
+									{profileAvatar}
 								</button>
 							</div>
 							<Menu
@@ -542,7 +536,6 @@ export function DashboardClient({
 					<div className="grid gap-5 pt-3">
 						<div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 							<div>
-								{/* <p className="eyebrow">Shared notes</p> */}
 								<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
 									Shared notes
 								</h2>
@@ -559,7 +552,6 @@ export function DashboardClient({
 						<div className="grid gap-5 md:grid-cols-3 xl:grid-cols-4">
 							{filteredNotes.length ? (
 								filteredNotes.map((note) => (
-									// <div className="shadow-lg">
 									<NoteCard
 										key={note.id}
 										note={note}
@@ -571,7 +563,6 @@ export function DashboardClient({
 											setNoteOpen(true);
 										}}
 									/>
-									// </div>
 								))
 							) : (
 								<p className="border border-neutral-200 bg-paper p-6 text-neutral-500 md:col-span-3 xl:col-span-4">
@@ -584,12 +575,8 @@ export function DashboardClient({
 					<div className="grid gap-5 pt-3">
 						<div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 							<div>
-								{/* <p className="eyebrow">Finance</p> */}
 								<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
-									{/* {filterRange === "week"
-										? "Weekly ledgers"
-											: "Monthly ledgers"} */}
-										Finance overview
+									Finance overview
 								</h2>
 							</div>
 							<Button
@@ -614,8 +601,7 @@ export function DashboardClient({
 						/>
 						<div className="grid gap-6 xl:grid-cols-2">
 							<ExpenseFeed
-								title="My ledger"
-								titleAvatarValue={profile.avatar_url}
+								title={`My ledger ${profileAvatar}`}
 								expenses={myExpenses}
 								currentUserId={profile.id}
 								readOnly={false}
@@ -626,8 +612,7 @@ export function DashboardClient({
 								}}
 							/>
 							<ExpenseFeed
-								title={`${partner.display_name}'s ledger`}
-								titleAvatarValue={partner.avatar_url}
+								title={`${partner.display_name}'s ledger ${partnerAvatar}`}
 								expenses={partnerExpenses}
 								currentUserId={profile.id}
 								readOnly

@@ -8,10 +8,9 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Edit2, Trash2, EllipsisVertical } from "lucide-react"; // Đã đổi sang EllipsisVertical ở đây
+import { Edit2, Trash2, EllipsisVertical } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { deleteNote } from "@/app/actions";
-import { AvatarIcon } from "@/components/avatar-icon";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
 
@@ -54,7 +53,6 @@ export function NoteCard({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  // State quản lý Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
@@ -98,13 +96,9 @@ export function NoteCard({
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] uppercase tracking-[0.1em] text-neutral-600">
             <span>From</span>
             <span className="font-semibold">
-              {note.author?.display_name ?? "Partner"}
+              {note.author?.display_name ?? "Partner"}{" "}
+              {note.author?.avatar_url ?? "🙂"}
             </span>
-            <AvatarIcon
-              value={note.author?.avatar_url ?? null}
-              label={note.author?.display_name ?? "Partner"}
-              className="grid size-4 shrink-0 place-items-center rounded-full text-[13px] leading-none"
-            />
           </div>
           <div className="text-[12px] text-neutral-400">
             {formatAppDateTime(note.created_at, timeZone)}
@@ -114,7 +108,6 @@ export function NoteCard({
           </h3>
         </div>
 
-        {/* Nút 3 chấm dọc sử dụng EllipsisVertical từ lucide-react */}
         {canEdit && (
           <div className="shrink-0 -mt-1 -mr-2">
             <IconButton
