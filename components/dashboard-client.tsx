@@ -315,7 +315,7 @@ export function DashboardClient({
 									className="hidden size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl shadow-lg backdrop-blur-md sm:grid"
 								/>
 								<div className="min-w-0 text-right leading-tight sm:text-left">
-									<p className="truncate font-serif text-sm font-semibold">
+									<p className="font-serif text-sm font-semibold">
 										{profile.display_name}
 									</p>
 									<p className="text-xs text-paper/70">
