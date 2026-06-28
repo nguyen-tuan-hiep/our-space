@@ -1,0 +1,1 @@
+grant select on public.app_settings to service_role;

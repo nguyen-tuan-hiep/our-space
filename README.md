@@ -303,13 +303,48 @@ curl -sS -X POST \
 Expected response:
 
 ```json
-{"ok":true,"skipped":true}
+{ "ok": true, "skipped": true }
 ```
 
 The production function URL is:
 
 ```txt
 https://uojaxhmrfhbtthypugwq.functions.supabase.co/send-push-notification
+```
+
+### Anniversary Reminder Webhook
+
+This repository also includes a second Edge Function named `notify-on-anniversary-reminder`.
+It checks `public.app_settings.anniversary_date` for each couple and sends push reminders at:
+
+- 7 days before
+- 3 days before
+- 1 day before
+- on the anniversary date
+
+Deploy it with the same secrets as the main notification function:
+
+```bash
+supabase functions deploy notify-on-anniversary-reminder \
+  --project-ref uojaxhmrfhbtthypugwq \
+  --no-verify-jwt
+```
+
+The function URL is:
+
+```txt
+https://uojaxhmrfhbtthypugwq.functions.supabase.co/notify-on-anniversary-reminder
+```
+
+It accepts the same `x-webhook-secret` header or `?x-webhook-secret=...` query parameter.
+
+For a daily scheduler, point your cron or external webhook caller at this URL and send a POST request once per day. A manual smoke test can pass a test date in the body:
+
+```bash
+curl -sS -X POST \
+  'https://uojaxhmrfhbtthypugwq.functions.supabase.co/notify-on-anniversary-reminder?x-webhook-secret=89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d' \
+  -H 'Content-Type: application/json' \
+  -d '{"date":"2026-06-28T00:00:00.000Z"}'
 ```
 
 ### Database Grants
@@ -320,6 +355,7 @@ The Edge Function uses `SUPABASE_SERVICE_ROLE_KEY` to fetch sender and receiver 
 grant select, update on public.profiles to service_role;
 grant select on public.notes to service_role;
 grant select on public.individual_expenses to service_role;
+grant select on public.app_settings to service_role;
 ```
 
 If the function returns this error, the grants are missing:
@@ -386,10 +422,10 @@ from public.profiles;
 Useful browser console checks:
 
 ```js
-const oneSignal = await window.__oneSignalInitPromise
-oneSignal.Notifications.permission
-oneSignal.User.PushSubscription.id
-window.OneSignal?.User.PushSubscription.id
+const oneSignal = await window.__oneSignalInitPromise;
+oneSignal.Notifications.permission;
+oneSignal.User.PushSubscription.id;
+window.OneSignal?.User.PushSubscription.id;
 ```
 
 On iPhone, Web Push works only in an installed standalone PWA:
@@ -401,8 +437,8 @@ On iPhone, Web Push works only in an installed standalone PWA:
 5. Confirm:
 
 ```js
-window.navigator.standalone === true
-"serviceWorker" in navigator === true
+window.navigator.standalone === true;
+"serviceWorker" in navigator === true;
 ```
 
 If the body of notification message is changed, redeploy the Edge Function and test again using command:
