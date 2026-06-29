@@ -491,7 +491,7 @@ export function DashboardClient({
 					<div className="flex-1 flex flex-col justify-between">
 						<div className="">
 							<p className="eyebrow !text-paper/70">
-								A little love in every line.
+								Love in every line.
 							</p>
 							{/* <h1 className="mt-4 max-w-[10ch] font-serif text-3xl lg:text-5xl leading-[0.95] ">
 								A private place for both of us.
