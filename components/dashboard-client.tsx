@@ -508,7 +508,7 @@ export function DashboardClient({
 							<h1 className="max-w-[10ch] font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl leading-1 mb-2 sm:mb-6">
 								A private place for us.
 							</h1>
-							<div className="grid max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(18rem,1.2fr)]">
+							<div className="grid max-w-3xl gap-3 grid-cols-2">
 								<div className="bg-black/20 p-4 backdrop-blur-sm rounded-lg">
 									<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 										Days together
