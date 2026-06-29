@@ -17,7 +17,6 @@ export interface Profile {
   email: string | null;
   display_name: string;
   avatar_url: string | null;
-  onesignal_subscription_id: string | null;
   country_code: LocationCode;
   currency: CurrencyCode;
   time_zone: string;

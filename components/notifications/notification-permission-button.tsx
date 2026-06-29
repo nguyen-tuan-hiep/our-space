@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import { Bell, BellOff } from "lucide-react";
@@ -34,16 +34,9 @@ export function NotificationPermissionButton({
   onDone,
 }: NotificationPermissionButtonProps) {
   const { enqueueSnackbar } = useSnackbar();
-  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
-  const subscriptionIdRef = useRef<string | null>(null);
-  const [optedIn, setOptedIn] = useState(false);
+  const [enabled, setEnabled] = useState(false);
   const [supported, setSupported] = useState(true);
   const [pending, setPending] = useState(false);
-
-  const enabled = useMemo(
-    () => Boolean(subscriptionId) && optedIn,
-    [optedIn, subscriptionId],
-  );
 
   useEffect(() => {
     if (!isOneSignalConfigured() || !("serviceWorker" in navigator)) {
@@ -67,9 +60,7 @@ export function NotificationPermissionButton({
           isOptedIn: boolean,
         ) => {
           if (cancelled) return;
-          setOptedIn(isOptedIn);
-          subscriptionIdRef.current = id;
-          setSubscriptionId(id);
+          setEnabled(Boolean(id) && isOptedIn);
         };
 
         const currentId = oneSignal.User.PushSubscription.id;
@@ -133,9 +124,7 @@ export function NotificationPermissionButton({
         );
       }
 
-      subscriptionIdRef.current = currentSubscriptionId;
-      setSubscriptionId(currentSubscriptionId);
-      setOptedIn(true);
+      setEnabled(true);
       enqueueSnackbar("Notifications enabled.", { variant: "success" });
       onDone?.();
     } catch (error) {
@@ -163,9 +152,7 @@ export function NotificationPermissionButton({
         }
       }
 
-      subscriptionIdRef.current = null;
-      setSubscriptionId(null);
-      setOptedIn(false);
+      setEnabled(false);
       enqueueSnackbar("Notifications turned off.", { variant: "success" });
       onDone?.();
     } catch (error) {

@@ -5,12 +5,6 @@ type AppSettingsRow = {
   anniversary_date: string | null;
 };
 
-type Profile = {
-  id: string;
-  display_name: string;
-  avatar_url: string | null;
-};
-
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const oneSignalAppId = Deno.env.get("ONESIGNAL_APP_ID");
@@ -98,19 +92,6 @@ function getReminderMessage(daysUntil: number) {
   }
 }
 
-async function getProfile(id: string) {
-  if (!supabase) throw new Error("Supabase client is not configured.");
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, display_name, avatar_url")
-    .eq("id", id)
-    .maybeSingle<Profile>();
-
-  if (error) throw new Error(error.message);
-  return data;
-}
-
 async function listReminderTargets(now: Date) {
   if (!supabase) throw new Error("Supabase client is not configured.");
 
@@ -128,7 +109,7 @@ async function listReminderTargets(now: Date) {
     anniversaryDate: string;
     daysUntil: number;
     message: string;
-    recipients: Profile[];
+    recipientExternalIds: string[];
   }> = [];
 
   for (const row of data ?? []) {
@@ -144,22 +125,12 @@ async function listReminderTargets(now: Date) {
     const message = getReminderMessage(daysUntil);
     if (!message) continue;
 
-    const profiles = await Promise.all(
-      coupleProfileIds.map((profileId) => getProfile(profileId)),
-    );
-
-    const recipients = profiles.filter(
-      (profile): profile is Profile => Boolean(profile),
-    );
-
-    if (!recipients.length) continue;
-
     targets.push({
       settingsId: row.id,
       anniversaryDate: row.anniversary_date,
       daysUntil,
       message,
-      recipients,
+      recipientExternalIds: [...coupleProfileIds],
     });
   }
 
@@ -249,7 +220,7 @@ Deno.serve(async (request) => {
 
     for (const target of targets) {
       const oneSignalResponse = await sendOneSignalNotification({
-        recipientExternalIds: target.recipients.map((recipient) => recipient.id),
+        recipientExternalIds: target.recipientExternalIds,
         title: "Anniversary reminder",
         body: target.message,
         url: appUrl,

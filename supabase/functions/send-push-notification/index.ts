@@ -90,15 +90,11 @@ async function buildNotification(payload: WebhookPayload) {
     const noteId = getString(record, "id");
     if (!authorId || !recipientId) return null;
 
-    const [author, recipient] = await Promise.all([
-      getProfile(authorId),
-      getProfile(recipientId),
-    ]);
-
-    if (!author || !recipient) return null;
+    const author = await getProfile(authorId);
+    if (!author) return null;
 
     return {
-      recipientExternalId: recipient.id,
+      recipientExternalId: recipientId,
       title: "New note",
       body: `${getProfileLabel(author)} just wrote a new note for you!`,
       url: `${appUrl}/?note=${noteId ?? ""}`,
@@ -120,11 +116,8 @@ async function buildNotification(payload: WebhookPayload) {
     const owner = await getProfile(ownerId);
     if (!owner?.partner_id) return null;
 
-    const partner = await getProfile(owner.partner_id);
-    if (!partner) return null;
-
     return {
-      recipientExternalId: partner.id,
+      recipientExternalId: owner.partner_id,
       title: "New transaction",
       body: `${getProfileLabel(owner)} created a new transaction "${expenseTitle}"!`,
       url: `${appUrl}/?expense=${expenseId ?? ""}`,
@@ -132,7 +125,7 @@ async function buildNotification(payload: WebhookPayload) {
         type: "expense",
         expense_id: expenseId,
         owner_id: ownerId,
-        recipient_id: partner.id,
+        recipient_id: owner.partner_id,
       },
     };
   }

@@ -24,7 +24,6 @@ create table public.profiles (
   email text,
   display_name text not null,
   avatar_url text,
-  onesignal_subscription_id text,
   country_code text not null,
   currency text not null,
   time_zone text not null default 'UTC',

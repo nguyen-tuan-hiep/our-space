@@ -425,7 +425,6 @@ Useful browser console checks:
 const oneSignal = await window.__oneSignalInitPromise;
 oneSignal.Notifications.permission;
 oneSignal.User.PushSubscription.id;
-window.OneSignal?.User.PushSubscription.id;
 ```
 
 On iPhone, Web Push works only in an installed standalone PWA:
