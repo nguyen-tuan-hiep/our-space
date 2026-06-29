@@ -9,7 +9,6 @@ type Profile = {
   id: string;
   display_name: string;
   avatar_url: string | null;
-  onesignal_subscription_id: string | null;
 };
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -104,7 +103,7 @@ async function getProfile(id: string) {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, avatar_url, onesignal_subscription_id")
+    .select("id, display_name, avatar_url")
     .eq("id", id)
     .maybeSingle<Profile>();
 
@@ -150,7 +149,7 @@ async function listReminderTargets(now: Date) {
     );
 
     const recipients = profiles.filter(
-      (profile): profile is Profile => Boolean(profile?.onesignal_subscription_id),
+      (profile): profile is Profile => Boolean(profile),
     );
 
     if (!recipients.length) continue;
@@ -168,7 +167,7 @@ async function listReminderTargets(now: Date) {
 }
 
 async function sendOneSignalNotification(notification: {
-  subscriptionIds: string[];
+  recipientExternalIds: string[];
   title: string;
   body: string;
   url: string;
@@ -178,15 +177,18 @@ async function sendOneSignalNotification(notification: {
     throw new Error("OneSignal is not configured.");
   }
 
-  const response = await fetch("https://onesignal.com/api/v1/notifications", {
+  const response = await fetch("https://api.onesignal.com/notifications", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${oneSignalRestApiKey}`,
+      Authorization: `Key ${oneSignalRestApiKey}`,
     },
     body: JSON.stringify({
       app_id: oneSignalAppId,
-      include_subscription_ids: notification.subscriptionIds,
+      include_aliases: {
+        external_id: notification.recipientExternalIds,
+      },
+      target_channel: "push",
       headings: { en: notification.title },
       contents: { en: notification.body },
       url: notification.url,
@@ -247,9 +249,7 @@ Deno.serve(async (request) => {
 
     for (const target of targets) {
       const oneSignalResponse = await sendOneSignalNotification({
-        subscriptionIds: target.recipients
-          .map((recipient) => recipient.onesignal_subscription_id)
-          .filter((value): value is string => Boolean(value)),
+        recipientExternalIds: target.recipients.map((recipient) => recipient.id),
         title: "Anniversary reminder",
         body: target.message,
         url: appUrl,

@@ -13,7 +13,6 @@ type Profile = {
   display_name: string;
   avatar_url: string | null;
   partner_id: string | null;
-  onesignal_subscription_id: string | null;
 };
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -69,7 +68,7 @@ async function getProfile(id: string) {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, avatar_url, partner_id, onesignal_subscription_id")
+    .select("id, display_name, avatar_url, partner_id")
     .eq("id", id)
     .maybeSingle<Profile>();
 
@@ -96,10 +95,10 @@ async function buildNotification(payload: WebhookPayload) {
       getProfile(recipientId),
     ]);
 
-    if (!author || !recipient?.onesignal_subscription_id) return null;
+    if (!author || !recipient) return null;
 
     return {
-      subscriptionId: recipient.onesignal_subscription_id,
+      recipientExternalId: recipient.id,
       title: "New note",
       body: `${getProfileLabel(author)} just wrote a new note for you!`,
       url: `${appUrl}/?note=${noteId ?? ""}`,
@@ -122,10 +121,10 @@ async function buildNotification(payload: WebhookPayload) {
     if (!owner?.partner_id) return null;
 
     const partner = await getProfile(owner.partner_id);
-    if (!partner?.onesignal_subscription_id) return null;
+    if (!partner) return null;
 
     return {
-      subscriptionId: partner.onesignal_subscription_id,
+      recipientExternalId: partner.id,
       title: "New transaction",
       body: `${getProfileLabel(owner)} created a new transaction "${expenseTitle}"!`,
       url: `${appUrl}/?expense=${expenseId ?? ""}`,
@@ -142,21 +141,24 @@ async function buildNotification(payload: WebhookPayload) {
 }
 
 async function sendOneSignalNotification(notification: {
-  subscriptionId: string;
+  recipientExternalId: string;
   title: string;
   body: string;
   url: string;
   data: Record<string, unknown>;
 }) {
-  const response = await fetch("https://onesignal.com/api/v1/notifications", {
+  const response = await fetch("https://api.onesignal.com/notifications", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${oneSignalRestApiKey}`,
+      Authorization: `Key ${oneSignalRestApiKey}`,
     },
     body: JSON.stringify({
       app_id: oneSignalAppId,
-      include_subscription_ids: [notification.subscriptionId],
+      include_aliases: {
+        external_id: [notification.recipientExternalId],
+      },
+      target_channel: "push",
       headings: { en: notification.title },
       contents: { en: notification.body },
       url: notification.url,

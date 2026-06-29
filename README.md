@@ -249,10 +249,10 @@ When the user taps the button:
 1. OneSignal initializes with `NEXT_PUBLIC_ONESIGNAL_APP_ID`.
 2. The SDK calls `OneSignal.login(profile.id)` to link the web subscription to the Supabase user ID.
 3. The OneSignal prompt and native browser permission prompt are shown.
-4. The current `OneSignal.User.PushSubscription.id` is saved to `profiles.onesignal_subscription_id`.
-5. Future subscription changes update the same profile column.
+4. The current browser subscription is linked to the profile id as OneSignal's `external_id`.
+5. Every enabled device for the same profile id can receive the same notification.
 
-The mobile notification option lives in the avatar menu. The desktop/tablet notification button lives in the dashboard toolbar. Turning notifications off calls OneSignal `optOut()` when available and clears `profiles.onesignal_subscription_id`.
+The mobile notification option lives in the avatar menu. The desktop/tablet notification button lives in the dashboard toolbar. Turning notifications off calls OneSignal `optOut()` for the current browser/device only.
 
 ### Edge Function Deploy
 
@@ -397,9 +397,9 @@ The function also accepts the secret as a query parameter, which is useful if th
 https://uojaxhmrfhbtthypugwq.functions.supabase.co/send-push-notification?x-webhook-secret=89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d
 ```
 
-When a note row is inserted, the function reads `record.recipient_id`, fetches that profile's `onesignal_subscription_id`, and sends `[author display name] just wrote a new note for you!`.
+When a note row is inserted, the function reads `record.recipient_id`, targets that profile id as OneSignal `external_id`, and sends `[author display name] just wrote a new note for you!`.
 
-When an expense row is inserted, the function reads `record.owner_id`, finds that owner's `partner_id`, fetches the partner's `onesignal_subscription_id`, and sends a transaction notification.
+When an expense row is inserted, the function reads `record.owner_id`, finds that owner's `partner_id`, targets the partner profile id as OneSignal `external_id`, and sends a transaction notification.
 
 ### Testing
 
@@ -407,15 +407,15 @@ When an expense row is inserted, the function reads `record.owner_id`, finds tha
 2. Confirm Vercel has `NEXT_PUBLIC_ONESIGNAL_APP_ID=d27ba552-6618-4673-9914-6cb8e637d287`.
 3. Open `https://dailymoments.vercel.app` on a supported browser.
 4. Sign in and tap `Enable notifications`.
-5. Confirm that `profiles.onesignal_subscription_id` is populated in Supabase.
-6. Confirm OneSignal Dashboard -> Audience -> Subscriptions shows the device as subscribed.
+5. Confirm OneSignal Dashboard -> Audience -> Subscriptions shows the device as subscribed with the profile id as external id.
+6. Repeat steps 3-5 on another device with the same profile.
 7. Sign in as the other partner and create a note or transaction.
-8. Lock the receiving device and confirm the notification appears.
+8. Lock both receiving devices and confirm the notification appears on both.
 
 Useful SQL checks:
 
 ```sql
-select id, display_name, onesignal_subscription_id
+select id, display_name
 from public.profiles;
 ```
 
