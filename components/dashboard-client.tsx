@@ -684,7 +684,7 @@ export function DashboardClient({
 						</div>
 					</div>
 				) : (
-					<div className="grid gap-5 pt-3">
+					<div className="grid gap-5">
 						<div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
