@@ -16,7 +16,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { createNote, updateNote } from "@/app/actions";
 import {
 	defaultTimeZone,
@@ -31,6 +31,7 @@ interface NoteDialogProps {
 	recipient: Profile;
 	senderTimeZone: string;
 	note?: SharedNote | null;
+	onSaved?: (note: SharedNote) => void;
 }
 
 export function NoteDialog({
@@ -39,8 +40,9 @@ export function NoteDialog({
 	recipient,
 	senderTimeZone,
 	note,
+	onSaved,
 }: NoteDialogProps) {
-	const { enqueueSnackbar } = useSnackbar();
+	const toast = useToast();
 	const [pending, startTransition] = useTransition();
 	const [unlockDate, setUnlockDate] = useState<dayjs.Dayjs | null>(dayjs());
 	const [unlockTime, setUnlockTime] = useState<dayjs.Dayjs | null>(dayjs());
@@ -106,10 +108,13 @@ export function NoteDialog({
 							const result = note
 								? await updateNote(formData)
 								: await createNote(formData);
-							enqueueSnackbar(result.message, {
+							toast(result.message, {
 								variant: result.ok ? "success" : "error",
 							});
-							if (result.ok) handleClose();
+							if (result.ok) {
+								onSaved?.(result.note);
+								handleClose();
+							}
 						});
 					}}
 				>

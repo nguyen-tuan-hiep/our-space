@@ -8,7 +8,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import type { User } from "@supabase/supabase-js";
 import { createMissingProfile } from "@/app/actions";
 import {
@@ -26,7 +26,7 @@ interface CreateProfileFormProps {
 
 export function CreateProfileForm({ user }: CreateProfileFormProps) {
   const router = useRouter();
-  const { enqueueSnackbar } = useSnackbar();
+  const toast = useToast();
   const [pending, startTransition] = useTransition();
   const browserTimeZone = useMemo(() => {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || defaultTimeZone;
@@ -49,7 +49,7 @@ export function CreateProfileForm({ user }: CreateProfileFormProps) {
       action={(formData) => {
         startTransition(async () => {
           const result = await createMissingProfile(formData);
-          enqueueSnackbar(result.message, {
+          toast(result.message, {
             variant: result.ok ? "success" : "error",
           });
           if (result.ok) router.refresh();

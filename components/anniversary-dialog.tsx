@@ -10,7 +10,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { updateAnniversary } from "@/app/actions";
 
 interface AnniversaryDialogProps {
@@ -24,7 +24,7 @@ export function AnniversaryDialog({
   onClose,
   currentDate,
 }: AnniversaryDialogProps) {
-  const { enqueueSnackbar } = useSnackbar();
+  const toast = useToast();
   const [pending, startTransition] = useTransition();
   const [anniversaryDate, setAnniversaryDate] = useState<dayjs.Dayjs | null>(
     dayjs(currentDate),
@@ -54,7 +54,7 @@ export function AnniversaryDialog({
             );
             startTransition(async () => {
               const result = await updateAnniversary(formData);
-              enqueueSnackbar(result.message, {
+              toast(result.message, {
                 variant: result.ok ? "success" : "error",
               });
               if (result.ok) handleClose();

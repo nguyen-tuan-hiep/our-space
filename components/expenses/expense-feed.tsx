@@ -10,7 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { Edit2, Trash2, EllipsisVertical } from "lucide-react";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { expenseCategoryColors, formatCurrency } from "@/lib/constants";
@@ -34,7 +34,7 @@ export function ExpenseFeed({
 	timeZone,
 	onEdit,
 }: ExpenseFeedProps) {
-	const { enqueueSnackbar } = useSnackbar();
+	const toast = useToast();
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [expenseToDelete, setExpenseToDelete] =
 		useState<IndividualExpense | null>(null);
@@ -233,7 +233,7 @@ export function ExpenseFeed({
 					setDeletingId(expenseToDelete.id);
 					startTransition(async () => {
 						const result = await deleteExpense(expenseToDelete.id);
-						enqueueSnackbar(result.message, {
+						toast(result.message, {
 							variant: result.ok ? "success" : "error",
 						});
 						setDeletingId(null);

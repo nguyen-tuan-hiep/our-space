@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import Button from "@mui/material/Button";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { acceptPairingRequest } from "@/app/actions";
 import type { PairingRequest } from "@/lib/types";
 
@@ -14,7 +14,7 @@ interface PairingRequestsProps {
 
 export function PairingRequests({ profileId, requests }: PairingRequestsProps) {
 	const router = useRouter();
-	const { enqueueSnackbar } = useSnackbar();
+	const toast = useToast();
 	const [pending, startTransition] = useTransition();
 
 	if (!requests.length) return null;
@@ -54,7 +54,7 @@ export function PairingRequests({ profileId, requests }: PairingRequestsProps) {
 									startTransition(async () => {
 										const result = await acceptPairingRequest(formData);
 
-										enqueueSnackbar(result.message, {
+										toast(result.message, {
 											variant: result.ok ? "success" : "error",
 										});
 

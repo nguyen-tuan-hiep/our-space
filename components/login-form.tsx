@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import Tab from "@mui/material/Tab";
@@ -12,7 +12,7 @@ import { signInWithPassword, signUpWithPassword } from "@/app/actions";
 
 export function LoginForm() {
   const router = useRouter();
-  const { enqueueSnackbar } = useSnackbar();
+  const toast = useToast();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [pending, startTransition] = useTransition();
 
@@ -38,7 +38,7 @@ export function LoginForm() {
               mode === "signin"
                 ? await signInWithPassword(formData)
                 : await signUpWithPassword(formData);
-            enqueueSnackbar(result.message, {
+            toast(result.message, {
               variant: result.ok ? "success" : "error",
             });
             if (result.ok) {

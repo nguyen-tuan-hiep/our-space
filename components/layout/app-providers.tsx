@@ -2,8 +2,8 @@
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { SnackbarProvider } from "notistack";
 import { RuntimeErrorGuard } from "@/components/layout/runtime-error-guard";
+import { ToastProvider } from "@/components/toast";
 import { themeColors } from "@/lib/theme-colors";
 
 const theme = createTheme({
@@ -121,15 +121,11 @@ const theme = createTheme({
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider theme={theme}>
-      <SnackbarProvider
-        maxSnack={4}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        autoHideDuration={3200}
-      >
+      <ToastProvider>
         <CssBaseline />
         <RuntimeErrorGuard />
         {children}
-      </SnackbarProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

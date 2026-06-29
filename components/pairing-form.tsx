@@ -4,12 +4,12 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { pairWithCode } from "@/app/actions";
 
 export function PairingForm() {
 	const router = useRouter();
-	const { enqueueSnackbar } = useSnackbar();
+	const toast = useToast();
 	const [pending, startTransition] = useTransition();
 
 	return (
@@ -19,7 +19,7 @@ export function PairingForm() {
 				startTransition(async () => {
 					const result = await pairWithCode(formData);
 
-					enqueueSnackbar(result.message, {
+					toast(result.message, {
 						variant: result.ok ? "success" : "error",
 					});
 

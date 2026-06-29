@@ -17,7 +17,12 @@ import {
   normalizeCurrencyCode,
   normalizeGroupedNumberInput,
 } from "@/lib/constants";
-import type { CurrencyCode, ExpenseCategory } from "@/lib/types";
+import type {
+  CurrencyCode,
+  ExpenseCategory,
+  IndividualExpense,
+  SharedNote,
+} from "@/lib/types";
 
 type ExpensePayload = {
   title: string;
@@ -373,17 +378,23 @@ export async function createNote(formData: FormData) {
   const recipientId = stringValue(formData, "recipient_id");
   const unlockAt = nullableStringValue(formData, "unlock_at");
 
-  const { error } = await supabase.from("notes").insert({
-    author_id: user.id,
-    recipient_id: recipientId,
-    title: stringValue(formData, "title"),
-    content: stringValue(formData, "content"),
-    unlock_at: unlockAt ? new Date(unlockAt).toISOString() : null,
-  });
+  const { data, error } = await supabase
+    .from("notes")
+    .insert({
+      author_id: user.id,
+      recipient_id: recipientId,
+      title: stringValue(formData, "title"),
+      content: stringValue(formData, "content"),
+      unlock_at: unlockAt ? new Date(unlockAt).toISOString() : null,
+    })
+    .select(
+      "*, author:profiles!notes_author_id_fkey(id, display_name, avatar_url, currency), recipient:profiles!notes_recipient_id_fkey(id, display_name, avatar_url, currency)",
+    )
+    .single<SharedNote>();
 
   if (error) return fail(error.message);
   revalidatePath("/");
-  return ok("Note created successfully!");
+  return { ...ok("Note created successfully!"), note: data };
 }
 
 export async function updateNote(formData: FormData) {
@@ -391,18 +402,22 @@ export async function updateNote(formData: FormData) {
   const noteId = stringValue(formData, "id");
   const unlockAt = nullableStringValue(formData, "unlock_at");
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("notes")
     .update({
       title: stringValue(formData, "title"),
       content: stringValue(formData, "content"),
       unlock_at: unlockAt ? new Date(unlockAt).toISOString() : null,
     })
-    .eq("id", noteId);
+    .eq("id", noteId)
+    .select(
+      "*, author:profiles!notes_author_id_fkey(id, display_name, avatar_url, currency), recipient:profiles!notes_recipient_id_fkey(id, display_name, avatar_url, currency)",
+    )
+    .single<SharedNote>();
 
   if (error) return fail(error.message);
   revalidatePath("/");
-  return ok("Note updated successfully!");
+  return { ...ok("Note updated successfully!"), note: data };
 }
 
 export async function deleteNote(noteId: string) {
@@ -419,14 +434,18 @@ export async function createExpense(formData: FormData) {
   const expense = getExpensePayload(formData);
   if (!expense.ok) return expense;
 
-  const { error } = await supabase.from("individual_expenses").insert({
-    owner_id: user.id,
-    ...expense.payload,
-  });
+  const { data, error } = await supabase
+    .from("individual_expenses")
+    .insert({
+      owner_id: user.id,
+      ...expense.payload,
+    })
+    .select("*")
+    .single<IndividualExpense>();
 
   if (error) return fail(error.message);
   revalidatePath("/");
-  return ok("Expense logged successfully!");
+  return { ...ok("Expense logged successfully!"), expense: data };
 }
 
 export async function updateExpense(formData: FormData) {
@@ -435,14 +454,16 @@ export async function updateExpense(formData: FormData) {
   const expense = getExpensePayload(formData);
   if (!expense.ok) return expense;
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("individual_expenses")
     .update(expense.payload)
-    .eq("id", expenseId);
+    .eq("id", expenseId)
+    .select("*")
+    .single<IndividualExpense>();
 
   if (error) return fail(error.message);
   revalidatePath("/");
-  return ok("Transaction updated!");
+  return { ...ok("Transaction updated!"), expense: data };
 }
 
 export async function deleteExpense(expenseId: string) {

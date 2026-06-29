@@ -8,7 +8,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { ImageUp } from "lucide-react";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { updateHeroImage } from "@/app/actions";
 
 interface HeroImageDialogProps {
@@ -22,7 +22,7 @@ export function HeroImageDialog({
   onClose,
   currentUrl,
 }: HeroImageDialogProps) {
-  const { enqueueSnackbar } = useSnackbar();
+  const toast = useToast();
   const [pending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
   const [heroUrl, setHeroUrl] = useState(currentUrl);
@@ -50,7 +50,7 @@ export function HeroImageDialog({
       setHeroUrl(result.secure_url);
       setPublicId(result.public_id);
     } catch (error) {
-      enqueueSnackbar(
+      toast(
         error instanceof Error ? error.message : "Upload failed",
         {
           variant: "error",
@@ -98,7 +98,7 @@ export function HeroImageDialog({
           formData.set("hero_image_public_id", publicId);
           startTransition(async () => {
             const result = await updateHeroImage(formData);
-            enqueueSnackbar(result.message, {
+            toast(result.message, {
               variant: result.ok ? "success" : "error",
             });
             if (result.ok) handleClose();

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import { Bell, BellOff } from "lucide-react";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { getOneSignal, isOneSignalConfigured } from "@/lib/onesignal-web";
 
 interface NotificationPermissionButtonProps {
@@ -33,7 +33,7 @@ export function NotificationPermissionButton({
   variant = "button",
   onDone,
 }: NotificationPermissionButtonProps) {
-  const { enqueueSnackbar } = useSnackbar();
+  const toast = useToast();
   const [enabled, setEnabled] = useState(false);
   const [supported, setSupported] = useState(true);
   const [pending, setPending] = useState(false);
@@ -95,7 +95,7 @@ export function NotificationPermissionButton({
 
       if (!oneSignal.Notifications.isPushSupported()) {
         setSupported(false);
-        enqueueSnackbar("This browser does not support web push notifications.", {
+        toast("This browser does not support web push notifications.", {
           variant: "warning",
         });
         return;
@@ -106,7 +106,7 @@ export function NotificationPermissionButton({
       if (!oneSignal.Notifications.permission) {
         const granted = await oneSignal.Notifications.requestPermission();
         if (!granted) {
-          enqueueSnackbar("Notifications were not enabled.", { variant: "info" });
+          toast("Notifications were not enabled.", { variant: "info" });
           return;
         }
       }
@@ -125,16 +125,16 @@ export function NotificationPermissionButton({
       }
 
       setEnabled(true);
-      enqueueSnackbar("Notifications enabled.", { variant: "success" });
+      toast("Notifications enabled.", { variant: "success" });
       onDone?.();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Could not enable notifications.";
-      enqueueSnackbar(message, { variant: "error" });
+      toast(message, { variant: "error" });
     } finally {
       setPending(false);
     }
-  }, [enqueueSnackbar, onDone, userId]);
+  }, [toast, onDone, userId]);
 
   const handleDisableNotifications = useCallback(async () => {
     setPending(true);
@@ -153,18 +153,18 @@ export function NotificationPermissionButton({
       }
 
       setEnabled(false);
-      enqueueSnackbar("Notifications turned off.", { variant: "success" });
+      toast("Notifications turned off.", { variant: "success" });
       onDone?.();
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
           : "Could not turn off notifications.";
-      enqueueSnackbar(message, { variant: "error" });
+      toast(message, { variant: "error" });
     } finally {
       setPending(false);
     }
-  }, [enqueueSnackbar, onDone, userId]);
+  }, [toast, onDone, userId]);
 
   const handleToggleNotifications = enabled
     ? handleDisableNotifications

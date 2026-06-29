@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -22,11 +22,12 @@ import {
 	Settings,
 	WalletCards,
 } from "lucide-react";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { signOut } from "@/app/actions";
 import type { IndividualExpense, Profile, SharedNote } from "@/lib/types";
 import { NoteCard } from "@/components/notes/note-card";
 import { NotificationPermissionButton } from "@/components/notifications/notification-permission-button";
+import { logoutOneSignal } from "@/lib/onesignal-web";
 import {
 	type FilterRange,
 	getPeriodOptions,
@@ -108,7 +109,7 @@ export function DashboardClient({
 	exchangeRateSource,
 }: DashboardClientProps) {
 	const router = useRouter();
-	const { enqueueSnackbar } = useSnackbar();
+	const toast = useToast();
 	const [noteOpen, setNoteOpen] = useState(false);
 	const [expenseOpen, setExpenseOpen] = useState(false);
 	const [profileOpen, setProfileOpen] = useState(false);
@@ -129,6 +130,10 @@ export function DashboardClient({
 	const [editingNote, setEditingNote] = useState<SharedNote | null>(null);
 	const [editingExpense, setEditingExpense] =
 		useState<IndividualExpense | null>(null);
+	const [notes, setNotes] = useState(initialNotes);
+	const [expenses, setExpenses] = useState(initialExpenses);
+	const ignoredRealtimeNoteIds = useRef(new Set<string>());
+	const ignoredRealtimeExpenseIds = useRef(new Set<string>());
 	const [pending, startTransition] = useTransition();
 	const profileTimeZone = profile.time_zone;
 	const profileAvatar = profile.avatar_url ?? "🙂";
@@ -148,17 +153,17 @@ export function DashboardClient({
 
 	const periodOptions = useMemo(() => {
 		return getPeriodOptions(
-			initialNotes,
-			initialExpenses,
+			notes,
+			expenses,
 			initialClock,
 			profileTimeZone,
 			filterRange,
 		);
 	}, [
+		expenses,
 		filterRange,
 		initialClock,
-		initialExpenses,
-		initialNotes,
+		notes,
 		profileTimeZone,
 	]);
 
@@ -179,15 +184,15 @@ export function DashboardClient({
 
 	const filteredNotes = useMemo(
 		() =>
-			initialNotes.filter((note) =>
+			notes.filter((note) =>
 				isInPeriod(note.created_at, activePeriod, profileTimeZone, filterRange),
 			),
-		[activePeriod, filterRange, initialNotes, profileTimeZone],
+		[activePeriod, filterRange, notes, profileTimeZone],
 	);
 
 	const filteredExpenses = useMemo(
 		() =>
-			initialExpenses.filter((expense) =>
+			expenses.filter((expense) =>
 				isInPeriod(
 					expense.transaction_date,
 					activePeriod,
@@ -195,7 +200,7 @@ export function DashboardClient({
 					filterRange,
 				),
 			),
-		[activePeriod, filterRange, initialExpenses, profileTimeZone],
+		[activePeriod, expenses, filterRange, profileTimeZone],
 	);
 
 	const myExpenses = useMemo(
@@ -207,11 +212,69 @@ export function DashboardClient({
 		[filteredExpenses, partner.id],
 	);
 	const chartExpenses =
-		filterRange === "week" ? filteredExpenses : initialExpenses;
+		filterRange === "week" ? filteredExpenses : expenses;
 	const coupleProfiles = useMemo<[Profile, Profile]>(
 		() => [profile, partner],
 		[profile, partner],
 	);
+
+	useEffect(() => {
+		setNotes(initialNotes);
+	}, [initialNotes]);
+
+	useEffect(() => {
+		setExpenses(initialExpenses);
+	}, [initialExpenses]);
+
+	const upsertLocalNote = (savedNote: SharedNote) => {
+		ignoredRealtimeNoteIds.current.add(savedNote.id);
+		window.setTimeout(() => {
+			ignoredRealtimeNoteIds.current.delete(savedNote.id);
+		}, 10000);
+
+		setNotes((currentNotes) => {
+			const nextNotes = currentNotes.some((note) => note.id === savedNote.id)
+				? currentNotes.map((note) =>
+						note.id === savedNote.id ? savedNote : note,
+					)
+				: [savedNote, ...currentNotes];
+
+			return nextNotes.sort(
+				(first, second) =>
+					new Date(second.created_at).getTime() -
+					new Date(first.created_at).getTime(),
+			);
+		});
+	};
+
+	const upsertLocalExpense = (savedExpense: IndividualExpense) => {
+		ignoredRealtimeExpenseIds.current.add(savedExpense.id);
+		window.setTimeout(() => {
+			ignoredRealtimeExpenseIds.current.delete(savedExpense.id);
+		}, 10000);
+
+		setExpenses((currentExpenses) => {
+			const nextExpenses = currentExpenses.some(
+				(expense) => expense.id === savedExpense.id,
+			)
+				? currentExpenses.map((expense) =>
+						expense.id === savedExpense.id ? savedExpense : expense,
+					)
+				: [savedExpense, ...currentExpenses];
+
+			return nextExpenses.sort(
+				(first, second) =>
+					new Date(second.transaction_date).getTime() -
+					new Date(first.transaction_date).getTime(),
+			);
+		});
+	};
+
+	const getRealtimeRecordId = (
+		record: Record<string, unknown> | null | undefined,
+	) => {
+		return typeof record?.id === "string" ? record.id : null;
+	};
 
 	useEffect(() => {
 		let cleanup: (() => void) | undefined;
@@ -228,12 +291,32 @@ export function DashboardClient({
 					.on(
 						"postgres_changes",
 						{ event: "*", schema: "public", table: "notes" },
-						() => router.refresh(),
+						(payload) => {
+							const noteId =
+								getRealtimeRecordId(payload.new) ??
+								getRealtimeRecordId(payload.old);
+
+							if (noteId && ignoredRealtimeNoteIds.current.has(noteId)) return;
+							router.refresh();
+						},
 					)
 					.on(
 						"postgres_changes",
 						{ event: "*", schema: "public", table: "individual_expenses" },
-						() => router.refresh(),
+						(payload) => {
+							const expenseId =
+								getRealtimeRecordId(payload.new) ??
+								getRealtimeRecordId(payload.old);
+
+							if (
+								expenseId &&
+								ignoredRealtimeExpenseIds.current.has(expenseId)
+							) {
+								return;
+							}
+
+							router.refresh();
+						},
 					)
 					.on(
 						"postgres_changes",
@@ -279,7 +362,13 @@ export function DashboardClient({
 	const mobileMenuOpen = Boolean(mobileMenuAnchor);
 	const handleSignOut = () => {
 		startTransition(async () => {
-			enqueueSnackbar("Logged out successfully!", {
+			try {
+				await logoutOneSignal();
+			} catch (error) {
+				console.warn("OneSignal logout failed", error);
+			}
+
+			toast("Logged out successfully!", {
 				variant: "success",
 			});
 			await signOut();
@@ -625,6 +714,7 @@ export function DashboardClient({
 					recipient={partner}
 					senderTimeZone={profileTimeZone}
 					note={editingNote}
+					onSaved={upsertLocalNote}
 				/>
 			) : null}
 			{expenseOpen ? (
@@ -636,6 +726,7 @@ export function DashboardClient({
 					}}
 					profile={profile}
 					expense={editingExpense}
+					onSaved={upsertLocalExpense}
 				/>
 			) : null}
 			{profileOpen ? (

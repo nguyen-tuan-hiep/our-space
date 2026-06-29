@@ -13,7 +13,7 @@ import Select from "@mui/material/Select";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { updatePassword, updateProfile } from "@/app/actions";
 import {
 	avatarOptions,
@@ -33,7 +33,7 @@ interface ProfileDialogProps {
 }
 
 export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
-	const { enqueueSnackbar } = useSnackbar();
+	const toast = useToast();
 	const [tab, setTab] = useState<"profile" | "password">("profile");
 	const [avatar, setAvatar] = useState(profile.avatar_url || "💖");
 	const countryNames = useMemo(() => {
@@ -90,7 +90,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 							formData.set("avatar", avatar);
 							startTransition(async () => {
 								const result = await updateProfile(formData);
-								enqueueSnackbar(result.message, {
+								toast(result.message, {
 									variant: result.ok ? "success" : "error",
 								});
 								if (result.ok) handleClose();
@@ -207,7 +207,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 						action={(formData) => {
 							startTransition(async () => {
 								const result = await updatePassword(formData);
-								enqueueSnackbar(result.message, {
+								toast(result.message, {
 									variant: result.ok ? "success" : "error",
 								});
 								if (result.ok) onClose();

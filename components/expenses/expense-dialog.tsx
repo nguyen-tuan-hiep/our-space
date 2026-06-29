@@ -16,7 +16,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { createExpense, updateExpense } from "@/app/actions";
 import {
   expenseCategories,
@@ -34,6 +34,7 @@ interface ExpenseDialogProps {
   onClose: () => void;
   profile: Profile;
   expense?: IndividualExpense | null;
+  onSaved?: (expense: IndividualExpense) => void;
 }
 
 export function ExpenseDialog({
@@ -41,8 +42,9 @@ export function ExpenseDialog({
   onClose,
   profile,
   expense,
+  onSaved,
 }: ExpenseDialogProps) {
-  const { enqueueSnackbar } = useSnackbar();
+  const toast = useToast();
   const [pending, startTransition] = useTransition();
   const [transactionDate, setTransactionDate] = useState<dayjs.Dayjs | null>(
     dayjs(),
@@ -126,11 +128,12 @@ export function ExpenseDialog({
                 ? await updateExpense(formData)
                 : await createExpense(formData);
 
-              enqueueSnackbar(result.message, {
+              toast(result.message, {
                 variant: result.ok ? "success" : "error",
               });
 
               if (result.ok) {
+                onSaved?.(result.expense);
                 handleClose();
               }
             });

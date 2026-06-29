@@ -9,7 +9,7 @@ import IconButton from "@mui/material/IconButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { Edit2, Trash2, EllipsisVertical } from "lucide-react";
-import { useSnackbar } from "notistack";
+import { useToast } from "@/components/toast";
 import { deleteNote } from "@/app/actions";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
@@ -48,7 +48,7 @@ export function NoteCard({
   timeZone,
   onEdit,
 }: NoteCardProps) {
-  const { enqueueSnackbar } = useSnackbar();
+  const toast = useToast();
   const [now, setNow] = useState(initialNowMs);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -166,7 +166,7 @@ export function NoteCard({
           onConfirm={() =>
             startTransition(async () => {
               const result = await deleteNote(note.id);
-              enqueueSnackbar(result.message, {
+              toast(result.message, {
                 variant: result.ok ? "success" : "error",
               });
               if (result.ok) setConfirmOpen(false);

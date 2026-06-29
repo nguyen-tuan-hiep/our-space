@@ -1,9 +1,8 @@
-import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import type { User } from "@supabase/supabase-js";
-import { signOut } from "@/app/actions";
 import { PairingForm } from "@/components/pairing-form";
 import { PairingRequests } from "@/components/pairing-requests";
+import { SignOutButton } from "@/components/sign-out-button";
 import { SetupRealtimeRefresh } from "@/components/setup-realtime-refresh";
 import type { PairingRequest, Profile } from "@/lib/types";
 
@@ -92,18 +91,7 @@ export function SetupRequired({
 
 					{profile ? (
 						<div className="mt-6 flex justify-center">
-							<form
-								action={signOut}
-								className="w-full sm:w-auto"
-							>
-								<Button
-									type="submit"
-									variant="contained"
-									className="min-h-12 w-full text-white hover:bg-neutral-700 sm:w-56"
-								>
-									Logout
-								</Button>
-							</form>
+							<SignOutButton className="min-h-12 w-full text-white hover:bg-neutral-700 sm:w-56" />
 						</div>
 					) : null}
 				</Card>

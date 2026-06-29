@@ -10,7 +10,7 @@ Our Space is a private Next.js application for a couple. It combines shared time
 - Supabase Auth, PostgreSQL, Row Level Security, and Realtime
 - Cloudinary for hero images, profile pictures, and note attachments
 - Recharts for finance trend and category charts
-- notistack for toast notifications
+- Local `components/toast.tsx` provider for toast notifications
 
 ## Project Structure
 
@@ -164,7 +164,7 @@ MUI handles interactive and form-heavy surfaces:
 - MUI `ThemeProvider`
 - MUI `CssBaseline`
 - MUI X `LocalizationProvider`
-- notistack `SnackbarProvider`
+- local `ToastProvider`
 
 This keeps Tailwind utility classes predictable while still allowing MUI theme overrides.
 

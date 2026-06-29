@@ -12,6 +12,7 @@ export interface OneSignalWebSdk {
     notifyButton?: { enable: boolean };
   }): Promise<void>;
   login(externalId: string): Promise<void>;
+  logout(): Promise<void>;
   Slidedown: {
     promptPush(options?: { force?: boolean }): Promise<void> | void;
   };
@@ -132,4 +133,12 @@ export async function getOneSignal(userId?: string) {
   });
 
   return oneSignalInitPromise;
+}
+
+export async function logoutOneSignal() {
+  if (!isOneSignalConfigured()) return;
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+
+  const oneSignal = await getOneSignal();
+  await oneSignal.logout();
 }
