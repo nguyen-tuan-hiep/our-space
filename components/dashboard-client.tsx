@@ -19,12 +19,18 @@ import {
 	Menu as MenuIcon,
 	NotebookPen,
 	Plus,
+	Quote,
 	Settings,
 	WalletCards,
 } from "lucide-react";
 import { useToast } from "@/components/toast";
 import { signOut } from "@/app/actions";
-import type { IndividualExpense, Profile, SharedNote } from "@/lib/types";
+import type {
+	IndividualExpense,
+	LoveQuote,
+	Profile,
+	SharedNote,
+} from "@/lib/types";
 import { NoteCard } from "@/components/notes/note-card";
 import { NotificationPermissionButton } from "@/components/notifications/notification-permission-button";
 import { logoutOneSignal } from "@/lib/onesignal-web";
@@ -93,6 +99,7 @@ interface DashboardClientProps {
 	exchangeRates: Record<string, number> | null;
 	exchangeRateUpdatedAt: string | null;
 	exchangeRateSource: string | null;
+	dailyLoveQuote: LoveQuote;
 }
 
 export function DashboardClient({
@@ -107,6 +114,7 @@ export function DashboardClient({
 	exchangeRates,
 	exchangeRateUpdatedAt,
 	exchangeRateSource,
+	dailyLoveQuote,
 }: DashboardClientProps) {
 	const router = useRouter();
 	const toast = useToast();
@@ -490,9 +498,7 @@ export function DashboardClient({
 
 					<div className="flex-1 flex flex-col justify-between">
 						<div className="">
-							<p className="eyebrow !text-paper/70">
-								Love in every line.
-							</p>
+							<p className="eyebrow !text-paper/70">Love in every line.</p>
 							{/* <h1 className="mt-4 max-w-[10ch] font-serif text-3xl lg:text-5xl leading-[0.95] ">
 								A private place for both of us.
 							</h1> */}
@@ -502,7 +508,7 @@ export function DashboardClient({
 							<h1 className="max-w-[10ch] font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl leading-1 mb-2 sm:mb-6">
 								A private place for us.
 							</h1>
-							<div className="grid max-w-3xl gap-3 grid-cols-2">
+							<div className="grid max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(18rem,1.2fr)]">
 								<div className="bg-black/20 p-4 backdrop-blur-sm rounded-lg">
 									<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 										Days together
@@ -531,7 +537,29 @@ export function DashboardClient({
 				</div>
 			</section>
 
-			<section className="container-page p-5 sm:py-8">
+			<section className="container-page py-5 sm:py-8">
+				<div className="flex gap-3 flex-row items-center sm:gap-4">
+					<div className="grid size-10 shrink-0 place-items-center rounded-full bg-paper text-neutral-700">
+						<Quote size={18} className="block"/>
+					</div>
+					<div className="min-w-0">
+						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+							Quote of the day
+						</p>
+						<p className="mt-2 font-serif text-xl leading-snug text-neutral-900 sm:text-2xl">
+							"{dailyLoveQuote.text}"
+						</p>
+						{dailyLoveQuote.author ? (
+							<p className="mt-2 text-sm text-neutral-500">
+								{dailyLoveQuote.author}
+							</p>
+						) : null}
+					</div>
+				</div>
+			{/* </section>
+
+			<section className="container-page p-5 pt-0 sm:py-8"> */}
+				<hr className="border-t border-neutral-400 my-5" />
 				<div className="-mx-5 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
 					<div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
 						{/* <hr className="border-t border-neutral-300 my-5" /> */}

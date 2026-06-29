@@ -5,6 +5,7 @@ import { SetupRequired } from "@/components/setup-required";
 import { getAppSession, getAuthenticatedSession } from "@/lib/auth";
 import { getDashboardData } from "@/lib/data";
 import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
+import { getDailyLoveQuote } from "@/lib/love-quotes";
 import type { PairingRequest, Profile } from "@/lib/types";
 
 export default async function HomePage() {
@@ -64,7 +65,10 @@ export default async function HomePage() {
     );
   }
 
-  const data = await getDashboardData(appSession.profile, appSession.partner);
+  const [data, dailyLoveQuote] = await Promise.all([
+    getDashboardData(appSession.profile, appSession.partner),
+    getDailyLoveQuote(appSession.profile.time_zone),
+  ]);
   const heroImageUrl =
     data.settings?.hero_image_url ??
     process.env.NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL ??
@@ -85,6 +89,7 @@ export default async function HomePage() {
       exchangeRates={data.exchangeRate.rates}
       exchangeRateUpdatedAt={data.exchangeRate.updatedAt}
       exchangeRateSource={data.exchangeRate.source}
+      dailyLoveQuote={dailyLoveQuote}
     />
   );
 }

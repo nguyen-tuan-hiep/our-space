@@ -78,6 +78,12 @@ export interface IndividualExpense {
   owner?: Pick<Profile, "id" | "display_name" | "avatar_url" | "currency">;
 }
 
+export interface LoveQuote {
+  text: string;
+  author: string | null;
+  source: string;
+}
+
 export interface AppSession {
   session: Session;
   user: User;
