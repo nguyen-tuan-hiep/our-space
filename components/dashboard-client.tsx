@@ -159,13 +159,7 @@ export function DashboardClient({
 			profileTimeZone,
 			filterRange,
 		);
-	}, [
-		expenses,
-		filterRange,
-		initialClock,
-		notes,
-		profileTimeZone,
-	]);
+	}, [expenses, filterRange, initialClock, notes, profileTimeZone]);
 
 	const [selectedPeriod, setSelectedPeriod] = useState(
 		() => periodOptions[0]?.value ?? "",
@@ -211,8 +205,7 @@ export function DashboardClient({
 		() => filteredExpenses.filter((expense) => expense.owner_id === partner.id),
 		[filteredExpenses, partner.id],
 	);
-	const chartExpenses =
-		filterRange === "week" ? filteredExpenses : expenses;
+	const chartExpenses = filterRange === "week" ? filteredExpenses : expenses;
 	const coupleProfiles = useMemo<[Profile, Profile]>(
 		() => [profile, partner],
 		[profile, partner],
@@ -377,7 +370,7 @@ export function DashboardClient({
 
 	return (
 		<main className="min-h-svh overflow-x-clip bg-bg">
-			<section className="relative min-h-[50svh] bg-black text-white">
+			<section className="relative min-h-[50svh] sm:min-h-[70svh] bg-black text-white">
 				<Image
 					src={heroImageUrl}
 					alt="Our Space hero"
@@ -387,8 +380,8 @@ export function DashboardClient({
 					sizes="100vw"
 					className="object-cover opacity-75"
 				/>
-				<div className="container-page relative flex min-h-[50svh] flex-col justify-between py-5 sm:py-7">
-					<header className="flex items-center justify-between gap-4 border-b border-paper/25 pb-5 sm:items-start">
+				<div className="container-page relative flex min-h-[50svh] sm:min-h-[70svh] flex-col py-5 sm:py-7">
+					<header className="flex items-center justify-between gap-4 border-b border-paper/25 pb-1">
 						<div className="flex min-w-0 items-start gap-4">
 							<div className="flex items-center gap-2">
 								<Image
@@ -494,35 +487,44 @@ export function DashboardClient({
 							</Menu>
 						</div>
 					</header>
-					<div className="max-w-5xl pt-4 sm:pt-0">
-						<p className="eyebrow !text-paper/70">
-							A little love in every line.
-						</p>
-						<h1 className="mt-4 max-w-[10ch] font-serif text-3xl lg:text-7xl leading-[0.95] ">
-							A private place for both of us.
-						</h1>
-						<div className="mt-20 grid max-w-3xl gap-3 grid-cols-2">
-							<div className="bg-black/20 p-4 backdrop-blur-sm rounded-lg">
-								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
-									Days together
-								</p>
-								<p className="mt-2 font-serif text-2xl leading-none sm:text-5xl">
-									{relationshipStats.daysTogether}
-								</p>
-								<p className="mt-2 text-sm text-paper/70">
-									Since {anniversaryLabel}
-								</p>
-							</div>
-							<div className="bg-black/20 p-4 backdrop-blur-sm rounded-lg">
-								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
-									Next anniversary
-								</p>
-								<p className="mt-2 font-serif text-2xl leading-none sm:text-5xl">
-									{relationshipStats.countdown}
-								</p>
-								<p className="mt-2 text-sm text-paper/70">
-									{relationshipStats.nextMonthlyLabel}
-								</p>
+
+					<div className="flex-1 flex flex-col justify-between">
+						<div className="">
+							<p className="eyebrow !text-paper/70">
+								A little love in every line.
+							</p>
+							{/* <h1 className="mt-4 max-w-[10ch] font-serif text-3xl lg:text-5xl leading-[0.95] ">
+								A private place for both of us.
+							</h1> */}
+						</div>
+
+						<div className="">
+							<h1 className="max-w-[10ch] font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl leading-1 mb-2 sm:mb-6">
+								A private place for us.
+							</h1>
+							<div className="grid max-w-3xl gap-3 grid-cols-2">
+								<div className="bg-black/20 p-4 backdrop-blur-sm rounded-lg">
+									<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
+										Days together
+									</p>
+									<p className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl">
+										{relationshipStats.daysTogether}
+									</p>
+									<p className="mt-2 text-sm text-paper/70">
+										Since {anniversaryLabel}
+									</p>
+								</div>
+								<div className="bg-black/20 p-4 backdrop-blur-sm rounded-lg">
+									<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
+										Next anniversary
+									</p>
+									<p className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl">
+										{relationshipStats.countdown}
+									</p>
+									<p className="mt-2 text-sm text-paper/70">
+										{relationshipStats.nextMonthlyLabel}
+									</p>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -530,8 +532,9 @@ export function DashboardClient({
 			</section>
 
 			<section className="container-page p-5 sm:py-8">
-				<div className="-mx-5 border-b border-neutral-200 bg-bg/95 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
+				<div className="-mx-5 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
 					<div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+						{/* <hr className="border-t border-neutral-300 my-5" /> */}
 						<ToggleButtonGroup
 							exclusive
 							value={activeSection}
@@ -612,8 +615,9 @@ export function DashboardClient({
 					</div>
 				</div>
 
+				<hr className="border-t border-neutral-400 my-5" />
 				{activeSection === "notes" ? (
-					<div className="grid gap-5 pt-3">
+					<div className="grid gap-5">
 						<div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
@@ -629,7 +633,7 @@ export function DashboardClient({
 								New note
 							</Button>
 						</div>
-						<div className="grid gap-5 md:grid-cols-3 xl:grid-cols-4">
+						<div className="grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 							{filteredNotes.length ? (
 								filteredNotes.map((note) => (
 									<NoteCard
