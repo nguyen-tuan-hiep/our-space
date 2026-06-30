@@ -513,7 +513,7 @@ export function DashboardClient({
 									<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 										Days together
 									</p>
-									<p className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl">
+									<p className="mt-2 font-serif text-2xl sm:text-4xl md:text-5xl">
 										{relationshipStats.daysTogether}
 									</p>
 									<p className="mt-2 text-sm text-paper/70">
@@ -524,7 +524,7 @@ export function DashboardClient({
 									<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 										Next anniversary
 									</p>
-									<p className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl">
+									<p className="mt-2 font-serif text-2xl sm:text-4xl md:text-5xl">
 										{relationshipStats.countdown}
 									</p>
 									<p className="mt-2 text-sm text-paper/70">
