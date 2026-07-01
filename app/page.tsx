@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DashboardClient } from "@/components/dashboard-client";
@@ -7,8 +8,17 @@ import { getDashboardData } from "@/lib/data";
 import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
 import { getDailyLoveQuote } from "@/lib/love-quotes";
 import type { PairingRequest, Profile } from "@/lib/types";
+import Loading from "./loading";
 
-export default async function HomePage() {
+export default function HomePage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+async function HomeContent() {
   const auth = await getAuthenticatedSession();
   if (!auth) redirect("/login");
 
