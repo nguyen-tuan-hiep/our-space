@@ -89,16 +89,11 @@ async function HomeContent() {
       profile={appSession.profile}
       partner={appSession.partner}
       initialNotes={data.notes}
-      initialExpenses={data.expenses}
       heroImageUrl={getOptimizedHeroImageUrl(heroImageUrl)}
       anniversaryDate={
         data.settings?.anniversary_date ?? new Date().toISOString().slice(0, 10)
       }
       currentTimeIso={new Date().toISOString()}
-      exchangeRatesBase={data.exchangeRate.ratesBase}
-      exchangeRates={data.exchangeRate.rates}
-      exchangeRateUpdatedAt={data.exchangeRate.updatedAt}
-      exchangeRateSource={data.exchangeRate.source}
       dailyLoveQuote={dailyLoveQuote}
     />
   );

@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { v2 as cloudinary } from "cloudinary";
 import { createClient } from "@/lib/supabase/server";
 import { getCoupleSettingsId } from "@/lib/couple-settings";
+import { getAppSession } from "@/lib/auth";
+import { getFinanceData } from "@/lib/data";
 import {
   defaultCountryCode,
   defaultCurrency,
@@ -476,4 +478,14 @@ export async function deleteExpense(expenseId: string) {
   if (error) return fail(error.message);
   revalidatePath("/");
   return ok("Transaction removed!");
+}
+
+export async function loadFinanceDashboardData() {
+  const appSession = await getAppSession();
+
+  if (!appSession?.partner) {
+    throw new Error("Please pair with your partner before viewing finances.");
+  }
+
+  return getFinanceData(appSession.profile, appSession.partner);
 }

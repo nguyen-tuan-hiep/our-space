@@ -2,6 +2,13 @@ import type { AppSettings } from "@/lib/types";
 
 const rateMaxAgeMs = 6 * 60 * 60 * 1000;
 const defaultRateBase = "USD";
+type ExchangeRateSettings = Pick<
+  AppSettings,
+  | "exchange_rates"
+  | "exchange_rates_base"
+  | "exchange_rate_updated_at"
+  | "exchange_rate_source"
+>;
 
 function isFresh(value: string | null) {
   if (!value) return false;
@@ -10,7 +17,7 @@ function isFresh(value: string | null) {
 }
 
 export function getExchangeRate(
-  settings: AppSettings | null,
+  settings: ExchangeRateSettings | null,
 ) {
   if (
     settings?.exchange_rates &&

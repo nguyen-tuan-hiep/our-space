@@ -8,41 +8,67 @@ import { getExchangeRate } from "@/lib/exchange-rates";
 import { createClient } from "@/lib/supabase/server";
 import { getCoupleSettingsId } from "@/lib/couple-settings";
 
+type DashboardSettings = Pick<AppSettings, "hero_image_url" | "anniversary_date">;
+type FinanceSettings = Pick<
+  AppSettings,
+  | "exchange_rates"
+  | "exchange_rates_base"
+  | "exchange_rate_updated_at"
+  | "exchange_rate_source"
+>;
+
 export async function getDashboardData(
   profile: Profile,
   partner: Profile | null,
 ) {
   const supabase = await createClient();
-  const participantIds = [profile.id, partner?.id].filter(Boolean) as string[];
   const settingsId = partner ? getCoupleSettingsId(profile, partner) : null;
 
-  const [{ data: notes }, { data: expenses }, { data: settings }] =
-    await Promise.all([
-      supabase
-        .from("notes")
-        .select(
-          "*, author:profiles!notes_author_id_fkey(id, display_name, avatar_url, currency), recipient:profiles!notes_recipient_id_fkey(id, display_name, avatar_url, currency)",
-        )
-        .or(`author_id.eq.${profile.id},recipient_id.eq.${profile.id}`)
-        .order("created_at", { ascending: false })
-        .returns<SharedNote[]>(),
-      supabase
-        .from("individual_expenses")
-        .select("*")
-        .in("owner_id", participantIds)
-        .order("transaction_date", { ascending: false })
-        .returns<IndividualExpense[]>(),
-      supabase
-        .from("app_settings")
-        .select("*")
-        .eq("id", settingsId ?? "main")
-        .maybeSingle<AppSettings>(),
-    ]);
+  const [{ data: notes }, { data: settings }] = await Promise.all([
+    supabase
+      .from("notes")
+      .select(
+        "*, author:profiles!notes_author_id_fkey(id, display_name, avatar_url, currency), recipient:profiles!notes_recipient_id_fkey(id, display_name, avatar_url, currency)",
+      )
+      .or(`author_id.eq.${profile.id},recipient_id.eq.${profile.id}`)
+      .order("created_at", { ascending: false })
+      .returns<SharedNote[]>(),
+    supabase
+      .from("app_settings")
+      .select("hero_image_url, anniversary_date")
+      .eq("id", settingsId ?? "main")
+      .maybeSingle<DashboardSettings>(),
+  ]);
 
   return {
     notes: notes ?? [],
-    expenses: expenses ?? [],
     settings: settings ?? null,
+  };
+}
+
+export async function getFinanceData(profile: Profile, partner: Profile) {
+  const supabase = await createClient();
+  const settingsId = getCoupleSettingsId(profile, partner);
+  const participantIds = [profile.id, partner.id];
+
+  const [{ data: expenses }, { data: settings }] = await Promise.all([
+    supabase
+      .from("individual_expenses")
+      .select("*")
+      .in("owner_id", participantIds)
+      .order("transaction_date", { ascending: false })
+      .returns<IndividualExpense[]>(),
+    supabase
+      .from("app_settings")
+      .select(
+        "exchange_rates, exchange_rates_base, exchange_rate_updated_at, exchange_rate_source",
+      )
+      .eq("id", settingsId)
+      .maybeSingle<FinanceSettings>(),
+  ]);
+
+  return {
+    expenses: expenses ?? [],
     exchangeRate: getExchangeRate(settings ?? null),
   };
 }

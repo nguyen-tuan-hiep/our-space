@@ -3,7 +3,14 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	useTransition,
+} from "react";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -24,7 +31,7 @@ import {
 	WalletCards,
 } from "lucide-react";
 import { useToast } from "@/components/toast";
-import { signOut } from "@/app/actions";
+import { loadFinanceDashboardData, signOut } from "@/app/actions";
 import type {
 	IndividualExpense,
 	LoveQuote,
@@ -91,14 +98,9 @@ interface DashboardClientProps {
 	profile: Profile;
 	partner: Profile;
 	initialNotes: SharedNote[];
-	initialExpenses: IndividualExpense[];
 	heroImageUrl: string;
 	anniversaryDate: string;
 	currentTimeIso: string;
-	exchangeRatesBase: string | null;
-	exchangeRates: Record<string, number> | null;
-	exchangeRateUpdatedAt: string | null;
-	exchangeRateSource: string | null;
 	dailyLoveQuote: LoveQuote;
 }
 
@@ -106,14 +108,9 @@ export function DashboardClient({
 	profile,
 	partner,
 	initialNotes,
-	initialExpenses,
 	heroImageUrl,
 	anniversaryDate,
 	currentTimeIso,
-	exchangeRatesBase,
-	exchangeRates,
-	exchangeRateUpdatedAt,
-	exchangeRateSource,
 	dailyLoveQuote,
 }: DashboardClientProps) {
 	const router = useRouter();
@@ -139,9 +136,25 @@ export function DashboardClient({
 	const [editingExpense, setEditingExpense] =
 		useState<IndividualExpense | null>(null);
 	const [notes, setNotes] = useState(initialNotes);
-	const [expenses, setExpenses] = useState(initialExpenses);
+	const [expenses, setExpenses] = useState<IndividualExpense[]>([]);
+	const [financeLoaded, setFinanceLoaded] = useState(false);
+	const [financeLoading, setFinanceLoading] = useState(false);
+	const [financeError, setFinanceError] = useState<string | null>(null);
+	const [exchangeRatesBase, setExchangeRatesBase] = useState<string | null>(null);
+	const [exchangeRates, setExchangeRates] = useState<Record<
+		string,
+		number
+	> | null>(null);
+	const [exchangeRateUpdatedAt, setExchangeRateUpdatedAt] = useState<
+		string | null
+	>(null);
+	const [exchangeRateSource, setExchangeRateSource] = useState<string | null>(
+		null,
+	);
 	const ignoredRealtimeNoteIds = useRef(new Set<string>());
 	const ignoredRealtimeExpenseIds = useRef(new Set<string>());
+	const financeLoadedRef = useRef(false);
+	const financeRequestId = useRef(0);
 	const [pending, startTransition] = useTransition();
 	const profileTimeZone = profile.time_zone;
 	const profileAvatar = profile.avatar_url ?? "🙂";
@@ -223,9 +236,46 @@ export function DashboardClient({
 		setNotes(initialNotes);
 	}, [initialNotes]);
 
+	const loadFinanceData = useCallback(async (options?: { silent?: boolean }) => {
+		const requestId = financeRequestId.current + 1;
+		financeRequestId.current = requestId;
+
+		if (!options?.silent) {
+			setFinanceLoading(true);
+		}
+		setFinanceError(null);
+
+		try {
+			const data = await loadFinanceDashboardData();
+			if (financeRequestId.current !== requestId) return;
+
+			setExpenses(data.expenses);
+			setExchangeRatesBase(data.exchangeRate.ratesBase);
+			setExchangeRates(data.exchangeRate.rates);
+			setExchangeRateUpdatedAt(data.exchangeRate.updatedAt);
+			setExchangeRateSource(data.exchangeRate.source);
+			setFinanceLoaded(true);
+			financeLoadedRef.current = true;
+		} catch (error) {
+			if (financeRequestId.current !== requestId) return;
+
+			const message =
+				error instanceof Error
+					? error.message
+					: "Finance data could not be loaded.";
+			setFinanceError(message);
+		} finally {
+			if (financeRequestId.current === requestId) {
+				setFinanceLoading(false);
+			}
+		}
+	}, []);
+
 	useEffect(() => {
-		setExpenses(initialExpenses);
-	}, [initialExpenses]);
+		if (activeSection === "finances" && !financeLoaded && !financeLoading) {
+			void loadFinanceData();
+		}
+	}, [activeSection, financeLoaded, financeLoading, loadFinanceData]);
 
 	const upsertLocalNote = (savedNote: SharedNote) => {
 		ignoredRealtimeNoteIds.current.add(savedNote.id);
@@ -316,7 +366,9 @@ export function DashboardClient({
 								return;
 							}
 
-							router.refresh();
+							if (financeLoadedRef.current) {
+								void loadFinanceData({ silent: true });
+							}
 						},
 					)
 					.on(
@@ -352,7 +404,7 @@ export function DashboardClient({
 			cancelScheduledConnect?.();
 			cleanup?.();
 		};
-	}, [router]);
+	}, [loadFinanceData, router]);
 
 	useEffect(() => {
 		const timer = window.setInterval(() => setClock(new Date()), 30000);
@@ -695,43 +747,63 @@ export function DashboardClient({
 								variant="contained"
 								startIcon={<Plus size={17} />}
 								className="min-h-11 w-full px-5 text-white hover:bg-neutral-700 sm:w-auto"
+								disabled={financeLoading && !financeLoaded}
 								onClick={() => setExpenseOpen(true)}
 							>
 								Log expense
 							</Button>
 						</div>
-						<FinanceCharts
-							expenses={filteredExpenses}
-							barExpenses={chartExpenses}
-							profiles={coupleProfiles}
-							exchangeRatesBase={exchangeRatesBase}
-							exchangeRates={exchangeRates}
-							exchangeRateUpdatedAt={exchangeRateUpdatedAt}
-							exchangeRateSource={exchangeRateSource}
-							timeZone={profileTimeZone}
-							filterRange={filterRange}
-							selectedPeriod={activePeriod}
-						/>
-						<div className="grid gap-6 xl:grid-cols-2">
-							<ExpenseFeed
-								title={`My ledger ${profileAvatar}`}
-								expenses={myExpenses}
-								currentUserId={profile.id}
-								readOnly={false}
-								timeZone={profileTimeZone}
-								onEdit={(expense) => {
-									setEditingExpense(expense);
-									setExpenseOpen(true);
-								}}
-							/>
-							<ExpenseFeed
-								title={`${partner.display_name}'s ledger ${partnerAvatar}`}
-								expenses={partnerExpenses}
-								currentUserId={profile.id}
-								readOnly
-								timeZone={profileTimeZone}
-							/>
-						</div>
+						{financeLoading && !financeLoaded ? (
+							<p className="border border-neutral-200 bg-paper p-6 text-neutral-500">
+								Loading finance data...
+							</p>
+						) : financeError ? (
+							<div className="grid gap-4 border border-neutral-200 bg-paper p-6 text-neutral-600">
+								<p>{financeError}</p>
+								<Button
+									variant="outlined"
+									className="w-full sm:w-fit"
+									onClick={() => void loadFinanceData()}
+								>
+									Try again
+								</Button>
+							</div>
+						) : (
+							<>
+								<FinanceCharts
+									expenses={filteredExpenses}
+									barExpenses={chartExpenses}
+									profiles={coupleProfiles}
+									exchangeRatesBase={exchangeRatesBase}
+									exchangeRates={exchangeRates}
+									exchangeRateUpdatedAt={exchangeRateUpdatedAt}
+									exchangeRateSource={exchangeRateSource}
+									timeZone={profileTimeZone}
+									filterRange={filterRange}
+									selectedPeriod={activePeriod}
+								/>
+								<div className="grid gap-6 xl:grid-cols-2">
+									<ExpenseFeed
+										title={`My ledger ${profileAvatar}`}
+										expenses={myExpenses}
+										currentUserId={profile.id}
+										readOnly={false}
+										timeZone={profileTimeZone}
+										onEdit={(expense) => {
+											setEditingExpense(expense);
+											setExpenseOpen(true);
+										}}
+									/>
+									<ExpenseFeed
+										title={`${partner.display_name}'s ledger ${partnerAvatar}`}
+										expenses={partnerExpenses}
+										currentUserId={profile.id}
+										readOnly
+										timeZone={profileTimeZone}
+									/>
+								</div>
+							</>
+						)}
 					</div>
 				)}
 			</section>
