@@ -1,12 +1,11 @@
 import { redirect } from "next/navigation";
-import type { Session, User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { AppSession, Profile } from "@/lib/types";
 
 type AuthenticatedSession = {
   supabase: Awaited<ReturnType<typeof createClient>>;
   user: User;
-  session: Session;
 };
 
 export async function getAuthenticatedSession() {
@@ -15,12 +14,9 @@ export async function getAuthenticatedSession() {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
 
-  if (userError || !user || !session) return null;
-  return { supabase, user, session };
+  if (userError || !user) return null;
+  return { supabase, user };
 }
 
 export async function getAppSession(
@@ -46,7 +42,6 @@ export async function getAppSession(
     : { data: null, error: null };
 
   return {
-    session: auth.session,
     user: auth.user,
     profile,
     partner: partnerError ? null : partner,

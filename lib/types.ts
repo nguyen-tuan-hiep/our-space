@@ -1,4 +1,4 @@
-import type { Session, User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 
 export type CurrencyCode = string;
 export type LocationCode = string;
@@ -85,7 +85,6 @@ export interface LoveQuote {
 }
 
 export interface AppSession {
-  session: Session;
   user: User;
   profile: Profile;
   partner: Profile | null;
