@@ -8,6 +8,10 @@ type AuthenticatedSession = {
   user: User;
 };
 
+type ProfileWithPartner = Profile & {
+  partner: Profile | null;
+};
+
 export async function getAuthenticatedSession() {
   const supabase = await createClient();
   const {
@@ -25,26 +29,42 @@ export async function getAppSession(
   const auth = existingAuth ?? (await getAuthenticatedSession());
   if (!auth) return null;
 
-  const { data: profile, error } = await auth.supabase
+  const { data: profileWithPartner, error } = await auth.supabase
+    .from("profiles")
+    .select("*, partner:profiles!profiles_partner_id_fkey(*)")
+    .eq("id", auth.user.id)
+    .single<ProfileWithPartner>();
+
+  if (!error && profileWithPartner) {
+    const { partner, ...profile } = profileWithPartner;
+
+    return {
+      user: auth.user,
+      profile,
+      partner,
+    };
+  }
+
+  const { data: profile, error: profileError } = await auth.supabase
     .from("profiles")
     .select("*")
     .eq("id", auth.user.id)
     .single<Profile>();
 
-  if (error || !profile) return null;
+  if (profileError || !profile) return null;
 
-  const { data: partner, error: partnerError } = profile.partner_id
+  const { data: partner } = profile.partner_id
     ? await auth.supabase
         .from("profiles")
         .select("*")
         .eq("id", profile.partner_id)
         .single<Profile>()
-    : { data: null, error: null };
+    : { data: null };
 
   return {
     user: auth.user,
     profile,
-    partner: partnerError ? null : partner,
+    partner,
   };
 }
 

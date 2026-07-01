@@ -1,11 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-
-type CookieToSet = {
-  name: string;
-  value: string;
-  options: Parameters<NextResponse["cookies"]["set"]>[2];
-};
 
 function isSupabaseAuthCookie(name: string) {
   return /^sb-.+-auth-token/.test(name);
@@ -18,16 +11,6 @@ function getSupabaseAuthCookieNames(request: NextRequest) {
     .filter(isSupabaseAuthCookie);
 }
 
-function clearSupabaseAuthCookies(
-  request: NextRequest,
-  response: NextResponse,
-) {
-  getSupabaseAuthCookieNames(request).forEach((name) => {
-    request.cookies.delete(name);
-    response.cookies.delete(name);
-  });
-}
-
 function redirectToLogin(request: NextRequest) {
   const login = request.nextUrl.clone();
   login.pathname = "/login";
@@ -36,47 +19,14 @@ function redirectToLogin(request: NextRequest) {
 }
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({ request });
   const hasAuthCookie = getSupabaseAuthCookieNames(request).length > 0;
 
   if (!hasAuthCookie) {
     if (request.nextUrl.pathname === "/") return redirectToLogin(request);
-    return response;
+    return NextResponse.next({ request });
   }
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
-        },
-      },
-    },
-  );
-
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    const login = redirectToLogin(request);
-    clearSupabaseAuthCookies(request, login);
-    return login;
-  }
-
-  return response;
+  return NextResponse.next({ request });
 }
 
 export const config = {
