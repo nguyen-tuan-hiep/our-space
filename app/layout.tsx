@@ -7,7 +7,7 @@ import { themeColors } from "@/lib/theme-colors";
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "600"],
   variable: "--font-sans",
   display: "swap",
 });
@@ -17,6 +17,7 @@ const merriweather = Merriweather({
   weight: ["400", "700"],
   variable: "--font-serif",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {

@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/login-form";
-import { getAppSession } from "@/lib/auth";
+import { getAuthenticatedSession } from "@/lib/auth";
 
 export default async function LoginPage() {
-  const appSession = await getAppSession();
-  if (appSession) redirect("/");
+  const auth = await getAuthenticatedSession();
+  if (auth) redirect("/");
 
   return (
     <main className="min-h-svh bg-paper">

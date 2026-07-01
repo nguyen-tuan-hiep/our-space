@@ -436,7 +436,8 @@ export function DashboardClient({
 					alt="Our Space hero"
 					fill
 					priority
-					quality={88}
+					fetchPriority="high"
+					quality={50}
 					sizes="100vw"
 					className="object-cover opacity-75"
 				/>
