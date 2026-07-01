@@ -12,7 +12,7 @@ export default async function HomePage() {
   const auth = await getAuthenticatedSession();
   if (!auth) redirect("/login");
 
-  const appSession = await getAppSession();
+  const appSession = await getAppSession(auth);
   if (!appSession) {
     const details: string[] = [];
     const { data: profile, error: profileError } = await auth.supabase

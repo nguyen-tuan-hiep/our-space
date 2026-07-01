@@ -3,20 +3,18 @@ import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
-import { OneSignalBootstrap } from "@/components/notifications/onesignal-bootstrap";
-import { ONESIGNAL_WEB_APP_ID } from "@/lib/onesignal-web";
 import { themeColors } from "@/lib/theme-colors";
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   variable: "--font-sans",
   display: "swap",
 });
 
 const merriweather = Merriweather({
   subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "700", "900"],
+  weight: ["400", "700"],
   variable: "--font-serif",
   display: "swap",
 });
@@ -54,41 +52,9 @@ export default function RootLayout({
         } as React.CSSProperties
       }
     >
-      <head>
-        <script
-          id="onesignal-sdk"
-          src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
-          defer
-        />
-        <script
-          id="onesignal-init"
-          dangerouslySetInnerHTML={{
-            __html: `
-            window.OneSignalDeferred = window.OneSignalDeferred || [];
-            window.__oneSignalInitPromise = new Promise(function(resolve, reject) {
-              window.OneSignalDeferred.push(async function(OneSignal) {
-                try {
-                  await OneSignal.init({
-                    appId: "${ONESIGNAL_WEB_APP_ID}",
-                    notifyButton: { enable: true }
-                  });
-                  window.OneSignal = OneSignal;
-                  window.__oneSignal = OneSignal;
-                  window.__oneSignalInitialized = true;
-                  resolve(OneSignal);
-                } catch (error) {
-                  reject(error);
-                }
-              });
-            });
-          `,
-          }}
-        />
-      </head>
       <body>
         <AppRouterCacheProvider>
           <AppProviders>
-            <OneSignalBootstrap />
             {children}
           </AppProviders>
         </AppRouterCacheProvider>

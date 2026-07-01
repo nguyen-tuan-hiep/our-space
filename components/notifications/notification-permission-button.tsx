@@ -48,9 +48,12 @@ export function NotificationPermissionButton({
     if (!supported) return;
 
     let cancelled = false;
+    const oneSignal = window.__oneSignalInitialized ? window.__oneSignal : null;
+    if (!oneSignal) return;
 
-    getOneSignal(userId)
-      .then((oneSignal) => {
+    void oneSignal
+      .login(userId)
+      .then(() => {
         if (cancelled) return;
 
         setSupported(oneSignal.Notifications.isPushSupported());
