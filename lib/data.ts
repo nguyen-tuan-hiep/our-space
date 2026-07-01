@@ -43,6 +43,6 @@ export async function getDashboardData(
     notes: notes ?? [],
     expenses: expenses ?? [],
     settings: settings ?? null,
-    exchangeRate: await getExchangeRate(settings ?? null, settingsId ?? "main"),
+    exchangeRate: getExchangeRate(settings ?? null),
   };
 }
