@@ -69,12 +69,11 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "Our Space 𑣲⋆",
-    startupImage: appleStartupImages,
     statusBarStyle: "default",
   },
   icons: {
     icon: "/icon.svg",
-    apple: "/splash/apple-icon-180.png",
+    apple: "/apple-touch-icon.png",
   },
 };
 
@@ -101,6 +100,23 @@ export default function RootLayout({
         } as React.CSSProperties
       }
     >
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Our Space 𑣲⋆" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="default"
+        />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        {appleStartupImages.map(({ url, media }) => (
+          <link
+            key={`${url}-${media}`}
+            rel="apple-touch-startup-image"
+            href={url}
+            media={media}
+          />
+        ))}
+      </head>
       <body>
         <AppProviders>{children}</AppProviders>
       </body>
