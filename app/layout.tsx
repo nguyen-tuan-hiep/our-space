@@ -45,15 +45,28 @@ const appleStartupImages = [
 ].flatMap(({ size, ratio, portrait }) => {
   const [deviceWidth, deviceHeight] = size.split("x");
   const [imageWidth, imageHeight] = portrait.split("-");
+  const portraitDeviceMedia =
+    `(device-width: ${deviceWidth}px) and ` +
+    `(device-height: ${deviceHeight}px) and ` +
+    `(-webkit-device-pixel-ratio: ${ratio})`;
+  const landscapeDeviceMedia =
+    `(device-width: ${deviceHeight}px) and ` +
+    `(device-height: ${deviceWidth}px) and ` +
+    `(-webkit-device-pixel-ratio: ${ratio})`;
+  const landscapeUrl = `/splash/apple-splash-${imageHeight}-${imageWidth}.jpg`;
 
   return [
     {
-      url: `/splash/apple-splash-${portrait}.png`,
-      media: `(device-width: ${deviceWidth}px) and (device-height: ${deviceHeight}px) and (-webkit-device-pixel-ratio: ${ratio}) and (orientation: portrait)`,
+      url: `/splash/apple-splash-${portrait}.jpg`,
+      media: `${portraitDeviceMedia} and (orientation: portrait)`,
     },
     {
-      url: `/splash/apple-splash-${imageHeight}-${imageWidth}.png`,
-      media: `(device-width: ${deviceHeight}px) and (device-height: ${deviceWidth}px) and (-webkit-device-pixel-ratio: ${ratio}) and (orientation: landscape)`,
+      url: landscapeUrl,
+      media: `${portraitDeviceMedia} and (orientation: landscape)`,
+    },
+    {
+      url: landscapeUrl,
+      media: `${landscapeDeviceMedia} and (orientation: landscape)`,
     },
   ];
 });
@@ -66,19 +79,14 @@ export const metadata: Metadata = {
     capable: true,
     title: "Our Space 𑣲⋆",
     statusBarStyle: "default",
-    startupImage: appleStartupImages,
   },
-  // 💡 TỐI ƯU TẠI ĐÂY: Khai báo tường minh icon cho Apple với nhiều kích thước khác nhau
-  // Khai báo thêm shortcut để đảm bảo macOS Web App ưu tiên nhận diện ảnh icon chứ không lấy ảnh splash
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-      // Nếu bạn có file icon lớn hơn như 512x512 được gen ra, hãy thêm vào đây để macOS hiển thị cực nét:
-      // { url: "/icon-512.png", sizes: "512x512", type: "image/png" }
     ],
   },
 };
@@ -110,6 +118,23 @@ export default function RootLayout({
         } as React.CSSProperties
       }
     >
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Our Space 𑣲⋆" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="default"
+        />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        {appleStartupImages.map(({ url, media }) => (
+          <link
+            key={`${url}-${media}`}
+            rel="apple-touch-startup-image"
+            href={url}
+            media={media}
+          />
+        ))}
+      </head>
       <body>
         <AppProviders>{children}</AppProviders>
       </body>
