@@ -53,7 +53,7 @@ function segmentButtonClass(active: boolean) {
 		"relative inline-flex min-h-10 min-w-0 flex-1 items-center justify-center gap-2 border px-3 text-sm font-bold transition sm:flex-none sm:px-5",
 		active
 			? "z-10 border-mui bg-mui/10 text-mui"
-			: "z-0 border-neutral-300 bg-paper text-neutral-700 hover:bg-neutral-100",
+			: "z-0 border-neutral-300 bg-paper text-neutral-700",
 	].join(" ");
 }
 
@@ -800,9 +800,12 @@ export function DashboardClient({
 							</button>
 						</div>
 						{financeLoading && !financeLoaded ? (
-							<p className="border border-neutral-200 bg-paper p-6 text-neutral-500">
+							<div className="border border-neutral-200 bg-paper p-6 text-neutral-500 rounded-lg">
 								Loading finance data...
-							</p>
+								<div className="mx-auto mt-4 h-1.5 w-44 overflow-hidden rounded-full items-center">
+									<div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
+								</div>
+							</div>
 						) : financeError ? (
 							<div className="grid gap-4 border border-neutral-200 bg-paper p-6 text-neutral-600">
 								<p>{financeError}</p>
