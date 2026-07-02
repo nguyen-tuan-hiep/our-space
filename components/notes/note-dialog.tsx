@@ -87,92 +87,96 @@ export function NoteDialog({
 				)
 			}
 		>
-				<form
-					action={(formData) => {
-						formData.set("recipient_id", recipient.id);
-						formData.set("unlock_at", getUnlockIso());
-						if (note) formData.set("id", note.id);
+			<form
+				action={(formData) => {
+					formData.set("recipient_id", recipient.id);
+					formData.set("unlock_at", getUnlockIso());
+					if (note) formData.set("id", note.id);
 
-						startTransition(async () => {
-							const result = note
-								? await updateNote(formData)
-								: await createNote(formData);
-							toast(result.message, {
-								variant: result.ok ? "success" : "error",
-							});
-							if (result.ok) {
-								onSaved?.(result.note);
-								handleClose();
-							}
+					startTransition(async () => {
+						const result = note
+							? await updateNote(formData)
+							: await createNote(formData);
+						toast(result.message, {
+							variant: result.ok ? "success" : "error",
 						});
-					}}
-				>
-						<div className="grid gap-2">
-							<NativeInput
-								required
-								name="title"
-								label="Title"
-								defaultValue={note?.title ?? ""}
-							/>
-							<NativeTextarea
-								required
-								rows={5}
-								name="content"
-								label="Content"
-								defaultValue={note?.content ?? ""}
-							/>
-							<NativeInput
-								type="date"
-								label="Unlock date"
-								value={(unlockDate ?? dayjs()).format("YYYY-MM-DD")}
-								onChange={(event) => setUnlockDate(dayjs(event.target.value))}
-							/>
+						if (result.ok) {
+							onSaved?.(result.note);
+							handleClose();
+						}
+					});
+				}}
+			>
+				<div className="grid gap-4">
+					<NativeInput
+						required
+						name="title"
+						label="Title"
+						defaultValue={note?.title ?? ""}
+					/>
+					<NativeTextarea
+						required
+						rows={8}
+						name="content"
+						label="Content"
+						defaultValue={note?.content ?? ""}
+					/>
+					<NativeInput
+						type="date"
+						label="Unlock date"
+						value={(unlockDate ?? dayjs()).format("YYYY-MM-DD")}
+						onChange={(event) => setUnlockDate(dayjs(event.target.value))}
+					/>
 
-							<div className="grid grid-cols-2 gap-3">
-								<NativeInput
-									type="time"
-									label="Unlock time"
-									value={(unlockTime ?? dayjs()).format("HH:mm")}
-									onChange={(event) => {
-										const [hour = 0, minute = 0] = event.target.value
-											.split(":")
-											.map(Number);
-										setUnlockTime((current) =>
-											(current ?? dayjs()).hour(hour).minute(minute),
-										);
-									}}
-								/>
-								<NativeSelect
-										value={unlockTimeZone}
-										label="Time zone"
-										onChange={(event) => setUnlockTimeZone(event.target.value)}
-									>
-										{timeZoneOptions.map((timeZone) => (
-											<option
-												key={timeZone.value}
-												value={timeZone.value}
-											>
-												{timeZone.label}
-											</option>
-										))}
-								</NativeSelect>
-							</div>
-							<p className="form-helper">
-								The selected date and time will use this time zone.
-							</p>
-						</div>
-					<div className="mt-6 flex justify-end gap-3">
-						<NativeButton type="button" variant="text" onClick={handleClose}>
-							Cancel
-						</NativeButton>
-						<NativeButton
-							type="submit"
-							disabled={pending}
+					<div className="grid grid-cols-2 gap-3">
+						<NativeInput
+							type="time"
+							label="Unlock time"
+							value={(unlockTime ?? dayjs()).format("HH:mm")}
+							onChange={(event) => {
+								const [hour = 0, minute = 0] = event.target.value
+									.split(":")
+									.map(Number);
+								setUnlockTime((current) =>
+									(current ?? dayjs()).hour(hour).minute(minute),
+								);
+							}}
+						/>
+						<NativeSelect
+							value={unlockTimeZone}
+							label="Time zone"
+							onChange={(event) => setUnlockTimeZone(event.target.value)}
 						>
-							{pending ? "Saving..." : "Save note"}
-						</NativeButton>
+							{timeZoneOptions.map((timeZone) => (
+								<option
+									key={timeZone.value}
+									value={timeZone.value}
+								>
+									{timeZone.label}
+								</option>
+							))}
+						</NativeSelect>
 					</div>
-				</form>
+					<p className="form-helper">
+						The selected date and time will use this time zone.
+					</p>
+				</div>
+				<div className="mt-6 flex justify-end gap-3">
+					<NativeButton
+						type="button"
+						variant="text"
+						onClick={handleClose}
+					>
+						Cancel
+					</NativeButton>
+					<NativeButton
+						type="submit"
+						disabled={pending}
+					>
+						{pending ? "Saving..." : "Save note"}
+					</NativeButton>
+				</div>
+			</form>
 		</NativeDialog>
 	);
 }

@@ -22,6 +22,7 @@ import {
 	Settings,
 	WalletCards,
 } from "lucide-react";
+import { NativeSelect } from "./ui/native-controls";
 import { useToast } from "@/components/toast";
 import { loadFinanceDashboardData, signOut } from "@/app/actions";
 import type {
@@ -43,9 +44,9 @@ import {
 const menuItemClass =
 	"flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-neutral-700 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50";
 const primaryButtonClass =
-	"inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-neutral-900 px-5 text-sm font-bold text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50";
+	"inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-neutral-900 px-5 text-sm font-bold text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50";
 const outlineButtonClass =
-	"inline-flex min-h-11 items-center justify-center rounded-md border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10";
+	"inline-flex min-h-10 items-center justify-center rounded-md border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10";
 
 function segmentButtonClass(active: boolean) {
 	return [
@@ -655,15 +656,17 @@ export function DashboardClient({
 				{/* </section>
 
 			<section className="container-page p-5 pt-0 sm:py-8"> */}
-				<hr className="border-t border-neutral-400 my-5" />
+				<hr className="border-t border-neutral-400 mt-5 mb-4" />
 
-				<div className="-mx-5 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12 md:pt-2">
-					<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-6">
+				<div className="-mx-5 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12 pt-2">
+					{/* 💡 SỬA TẠI ĐÂY: Chuyển từ flex-col sang flex-row ngay từ mốc `sm` thay vì `md` */}
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:gap-6">
 						{/* Phần 1: Tabs */}
 						<div
 							role="tablist"
 							aria-label="Dashboard section"
-							className="flex w-full rounded-lg bg-paper sm:w-auto"
+							// {/* 💡 SỬA: sm:w-60 hoặc cứ để sm:w-auto tùy bạn vì chúng đã nằm chung hàng ngang */}
+							className="flex w-full rounded-lg bg-paper sm:w-auto h-10 shrink-0"
 						>
 							<button
 								type="button"
@@ -691,7 +694,8 @@ export function DashboardClient({
 						<div
 							role="radiogroup"
 							aria-label="Filter range"
-							className="grid w-full grid-cols-2 rounded-lg bg-paper sm:flex sm:w-auto md:ml-auto"
+							// {/* 💡 SỬA: Đổi md:ml-auto thành sm:ml-auto để chủ động đẩy cụm này và Select về bên phải từ mốc sm */}
+							className="grid w-full grid-cols-2 rounded-lg bg-paper sm:flex sm:w-auto sm:ml-auto h-10 shrink-0"
 						>
 							<button
 								type="button"
@@ -714,20 +718,15 @@ export function DashboardClient({
 						</div>
 
 						{/* Phần 3: Select Period */}
-						<label className="relative grid w-full gap-1 rounded-lg sm:w-72">
-							{/*
-        Sử dụng md:absolute và md:-top-5 để nhãn nhảy lên trên ở màn hình lớn,
-        giúp ô select bên dưới căn thẳng hàng với Phần 1 và Phần 2
-      */}
-							<span className="text-[11px] font-semibold text-neutral-500 md:absolute md:-top-5 md:left-0">
-								{periodLabel}
-							</span>
-							<select
+						{/* 💡 SỬA: shrink-0 giúp select không bị bóp méo khi màn hình thu nhỏ vừa phải */}
+						<div className="relative grid w-full gap-1 rounded-lg sm:w-64 md:w-72 shrink-0">
+							<NativeSelect
 								id="period-select"
 								name="selected_period"
 								value={activePeriod}
+								label={periodLabel}
+								labelBgClass="bg-bg"
 								onChange={(event) => setSelectedPeriod(event.target.value)}
-								className="min-h-10 w-full rounded-lg border border-neutral-300 bg-paper px-3 text-sm text-neutral-900 outline-none transition focus:border-mui focus:ring-2 focus:ring-mui/20"
 							>
 								{periodOptions.map((option) => (
 									<option
@@ -737,8 +736,8 @@ export function DashboardClient({
 										{option.label}
 									</option>
 								))}
-							</select>
-						</label>
+							</NativeSelect>
+						</div>
 					</div>
 				</div>
 
@@ -805,7 +804,7 @@ export function DashboardClient({
 								Loading finance data...
 							</p>
 						) : financeError ? (
-							<div className="grid gap-2 border border-neutral-200 bg-paper p-6 text-neutral-600">
+							<div className="grid gap-4 border border-neutral-200 bg-paper p-6 text-neutral-600">
 								<p>{financeError}</p>
 								<button
 									type="button"

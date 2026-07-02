@@ -214,7 +214,7 @@ export function FinanceCharts({
 
 				<div className="flex flex-wrap gap-3">
 					<NativeSelect
-						label="Display currency"
+						label="Currency"
 						id="display-currency"
 						name="display_currency"
 						value={displayCurrency}

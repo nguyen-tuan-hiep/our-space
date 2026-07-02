@@ -32,7 +32,7 @@ export function LoginForm() {
         {mode === "signin" ? "Welcome back" : "Create your space"}
       </h2>
       <form
-        className="mt-8 grid gap-4"
+        className="mt-8 grid gap-3"
         action={(formData) => {
           startTransition(async () => {
             const result =
@@ -70,7 +70,7 @@ export function LoginForm() {
         <NativeButton
           type="submit"
           disabled={pending}
-          className="min-h-12"
+          className="min-h-11"
         >
           {pending
             ? mode === "signin"

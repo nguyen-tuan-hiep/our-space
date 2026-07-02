@@ -13,7 +13,7 @@ export function PairingForm() {
 
 	return (
 		<form
-			className="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-3"
+			className="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-2"
 			action={(formData) => {
 				startTransition(async () => {
 					const result = await pairWithCode(formData);
@@ -29,8 +29,8 @@ export function PairingForm() {
 			<NativeInput
 				required
 				name="pair_code"
-				label=""
-				placeholder="AB12CD34"
+				label="Your partner's code"
+				placeholder=""
 				maxLength={16}
 				className="uppercase"
 			/>
@@ -38,7 +38,6 @@ export function PairingForm() {
 			<NativeButton
 				type="submit"
 				disabled={pending}
-				className="min-h-14 whitespace-nowrap px-4 sm:px-6"
 			>
 				{pending ? "Sending..." : "Send request"}
 			</NativeButton>

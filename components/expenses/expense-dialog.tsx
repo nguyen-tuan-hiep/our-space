@@ -133,7 +133,7 @@ export function ExpenseDialog({
             });
           }}
         >
-            <div className="grid gap-2">
+            <div className="grid gap-4">
               <NativeInput
                 required
                 name="title"

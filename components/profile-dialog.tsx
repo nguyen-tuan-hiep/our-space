@@ -89,7 +89,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 				{tab === "profile" ? (
 					<form
 						id="profile-form"
-						className="grid gap-2"
+						className="grid gap-4"
 						action={(formData) => {
 							formData.set("avatar", avatar);
 							startTransition(async () => {
@@ -164,7 +164,6 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 									? "Please enter one emoji only."
 									: "Paste an emoji, or choose one below."
 							}
-							className="mb-4"
 						/>
 
 						<div>
@@ -195,7 +194,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 				) : (
 					<form
 						id="password-form"
-						className="grid gap-2"
+						className="grid gap-4"
 						action={(formData) => {
 							startTransition(async () => {
 								const result = await updatePassword(formData);

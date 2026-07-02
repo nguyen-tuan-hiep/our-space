@@ -39,7 +39,7 @@ export function SetupRequired({
 					</div>
 
 					{profile?.pair_code ? (
-						<div className="mt-4 rounded-3xl border border-neutral-200 bg-white/40 p-5 text-center">
+						<div className="mt-4 rounded-lg border border-neutral-400 bg-paper p-5 text-center">
 							<span className="block text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
 								Your pairing code
 							</span>
@@ -51,7 +51,7 @@ export function SetupRequired({
 					) : null}
 
 					{profile?.partner_id ? (
-						<div className="mt-5 rounded-2xl border border-neutral-200 bg-white/40 p-4">
+						<div className="mt-5 rounded-2xl border border-neutral-400 bg-white/40 p-4">
 							<p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
 								Partner id
 							</p>
@@ -65,7 +65,7 @@ export function SetupRequired({
 					{profile ? (
 						<div className="mt-4 space-y-4">
 							{hasPairingRequests ? (
-								<div className="rounded-3xl border border-neutral-200 bg-white/40 p-4 sm:p-5">
+								<div className="rounded-lg border border-neutral-400 bg-paper p-4 sm:p-5">
 									<PairingRequests
 										profileId={profile.id}
 										requests={pairingRequests}
@@ -73,7 +73,7 @@ export function SetupRequired({
 								</div>
 							) : null}
 
-							<div className="rounded-3xl border border-neutral-200 bg-white/40 p-4 sm:p-5">
+							<div className="rounded-lg border border-neutral-400 bg-paper p-4 sm:p-5">
 								<p className="mb-4 text-sm font-medium text-neutral-700">
 									Enter your partner's pairing code
 								</p>
@@ -90,7 +90,7 @@ export function SetupRequired({
 
 					{profile ? (
 						<div className="mt-6 flex justify-center">
-							<SignOutButton className="min-h-12 w-full text-white hover:bg-neutral-700 sm:w-56" />
+							<SignOutButton className="min-h-10 w-full text-white hover:bg-neutral-700 sm:w-56" />
 						</div>
 					) : null}
 				</div>
