@@ -73,10 +73,10 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/splash/apple-icon-180.png", sizes: "180x180", type: "image/png" }
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
     ],
     apple: [
-      { url: "/splash/apple-icon-180.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
       // Nếu bạn có file icon lớn hơn như 512x512 được gen ra, hãy thêm vào đây để macOS hiển thị cực nét:
       // { url: "/icon-512.png", sizes: "512x512", type: "image/png" }
     ],
