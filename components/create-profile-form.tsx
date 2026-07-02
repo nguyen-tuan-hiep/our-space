@@ -2,12 +2,11 @@
 
 import { useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import Button from "@mui/material/Button";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import TextField from "@mui/material/TextField";
+import {
+  NativeButton,
+  NativeInput,
+  NativeSelect,
+} from "@/components/ui/native-controls";
 import { useToast } from "@/components/toast";
 import type { User } from "@supabase/supabase-js";
 import { createMissingProfile } from "@/app/actions";
@@ -56,7 +55,7 @@ export function CreateProfileForm({ user }: CreateProfileFormProps) {
         });
       }}
     >
-      <TextField
+      <NativeInput
         required
         name="display_name"
         label="Display name"
@@ -65,10 +64,7 @@ export function CreateProfileForm({ user }: CreateProfileFormProps) {
         }
       />
       <div className="grid gap-3 sm:grid-cols-3">
-        <FormControl fullWidth>
-          <InputLabel id="create-profile-country-label">Country</InputLabel>
-          <Select
-            labelId="create-profile-country-label"
+        <NativeSelect
             name="country_code"
             label="Country"
             defaultValue={
@@ -80,52 +76,42 @@ export function CreateProfileForm({ user }: CreateProfileFormProps) {
             }
           >
             {supportedCountryCodes.map((country) => (
-              <MenuItem key={country} value={country}>
+              <option key={country} value={country}>
                 {country} - {countryNames.of(country)}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
-        <FormControl fullWidth>
-          <InputLabel id="create-profile-currency-label">Currency</InputLabel>
-          <Select
-            labelId="create-profile-currency-label"
+        </NativeSelect>
+        <NativeSelect
             name="currency"
             label="Currency"
             defaultValue={defaultCurrency}
           >
             {currencyOptions.map((currency) => (
-              <MenuItem key={currency} value={currency}>
+              <option key={currency} value={currency}>
                 {currency}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
-        <TextField required name="avatar" label="Emoji" defaultValue="💖" />
+        </NativeSelect>
+        <NativeInput required name="avatar" label="Emoji" defaultValue="💖" />
       </div>
-      <FormControl fullWidth>
-        <InputLabel id="create-profile-time-zone-label">Time zone</InputLabel>
-        <Select
-          labelId="create-profile-time-zone-label"
+      <NativeSelect
           name="time_zone"
           label="Time zone"
           defaultValue={normalizeTimeZoneValue(browserTimeZone)}
         >
           {timeZoneOptions.map((timeZone) => (
-            <MenuItem key={timeZone.value} value={timeZone.value}>
+            <option key={timeZone.value} value={timeZone.value}>
               {timeZone.label}
-            </MenuItem>
+            </option>
           ))}
-        </Select>
-      </FormControl>
-      <Button
+      </NativeSelect>
+      <NativeButton
         type="submit"
-        variant="contained"
         disabled={pending}
-        className="min-h-12 text-white hover:bg-neutral-700"
+        className="min-h-12"
       >
         {pending ? "Creating profile..." : "Create profile"}
-      </Button>
+      </NativeButton>
     </form>
   );
 }

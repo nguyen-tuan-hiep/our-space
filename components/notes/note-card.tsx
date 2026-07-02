@@ -1,13 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState, useTransition } from "react";
-import Card from "@mui/material/Card";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import IconButton from "@mui/material/IconButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Edit2, Trash2, EllipsisVertical } from "lucide-react";
 import { useToast } from "@/components/toast";
 import { deleteNote } from "@/app/actions";
@@ -53,8 +47,9 @@ export function NoteCard({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const menuOpen = Boolean(anchorEl);
+  const [activeNote, setActiveNote] = useState<SharedNote | null>(null);
+  const menuOpen = Boolean(activeNote);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const locked = Boolean(
     note.unlock_at && now < new Date(note.unlock_at).getTime(),
@@ -71,17 +66,43 @@ export function NoteCard({
     return () => window.clearInterval(timer);
   }, [note.unlock_at]);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && !menuRef.current?.contains(target)) {
+        setActiveNote(null);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setActiveNote(null);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen]);
+
+  const handleMenuOpen = (selectedNote: SharedNote) => {
+    setActiveNote((current) =>
+      current?.id === selectedNote.id ? null : selectedNote,
+    );
   };
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
+    setActiveNote(null);
   };
 
   const handleEditClick = () => {
+    if (!activeNote) return;
     handleMenuClose();
-    onEdit(note);
+    onEdit(activeNote);
   };
 
   const handleDeleteClick = () => {
@@ -90,7 +111,7 @@ export function NoteCard({
   };
 
   return (
-    <Card className="flex h-[20rem] flex-col overflow-hidden border border-neutral-200 bg-paper p-5">
+    <article className="relative z-0 flex h-[20rem] flex-col overflow-visible rounded-lg border border-neutral-200 bg-paper p-5">
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] uppercase tracking-[0.1em] text-neutral-600">
@@ -109,48 +130,49 @@ export function NoteCard({
         </div>
 
         {canEdit && (
-          <div className="shrink-0 -mt-1 -mr-2">
-            <IconButton
+          <div
+            className="relative -mr-2 shrink-0"
+            ref={activeNote?.id === note.id ? menuRef : null}
+          >
+            <button
+              type="button"
               aria-label="more"
-              id="note-menu-button"
-              aria-controls={menuOpen ? "note-menu" : undefined}
-              aria-expanded={menuOpen ? "true" : undefined}
-              aria-haspopup="true"
-              onClick={handleMenuOpen}
-              size="small"
+              id={`note-menu-button-${note.id}`}
+              aria-controls={activeNote?.id === note.id ? "note-menu" : undefined}
+              aria-expanded={activeNote?.id === note.id ? "true" : undefined}
+              aria-haspopup="menu"
+              onClick={() => handleMenuOpen(note)}
+              className="grid size-8 place-items-center rounded-full text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800"
             >
-              <EllipsisVertical size={20} className="text-neutral-500" />
-            </IconButton>
-            <Menu
-              id="note-menu"
-              anchorEl={anchorEl}
-              open={menuOpen}
-              onClose={handleMenuClose}
-              MenuListProps={{
-                "aria-labelledby": "note-menu-button",
-              }}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-            >
-              <MenuItem onClick={handleEditClick}>
-                <ListItemIcon>
-                  <Edit2 size={16} />
-                </ListItemIcon>
-                <ListItemText>Edit</ListItemText>
-              </MenuItem>
-              <MenuItem onClick={handleDeleteClick} className="text-danger">
-                <ListItemIcon>
-                  <Trash2 size={16} className="text-danger" />
-                </ListItemIcon>
-                <ListItemText>Delete</ListItemText>
-              </MenuItem>
-            </Menu>
+              <EllipsisVertical size={18} className="text-neutral-500" />
+            </button>
+            {activeNote?.id === note.id ? (
+              <div
+                id="note-menu"
+                role="menu"
+                aria-labelledby={`note-menu-button-${note.id}`}
+                className="absolute right-0 top-9 z-20 w-36 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={handleEditClick}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-neutral-700 transition hover:bg-neutral-100"
+                >
+                  <Edit2 size={15} />
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={handleDeleteClick}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-danger transition hover:bg-danger-bg"
+                >
+                  <Trash2 size={15} className="text-danger" />
+                  Delete
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
       </div>
@@ -198,6 +220,6 @@ export function NoteCard({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-paper to-transparent" />
         </div>
       )}
-    </Card>
+    </article>
   );
 }

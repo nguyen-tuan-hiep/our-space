@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import Button from "@mui/material/Button";
+import { NativeButton } from "@/components/ui/native-controls";
 import { signOut } from "@/app/actions";
 import { logoutOneSignal } from "@/lib/onesignal-web";
 
@@ -25,14 +25,13 @@ export function SignOutButton({ className }: SignOutButtonProps) {
 	};
 
 	return (
-		<Button
+		<NativeButton
 			type="button"
-			variant="contained"
 			disabled={pending}
 			onClick={handleSignOut}
 			className={className}
 		>
 			Logout
-		</Button>
+		</NativeButton>
 	);
 }

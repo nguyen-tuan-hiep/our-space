@@ -2,15 +2,12 @@
 
 import { useEffect, useState, useTransition } from "react";
 import dayjs from "dayjs";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useToast } from "@/components/toast";
+import {
+  NativeButton,
+  NativeDialog,
+  NativeInput,
+} from "@/components/ui/native-controls";
 import { updateAnniversary } from "@/app/actions";
 
 interface AnniversaryDialogProps {
@@ -43,9 +40,12 @@ export function AnniversaryDialog({
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
-        <DialogTitle>Edit anniversary</DialogTitle>
+      <NativeDialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="xs"
+        title="Edit anniversary"
+      >
         <form
           action={(formData) => {
             formData.set(
@@ -61,23 +61,22 @@ export function AnniversaryDialog({
             });
           }}
         >
-          <DialogContent>
-            <DatePicker
-              format="DD/MM/YYYY"
+            <NativeInput
+              type="date"
               label="Anniversary"
-              value={anniversaryDate}
-              onChange={(value) => setAnniversaryDate(value)}
-              slotProps={{ textField: { fullWidth: true, required: true } }}
+              value={(anniversaryDate ?? dayjs()).format("YYYY-MM-DD")}
+              onChange={(event) => setAnniversaryDate(dayjs(event.target.value))}
+              required
             />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained" disabled={pending}>
+          <div className="mt-6 flex justify-end gap-3">
+            <NativeButton type="button" variant="text" onClick={handleClose}>
+              Cancel
+            </NativeButton>
+            <NativeButton type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save"}
-            </Button>
-          </DialogActions>
+            </NativeButton>
+          </div>
         </form>
-      </Dialog>
-    </LocalizationProvider>
+      </NativeDialog>
   );
 }

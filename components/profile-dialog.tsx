@@ -1,19 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
-import TextField from "@mui/material/TextField";
 import { useToast } from "@/components/toast";
+import {
+	NativeButton,
+	NativeDialog,
+	NativeInput,
+	NativeSelect,
+	NativeTabs,
+} from "@/components/ui/native-controls";
 import { updatePassword, updateProfile } from "@/app/actions";
 import {
 	avatarOptions,
@@ -57,35 +52,44 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 	}, [open, profile.avatar_url]);
 
 	return (
-		<Dialog
+		<NativeDialog
 			open={open}
 			onClose={handleClose}
-			fullWidth
 			maxWidth="sm"
+			title="Edit profile"
+			actions={
+				<>
+					<NativeButton type="button" variant="text" onClick={handleClose}>
+						Cancel
+					</NativeButton>
+					<NativeButton
+						type="submit"
+						form={tab === "profile" ? "profile-form" : "password-form"}
+						disabled={pending}
+					>
+						{pending
+							? "Saving..."
+							: tab === "profile"
+								? "Save profile"
+								: "Change password"}
+					</NativeButton>
+				</>
+			}
 		>
-			<DialogTitle sx={{ p: 3, pb: 0 }}>
-				<span className="font-serif text-3xl">Edit profile</span>
-			</DialogTitle>
-			<DialogContent sx={{ px: 3, py: 0 }}>
-				<Tabs
+				<NativeTabs
 					value={tab}
-					onChange={(_, value) => setTab(value)}
+					onChange={setTab}
+					options={[
+						{ value: "profile", label: "Profile" },
+						{ value: "password", label: "Password" },
+					]}
 					className="mb-5 border-b border-neutral-200"
-				>
-					<Tab
-						value="profile"
-						label="Profile"
-					/>
-					<Tab
-						value="password"
-						label="Password"
-					/>
-				</Tabs>
+				/>
 
 				{tab === "profile" ? (
 					<form
 						id="profile-form"
-						className="grid gap-5"
+						className="grid gap-2"
 						action={(formData) => {
 							formData.set("avatar", avatar);
 							startTransition(async () => {
@@ -97,69 +101,57 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 							});
 						}}
 					>
-						<TextField
+						<NativeInput
 							required
 							name="display_name"
 							label="Display name"
 							defaultValue={profile.display_name}
 						/>
 						<div className="grid gap-3 sm:grid-cols-3">
-							<FormControl fullWidth>
-								<InputLabel id="profile-country-label">Country</InputLabel>
-								<Select
-									labelId="profile-country-label"
+							<NativeSelect
 									name="country_code"
 									label="Country"
 									defaultValue={profile.country_code}
 								>
 									{supportedCountryCodes.map((country) => (
-										<MenuItem
+										<option
 											key={country}
 											value={country}
 										>
 											{country} - {countryNames.of(country)}
-										</MenuItem>
+										</option>
 									))}
-								</Select>
-							</FormControl>
-							<FormControl fullWidth>
-								<InputLabel id="profile-currency-label">Currency</InputLabel>
-								<Select
-									labelId="profile-currency-label"
+							</NativeSelect>
+							<NativeSelect
 									name="currency"
 									label="Currency"
 									defaultValue={profile.currency}
 								>
 									{currencyOptions.map((currency) => (
-										<MenuItem
+										<option
 											key={currency}
 											value={currency}
 										>
 											{currency}
-										</MenuItem>
+										</option>
 									))}
-								</Select>
-							</FormControl>
-							<FormControl fullWidth>
-								<InputLabel id="profile-time-zone-label">Time zone</InputLabel>
-								<Select
-									labelId="profile-time-zone-label"
+							</NativeSelect>
+							<NativeSelect
 									name="time_zone"
 									label="Time zone"
 									defaultValue={normalizeTimeZoneValue(profile.time_zone)}
 								>
 									{timeZoneOptions.map((timeZone) => (
-										<MenuItem
+										<option
 											key={timeZone.value}
 											value={timeZone.value}
 										>
 											{timeZone.label}
-										</MenuItem>
+										</option>
 									))}
-								</Select>
-							</FormControl>
+							</NativeSelect>
 						</div>
-						<TextField
+						<NativeInput
 							label="Custom emoji"
 							value={avatar}
 							onChange={(event) =>
@@ -203,7 +195,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 				) : (
 					<form
 						id="password-form"
-						className="grid gap-4"
+						className="grid gap-2"
 						action={(formData) => {
 							startTransition(async () => {
 								const result = await updatePassword(formData);
@@ -214,14 +206,14 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 							});
 						}}
 					>
-						<TextField
+						<NativeInput
 							required
 							name="password"
 							label="New password"
 							type="password"
 							autoComplete="new-password"
 						/>
-						<TextField
+						<NativeInput
 							required
 							name="confirm_password"
 							label="Confirm password"
@@ -230,22 +222,6 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 						/>
 					</form>
 				)}
-			</DialogContent>
-			<DialogActions sx={{ p: 0, px: 3, py: 3 }}>
-				<Button onClick={handleClose}>Cancel</Button>
-				<Button
-					type="submit"
-					form={tab === "profile" ? "profile-form" : "password-form"}
-					variant="contained"
-					disabled={pending}
-				>
-					{pending
-						? "Saving..."
-						: tab === "profile"
-							? "Save profile"
-							: "Change password"}
-				</Button>
-			</DialogActions>
-		</Dialog>
+		</NativeDialog>
 	);
 }

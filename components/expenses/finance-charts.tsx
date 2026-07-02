@@ -1,12 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Card from "@mui/material/Card";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import useMediaQuery from "@mui/material/useMediaQuery";
+import { useEffect, useMemo, useState } from "react";
 import {
 	Area,
 	AreaChart,
@@ -20,6 +14,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { NativeSelect } from "@/components/ui/native-controls";
 import {
 	expenseCategoryColors,
 	ledgerSeriesColors,
@@ -59,6 +54,20 @@ function getAxisWidth(currency: CurrencyCode, values: number[]) {
 	return Math.min(140, Math.max(70, longestLabel * 8));
 }
 
+function useSmallDevice() {
+	const [isSmallDevice, setIsSmallDevice] = useState(false);
+
+	useEffect(() => {
+		const query = window.matchMedia("(max-width: 640px)");
+		const update = () => setIsSmallDevice(query.matches);
+		update();
+		query.addEventListener("change", update);
+		return () => query.removeEventListener("change", update);
+	}, []);
+
+	return isSmallDevice;
+}
+
 interface FinanceChartsProps {
 	expenses: IndividualExpense[];
 	barExpenses: IndividualExpense[];
@@ -87,7 +96,7 @@ export function FinanceCharts({
 	const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode>(
 		profiles[0]?.currency ?? "USD",
 	);
-	const isSmallDevice = useMediaQuery("(max-width: 640px)");
+	const isSmallDevice = useSmallDevice();
 	const supportedCurrencies = useMemo(() => getSupportedCurrencyCodes(), []);
 	const profileCurrencyOptions = useMemo(() => {
 		return Array.from(
@@ -187,7 +196,7 @@ export function FinanceCharts({
 	}, [chartData.length, isSmallDevice, yAxisWidth]);
 
 	return (
-		<Card className="w-full min-w-0 border border-neutral-200 bg-paper p-5">
+		<div className="w-full min-w-0 rounded-lg border border-neutral-200 bg-paper p-5">
 			<div className="mb-5 flex min-w-0 flex-wrap items-end justify-between gap-4">
 				<div className="min-w-0">
 					<p className="eyebrow">Finance overview</p>
@@ -204,42 +213,33 @@ export function FinanceCharts({
 				</div>
 
 				<div className="flex flex-wrap gap-3">
-					<FormControl
-						size="small"
-						className="w-44"
+					<NativeSelect
+						label="Display currency"
+						id="display-currency"
+						name="display_currency"
+						value={displayCurrency}
+						onChange={(event) =>
+							setDisplayCurrency(event.target.value as CurrencyCode)
+						}
+						className="min-h-10"
 					>
-						<InputLabel id="display-currency-label">
-							Display currency
-						</InputLabel>
-
-						<Select
-							labelId="display-currency-label"
-							id="display-currency"
-							name="display_currency"
-							value={displayCurrency}
-							label="Display currency"
-							onChange={(event) =>
-								setDisplayCurrency(event.target.value as CurrencyCode)
-							}
-						>
 							{profileCurrencyOptions.map((option) => (
-								<MenuItem
+								<option
 									key={option.currency}
 									value={option.currency}
 								>
 									{option.label}
-								</MenuItem>
+								</option>
 							))}
 							{otherCurrencyOptions.map((currency) => (
-								<MenuItem
+								<option
 									key={currency}
 									value={currency}
 								>
 									{currency}
-								</MenuItem>
+								</option>
 							))}
-						</Select>
-					</FormControl>
+					</NativeSelect>
 				</div>
 			</div>
 
@@ -368,6 +368,6 @@ export function FinanceCharts({
 					))}
 				</div>
 			</div>
-		</Card>
+		</div>
 	);
 }

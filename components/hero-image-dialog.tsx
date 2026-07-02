@@ -2,13 +2,9 @@
 
 import { useState, useTransition } from "react";
 import Image from "next/image";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import { ImageUp } from "lucide-react";
 import { useToast } from "@/components/toast";
+import { NativeButton, NativeDialog } from "@/components/ui/native-controls";
 import { updateHeroImage } from "@/app/actions";
 
 interface HeroImageDialogProps {
@@ -62,9 +58,39 @@ export function HeroImageDialog({
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle className="font-serif text-3xl">Edit hero image</DialogTitle>
-      <DialogContent className="grid gap-5 pt-3">
+    <NativeDialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="md"
+      title="Edit hero image"
+      actions={
+        <form
+          action={(formData) => {
+            formData.set("hero_image_url", heroUrl);
+            formData.set("hero_image_public_id", publicId);
+            startTransition(async () => {
+              const result = await updateHeroImage(formData);
+              toast(result.message, {
+                variant: result.ok ? "success" : "error",
+              });
+              if (result.ok) handleClose();
+            });
+          }}
+          className="flex justify-end gap-3"
+        >
+          <NativeButton type="button" variant="text" onClick={handleClose}>
+            Cancel
+          </NativeButton>
+          <NativeButton
+            type="submit"
+            disabled={pending || uploading}
+          >
+            {pending ? "Saving..." : "Save hero"}
+          </NativeButton>
+        </form>
+      }
+    >
+      <div className="grid gap-5">
         <div className="relative aspect-[16/9] overflow-hidden border border-neutral-200 bg-neutral-100">
           <Image
             src={heroUrl}
@@ -73,12 +99,12 @@ export function HeroImageDialog({
             className="object-cover"
           />
         </div>
-        <Button
-          component="label"
-          variant="outlined"
-          startIcon={<ImageUp size={17} />}
-          disabled={uploading}
+        <label
+          className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 ${
+            uploading ? "pointer-events-none opacity-50" : ""
+          }`}
         >
+          <ImageUp size={17} />
           {uploading ? "Uploading..." : "Upload new hero image"}
           <input
             aria-label="Upload hero image file"
@@ -90,32 +116,8 @@ export function HeroImageDialog({
               if (file) void uploadHero(file);
             }}
           />
-        </Button>
-      </DialogContent>
-      <form
-        action={(formData) => {
-          formData.set("hero_image_url", heroUrl);
-          formData.set("hero_image_public_id", publicId);
-          startTransition(async () => {
-            const result = await updateHeroImage(formData);
-            toast(result.message, {
-              variant: result.ok ? "success" : "error",
-            });
-            if (result.ok) handleClose();
-          });
-        }}
-      >
-        <DialogActions className="px-6 pb-6">
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={pending || uploading}
-          >
-            {pending ? "Saving..." : "Save hero"}
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+        </label>
+      </div>
+    </NativeDialog>
   );
 }

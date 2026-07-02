@@ -1,10 +1,6 @@
 "use client";
 
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
+import { NativeButton, NativeDialog } from "@/components/ui/native-controls";
 
 interface ConfirmDialogProps {
 	open: boolean;
@@ -33,32 +29,33 @@ export function ConfirmDialog({
 	};
 
 	return (
-		<Dialog
+		<NativeDialog
 			open={open}
-			onClose={pending ? undefined : handleClose}
-			fullWidth
+			onClose={pending ? () => undefined : handleClose}
 			maxWidth="xs"
+			title={title}
+			actions={
+				<>
+					<NativeButton
+						type="button"
+						variant="text"
+						onClick={handleClose}
+						disabled={pending}
+					>
+						Cancel
+					</NativeButton>
+					<NativeButton
+						type="button"
+						variant="danger"
+						onClick={onConfirm}
+						disabled={pending}
+					>
+						{pending ? "Deleting..." : confirmLabel}
+					</NativeButton>
+				</>
+			}
 		>
-			<DialogTitle className="font-serif text-3xl">{title}</DialogTitle>
-			<DialogContent>
-				<p className="text-sm leading-7 text-neutral-600">{description}</p>
-			</DialogContent>
-			<DialogActions sx={{ p: 3, pt: 0 }}>
-				<Button
-					onClick={handleClose}
-					disabled={pending}
-				>
-					Cancel
-				</Button>
-				<Button
-					variant="contained"
-					color="error"
-					onClick={onConfirm}
-					disabled={pending}
-				>
-					{pending ? "Deleting..." : confirmLabel}
-				</Button>
-			</DialogActions>
-		</Dialog>
+			<p className="text-sm leading-7 text-neutral-600">{description}</p>
+		</NativeDialog>
 	);
 }

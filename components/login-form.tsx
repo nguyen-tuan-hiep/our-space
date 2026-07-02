@@ -3,11 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useToast } from "@/components/toast";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
-import TextField from "@mui/material/TextField";
+import {
+  NativeButton,
+  NativeInput,
+  NativeTabs,
+} from "@/components/ui/native-controls";
 import { signInWithPassword, signUpWithPassword } from "@/app/actions";
 
 export function LoginForm() {
@@ -17,21 +17,22 @@ export function LoginForm() {
   const [pending, startTransition] = useTransition();
 
   return (
-    <Card className="border border-neutral-200 bg-paper p-6 sm:p-8">
-      <Tabs
+    <div className="rounded-lg border border-neutral-200 bg-paper p-6 sm:p-8">
+      <NativeTabs
         value={mode}
-        onChange={(_, value) => setMode(value)}
+        onChange={setMode}
+        options={[
+          { value: "signin", label: "Sign in" },
+          { value: "signup", label: "Sign up" },
+        ]}
         className="border-b border-neutral-200"
-      >
-        <Tab value="signin" label="Sign in" />
-        <Tab value="signup" label="Sign up" />
-      </Tabs>
+      />
       <p className="eyebrow mt-6">{mode === "signin" ? "Sign in" : "Sign up"}</p>
       <h2 className="mt-3 font-serif text-4xl leading-none">
         {mode === "signin" ? "Welcome back" : "Create your space"}
       </h2>
       <form
-        className="mt-8 grid gap-5"
+        className="mt-8 grid gap-4"
         action={(formData) => {
           startTransition(async () => {
             const result =
@@ -52,28 +53,24 @@ export function LoginForm() {
           });
         }}
       >
-        <TextField
+        <NativeInput
           required
-          fullWidth
           name="email"
           label="Email"
           type="email"
           autoComplete="email"
         />
-        <TextField
+        <NativeInput
           required
-          fullWidth
           name="password"
           label="Password"
           type="password"
           autoComplete={mode === "signin" ? "current-password" : "new-password"}
         />
-        <Button
+        <NativeButton
           type="submit"
-          variant="contained"
-          size="large"
           disabled={pending}
-          className="min-h-12 text-white hover:bg-neutral-700"
+          className="min-h-12"
         >
           {pending
             ? mode === "signin"
@@ -82,8 +79,8 @@ export function LoginForm() {
             : mode === "signin"
               ? "Sign in"
               : "Sign up"}
-        </Button>
+        </NativeButton>
       </form>
-    </Card>
+    </div>
   );
 }

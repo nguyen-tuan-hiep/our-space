@@ -11,14 +11,6 @@ import {
 	useState,
 	useTransition,
 } from "react";
-import Button from "@mui/material/Button";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
 import {
 	ImageUp,
 	LogOut,
@@ -47,6 +39,22 @@ import {
 	getRelationshipStats,
 	isInPeriod,
 } from "@/lib/dashboard-utils";
+
+const menuItemClass =
+	"flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-neutral-700 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50";
+const primaryButtonClass =
+	"inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-neutral-900 px-5 text-sm font-bold text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50";
+const outlineButtonClass =
+	"inline-flex min-h-11 items-center justify-center rounded-md border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10";
+
+function segmentButtonClass(active: boolean) {
+	return [
+		"relative inline-flex min-h-10 min-w-0 flex-1 items-center justify-center gap-2 border px-3 text-sm font-bold transition sm:flex-none sm:px-5",
+		active
+			? "z-10 border-mui bg-mui/10 text-mui"
+			: "z-0 border-neutral-300 bg-paper text-neutral-700 hover:bg-neutral-100",
+	].join(" ");
+}
 
 const NoteDialog = dynamic(
 	() => import("@/components/notes/note-dialog").then((mod) => mod.NoteDialog),
@@ -120,9 +128,7 @@ export function DashboardClient({
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [heroOpen, setHeroOpen] = useState(false);
 	const [anniversaryOpen, setAnniversaryOpen] = useState(false);
-	const [mobileMenuAnchor, setMobileMenuAnchor] = useState<HTMLElement | null>(
-		null,
-	);
+	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [activeSection, setActiveSection] = useState<"notes" | "finances">(
 		"notes",
 	);
@@ -140,7 +146,9 @@ export function DashboardClient({
 	const [financeLoaded, setFinanceLoaded] = useState(false);
 	const [financeLoading, setFinanceLoading] = useState(false);
 	const [financeError, setFinanceError] = useState<string | null>(null);
-	const [exchangeRatesBase, setExchangeRatesBase] = useState<string | null>(null);
+	const [exchangeRatesBase, setExchangeRatesBase] = useState<string | null>(
+		null,
+	);
 	const [exchangeRates, setExchangeRates] = useState<Record<
 		string,
 		number
@@ -153,6 +161,7 @@ export function DashboardClient({
 	);
 	const ignoredRealtimeNoteIds = useRef(new Set<string>());
 	const ignoredRealtimeExpenseIds = useRef(new Set<string>());
+	const mobileMenuRef = useRef<HTMLDivElement | null>(null);
 	const financeLoadedRef = useRef(false);
 	const financeRequestId = useRef(0);
 	const [pending, startTransition] = useTransition();
@@ -236,40 +245,43 @@ export function DashboardClient({
 		setNotes(initialNotes);
 	}, [initialNotes]);
 
-	const loadFinanceData = useCallback(async (options?: { silent?: boolean }) => {
-		const requestId = financeRequestId.current + 1;
-		financeRequestId.current = requestId;
+	const loadFinanceData = useCallback(
+		async (options?: { silent?: boolean }) => {
+			const requestId = financeRequestId.current + 1;
+			financeRequestId.current = requestId;
 
-		if (!options?.silent) {
-			setFinanceLoading(true);
-		}
-		setFinanceError(null);
-
-		try {
-			const data = await loadFinanceDashboardData();
-			if (financeRequestId.current !== requestId) return;
-
-			setExpenses(data.expenses);
-			setExchangeRatesBase(data.exchangeRate.ratesBase);
-			setExchangeRates(data.exchangeRate.rates);
-			setExchangeRateUpdatedAt(data.exchangeRate.updatedAt);
-			setExchangeRateSource(data.exchangeRate.source);
-			setFinanceLoaded(true);
-			financeLoadedRef.current = true;
-		} catch (error) {
-			if (financeRequestId.current !== requestId) return;
-
-			const message =
-				error instanceof Error
-					? error.message
-					: "Finance data could not be loaded.";
-			setFinanceError(message);
-		} finally {
-			if (financeRequestId.current === requestId) {
-				setFinanceLoading(false);
+			if (!options?.silent) {
+				setFinanceLoading(true);
 			}
-		}
-	}, []);
+			setFinanceError(null);
+
+			try {
+				const data = await loadFinanceDashboardData();
+				if (financeRequestId.current !== requestId) return;
+
+				setExpenses(data.expenses);
+				setExchangeRatesBase(data.exchangeRate.ratesBase);
+				setExchangeRates(data.exchangeRate.rates);
+				setExchangeRateUpdatedAt(data.exchangeRate.updatedAt);
+				setExchangeRateSource(data.exchangeRate.source);
+				setFinanceLoaded(true);
+				financeLoadedRef.current = true;
+			} catch (error) {
+				if (financeRequestId.current !== requestId) return;
+
+				const message =
+					error instanceof Error
+						? error.message
+						: "Finance data could not be loaded.";
+				setFinanceError(message);
+			} finally {
+				if (financeRequestId.current === requestId) {
+					setFinanceLoading(false);
+				}
+			}
+		},
+		[],
+	);
 
 	useEffect(() => {
 		if (activeSection === "finances" && !financeLoaded && !financeLoading) {
@@ -411,8 +423,30 @@ export function DashboardClient({
 		return () => window.clearInterval(timer);
 	}, []);
 
+	useEffect(() => {
+		if (!mobileMenuOpen) return;
+
+		const handlePointerDown = (event: PointerEvent) => {
+			const target = event.target;
+			if (target instanceof Node && !mobileMenuRef.current?.contains(target)) {
+				setMobileMenuOpen(false);
+			}
+		};
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape") {
+				setMobileMenuOpen(false);
+			}
+		};
+
+		document.addEventListener("pointerdown", handlePointerDown);
+		document.addEventListener("keydown", handleKeyDown);
+		return () => {
+			document.removeEventListener("pointerdown", handlePointerDown);
+			document.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [mobileMenuOpen]);
+
 	const periodLabel = filterRange === "week" ? "Week" : "Month";
-	const mobileMenuOpen = Boolean(mobileMenuAnchor);
 	const handleSignOut = () => {
 		startTransition(async () => {
 			try {
@@ -471,81 +505,87 @@ export function DashboardClient({
 										{profile.country_code} · {profile.currency}
 									</p>
 								</div>
-								<button
-									type="button"
-									aria-label="Open profile menu"
-									aria-controls={mobileMenuOpen ? "mobile-nav-menu" : undefined}
-									aria-expanded={mobileMenuOpen ? "true" : undefined}
-									aria-haspopup="menu"
-									onClick={(event) => setMobileMenuAnchor(event.currentTarget)}
-									className="grid size-9 shrink-0 place-items-center rounded-full border border-paper/70 bg-black/35 p-0 transition hover:bg-black/50"
+								<div
+									className="relative"
+									ref={mobileMenuRef}
 								>
-									<MenuIcon size={18} />
-								</button>
+									<button
+										type="button"
+										aria-label="Open profile menu"
+										aria-controls={
+											mobileMenuOpen ? "mobile-nav-menu" : undefined
+										}
+										aria-expanded={mobileMenuOpen ? "true" : undefined}
+										aria-haspopup="menu"
+										onClick={() => setMobileMenuOpen((open) => !open)}
+										className="grid size-9 shrink-0 place-items-center rounded-full border border-paper/70 bg-black/35 p-0 transition hover:bg-black/50"
+									>
+										<MenuIcon size={18} />
+									</button>
+									{mobileMenuOpen ? (
+										<div
+											id="mobile-nav-menu"
+											role="menu"
+											className="absolute right-0 top-11 z-30 w-64 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-neutral-900 shadow-lg"
+										>
+											<button
+												type="button"
+												role="menuitem"
+												className={menuItemClass}
+												onClick={() => {
+													setMobileMenuOpen(false);
+													setProfileOpen(true);
+												}}
+											>
+												<Settings size={16} />
+												Profile
+											</button>
+											<button
+												type="button"
+												role="menuitem"
+												className={menuItemClass}
+												onClick={() => {
+													setMobileMenuOpen(false);
+													setHeroOpen(true);
+												}}
+											>
+												<ImageUp size={16} />
+												Edit image
+											</button>
+											<button
+												type="button"
+												role="menuitem"
+												className={menuItemClass}
+												onClick={() => {
+													setMobileMenuOpen(false);
+													setAnniversaryOpen(true);
+												}}
+											>
+												<CalendarHeart size={16} />
+												Edit anniversary
+											</button>
+											<NotificationPermissionButton
+												userId={profile.id}
+												variant="menu-item"
+												onDone={() => setMobileMenuOpen(false)}
+											/>
+											<button
+												type="button"
+												role="menuitem"
+												disabled={pending}
+												className={menuItemClass}
+												onClick={() => {
+													setMobileMenuOpen(false);
+													handleSignOut();
+												}}
+											>
+												<LogOut size={16} />
+												Logout
+											</button>
+										</div>
+									) : null}
+								</div>
 							</div>
-							<Menu
-								id="mobile-nav-menu"
-								anchorEl={mobileMenuAnchor}
-								open={mobileMenuOpen}
-								onClose={() => setMobileMenuAnchor(null)}
-								anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-								transformOrigin={{ vertical: "top", horizontal: "right" }}
-							>
-								<MenuItem
-									onClick={() => {
-										setMobileMenuAnchor(null);
-										setProfileOpen(true);
-									}}
-								>
-									<Settings
-										size={16}
-										className="mr-2"
-									/>
-									Profile
-								</MenuItem>
-								<MenuItem
-									onClick={() => {
-										setMobileMenuAnchor(null);
-										setHeroOpen(true);
-									}}
-								>
-									<ImageUp
-										size={16}
-										className="mr-2"
-									/>
-									Edit image
-								</MenuItem>
-								<MenuItem
-									onClick={() => {
-										setMobileMenuAnchor(null);
-										setAnniversaryOpen(true);
-									}}
-								>
-									<CalendarHeart
-										size={16}
-										className="mr-2"
-									/>
-									Edit anniversary
-								</MenuItem>
-								<NotificationPermissionButton
-									userId={profile.id}
-									variant="menu-item"
-									onDone={() => setMobileMenuAnchor(null)}
-								/>
-								<MenuItem
-									disabled={pending}
-									onClick={() => {
-										setMobileMenuAnchor(null);
-										handleSignOut();
-									}}
-								>
-									<LogOut
-										size={16}
-										className="mr-2"
-									/>
-									Logout
-								</MenuItem>
-							</Menu>
 						</div>
 					</header>
 
@@ -593,7 +633,10 @@ export function DashboardClient({
 			<section className="container-page py-5 sm:py-8">
 				<div className="flex gap-3 flex-row items-center sm:gap-4">
 					<div className="grid size-10 shrink-0 place-items-center rounded-full bg-paper text-neutral-700">
-						<Quote size={18} className="block"/>
+						<Quote
+							size={18}
+							className="block"
+						/>
 					</div>
 					<div className="min-w-0">
 						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
@@ -609,90 +652,93 @@ export function DashboardClient({
 						) : null}
 					</div>
 				</div>
-			{/* </section>
+				{/* </section>
 
 			<section className="container-page p-5 pt-0 sm:py-8"> */}
 				<hr className="border-t border-neutral-400 my-5" />
-				<div className="-mx-5 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
-					<div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
-						{/* <hr className="border-t border-neutral-300 my-5" /> */}
-						<ToggleButtonGroup
-							exclusive
-							value={activeSection}
-							onChange={(_, value) => value && setActiveSection(value)}
-							size="small"
-							className="w-full self-start bg-paper sm:w-auto"
+
+				<div className="-mx-5 px-5 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12 md:pt-2">
+					<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-6">
+						{/* Phần 1: Tabs */}
+						<div
+							role="tablist"
+							aria-label="Dashboard section"
+							className="flex w-full rounded-lg bg-paper sm:w-auto"
 						>
-							<ToggleButton
-								value="notes"
-								className="flex-1 gap-2 px-3 sm:flex-none sm:px-5"
+							<button
+								type="button"
+								role="tab"
+								aria-selected={activeSection === "notes"}
+								className={`${segmentButtonClass(activeSection === "notes")} rounded-l-lg`}
+								onClick={() => setActiveSection("notes")}
 							>
 								<NotebookPen size={16} />
 								Notes
-							</ToggleButton>
-							<ToggleButton
-								value="finances"
-								className="flex-1 gap-2 px-3 sm:flex-none sm:px-5"
+							</button>
+							<button
+								type="button"
+								role="tab"
+								aria-selected={activeSection === "finances"}
+								className={`${segmentButtonClass(activeSection === "finances")} rounded-r-lg`}
+								onClick={() => setActiveSection("finances")}
 							>
 								<WalletCards size={16} />
 								Finances
-							</ToggleButton>
-						</ToggleButtonGroup>
-						<div className="flex flex-col w-full gap-5 sm:w-auto sm:flex-row sm:items-center sm:gap-5">
-							<ToggleButtonGroup
-								exclusive
-								value={filterRange}
-								onChange={(_, value: FilterRange | null) => {
-									if (value) {
-										setFilterRange(value);
-									}
-								}}
-								size="small"
-								className="grid w-full grid-cols-2 bg-paper sm:flex sm:w-auto"
-							>
-								<ToggleButton
-									value="week"
-									className="min-w-0 w-full px-4"
-								>
-									Week
-								</ToggleButton>
-								<ToggleButton
-									value="month"
-									className="min-w-0 w-full px-4"
-								>
-									Month
-								</ToggleButton>
-							</ToggleButtonGroup>
-							<FormControl
-								size="small"
-								className="w-full rounded-lg bg-paper sm:w-72"
-							>
-								<InputLabel id="period-select-label">{periodLabel}</InputLabel>
-								<Select
-									labelId="period-select-label"
-									id="period-select"
-									name="selected_period"
-									value={activePeriod}
-									label={periodLabel}
-									sx={{
-										borderRadius: 1,
-										"& .MuiOutlinedInput-notchedOutline": {
-											borderRadius: 1,
-										},
-									}}
-									onChange={(event) => setSelectedPeriod(event.target.value)}
-								>
-									{periodOptions.map((option) => (
-										<MenuItem
-											key={option.value}
-											value={option.value}
-										>
-											{option.label}
-										</MenuItem>
-									))}
-								</Select>
-							</FormControl>
+							</button>
 						</div>
+
+						{/* Phần 2: Filter Range */}
+						<div
+							role="radiogroup"
+							aria-label="Filter range"
+							className="grid w-full grid-cols-2 rounded-lg bg-paper sm:flex sm:w-auto md:ml-auto"
+						>
+							<button
+								type="button"
+								role="radio"
+								aria-checked={filterRange === "week"}
+								className={`${segmentButtonClass(filterRange === "week")} rounded-l-lg`}
+								onClick={() => setFilterRange("week")}
+							>
+								Week
+							</button>
+							<button
+								type="button"
+								role="radio"
+								aria-checked={filterRange === "month"}
+								className={`${segmentButtonClass(filterRange === "month")} rounded-r-lg`}
+								onClick={() => setFilterRange("month")}
+							>
+								Month
+							</button>
+						</div>
+
+						{/* Phần 3: Select Period */}
+						<label className="relative grid w-full gap-1 rounded-lg sm:w-72">
+							{/*
+        Sử dụng md:absolute và md:-top-5 để nhãn nhảy lên trên ở màn hình lớn,
+        giúp ô select bên dưới căn thẳng hàng với Phần 1 và Phần 2
+      */}
+							<span className="text-[11px] font-semibold text-neutral-500 md:absolute md:-top-5 md:left-0">
+								{periodLabel}
+							</span>
+							<select
+								id="period-select"
+								name="selected_period"
+								value={activePeriod}
+								onChange={(event) => setSelectedPeriod(event.target.value)}
+								className="min-h-10 w-full rounded-lg border border-neutral-300 bg-paper px-3 text-sm text-neutral-900 outline-none transition focus:border-mui focus:ring-2 focus:ring-mui/20"
+							>
+								{periodOptions.map((option) => (
+									<option
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</option>
+								))}
+							</select>
+						</label>
 					</div>
 				</div>
 
@@ -705,14 +751,14 @@ export function DashboardClient({
 									Shared notes
 								</h2>
 							</div>
-							<Button
-								variant="contained"
-								startIcon={<Plus size={17} />}
-								className="min-h-11 w-full px-5 text-white hover:bg-neutral-700 sm:w-auto"
+							<button
+								type="button"
+								className={`${primaryButtonClass} w-full sm:w-auto`}
 								onClick={() => setNoteOpen(true)}
 							>
+								<Plus size={17} />
 								New note
-							</Button>
+							</button>
 						</div>
 						<div className="grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 							{filteredNotes.length ? (
@@ -744,30 +790,30 @@ export function DashboardClient({
 									Finance overview
 								</h2>
 							</div>
-							<Button
-								variant="contained"
-								startIcon={<Plus size={17} />}
-								className="min-h-11 w-full px-5 text-white hover:bg-neutral-700 sm:w-auto"
+							<button
+								type="button"
+								className={`${primaryButtonClass} w-full sm:w-auto`}
 								disabled={financeLoading && !financeLoaded}
 								onClick={() => setExpenseOpen(true)}
 							>
+								<Plus size={17} />
 								Log expense
-							</Button>
+							</button>
 						</div>
 						{financeLoading && !financeLoaded ? (
 							<p className="border border-neutral-200 bg-paper p-6 text-neutral-500">
 								Loading finance data...
 							</p>
 						) : financeError ? (
-							<div className="grid gap-4 border border-neutral-200 bg-paper p-6 text-neutral-600">
+							<div className="grid gap-2 border border-neutral-200 bg-paper p-6 text-neutral-600">
 								<p>{financeError}</p>
-								<Button
-									variant="outlined"
-									className="w-full sm:w-fit"
+								<button
+									type="button"
+									className={`${outlineButtonClass} w-full sm:w-fit`}
 									onClick={() => void loadFinanceData()}
 								>
 									Try again
-								</Button>
+								</button>
 							</div>
 						) : (
 							<>

@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
+import { NativeButton, NativeInput } from "@/components/ui/native-controls";
 import { useToast } from "@/components/toast";
 import { pairWithCode } from "@/app/actions";
 
@@ -27,28 +26,22 @@ export function PairingForm() {
 				});
 			}}
 		>
-			<TextField
+			<NativeInput
 				required
-				fullWidth
 				name="pair_code"
-				label="Partner pairing code"
+				label=""
 				placeholder="AB12CD34"
-				slotProps={{
-					htmlInput: {
-						maxLength: 16,
-						style: { textTransform: "uppercase" },
-					},
-				}}
+				maxLength={16}
+				className="uppercase"
 			/>
 
-			<Button
+			<NativeButton
 				type="submit"
-				variant="contained"
 				disabled={pending}
-				className="min-h-14 whitespace-nowrap px-4 text-white hover:bg-neutral-700 sm:px-6"
+				className="min-h-14 whitespace-nowrap px-4 sm:px-6"
 			>
 				{pending ? "Sending..." : "Send request"}
-			</Button>
+			</NativeButton>
 		</form>
 	);
 }

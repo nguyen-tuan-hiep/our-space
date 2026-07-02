@@ -2,21 +2,14 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import dayjs from "dayjs";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import TextField from "@mui/material/TextField";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
 import { useToast } from "@/components/toast";
+import {
+	NativeButton,
+	NativeDialog,
+	NativeInput,
+	NativeSelect,
+	NativeTextarea,
+} from "@/components/ui/native-controls";
 import { createNote, updateNote } from "@/app/actions";
 import {
 	defaultTimeZone,
@@ -80,24 +73,20 @@ export function NoteDialog({
 	}
 
 	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			<Dialog
-				open={open}
-				onClose={handleClose}
-				fullWidth
-				maxWidth="sm"
-			>
-				<DialogTitle sx={{ px: 3, pt: 3, pb: 0 }}>
-					{note ? (
-						"Edit note"
-					) : (
-						<div className="flex items-center gap-1.5">
-							<span className="font-serif text-2xl leading-1">
-								Write to {recipient.display_name} {recipient.avatar_url ?? "🙂"}
-							</span>
-						</div>
-					)}
-				</DialogTitle>
+		<NativeDialog
+			open={open}
+			onClose={handleClose}
+			maxWidth="sm"
+			title={
+				note ? (
+					"Edit note"
+				) : (
+					<span className="text-2xl leading-tight">
+						Write to {recipient.display_name} {recipient.avatar_url ?? "🙂"}
+					</span>
+				)
+			}
+		>
 				<form
 					action={(formData) => {
 						formData.set("recipient_id", recipient.id);
@@ -118,75 +107,73 @@ export function NoteDialog({
 						});
 					}}
 				>
-					<DialogContent sx={{ p: 3 }}>
-						<div className="grid gap-4">
-							<TextField
+						<div className="grid gap-2">
+							<NativeInput
 								required
 								name="title"
 								label="Title"
 								defaultValue={note?.title ?? ""}
 							/>
-							<TextField
+							<NativeTextarea
 								required
-								multiline
-								minRows={5}
+								rows={5}
 								name="content"
 								label="Content"
 								defaultValue={note?.content ?? ""}
 							/>
-							<DatePicker
-								format="DD/MM/YYYY"
+							<NativeInput
+								type="date"
 								label="Unlock date"
-								value={unlockDate}
-								onChange={(value) => setUnlockDate(value)}
-								slotProps={{ textField: { fullWidth: true } }}
+								value={(unlockDate ?? dayjs()).format("YYYY-MM-DD")}
+								onChange={(event) => setUnlockDate(dayjs(event.target.value))}
 							/>
 
 							<div className="grid grid-cols-2 gap-3">
-								<DesktopTimePicker
-									format="HH:mm"
+								<NativeInput
+									type="time"
 									label="Unlock time"
-									value={unlockTime}
-									onChange={(value) => setUnlockTime(value)}
-									slotProps={{ textField: { fullWidth: true } }}
+									value={(unlockTime ?? dayjs()).format("HH:mm")}
+									onChange={(event) => {
+										const [hour = 0, minute = 0] = event.target.value
+											.split(":")
+											.map(Number);
+										setUnlockTime((current) =>
+											(current ?? dayjs()).hour(hour).minute(minute),
+										);
+									}}
 								/>
-								<FormControl fullWidth>
-									<InputLabel id="unlock-time-zone-label">Time zone</InputLabel>
-									<Select
-										labelId="unlock-time-zone-label"
+								<NativeSelect
 										value={unlockTimeZone}
 										label="Time zone"
 										onChange={(event) => setUnlockTimeZone(event.target.value)}
 									>
 										{timeZoneOptions.map((timeZone) => (
-											<MenuItem
+											<option
 												key={timeZone.value}
 												value={timeZone.value}
 											>
 												{timeZone.label}
-											</MenuItem>
+											</option>
 										))}
-									</Select>
-								</FormControl>
+								</NativeSelect>
 							</div>
 							<p className="form-helper">
 								The selected date and time will use this time zone.
 							</p>
 						</div>
-					</DialogContent>
-					<DialogActions sx={{ px: 3, pt: 0, pb: 3 }}>
-						<Button onClick={handleClose}>Cancel</Button>
-						<Button
+					<div className="mt-6 flex justify-end gap-3">
+						<NativeButton type="button" variant="text" onClick={handleClose}>
+							Cancel
+						</NativeButton>
+						<NativeButton
 							type="submit"
-							variant="contained"
 							disabled={pending}
 						>
 							{pending ? "Saving..." : "Save note"}
-						</Button>
-					</DialogActions>
+						</NativeButton>
+					</div>
 				</form>
-			</Dialog>
-		</LocalizationProvider>
+		</NativeDialog>
 	);
 }
 

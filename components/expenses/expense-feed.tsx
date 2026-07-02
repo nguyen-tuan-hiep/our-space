@@ -1,16 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import Chip from "@mui/material/Chip";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import IconButton from "@mui/material/IconButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Edit2, Trash2, EllipsisVertical } from "lucide-react";
 import { useToast } from "@/components/toast";
+import { NativeButton } from "@/components/ui/native-controls";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { expenseCategoryColors, formatCurrency } from "@/lib/constants";
@@ -41,24 +34,40 @@ export function ExpenseFeed({
 	const [expanded, setExpanded] = useState(false);
 	const [pending, startTransition] = useTransition();
 
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const [activeExpense, setActiveExpense] = useState<IndividualExpense | null>(
 		null,
 	);
-	const menuOpen = Boolean(anchorEl);
+	const menuOpen = Boolean(activeExpense);
+	const menuRef = useRef<HTMLDivElement | null>(null);
 
 	const visibleExpenses = expanded ? expenses : expenses.slice(0, 3);
 
-	const handleMenuOpen = (
-		event: React.MouseEvent<HTMLElement>,
-		expense: IndividualExpense,
-	) => {
-		setAnchorEl(event.currentTarget);
-		setActiveExpense(expense);
+	useEffect(() => {
+		if (!menuOpen) return;
+
+		const handlePointerDown = (event: PointerEvent) => {
+			const target = event.target;
+			if (target instanceof Node && !menuRef.current?.contains(target)) {
+				setActiveExpense(null);
+			}
+		};
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape") setActiveExpense(null);
+		};
+
+		document.addEventListener("pointerdown", handlePointerDown);
+		document.addEventListener("keydown", handleKeyDown);
+		return () => {
+			document.removeEventListener("pointerdown", handlePointerDown);
+			document.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [menuOpen]);
+
+	const handleMenuOpen = (expense: IndividualExpense) => {
+		setActiveExpense((current) => (current?.id === expense.id ? null : expense));
 	};
 
 	const handleMenuClose = () => {
-		setAnchorEl(null);
 		setActiveExpense(null);
 	};
 
@@ -77,7 +86,7 @@ export function ExpenseFeed({
 	};
 
 	return (
-		<Card className="border border-neutral-200 bg-paper p-5">
+		<div className="rounded-lg border border-neutral-200 bg-paper p-5">
 			<div className="mb-5 flex items-center justify-between gap-4">
 				<div>
 					<p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>
@@ -114,43 +123,67 @@ export function ExpenseFeed({
 										</p>
 
 										{canEdit && (
-											<IconButton
-												aria-label="more"
-												id={`expense-menu-button-${expense.id}`}
-												aria-controls={
-													menuOpen && activeExpense?.id === expense.id
-														? "expense-menu"
-														: undefined
-												}
-												aria-expanded={
-													menuOpen && activeExpense?.id === expense.id
-														? "true"
-														: undefined
-												}
-												aria-haspopup="true"
-												onClick={(e) => handleMenuOpen(e, expense)}
-												size="small"
-												disabled={isDeleting}
-												className="-mr-2"
-											>
-												<EllipsisVertical
-													size={18}
-													className="text-neutral-500"
-												/>
-											</IconButton>
+											<div className="relative -mr-2" ref={activeExpense?.id === expense.id ? menuRef : null}>
+												<button
+													type="button"
+													aria-label="more"
+													id={`expense-menu-button-${expense.id}`}
+													aria-controls={
+														activeExpense?.id === expense.id
+															? "expense-menu"
+															: undefined
+													}
+													aria-expanded={
+														activeExpense?.id === expense.id ? "true" : undefined
+													}
+													aria-haspopup="menu"
+													onClick={() => handleMenuOpen(expense)}
+													disabled={isDeleting}
+													className="grid size-8 place-items-center rounded-full text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+												>
+													<EllipsisVertical size={18} />
+												</button>
+												{activeExpense?.id === expense.id ? (
+													<div
+														id="expense-menu"
+														role="menu"
+														aria-labelledby={`expense-menu-button-${expense.id}`}
+														className="absolute right-0 top-9 z-20 w-36 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg"
+													>
+														<button
+															type="button"
+															role="menuitem"
+															onClick={handleEditClick}
+															className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-neutral-700 transition hover:bg-neutral-100"
+														>
+															<Edit2 size={15} />
+															Edit
+														</button>
+														<button
+															type="button"
+															role="menuitem"
+															onClick={handleDeleteClick}
+															className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-danger transition hover:bg-danger-bg"
+														>
+															<Trash2 size={15} />
+															Delete
+														</button>
+													</div>
+												) : null}
+											</div>
 										)}
 									</div>
 								</div>
 
 								<div className="my-2 flex flex-wrap items-center gap-2">
-									<Chip
-										size="small"
-										label={expense.category}
-										sx={{
+									<span
+										className="rounded-full px-2.5 py-1 text-xs font-bold text-neutral-900"
+										style={{
 											backgroundColor: expenseCategoryColors[expense.category],
-											fontWeight: 700,
 										}}
-									/>
+									>
+										{expense.category}
+									</span>
 								</div>
 								{expense.notes ? (
 									<div className="text-sm text-neutral-500 max-w-xs">
@@ -167,53 +200,18 @@ export function ExpenseFeed({
 				)}
 			</div>
 
-			{!readOnly ? (
-				<Menu
-					id="expense-menu"
-					anchorEl={anchorEl}
-					open={menuOpen}
-					onClose={handleMenuClose}
-					anchorOrigin={{
-						vertical: "bottom",
-						horizontal: "right",
-					}}
-					transformOrigin={{
-						vertical: "top",
-						horizontal: "right",
-					}}
-				>
-					<MenuItem onClick={handleEditClick}>
-						<ListItemIcon>
-							<Edit2 size={15} />
-						</ListItemIcon>
-						<ListItemText>Edit</ListItemText>
-					</MenuItem>
-					<MenuItem
-						onClick={handleDeleteClick}
-						className="text-danger"
-					>
-						<ListItemIcon>
-							<Trash2
-								size={15}
-								className="text-danger"
-							/>
-						</ListItemIcon>
-						<ListItemText>Delete</ListItemText>
-					</MenuItem>
-				</Menu>
-			) : null}
-
 			{expenses.length > 3 ? (
 				<div className="mt-5">
-					<Button
-						fullWidth
+					<NativeButton
+						type="button"
 						variant="outlined"
+						className="w-full"
 						onClick={() => setExpanded((value) => !value)}
 					>
 						{expanded
 							? "Show recent transactions"
 							: `Show all ${expenses.length} transactions`}
-					</Button>
+					</NativeButton>
 				</div>
 			) : null}
 
@@ -241,6 +239,6 @@ export function ExpenseFeed({
 					});
 				}}
 			/>
-		</Card>
+		</div>
 	);
 }

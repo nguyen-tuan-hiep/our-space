@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
 import { themeColors } from "@/lib/theme-colors";
@@ -54,11 +53,7 @@ export default function RootLayout({
       }
     >
       <body>
-        <AppRouterCacheProvider>
-          <AppProviders>
-            {children}
-          </AppProviders>
-        </AppRouterCacheProvider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

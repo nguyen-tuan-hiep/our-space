@@ -10,12 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@emotion/cache": "^11.14.0",
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/material": "^6.4.2",
-    "@mui/material-nextjs": "^6.4.2",
-    "@mui/x-date-pickers": "^7.25.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.48.1",
     "cloudinary": "^2.5.1",
@@ -27,6 +21,7 @@
     "recharts": "^2.15.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.10",
     "@types/node": "^22.10.10",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",

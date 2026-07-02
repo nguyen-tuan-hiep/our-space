@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
 import { Bell, BellOff } from "lucide-react";
 import { useToast } from "@/components/toast";
 import { getOneSignal, isOneSignalConfigured } from "@/lib/onesignal-web";
+
+const menuItemClass =
+  "flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-neutral-700 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50";
+const outlineButtonClass =
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-mui bg-paper px-4 text-sm font-bold text-mui transition hover:bg-mui/10 disabled:cursor-not-allowed disabled:opacity-50";
 
 interface NotificationPermissionButtonProps {
   userId: string;
@@ -177,32 +180,30 @@ export function NotificationPermissionButton({
     const Icon = enabled ? BellOff : Bell;
 
     return (
-      <MenuItem
+      <button
+        type="button"
+        role="menuitem"
         disabled={pending}
         onClick={handleToggleNotifications}
+        className={menuItemClass}
       >
-        <Icon
-          size={16}
-          className="mr-2"
-        />
+        <Icon size={16} />
         {enabled ? "Turn off notifications" : "Enable notifications"}
-      </MenuItem>
+      </button>
     );
   }
 
   if (!supported) return null;
 
   return (
-    <Button
+    <button
       type="button"
-      variant="outlined"
-      size="small"
-      startIcon={enabled ? <Bell size={16} /> : <BellOff size={16} />}
       disabled={pending}
       onClick={handleToggleNotifications}
-      className="min-h-10 bg-paper"
+      className={outlineButtonClass}
     >
+      {enabled ? <Bell size={16} /> : <BellOff size={16} />}
       {enabled ? "Turn off notifications" : "Enable notifications"}
-    </Button>
+    </button>
   );
 }

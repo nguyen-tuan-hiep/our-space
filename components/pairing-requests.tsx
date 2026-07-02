@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import Button from "@mui/material/Button";
+import { NativeButton } from "@/components/ui/native-controls";
 import { useToast } from "@/components/toast";
 import { acceptPairingRequest } from "@/app/actions";
 import type { PairingRequest } from "@/lib/types";
@@ -20,7 +20,7 @@ export function PairingRequests({ profileId, requests }: PairingRequestsProps) {
 	if (!requests.length) return null;
 
 	return (
-		<div className="grid gap-4">
+		<div className="grid gap-2">
 			{requests.map((request) => {
 				const incoming = request.recipient_id === profileId;
 				const otherProfile = incoming ? request.requester : request.recipient;
@@ -31,7 +31,7 @@ export function PairingRequests({ profileId, requests }: PairingRequestsProps) {
 				return (
 					<div
 						key={request.id}
-						className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+						className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
 					>
 						<div className="min-w-0">
 							<p className="font-semibold leading-6 text-neutral-900">
@@ -68,14 +68,13 @@ export function PairingRequests({ profileId, requests }: PairingRequestsProps) {
 									value={request.id}
 								/>
 
-								<Button
+								<NativeButton
 									type="submit"
-									variant="contained"
 									disabled={pending}
-									className="min-h-11 w-full text-white hover:bg-neutral-700 sm:w-36"
+									className="min-h-11 w-full sm:w-36"
 								>
 									{pending ? "Accepting..." : "Accept"}
-								</Button>
+								</NativeButton>
 							</form>
 						) : null}
 					</div>

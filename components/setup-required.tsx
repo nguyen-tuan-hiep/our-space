@@ -1,4 +1,3 @@
-import Card from "@mui/material/Card";
 import type { User } from "@supabase/supabase-js";
 import { PairingForm } from "@/components/pairing-form";
 import { PairingRequests } from "@/components/pairing-requests";
@@ -24,7 +23,7 @@ export function SetupRequired({
 	return (
 		<main className="min-h-svh bg-bg">
 			<section className="container-page grid min-h-svh items-center py-8 sm:py-12">
-				<Card className="mx-auto w-full max-w-3xl border border-neutral-200 bg-paper p-5 sm:p-8">
+				<div className="mx-auto w-full max-w-3xl rounded-lg border border-neutral-200 bg-paper p-5 sm:p-8">
 					{profile ? <SetupRealtimeRefresh profileId={profile.id} /> : null}
 
 					<div>
@@ -94,7 +93,7 @@ export function SetupRequired({
 							<SignOutButton className="min-h-12 w-full text-white hover:bg-neutral-700 sm:w-56" />
 						</div>
 					) : null}
-				</Card>
+				</div>
 			</section>
 		</main>
 	);

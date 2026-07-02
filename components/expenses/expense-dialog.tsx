@@ -2,21 +2,14 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import dayjs from "dayjs";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import TextField from "@mui/material/TextField";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
 import { useToast } from "@/components/toast";
+import {
+  NativeButton,
+  NativeDialog,
+  NativeInput,
+  NativeSelect,
+  NativeTextarea,
+} from "@/components/ui/native-controls";
 import { createExpense, updateExpense } from "@/app/actions";
 import {
   expenseCategories,
@@ -102,11 +95,12 @@ export function ExpenseDialog({
   }, [expense, open, profile.currency]);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ px: 3, pt: 3, pb: 0 }}>
-          {expense ? "Edit transaction" : "Log expense"}
-        </DialogTitle>
+    <NativeDialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      title={expense ? "Edit transaction" : "Log expense"}
+    >
 
         <form
           action={(formData) => {
@@ -139,9 +133,8 @@ export function ExpenseDialog({
             });
           }}
         >
-          <DialogContent sx={{ p: 3 }}>
-            <div className="grid gap-4">
-              <TextField
+            <div className="grid gap-2">
+              <NativeInput
                 required
                 name="title"
                 label="Title"
@@ -155,7 +148,7 @@ export function ExpenseDialog({
               />
 
               <div className="grid gap-3 grid-cols-2">
-                <TextField
+                <NativeInput
                   required
                   name="amount_display"
                   label={`Amount (${currency})`}
@@ -166,17 +159,10 @@ export function ExpenseDialog({
                       formatCurrencyInputValue(event.target.value, currency),
                     );
                   }}
-                  slotProps={{
-                    htmlInput: {
-                      inputMode: "numeric",
-                    },
-                  }}
+                  inputMode="numeric"
                 />
 
-                <FormControl fullWidth>
-                  <InputLabel id="currency-label">Currency</InputLabel>
-                  <Select
-                    labelId="currency-label"
+                <NativeSelect
                     id="currency"
                     value={currency}
                     label="Currency"
@@ -198,76 +184,68 @@ export function ExpenseDialog({
                     }}
                   >
                     {Array.from(new Set([currency, ...currencyOptions])).map((option) => (
-                      <MenuItem key={option} value={option}>
+                      <option key={option} value={option}>
                         {option}
-                      </MenuItem>
+                      </option>
                     ))}
-                  </Select>
-                </FormControl>
+                </NativeSelect>
               </div>
 
               <div className="grid gap-3 grid-cols-2">
-                <DatePicker
-                  format="DD/MM/YYYY"
+                <NativeInput
+                  type="date"
                   label="Date"
-                  value={transactionDate}
-                  onChange={(value) => setTransactionDate(value)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      required: true,
-                    },
-                  }}
+                  value={(transactionDate ?? dayjs()).format("YYYY-MM-DD")}
+                  onChange={(event) => setTransactionDate(dayjs(event.target.value))}
+                  required
                 />
-                <DesktopTimePicker
-                  format="HH:mm"
+                <NativeInput
+                  type="time"
                   label="Time"
-                  value={transactionTime}
-                  onChange={(value) => setTransactionTime(value)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      required: true,
-                    },
+                  value={(transactionTime ?? dayjs()).format("HH:mm")}
+                  onChange={(event) => {
+                    const [hour = 0, minute = 0] = event.target.value
+                      .split(":")
+                      .map(Number);
+                    setTransactionTime((current) =>
+                      (current ?? dayjs()).hour(hour).minute(minute).second(0),
+                    );
                   }}
+                  required
                 />
               </div>
 
-              <FormControl fullWidth required>
-                <InputLabel id="category-label">Category</InputLabel>
-                <Select
-                  labelId="category-label"
+              <NativeSelect
                   id="category"
                   name="category"
                   label="Category"
                   defaultValue={expense?.category ?? "Food & Drinks"}
+                  required
                 >
                   {expenseCategories.map((category) => (
-                    <MenuItem key={category} value={category}>
+                    <option key={category} value={category}>
                       {category}
-                    </MenuItem>
+                    </option>
                   ))}
-                </Select>
-              </FormControl>
+              </NativeSelect>
 
-              <TextField
-                multiline
-                minRows={3}
+              <NativeTextarea
+                rows={3}
                 name="notes"
                 label="Notes"
                 defaultValue={expense?.notes ?? ""}
               />
             </div>
-          </DialogContent>
 
-          <DialogActions sx={{ px: 3, pt: 0, pb: 3 }}>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained" disabled={pending}>
+          <div className="mt-6 flex justify-end gap-3">
+            <NativeButton type="button" variant="text" onClick={handleClose}>
+              Cancel
+            </NativeButton>
+            <NativeButton type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save expense"}
-            </Button>
-          </DialogActions>
+            </NativeButton>
+          </div>
         </form>
-      </Dialog>
-    </LocalizationProvider>
+    </NativeDialog>
   );
 }
