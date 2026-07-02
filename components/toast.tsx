@@ -140,7 +140,7 @@ export function Toast({
   return (
     <div
       role={variant === "error" ? "alert" : "status"}
-      className={`relative w-full overflow-hidden rounded-lg border bg-white shadow-[0_18px_55px_rgba(0,0,0,0.16)] ${style.shell} ${closing ? "toast-out" : "toast-in"}`}
+      className={`relative w-full overflow-hidden rounded-lg border bg-white ${style.shell} ${closing ? "toast-out" : "toast-in"}`}
     >
       <div className="flex items-start gap-3 p-4 pr-11">
         <div

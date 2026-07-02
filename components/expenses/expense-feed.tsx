@@ -77,7 +77,7 @@ export function ExpenseFeed({
 	};
 
 	return (
-		<Card className="border border-neutral-200 bg-paper p-5 !shadow-lg">
+		<Card className="border border-neutral-200 bg-paper p-5">
 			<div className="mb-5 flex items-center justify-between gap-4">
 				<div>
 					<p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>

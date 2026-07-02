@@ -17,7 +17,7 @@ export function LoginForm() {
   const [pending, startTransition] = useTransition();
 
   return (
-    <Card className="border border-neutral-200 bg-paper p-6 sm:p-8 !shadow-2xl">
+    <Card className="border border-neutral-200 bg-paper p-6 sm:p-8">
       <Tabs
         value={mode}
         onChange={(_, value) => setMode(value)}

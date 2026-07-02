@@ -3,7 +3,7 @@ export default function Loading() {
     <main className="min-h-svh bg-bg">
       <section className="container-page grid min-h-svh place-items-center py-10">
         <div className="w-full max-w-sm text-center">
-          <div className="mx-auto grid size-16 place-items-center rounded-full bg-paper text-3xl shadow-lg">
+          <div className="mx-auto grid size-16 place-items-center rounded-full bg-paper text-3xl">
             𑣲⋆
           </div>
           <p className="eyebrow mt-7">Our Space</p>

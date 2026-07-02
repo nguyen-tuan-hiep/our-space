@@ -90,7 +90,7 @@ export function NoteCard({
   };
 
   return (
-    <Card className="flex h-[20rem] flex-col overflow-hidden border border-neutral-200 bg-paper p-5 !shadow-lg">
+    <Card className="flex h-[20rem] flex-col overflow-hidden border border-neutral-200 bg-paper p-5">
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] uppercase tracking-[0.1em] text-neutral-600">

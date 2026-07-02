@@ -460,7 +460,7 @@ export function DashboardClient({
 						</div>
 						<div className="flex min-w-0 items-center justify-end gap-2 sm:gap-3">
 							<div className="flex min-w-0 items-center gap-2 sm:gap-3">
-								<div className="grid size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl shadow-lg backdrop-blur-md">
+								<div className="grid size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl backdrop-blur-md">
 									{profileAvatar}
 								</div>
 								<div className="min-w-0 text-right leading-tight sm:text-left">
@@ -478,7 +478,7 @@ export function DashboardClient({
 									aria-expanded={mobileMenuOpen ? "true" : undefined}
 									aria-haspopup="menu"
 									onClick={(event) => setMobileMenuAnchor(event.currentTarget)}
-									className="grid size-9 shrink-0 place-items-center rounded-full border border-paper/70 bg-black/35 p-0 shadow-lg transition hover:bg-black/50"
+									className="grid size-9 shrink-0 place-items-center rounded-full border border-paper/70 bg-black/35 p-0 transition hover:bg-black/50"
 								>
 									<MenuIcon size={18} />
 								</button>
