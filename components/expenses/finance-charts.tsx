@@ -68,6 +68,35 @@ function useSmallDevice() {
 	return isSmallDevice;
 }
 
+// 💡 Hàm vẽ Label hiển thị % trên các lát cắt của Pie
+const renderCustomizedLabel = ({
+	cx,
+	cy,
+	midAngle,
+	innerRadius,
+	outerRadius,
+	percent,
+}: any) => {
+	if (percent < 0.05) return null; // Không hiện nhãn nếu lát cắt quá nhỏ (< 5%) tránh đè chữ
+	const RADIAN = Math.PI / 180;
+	const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+	const x = cx + radius * Math.cos(-midAngle * RADIAN);
+	const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+	return (
+		<text
+			x={x}
+			y={y}
+			fill="black"
+			textAnchor="middle"
+			dominantBaseline="central"
+			className="text-[10px] font-bold"
+		>
+			{`${(percent * 100).toFixed(0)}%`}
+		</text>
+	);
+};
+
 interface FinanceChartsProps {
 	expenses: IndividualExpense[];
 	barExpenses: IndividualExpense[];
@@ -166,13 +195,7 @@ export function FinanceCharts({
 				exchangeRates,
 				exchangeRatesBase,
 			}),
-		[
-			displayCurrency,
-			exchangeRates,
-			exchangeRatesBase,
-			expenses,
-			profiles,
-		],
+		[displayCurrency, exchangeRates, exchangeRatesBase, expenses, profiles],
 	);
 
 	const chartValueTotals = useMemo(
@@ -223,22 +246,22 @@ export function FinanceCharts({
 						}
 						className="min-h-10"
 					>
-							{profileCurrencyOptions.map((option) => (
-								<option
-									key={option.currency}
-									value={option.currency}
-								>
-									{option.label}
-								</option>
-							))}
-							{otherCurrencyOptions.map((currency) => (
-								<option
-									key={currency}
-									value={currency}
-								>
-									{currency}
-								</option>
-							))}
+						{profileCurrencyOptions.map((option) => (
+							<option
+								key={option.currency}
+								value={option.currency}
+							>
+								{option.label}
+							</option>
+						))}
+						{otherCurrencyOptions.map((currency) => (
+							<option
+								key={currency}
+								value={currency}
+							>
+								{currency}
+							</option>
+						))}
 					</NativeSelect>
 				</div>
 			</div>
@@ -315,13 +338,13 @@ export function FinanceCharts({
 					</div>
 				</div>
 
-				<div className="grid min-w-0 gap-6 xl:grid-cols-2">
+				<div className="grid min-w-0 gap-6 md:grid-cols-2">
 					{perPerson.map((item) => (
 						<div
 							key={item.profile.id}
-							className="min-w-0 overflow-hidden border border-neutral-400 p-4 rounded-lg border-dashed"
+							className="min-w-0 overflow-hidden border border-neutral-400 p-4 rounded-lg border-dashed flex flex-col justify-between"
 						>
-							<div className="mb-4 flex items-center justify-between gap-3">
+							<div className="mb-2 flex items-center justify-between gap-3">
 								<div className="min-w-0">
 									<div className="flex items-center gap-1.5 whitespace-nowrap">
 										<span className="text-sm font-semibold">
@@ -330,7 +353,7 @@ export function FinanceCharts({
 										</span>
 									</div>
 									<p className="text-sm text-neutral-500">
-										{formatCurrency(item.total, displayCurrency)}
+										Total: {formatCurrency(item.total, displayCurrency)}
 									</p>
 								</div>
 
@@ -339,30 +362,73 @@ export function FinanceCharts({
 								</span>
 							</div>
 
-							<div className="h-56 w-full min-w-0">
-								<ResponsiveContainer
-									width="100%"
-									height="100%"
-								>
-									<PieChart>
-										<Pie
-											data={item.categories}
-											dataKey="value"
-											nameKey="category"
-											innerRadius={48}
-											outerRadius={82}
-											paddingAngle={2}
-										>
-											{item.categories.map((entry) => (
-												<Cell
-													key={entry.category}
-													fill={expenseCategoryColors[entry.category]}
-												/>
-											))}
-										</Pie>
-										<Tooltip formatter={tooltipFormatter} />
-									</PieChart>
-								</ResponsiveContainer>
+							{/* 💡 Chia đôi layout: Biểu đồ 1 bên, Legend chi tiết 1 bên */}
+							<div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full min-w-0">
+								<div className="h-48 w-48 shrink-0">
+									<ResponsiveContainer
+										width="100%"
+										height="100%"
+									>
+										<PieChart>
+											<Pie
+												data={item.categories}
+												dataKey="value"
+												nameKey="category"
+												innerRadius={40}
+												outerRadius={75}
+												paddingAngle={2}
+												labelLine={false}
+												label={renderCustomizedLabel} // 💡 Gắn phần trăm vào tâm lát cắt
+											>
+												{item.categories.map((entry) => (
+													<Cell
+														key={entry.category}
+														fill={
+															expenseCategoryColors[
+																entry.category as keyof typeof expenseCategoryColors
+															] ?? "#94a3b8"
+														}
+													/>
+												))}
+											</Pie>
+											<Tooltip formatter={tooltipFormatter} />
+										</PieChart>
+									</ResponsiveContainer>
+								</div>
+
+								{/* 💡 Custom Legend: Danh sách chi tiết danh mục + số tiền */}
+								<div className="flex-1 w-full space-y-1.5 overflow-y-auto max-h-48 text-xs">
+									{item.categories.length === 0 ? (
+										<p className="text-neutral-400 text-center py-4">
+											No data available
+										</p>
+									) : (
+										item.categories.map((cat: any) => (
+											<div
+												key={cat.category}
+												className="flex items-center justify-between gap-2 border-b border-neutral-100 pb-1"
+											>
+												<div className="flex items-center gap-2 min-w-0">
+													<span
+														className="w-2.5 h-2.5 rounded-full shrink-0"
+														style={{
+															backgroundColor:
+																expenseCategoryColors[
+																	cat.category as keyof typeof expenseCategoryColors
+																] ?? "#94a3b8",
+														}}
+													/>
+													<span className="truncate font-medium text-neutral-700 capitalize">
+														{cat.category}
+													</span>
+												</div>
+												<span className="font-semibold text-neutral-900 shrink-0">
+													{formatCurrency(cat.value, displayCurrency)}
+												</span>
+											</div>
+										))
+									)}
+								</div>
 							</div>
 						</div>
 					))}

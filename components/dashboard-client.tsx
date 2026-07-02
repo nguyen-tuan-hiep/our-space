@@ -828,7 +828,7 @@ export function DashboardClient({
 									filterRange={filterRange}
 									selectedPeriod={activePeriod}
 								/>
-								<div className="grid gap-6 xl:grid-cols-2">
+								<div className="grid gap-6 md:grid-cols-2">
 									<ExpenseFeed
 										title={`My ledger ${profileAvatar}`}
 										expenses={myExpenses}
