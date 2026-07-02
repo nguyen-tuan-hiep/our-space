@@ -1,4 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+
+type CookieToSet = {
+  name: string;
+  value: string;
+  options?: Parameters<NextResponse["cookies"]["set"]>[2];
+};
 
 function isSupabaseAuthCookie(name: string) {
   return /^sb-.+-auth-token/.test(name);
@@ -18,6 +25,16 @@ function redirectToLogin(request: NextRequest) {
   return NextResponse.redirect(login);
 }
 
+function clearSupabaseAuthCookies(request: NextRequest, response: NextResponse) {
+  getSupabaseAuthCookieNames(request).forEach((name) => {
+    request.cookies.delete(name);
+    response.cookies.set(name, "", {
+      path: "/",
+      maxAge: 0,
+    });
+  });
+}
+
 export async function middleware(request: NextRequest) {
   const hasAuthCookie = getSupabaseAuthCookieNames(request).length > 0;
 
@@ -26,11 +43,47 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  return NextResponse.next({ request });
+  let response = NextResponse.next({ request });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet: CookieToSet[]) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options),
+          );
+        },
+      },
+    },
+  );
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    clearSupabaseAuthCookies(request, response);
+    if (request.nextUrl.pathname === "/") {
+      const redirectResponse = redirectToLogin(request);
+      clearSupabaseAuthCookies(request, redirectResponse);
+      return redirectResponse;
+    }
+  }
+
+  return response;
 }
 
 export const config = {
   matcher: [
-    "/((?!login|auth/callback|_next/static|_next/image|favicon.ico|manifest.webmanifest|OneSignalSDKWorker.js|OneSignalSDKUpdaterWorker.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!auth/callback|_next/static|_next/image|favicon.ico|manifest.webmanifest|OneSignalSDKWorker.js|OneSignalSDKUpdaterWorker.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

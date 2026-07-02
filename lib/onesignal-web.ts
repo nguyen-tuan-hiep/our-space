@@ -131,6 +131,7 @@ export async function getOneSignal(userId?: string) {
     if (userId) await oneSignal.login(userId);
     return oneSignal;
   });
+  window.__oneSignalInitPromise = oneSignalInitPromise;
 
   return oneSignalInitPromise;
 }

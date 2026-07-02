@@ -39,11 +39,13 @@ export function NotificationPermissionButton({
   const toast = useToast();
   const [enabled, setEnabled] = useState(false);
   const [supported, setSupported] = useState(true);
+  const [checking, setChecking] = useState(true);
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
     if (!isOneSignalConfigured() || !("serviceWorker" in navigator)) {
       setSupported(false);
+      setChecking(false);
     }
   }, []);
 
@@ -51,12 +53,11 @@ export function NotificationPermissionButton({
     if (!supported) return;
 
     let cancelled = false;
-    const oneSignal = window.__oneSignalInitialized ? window.__oneSignal : null;
-    if (!oneSignal) return;
 
-    void oneSignal
-      .login(userId)
+    void getOneSignal(userId)
       .then(() => {
+        const oneSignal = window.__oneSignal;
+        if (!oneSignal) return;
         if (cancelled) return;
 
         setSupported(oneSignal.Notifications.isPushSupported());
@@ -72,6 +73,7 @@ export function NotificationPermissionButton({
         const currentId = oneSignal.User.PushSubscription.id;
         const currentOptedIn = oneSignal.User.PushSubscription.optedIn;
         updateCurrentSubscription(currentId, currentOptedIn);
+        setChecking(false);
 
         oneSignal.User.PushSubscription.addEventListener("change", (event) => {
           updateCurrentSubscription(
@@ -86,6 +88,7 @@ export function NotificationPermissionButton({
       })
       .catch((error) => {
         console.warn("OneSignal subscription state check failed", error);
+        if (!cancelled) setChecking(false);
       });
 
     return () => {
@@ -183,12 +186,16 @@ export function NotificationPermissionButton({
       <button
         type="button"
         role="menuitem"
-        disabled={pending}
+        disabled={pending || checking}
         onClick={handleToggleNotifications}
         className={menuItemClass}
       >
         <Icon size={16} />
-        {enabled ? "Turn off notifications" : "Enable notifications"}
+        {checking
+          ? "Checking notifications"
+          : enabled
+            ? "Turn off notifications"
+            : "Enable notifications"}
       </button>
     );
   }
@@ -198,12 +205,16 @@ export function NotificationPermissionButton({
   return (
     <button
       type="button"
-      disabled={pending}
+      disabled={pending || checking}
       onClick={handleToggleNotifications}
       className={outlineButtonClass}
     >
       {enabled ? <Bell size={16} /> : <BellOff size={16} />}
-      {enabled ? "Turn off notifications" : "Enable notifications"}
+      {checking
+        ? "Checking notifications"
+        : enabled
+          ? "Turn off notifications"
+          : "Enable notifications"}
     </button>
   );
 }
