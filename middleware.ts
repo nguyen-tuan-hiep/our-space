@@ -25,6 +25,13 @@ function redirectToLogin(request: NextRequest) {
   return NextResponse.redirect(login);
 }
 
+function redirectToHome(request: NextRequest) {
+  const home = request.nextUrl.clone();
+  home.pathname = "/";
+  home.search = "";
+  return NextResponse.redirect(home);
+}
+
 function clearSupabaseAuthCookies(request: NextRequest, response: NextResponse) {
   getSupabaseAuthCookieNames(request).forEach((name) => {
     request.cookies.delete(name);
@@ -35,11 +42,20 @@ function clearSupabaseAuthCookies(request: NextRequest, response: NextResponse) 
   });
 }
 
+function isLoginPath(pathname: string) {
+  return pathname === "/login";
+}
+
+function isProtectedPath(pathname: string) {
+  return pathname === "/";
+}
+
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
   const hasAuthCookie = getSupabaseAuthCookieNames(request).length > 0;
 
   if (!hasAuthCookie) {
-    if (request.nextUrl.pathname === "/") return redirectToLogin(request);
+    if (isProtectedPath(pathname)) return redirectToLogin(request);
     return NextResponse.next({ request });
   }
 
@@ -72,11 +88,17 @@ export async function middleware(request: NextRequest) {
 
   if (error || !user) {
     clearSupabaseAuthCookies(request, response);
-    if (request.nextUrl.pathname === "/") {
+    if (isProtectedPath(pathname)) {
       const redirectResponse = redirectToLogin(request);
       clearSupabaseAuthCookies(request, redirectResponse);
       return redirectResponse;
     }
+
+    return response;
+  }
+
+  if (isLoginPath(pathname)) {
+    return redirectToHome(request);
   }
 
   return response;
@@ -84,6 +106,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!auth/callback|_next/static|_next/image|favicon.ico|manifest.webmanifest|OneSignalSDKWorker.js|OneSignalSDKUpdaterWorker.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!auth/callback|_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|OneSignalSDKWorker.js|OneSignalSDKUpdaterWorker.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

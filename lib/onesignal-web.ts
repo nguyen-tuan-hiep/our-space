@@ -122,6 +122,8 @@ export async function getOneSignal(userId?: string) {
   oneSignalInitPromise = runWhenOneSignalReady(async (oneSignal) => {
     await oneSignal.init({
       appId: ONESIGNAL_WEB_APP_ID,
+      serviceWorkerPath: "/sw.js",
+      serviceWorkerParam: { scope: "/" },
       notifyButton: { enable: true },
     });
 
