@@ -72,26 +72,39 @@ async function cacheFirst(request, cacheName) {
 }
 
 async function staleWhileRevalidate(request, cacheName) {
+  if (request.headers.has("range")) {
+    return fetch(request);
+  }
+
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
+
   const fresh = fetch(request)
     .then((response) => {
-      if (response.ok) {
-        cache.put(request, response.clone());
+      if (response.ok || response.status === 0) {
+        cache.put(request, response.clone()).catch(() => {});
         void trimCache(cacheName, MAX_IMAGE_ENTRIES);
       }
       return response;
     })
     .catch(() => cached);
 
-  return cached ?? fresh;
+  return cached || fresh;
 }
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(STATIC_CACHE)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then((cache) =>
+        Promise.allSettled(
+          PRECACHE_URLS.map((url) =>
+            cache.add(url).catch((error) => {
+              console.warn("Precache failed:", url, error);
+            }),
+          ),
+        ),
+      )
       .then(() => self.skipWaiting()),
   );
 });

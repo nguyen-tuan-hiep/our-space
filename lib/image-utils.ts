@@ -1,5 +1,5 @@
 const CLOUDINARY_UPLOAD_SEGMENT = "/image/upload/";
-const HERO_IMAGE_TRANSFORM = "f_auto,q_auto:good,c_limit,w_1920";
+const HERO_IMAGE_TRANSFORM = "f_auto,q_auto:good,c_limit,w_1200";
 
 export function getOptimizedHeroImageUrl(imageUrl: string) {
   try {

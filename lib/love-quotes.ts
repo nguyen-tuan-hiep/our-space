@@ -103,8 +103,12 @@ export async function getDailyLoveQuote(timeZone: string): Promise<LoveQuote> {
     process.env.LOVE_QUOTE_API_URL ??
     "https://api.quotable.io/random?tags=love";
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 700);
+
   try {
     const response = await fetch(getDailyQuoteUrl(quoteUrl, dayKey), {
+      signal: controller.signal,
       next: { revalidate: quoteMaxAgeSeconds },
     });
 
@@ -118,5 +122,7 @@ export async function getDailyLoveQuote(timeZone: string): Promise<LoveQuote> {
     return quote ?? getFallbackQuote(dayKey);
   } catch {
     return getFallbackQuote(dayKey);
+  } finally {
+    clearTimeout(timeout);
   }
 }

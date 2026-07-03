@@ -32,7 +32,6 @@ import type {
 	SharedNote,
 } from "@/lib/types";
 import { NoteCard } from "@/components/notes/note-card";
-import { NotificationPermissionButton } from "@/components/notifications/notification-permission-button";
 import { logoutOneSignal } from "@/lib/onesignal-web";
 import {
 	type FilterRange,
@@ -56,6 +55,14 @@ function segmentButtonClass(active: boolean) {
 			: "z-0 border-neutral-300 bg-paper text-neutral-700",
 	].join(" ");
 }
+
+const NotificationPermissionButton = dynamic(
+  () =>
+    import("@/components/notifications/notification-permission-button").then(
+      (mod) => mod.NotificationPermissionButton,
+    ),
+  { ssr: false },
+);
 
 const NoteDialog = dynamic(
 	() => import("@/components/notes/note-dialog").then((mod) => mod.NoteDialog),
