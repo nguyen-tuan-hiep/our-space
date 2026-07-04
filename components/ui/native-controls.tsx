@@ -198,6 +198,7 @@ export function NativeSelect({
 	label,
 	children,
 	className,
+	containerClassName,
 	value,
 	defaultValue, // Đón nhận thêm prop này
 	labelBgClass = "bg-paper",
@@ -205,6 +206,7 @@ export function NativeSelect({
 }: React.SelectHTMLAttributes<HTMLSelectElement> & {
 	label: string;
 	labelBgClass?: string;
+	containerClassName?: string;
 	children: ReactNode;
 }) {
 	const hasValue =
@@ -214,7 +216,7 @@ export function NativeSelect({
 			defaultValue !== "");
 
 	return (
-		<div className="w-full">
+		<div className={cx("w-full", containerClassName)}>
 			<div className="relative">
 				<select
 					{...props}

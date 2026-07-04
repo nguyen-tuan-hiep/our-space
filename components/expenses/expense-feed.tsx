@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Edit2, Trash2, EllipsisVertical } from "lucide-react";
+import { Edit2, Trash2, EllipsisVertical, ListFilter } from "lucide-react";
 import { useToast } from "@/components/toast";
-import { NativeButton } from "@/components/ui/native-controls";
+import { NativeSelect } from "@/components/ui/native-controls";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { expenseCategoryColors, formatCurrency } from "@/lib/constants";
+import {
+	expenseCategories,
+	expenseCategoryColors,
+	formatCurrency,
+} from "@/lib/constants";
 import { formatAppDateTime } from "@/lib/date-format";
-import type { IndividualExpense } from "@/lib/types";
+import type { ExpenseCategory, IndividualExpense } from "@/lib/types";
 
 interface ExpenseFeedProps {
 	title: string;
@@ -31,7 +35,9 @@ export function ExpenseFeed({
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [expenseToDelete, setExpenseToDelete] =
 		useState<IndividualExpense | null>(null);
-	const [expanded, setExpanded] = useState(false);
+	const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | "all">(
+		"all",
+	);
 	const [pending, startTransition] = useTransition();
 
 	const [activeExpense, setActiveExpense] = useState<IndividualExpense | null>(
@@ -39,8 +45,10 @@ export function ExpenseFeed({
 	);
 	const menuOpen = Boolean(activeExpense);
 	const menuRef = useRef<HTMLDivElement | null>(null);
-
-	const visibleExpenses = expanded ? expenses : expenses.slice(0, 3);
+	const filteredExpenses =
+		categoryFilter === "all"
+			? expenses
+			: expenses.filter((expense) => expense.category === categoryFilter);
 
 	useEffect(() => {
 		if (!menuOpen) return;
@@ -87,20 +95,52 @@ export function ExpenseFeed({
 
 	return (
 		<div className="rounded-lg border border-neutral-200 bg-paper p-5">
-			<div className="mb-5 flex items-center justify-between gap-4">
+			<div className="mb-5">
 				<div>
 					<p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>
-					<div className="mt-2 flex items-center gap-1.5">
-						<span className="font-serif text-2xl leading-1">
+					<div className="mt-2 flex items-center gap-3">
+						<span className="min-w-0 font-serif text-2xl leading-1">
 							{title}
 						</span>
+						<div className="relative ml-auto grid size-9 shrink-0 place-items-center">
+							<div
+								aria-hidden="true"
+								className={`grid size-9 place-items-center rounded-full border transition ${
+									categoryFilter === "all"
+										? "border-neutral-200 text-neutral-500"
+										: "border-neutral-900 bg-neutral-900 text-white"
+								}`}
+							>
+								<ListFilter size={17} />
+							</div>
+							<NativeSelect
+								label="Category"
+								aria-label="Filter category"
+								value={categoryFilter}
+								onChange={(event) =>
+									setCategoryFilter(event.target.value as ExpenseCategory | "all")
+								}
+								containerClassName="absolute inset-0 opacity-0"
+								className="size-9 min-h-9 cursor-pointer"
+							>
+								<option value="all">All categories</option>
+								{expenseCategories.map((category) => (
+									<option
+										key={category}
+										value={category}
+									>
+										{category}
+									</option>
+								))}
+							</NativeSelect>
+						</div>
 					</div>
 				</div>
 			</div>
 
-			<div className="grid gap-5">
-				{expenses.length ? (
-					visibleExpenses.map((expense) => {
+			<div className="grid max-h-[28rem] gap-5 overflow-y-auto pr-1">
+				{filteredExpenses.length ? (
+					filteredExpenses.map((expense) => {
 						const canEdit = !readOnly && expense.owner_id === currentUserId;
 						const isDeleting = pending && deletingId === expense.id;
 
@@ -194,26 +234,13 @@ export function ExpenseFeed({
 						);
 					})
 				) : (
-					<p className="py-10 text-center text-neutral-500">
-						No transactions yet.
+					<p className="py-10 text-center text-neutral-500 border border-dashed border-neutral-400 rounded-lg">
+						{expenses.length
+							? "No transactions in this category."
+							: "No transactions yet."}
 					</p>
 				)}
 			</div>
-
-			{expenses.length > 3 ? (
-				<div className="mt-5">
-					<NativeButton
-						type="button"
-						variant="outlined"
-						className="w-full"
-						onClick={() => setExpanded((value) => !value)}
-					>
-						{expanded
-							? "Show recent transactions"
-							: `Show all ${expenses.length} transactions`}
-					</NativeButton>
-				</div>
-			) : null}
 
 			<ConfirmDialog
 				open={Boolean(expenseToDelete)}
