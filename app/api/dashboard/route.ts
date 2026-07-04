@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getAppSession } from "@/lib/auth";
 import { getDashboardData } from "@/lib/data";
 import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
-import { getDailyLoveQuote } from "@/lib/love-quotes";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +16,7 @@ export async function GET() {
     return NextResponse.json({ error: "Setup required" }, { status: 409 });
   }
 
-  const [data, dailyLoveQuote] = await Promise.all([
-    getDashboardData(appSession.profile, appSession.partner),
-    getDailyLoveQuote(appSession.profile.time_zone),
-  ]);
+  const data = await getDashboardData(appSession.profile, appSession.partner);
   const heroImageUrl =
     data.settings?.hero_image_url ??
     process.env.NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL ??
@@ -34,7 +30,6 @@ export async function GET() {
         data.settings?.anniversary_date ??
         appSession.profile.created_at?.slice(0, 10) ??
         new Date().toISOString().slice(0, 10),
-      dailyLoveQuote,
     },
     {
       headers: {

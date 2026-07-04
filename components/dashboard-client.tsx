@@ -137,7 +137,7 @@ type DashboardPayload = {
 	notes: SharedNote[];
 	heroImageUrl: string;
 	anniversaryDate: string;
-	dailyLoveQuote: LoveQuote;
+	dailyLoveQuote?: LoveQuote;
 };
 
 type CachedDashboardPayload = DashboardPayload & {
@@ -159,6 +159,18 @@ function isDashboardPayload(value: unknown): value is DashboardPayload {
 		Array.isArray(payload.notes) &&
 		typeof payload.heroImageUrl === "string" &&
 		typeof payload.anniversaryDate === "string" &&
+		(!payload.dailyLoveQuote ||
+			typeof payload.dailyLoveQuote.text === "string")
+	);
+}
+
+function isLoveQuotePayload(
+	value: unknown,
+): value is { dailyLoveQuote: LoveQuote } {
+	if (!value || typeof value !== "object") return false;
+	const payload = value as { dailyLoveQuote?: Partial<LoveQuote> };
+
+	return (
 		Boolean(payload.dailyLoveQuote) &&
 		typeof payload.dailyLoveQuote?.text === "string"
 	);
@@ -347,13 +359,55 @@ export function DashboardClient({
 		() => [profile, partner],
 		[profile, partner],
 	);
+	const displayNotes = useMemo(
+		() =>
+			filteredNotes.map((note) => ({
+				...note,
+				author:
+					note.author_id === profile.id
+						? {
+								id: profile.id,
+								display_name: profile.display_name,
+								avatar_url: profile.avatar_url,
+								currency: profile.currency,
+							}
+						: note.author_id === partner.id
+							? {
+									id: partner.id,
+									display_name: partner.display_name,
+									avatar_url: partner.avatar_url,
+									currency: partner.currency,
+								}
+							: note.author,
+				recipient:
+					note.recipient_id === profile.id
+						? {
+								id: profile.id,
+								display_name: profile.display_name,
+								avatar_url: profile.avatar_url,
+								currency: profile.currency,
+							}
+						: note.recipient_id === partner.id
+							? {
+									id: partner.id,
+									display_name: partner.display_name,
+									avatar_url: partner.avatar_url,
+									currency: partner.currency,
+								}
+							: note.recipient,
+			})),
+		[filteredNotes, partner, profile],
+	);
 
 	const applyDashboardPayload = useCallback(
 		(payload: DashboardPayload, options?: { cache?: boolean }) => {
 			setNotes(payload.notes);
 			setHeroImageUrl(payload.heroImageUrl);
 			setAnniversaryDate(payload.anniversaryDate);
-			setDailyLoveQuote(payload.dailyLoveQuote);
+			if (payload.dailyLoveQuote?.source === "api") {
+				const dailyLoveQuote = payload.dailyLoveQuote;
+				setDailyLoveQuote(dailyLoveQuote);
+			}
 
 			if (options?.cache !== false) {
 				writeCachedDashboardPayload(profile.id, payload);
@@ -395,6 +449,34 @@ export function DashboardClient({
 		[applyDashboardPayload],
 	);
 
+	const loadOnlineQuote = useCallback(
+		async (options?: { signal?: AbortSignal }) => {
+			try {
+				const response = await fetch("/api/love-quote", {
+					cache: "no-store",
+					signal: options?.signal,
+				});
+
+				if (response.ok) {
+					const payload = (await response.json()) as unknown;
+					if (
+						isLoveQuotePayload(payload) &&
+						payload.dailyLoveQuote.source !== "loading"
+					) {
+						setDailyLoveQuote(payload.dailyLoveQuote);
+					}
+				}
+			} catch (error) {
+				if (error instanceof DOMException && error.name === "AbortError") {
+					return;
+				}
+
+				console.warn("Server quote refresh failed", error);
+			}
+		},
+		[],
+	);
+
 	useEffect(() => {
 		const cached = readCachedDashboardPayload(profile.id);
 		if (cached) {
@@ -410,6 +492,13 @@ export function DashboardClient({
 
 		return () => controller.abort();
 	}, [applyDashboardPayload, loadDashboardData, profile.id]);
+
+	useEffect(() => {
+		const controller = new AbortController();
+		void loadOnlineQuote({ signal: controller.signal });
+
+		return () => controller.abort();
+	}, [loadOnlineQuote]);
 
 	const loadFinanceData = useCallback(
 		async (options?: { silent?: boolean }) => {
@@ -811,9 +900,19 @@ export function DashboardClient({
 						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
 							Quote of the day
 						</p>
-						<p className="mt-2 font-serif text-xl leading-snug text-neutral-900 sm:text-2xl">
-							"{dailyLoveQuote.text}"
-						</p>
+						{dailyLoveQuote.source === "loading" ? (
+							<p className="mt-2 font-serif text-xl leading-snug text-neutral-500 sm:text-2xl">
+								Loading today's quote...
+							</p>
+						) : dailyLoveQuote.source === "unavailable" ? (
+							<p className="mt-2 font-serif text-xl leading-snug text-neutral-500 sm:text-2xl">
+								Quote is unavailable right now.
+							</p>
+						) : (
+							<p className="mt-2 font-serif text-xl leading-snug text-neutral-900 sm:text-2xl">
+								"{dailyLoveQuote.text}"
+							</p>
+						)}
 						{dailyLoveQuote.author ? (
 							<p className="mt-2 text-sm text-neutral-500">
 								{dailyLoveQuote.author}
@@ -928,8 +1027,8 @@ export function DashboardClient({
 							</button>
 						</div>
 						<div className="grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-							{filteredNotes.length ? (
-								filteredNotes.map((note) => (
+							{displayNotes.length ? (
+								displayNotes.map((note) => (
 									<NoteCard
 										key={note.id}
 										note={note}

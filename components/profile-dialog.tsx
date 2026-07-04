@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast";
 import {
 	NativeButton,
@@ -28,6 +29,7 @@ interface ProfileDialogProps {
 }
 
 export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
+	const router = useRouter();
 	const toast = useToast();
 	const [tab, setTab] = useState<"profile" | "password">("profile");
 	const [avatar, setAvatar] = useState(profile.avatar_url || "💖");
@@ -97,7 +99,10 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 								toast(result.message, {
 									variant: result.ok ? "success" : "error",
 								});
-								if (result.ok) handleClose();
+								if (result.ok) {
+									router.refresh();
+									handleClose();
+								}
 							});
 						}}
 					>

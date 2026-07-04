@@ -6,7 +6,6 @@ import { SetupRequired } from "@/components/setup-required";
 import { getAppSession, getAuthenticatedSession } from "@/lib/auth";
 import { getDashboardSettings } from "@/lib/data";
 import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
-import { getDailyLoveQuote } from "@/lib/love-quotes";
 import type { PairingRequest, Profile } from "@/lib/types";
 import Loading from "./loading";
 
@@ -75,10 +74,10 @@ async function HomeContent() {
     );
   }
 
-  const [settings, dailyLoveQuote] = await Promise.all([
-    getDashboardSettings(appSession.profile, appSession.partner),
-    getDailyLoveQuote(appSession.profile.time_zone),
-  ]);
+  const settings = await getDashboardSettings(
+    appSession.profile,
+    appSession.partner,
+  );
   const heroImageUrl =
     settings?.hero_image_url ??
     process.env.NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL ??
@@ -96,7 +95,11 @@ async function HomeContent() {
         new Date().toISOString().slice(0, 10)
       }
       currentTimeIso={new Date().toISOString()}
-      dailyLoveQuote={dailyLoveQuote}
+      dailyLoveQuote={{
+        text: "",
+        author: null,
+        source: "loading",
+      }}
     />
   );
 }
