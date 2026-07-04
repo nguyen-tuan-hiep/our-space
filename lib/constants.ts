@@ -464,7 +464,7 @@ export const avatarOptions = [
   "☁️",
 ] as const;
 function hasEmojiPresentation(value: string) {
-  return /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(value);
+  return /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]/u.test(value);
 }
 
 function getGraphemes(value: string) {

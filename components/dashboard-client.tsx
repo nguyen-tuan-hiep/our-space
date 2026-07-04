@@ -137,7 +137,6 @@ type DashboardPayload = {
 	notes: SharedNote[];
 	heroImageUrl: string;
 	anniversaryDate: string;
-	dailyLoveQuote?: LoveQuote;
 };
 
 type CachedDashboardPayload = DashboardPayload & {
@@ -158,21 +157,7 @@ function isDashboardPayload(value: unknown): value is DashboardPayload {
 	return (
 		Array.isArray(payload.notes) &&
 		typeof payload.heroImageUrl === "string" &&
-		typeof payload.anniversaryDate === "string" &&
-		(!payload.dailyLoveQuote ||
-			typeof payload.dailyLoveQuote.text === "string")
-	);
-}
-
-function isLoveQuotePayload(
-	value: unknown,
-): value is { dailyLoveQuote: LoveQuote } {
-	if (!value || typeof value !== "object") return false;
-	const payload = value as { dailyLoveQuote?: Partial<LoveQuote> };
-
-	return (
-		Boolean(payload.dailyLoveQuote) &&
-		typeof payload.dailyLoveQuote?.text === "string"
+		typeof payload.anniversaryDate === "string"
 	);
 }
 
@@ -404,10 +389,6 @@ export function DashboardClient({
 			setNotes(payload.notes);
 			setHeroImageUrl(payload.heroImageUrl);
 			setAnniversaryDate(payload.anniversaryDate);
-			if (payload.dailyLoveQuote?.source === "api") {
-				const dailyLoveQuote = payload.dailyLoveQuote;
-				setDailyLoveQuote(dailyLoveQuote);
-			}
 
 			if (options?.cache !== false) {
 				writeCachedDashboardPayload(profile.id, payload);
@@ -449,34 +430,6 @@ export function DashboardClient({
 		[applyDashboardPayload],
 	);
 
-	const loadOnlineQuote = useCallback(
-		async (options?: { signal?: AbortSignal }) => {
-			try {
-				const response = await fetch("/api/love-quote", {
-					cache: "no-store",
-					signal: options?.signal,
-				});
-
-				if (response.ok) {
-					const payload = (await response.json()) as unknown;
-					if (
-						isLoveQuotePayload(payload) &&
-						payload.dailyLoveQuote.source !== "loading"
-					) {
-						setDailyLoveQuote(payload.dailyLoveQuote);
-					}
-				}
-			} catch (error) {
-				if (error instanceof DOMException && error.name === "AbortError") {
-					return;
-				}
-
-				console.warn("Server quote refresh failed", error);
-			}
-		},
-		[],
-	);
-
 	useEffect(() => {
 		const cached = readCachedDashboardPayload(profile.id);
 		if (cached) {
@@ -492,13 +445,6 @@ export function DashboardClient({
 
 		return () => controller.abort();
 	}, [applyDashboardPayload, loadDashboardData, profile.id]);
-
-	useEffect(() => {
-		const controller = new AbortController();
-		void loadOnlineQuote({ signal: controller.signal });
-
-		return () => controller.abort();
-	}, [loadOnlineQuote]);
 
 	const loadFinanceData = useCallback(
 		async (options?: { silent?: boolean }) => {
@@ -900,17 +846,13 @@ export function DashboardClient({
 						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
 							Quote of the day
 						</p>
-						{dailyLoveQuote.source === "loading" ? (
-							<p className="mt-2 font-serif text-xl leading-snug text-neutral-500 sm:text-2xl">
-								Loading today's quote...
-							</p>
-						) : dailyLoveQuote.source === "unavailable" ? (
-							<p className="mt-2 font-serif text-xl leading-snug text-neutral-500 sm:text-2xl">
-								Quote is unavailable right now.
-							</p>
-						) : (
+						{dailyLoveQuote.text ? (
 							<p className="mt-2 font-serif text-xl leading-snug text-neutral-900 sm:text-2xl">
 								"{dailyLoveQuote.text}"
+							</p>
+						) : (
+							<p className="mt-2 font-serif text-xl leading-snug text-neutral-500 sm:text-2xl">
+								Quote is unavailable right now.
 							</p>
 						)}
 						{dailyLoveQuote.author ? (

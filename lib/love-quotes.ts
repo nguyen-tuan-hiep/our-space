@@ -1,6 +1,5 @@
+import quotes from "@/lib/quotes.json";
 import type { LoveQuote } from "@/lib/types";
-
-const quoteMaxAgeSeconds = 24 * 60 * 60;
 
 const fallbackQuotes: LoveQuote[] = [
   {
@@ -30,14 +29,28 @@ const fallbackQuotes: LoveQuote[] = [
   },
 ];
 
-type QuoteApiPayload = {
-  content?: unknown;
-  quote?: unknown;
-  q?: unknown;
-  text?: unknown;
-  author?: unknown;
-  a?: unknown;
+type QuoteJsonPayload = {
+  quoteText?: unknown;
+  quoteAuthor?: unknown;
 };
+
+function normalizeQuote(payload: QuoteJsonPayload): LoveQuote | null {
+  const text =
+    typeof payload.quoteText === "string" ? payload.quoteText.trim() : "";
+
+  if (!text) return null;
+
+  const author =
+    typeof payload.quoteAuthor === "string" && payload.quoteAuthor.trim()
+      ? payload.quoteAuthor.trim()
+      : null;
+
+  return {
+    text,
+    author,
+    source: "local",
+  };
+}
 
 function getDayKey(date: Date, timeZone: string) {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -56,100 +69,20 @@ function getDayKey(date: Date, timeZone: string) {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-function getFallbackQuote(dayKey: string) {
-  const dayIndex = Number(dayKey.replaceAll("-", ""));
+function getQuoteIndex(key: string, length: number) {
+  let hash = 0;
 
-  return fallbackQuotes[Math.abs(dayIndex) % fallbackQuotes.length];
-}
-
-function getDailyQuoteUrl(quoteUrl: string, dayKey: string) {
-  const url = new URL(quoteUrl);
-  url.searchParams.set("daily_key", dayKey);
-
-  return url.toString();
-}
-
-function getQuoteUrls(dayKey: string) {
-  if (process.env.LOVE_QUOTE_API_URL) {
-    return [getDailyQuoteUrl(process.env.LOVE_QUOTE_API_URL, dayKey)];
+  for (const character of key) {
+    hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
   }
 
-  return [
-    getDailyQuoteUrl("https://api.quotable.io/random?tags=love", dayKey),
-    getDailyQuoteUrl("https://api.quotable.io/quotes/random?tags=love", dayKey),
-  ];
+  return hash % length;
 }
 
-function normalizeQuote(payload: QuoteApiPayload): LoveQuote | null {
-  const text =
-    typeof payload.content === "string"
-      ? payload.content
-      : typeof payload.quote === "string"
-        ? payload.quote
-        : typeof payload.q === "string"
-          ? payload.q
-          : typeof payload.text === "string"
-            ? payload.text
-            : null;
-
-  if (!text?.trim()) return null;
-
-  const author =
-    typeof payload.author === "string"
-      ? payload.author
-      : typeof payload.a === "string"
-        ? payload.a
-        : null;
-
-  return {
-    text: text.trim(),
-    author: author?.trim() || null,
-    source: "api",
-  };
-}
-
-export async function getDailyLoveQuote(timeZone: string): Promise<LoveQuote> {
+export function getDailyLoveQuote(timeZone: string): LoveQuote {
+  const quoteList = quotes as QuoteJsonPayload[];
   const dayKey = getDayKey(new Date(), timeZone);
-  return getFallbackQuote(dayKey);
-}
+  const quote = normalizeQuote(quoteList[getQuoteIndex(dayKey, quoteList.length)]);
 
-export async function getOnlineDailyLoveQuote(
-  timeZone: string,
-): Promise<LoveQuote> {
-  const dayKey = getDayKey(new Date(), timeZone);
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
-
-  try {
-    const quoteRequests = getQuoteUrls(dayKey).map(async (url) => {
-      const response = await fetch(url, {
-        signal: controller.signal,
-        next: { revalidate: quoteMaxAgeSeconds },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Quote request failed with ${response.status}`);
-      }
-
-      const payload = (await response.json()) as
-        | QuoteApiPayload
-        | QuoteApiPayload[];
-      const quote = Array.isArray(payload)
-        ? normalizeQuote(payload[0] ?? {})
-        : normalizeQuote(payload);
-
-      if (!quote) {
-        throw new Error("Quote payload was malformed.");
-      }
-
-      return quote;
-    });
-
-    return await Promise.any(quoteRequests);
-  } catch {
-    return getFallbackQuote(dayKey);
-  } finally {
-    clearTimeout(timeout);
-  }
+  return quote ?? fallbackQuotes[getQuoteIndex(dayKey, fallbackQuotes.length)];
 }

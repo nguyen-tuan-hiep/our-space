@@ -6,6 +6,7 @@ import { SetupRequired } from "@/components/setup-required";
 import { getAppSession, getAuthenticatedSession } from "@/lib/auth";
 import { getDashboardSettings } from "@/lib/data";
 import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
+import { getDailyLoveQuote } from "@/lib/love-quotes";
 import type { PairingRequest, Profile } from "@/lib/types";
 import Loading from "./loading";
 
@@ -95,11 +96,7 @@ async function HomeContent() {
         new Date().toISOString().slice(0, 10)
       }
       currentTimeIso={new Date().toISOString()}
-      dailyLoveQuote={{
-        text: "",
-        author: null,
-        source: "loading",
-      }}
+      dailyLoveQuote={getDailyLoveQuote(appSession.profile.time_zone)}
     />
   );
 }
