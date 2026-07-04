@@ -72,7 +72,9 @@ export function ExpenseFeed({
 	}, [menuOpen]);
 
 	const handleMenuOpen = (expense: IndividualExpense) => {
-		setActiveExpense((current) => (current?.id === expense.id ? null : expense));
+		setActiveExpense((current) =>
+			current?.id === expense.id ? null : expense,
+		);
 	};
 
 	const handleMenuClose = () => {
@@ -102,13 +104,13 @@ export function ExpenseFeed({
 						<span className="min-w-0 font-serif text-2xl leading-1">
 							{title}
 						</span>
-						<div className="relative ml-auto grid size-9 shrink-0 place-items-center">
+						<div className="relative ml-auto grid size-9 shrink-0 place-items-center rounded-full hover:bg-bg transition">
 							<div
 								aria-hidden="true"
 								className={`grid size-9 place-items-center rounded-full border transition ${
 									categoryFilter === "all"
-										? "border-neutral-200 text-neutral-500"
-										: "border-neutral-900 bg-neutral-900 text-white"
+										? "border-neutral-300 text-neutral-500"
+										: "border-neutral-700 bg-neutral-700 text-white"
 								}`}
 							>
 								<ListFilter size={17} />
@@ -118,7 +120,9 @@ export function ExpenseFeed({
 								aria-label="Filter category"
 								value={categoryFilter}
 								onChange={(event) =>
-									setCategoryFilter(event.target.value as ExpenseCategory | "all")
+									setCategoryFilter(
+										event.target.value as ExpenseCategory | "all",
+									)
 								}
 								containerClassName="absolute inset-0 opacity-0"
 								className="size-9 min-h-9 cursor-pointer"
@@ -163,7 +167,10 @@ export function ExpenseFeed({
 										</p>
 
 										{canEdit && (
-											<div className="relative -mr-2" ref={activeExpense?.id === expense.id ? menuRef : null}>
+											<div
+												className="relative -mr-2"
+												ref={activeExpense?.id === expense.id ? menuRef : null}
+											>
 												<button
 													type="button"
 													aria-label="more"
@@ -174,7 +181,9 @@ export function ExpenseFeed({
 															: undefined
 													}
 													aria-expanded={
-														activeExpense?.id === expense.id ? "true" : undefined
+														activeExpense?.id === expense.id
+															? "true"
+															: undefined
 													}
 													aria-haspopup="menu"
 													onClick={() => handleMenuOpen(expense)}
