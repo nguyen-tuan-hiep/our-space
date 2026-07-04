@@ -13,6 +13,7 @@ import {
 } from "react";
 import {
 	ImageUp,
+	Bell,
 	LogOut,
 	CalendarHeart,
 	Menu as MenuIcon,
@@ -32,7 +33,6 @@ import type {
 	SharedNote,
 } from "@/lib/types";
 import { NoteCard } from "@/components/notes/note-card";
-import { logoutOneSignal } from "@/lib/onesignal-web";
 import {
 	type FilterRange,
 	getPeriodOptions,
@@ -61,7 +61,20 @@ const NotificationPermissionButton = dynamic(
     import("@/components/notifications/notification-permission-button").then(
       (mod) => mod.NotificationPermissionButton,
     ),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => (
+      <button
+        type="button"
+        role="menuitem"
+        disabled
+        className={menuItemClass}
+      >
+        <Bell size={16} />
+        Checking notifications
+      </button>
+    ),
+  },
 );
 
 const NoteDialog = dynamic(
@@ -120,14 +133,92 @@ interface DashboardClientProps {
 	dailyLoveQuote: LoveQuote;
 }
 
+type DashboardPayload = {
+	notes: SharedNote[];
+	heroImageUrl: string;
+	anniversaryDate: string;
+	dailyLoveQuote: LoveQuote;
+};
+
+type CachedDashboardPayload = DashboardPayload & {
+	profileId: string;
+	cachedAt: string;
+};
+
+const dashboardCachePrefix = "our-space:dashboard:";
+
+function getDashboardCacheKey(profileId: string) {
+	return `${dashboardCachePrefix}${profileId}`;
+}
+
+function isDashboardPayload(value: unknown): value is DashboardPayload {
+	if (!value || typeof value !== "object") return false;
+	const payload = value as Partial<DashboardPayload>;
+
+	return (
+		Array.isArray(payload.notes) &&
+		typeof payload.heroImageUrl === "string" &&
+		typeof payload.anniversaryDate === "string" &&
+		Boolean(payload.dailyLoveQuote) &&
+		typeof payload.dailyLoveQuote?.text === "string"
+	);
+}
+
+function readCachedDashboardPayload(profileId: string) {
+	try {
+		const cached = window.localStorage.getItem(getDashboardCacheKey(profileId));
+		if (!cached) return null;
+
+		const parsed = JSON.parse(cached) as Partial<CachedDashboardPayload>;
+		if (parsed.profileId !== profileId || !isDashboardPayload(parsed)) {
+			return null;
+		}
+
+		return parsed;
+	} catch {
+		return null;
+	}
+}
+
+function writeCachedDashboardPayload(
+	profileId: string,
+	payload: DashboardPayload,
+) {
+	try {
+		window.localStorage.setItem(
+			getDashboardCacheKey(profileId),
+			JSON.stringify({
+				...payload,
+				profileId,
+				cachedAt: new Date().toISOString(),
+			}),
+		);
+	} catch {
+		// Storage can be unavailable in private browsing or low-space conditions.
+	}
+}
+
+function clearDashboardCaches() {
+	try {
+		for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
+			const key = window.localStorage.key(index);
+			if (key?.startsWith(dashboardCachePrefix)) {
+				window.localStorage.removeItem(key);
+			}
+		}
+	} catch {
+		// Best-effort cleanup only; auth sign-out still happens server-side.
+	}
+}
+
 export function DashboardClient({
 	profile,
 	partner,
 	initialNotes,
-	heroImageUrl,
-	anniversaryDate,
+	heroImageUrl: initialHeroImageUrl,
+	anniversaryDate: initialAnniversaryDate,
 	currentTimeIso,
-	dailyLoveQuote,
+	dailyLoveQuote: initialDailyLoveQuote,
 }: DashboardClientProps) {
 	const router = useRouter();
 	const toast = useToast();
@@ -150,6 +241,14 @@ export function DashboardClient({
 	const [editingExpense, setEditingExpense] =
 		useState<IndividualExpense | null>(null);
 	const [notes, setNotes] = useState(initialNotes);
+	const [heroImageUrl, setHeroImageUrl] = useState(initialHeroImageUrl);
+	const [anniversaryDate, setAnniversaryDate] = useState(
+		initialAnniversaryDate,
+	);
+	const [dailyLoveQuote, setDailyLoveQuote] = useState(initialDailyLoveQuote);
+	const [dashboardLoading, setDashboardLoading] = useState(
+		initialNotes.length === 0,
+	);
 	const [expenses, setExpenses] = useState<IndividualExpense[]>([]);
 	const [financeLoaded, setFinanceLoaded] = useState(false);
 	const [financeLoading, setFinanceLoading] = useState(false);
@@ -249,9 +348,68 @@ export function DashboardClient({
 		[profile, partner],
 	);
 
+	const applyDashboardPayload = useCallback(
+		(payload: DashboardPayload, options?: { cache?: boolean }) => {
+			setNotes(payload.notes);
+			setHeroImageUrl(payload.heroImageUrl);
+			setAnniversaryDate(payload.anniversaryDate);
+			setDailyLoveQuote(payload.dailyLoveQuote);
+
+			if (options?.cache !== false) {
+				writeCachedDashboardPayload(profile.id, payload);
+			}
+		},
+		[profile.id],
+	);
+
+	const loadDashboardData = useCallback(
+		async (options?: { signal?: AbortSignal; silent?: boolean }) => {
+			if (!options?.silent) setDashboardLoading(true);
+
+			try {
+				const response = await fetch("/api/dashboard", {
+					cache: "no-store",
+					signal: options?.signal,
+				});
+
+				if (!response.ok) {
+					throw new Error("Dashboard data could not be loaded.");
+				}
+
+				const payload = (await response.json()) as unknown;
+				if (!isDashboardPayload(payload)) {
+					throw new Error("Dashboard data was malformed.");
+				}
+
+				applyDashboardPayload(payload);
+			} catch (error) {
+				if (error instanceof DOMException && error.name === "AbortError") {
+					return;
+				}
+
+				console.warn("Dashboard data refresh failed", error);
+			} finally {
+				setDashboardLoading(false);
+			}
+		},
+		[applyDashboardPayload],
+	);
+
 	useEffect(() => {
-		setNotes(initialNotes);
-	}, [initialNotes]);
+		const cached = readCachedDashboardPayload(profile.id);
+		if (cached) {
+			applyDashboardPayload(cached, { cache: false });
+			setDashboardLoading(false);
+		}
+
+		const controller = new AbortController();
+		void loadDashboardData({
+			signal: controller.signal,
+			silent: Boolean(cached),
+		});
+
+		return () => controller.abort();
+	}, [applyDashboardPayload, loadDashboardData, profile.id]);
 
 	const loadFinanceData = useCallback(
 		async (options?: { silent?: boolean }) => {
@@ -368,7 +526,7 @@ export function DashboardClient({
 								getRealtimeRecordId(payload.old);
 
 							if (noteId && ignoredRealtimeNoteIds.current.has(noteId)) return;
-							router.refresh();
+							void loadDashboardData({ silent: true });
 						},
 					)
 					.on(
@@ -399,7 +557,7 @@ export function DashboardClient({
 					.on(
 						"postgres_changes",
 						{ event: "*", schema: "public", table: "app_settings" },
-						() => router.refresh(),
+						() => void loadDashboardData({ silent: true }),
 					)
 					.subscribe();
 
@@ -424,7 +582,7 @@ export function DashboardClient({
 			cancelScheduledConnect?.();
 			cleanup?.();
 		};
-	}, [loadFinanceData, router]);
+	}, [loadDashboardData, loadFinanceData, router]);
 
 	useEffect(() => {
 		const timer = window.setInterval(() => setClock(new Date()), 30000);
@@ -457,7 +615,10 @@ export function DashboardClient({
 	const periodLabel = filterRange === "week" ? "Week" : "Month";
 	const handleSignOut = () => {
 		startTransition(async () => {
+			clearDashboardCaches();
+
 			try {
+				const { logoutOneSignal } = await import("@/lib/onesignal-web");
 				await logoutOneSignal();
 			} catch (error) {
 				console.warn("OneSignal logout failed", error);
@@ -781,6 +942,13 @@ export function DashboardClient({
 										}}
 									/>
 								))
+							) : dashboardLoading ? (
+								<div className="border border-neutral-200 bg-paper p-6 text-neutral-500 md:col-span-3 xl:col-span-4">
+									Loading notes...
+									<div className="mx-auto mt-4 h-1.5 w-44 overflow-hidden rounded-full items-center">
+										<div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
+									</div>
+								</div>
 							) : (
 								<p className="border border-neutral-200 bg-paper p-6 text-neutral-500 md:col-span-3 xl:col-span-4">
 									No notes for this {filterRange}.

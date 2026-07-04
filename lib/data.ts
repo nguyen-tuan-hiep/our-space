@@ -46,6 +46,21 @@ export async function getDashboardData(
   };
 }
 
+export async function getDashboardSettings(
+  profile: Profile,
+  partner: Profile | null,
+) {
+  const supabase = await createClient();
+  const settingsId = partner ? getCoupleSettingsId(profile, partner) : null;
+  const { data: settings } = await supabase
+    .from("app_settings")
+    .select("hero_image_url, anniversary_date")
+    .eq("id", settingsId ?? "main")
+    .maybeSingle<DashboardSettings>();
+
+  return settings ?? null;
+}
+
 export async function getFinanceData(profile: Profile, partner: Profile) {
   const supabase = await createClient();
   const settingsId = getCoupleSettingsId(profile, partner);

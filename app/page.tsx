@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { DashboardClient } from "@/components/dashboard-client";
 import { SetupRequired } from "@/components/setup-required";
 import { getAppSession, getAuthenticatedSession } from "@/lib/auth";
-import { getDashboardData } from "@/lib/data";
+import { getDashboardSettings } from "@/lib/data";
 import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
 import { getDailyLoveQuote } from "@/lib/love-quotes";
 import type { PairingRequest, Profile } from "@/lib/types";
@@ -75,12 +75,12 @@ async function HomeContent() {
     );
   }
 
-  const [data, dailyLoveQuote] = await Promise.all([
-    getDashboardData(appSession.profile, appSession.partner),
+  const [settings, dailyLoveQuote] = await Promise.all([
+    getDashboardSettings(appSession.profile, appSession.partner),
     getDailyLoveQuote(appSession.profile.time_zone),
   ]);
   const heroImageUrl =
-    data.settings?.hero_image_url ??
+    settings?.hero_image_url ??
     process.env.NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL ??
     "https://res.cloudinary.com/demo/image/upload/sample.jpg";
 
@@ -88,10 +88,12 @@ async function HomeContent() {
     <DashboardClient
       profile={appSession.profile}
       partner={appSession.partner}
-      initialNotes={data.notes}
+      initialNotes={[]}
       heroImageUrl={getOptimizedHeroImageUrl(heroImageUrl)}
       anniversaryDate={
-        data.settings?.anniversary_date ?? new Date().toISOString().slice(0, 10)
+        settings?.anniversary_date ??
+        appSession.profile.created_at?.slice(0, 10) ??
+        new Date().toISOString().slice(0, 10)
       }
       currentTimeIso={new Date().toISOString()}
       dailyLoveQuote={dailyLoveQuote}

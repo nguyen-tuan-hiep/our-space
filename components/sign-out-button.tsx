@@ -3,10 +3,22 @@
 import { useTransition } from "react";
 import { NativeButton } from "@/components/ui/native-controls";
 import { signOut } from "@/app/actions";
-import { logoutOneSignal } from "@/lib/onesignal-web";
 
 interface SignOutButtonProps {
 	className?: string;
+}
+
+function clearDashboardCaches() {
+	try {
+		for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
+			const key = window.localStorage.key(index);
+			if (key?.startsWith("our-space:dashboard:")) {
+				window.localStorage.removeItem(key);
+			}
+		}
+	} catch {
+		// Best-effort cleanup only; auth sign-out still happens server-side.
+	}
 }
 
 export function SignOutButton({ className }: SignOutButtonProps) {
@@ -14,7 +26,10 @@ export function SignOutButton({ className }: SignOutButtonProps) {
 
 	const handleSignOut = () => {
 		startTransition(async () => {
+			clearDashboardCaches();
+
 			try {
+				const { logoutOneSignal } = await import("@/lib/onesignal-web");
 				await logoutOneSignal();
 			} catch (error) {
 				console.warn("OneSignal logout failed", error);

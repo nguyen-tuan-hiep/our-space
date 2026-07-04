@@ -62,10 +62,6 @@ const appleStartupImages = [
     },
     {
       url: landscapeUrl,
-      media: `${portraitDeviceMedia} and (orientation: landscape)`,
-    },
-    {
-      url: landscapeUrl,
       media: `${landscapeDeviceMedia} and (orientation: landscape)`,
     },
   ];
@@ -119,12 +115,6 @@ export default function RootLayout({
       }
     >
       <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="Our Space 𑣲⋆" />
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="default"
-        />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         {appleStartupImages.map(({ url, media }) => (
           <link
