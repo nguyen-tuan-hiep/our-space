@@ -143,5 +143,8 @@ export async function logoutOneSignal() {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
   const oneSignal = await getOneSignal();
+  if (oneSignal.User.PushSubscription.optedIn) {
+    await oneSignal.User.PushSubscription.optOut();
+  }
   await oneSignal.logout();
 }
