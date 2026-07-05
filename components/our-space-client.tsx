@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
 	useCallback,
@@ -24,7 +25,6 @@ import {
 	getRelationshipStats,
 	isInPeriod,
 } from "@/lib/dashboard-utils";
-import { FinancesPanel } from "@/components/our-space/finances-panel";
 import { LoveQuotePanel } from "@/components/our-space/love-quote-panel";
 import { NotesPanel } from "@/components/our-space/notes-panel";
 import { PeriodControls } from "@/components/our-space/period-controls";
@@ -34,8 +34,23 @@ import {
 	getUtcDateKey,
 	getUtcMonthStart,
 } from "@/components/our-space/period-utils";
-import { SpaceDialogs } from "@/components/our-space/space-dialogs";
 import { SpaceHero } from "@/components/our-space/space-hero";
+
+const FinancesPanel = dynamic(
+	() =>
+		import("@/components/our-space/finances-panel").then(
+			(mod) => mod.FinancesPanel,
+		),
+	{ ssr: false },
+);
+
+const SpaceDialogs = dynamic(
+	() =>
+		import("@/components/our-space/space-dialogs").then(
+			(mod) => mod.SpaceDialogs,
+		),
+	{ ssr: false },
+);
 
 interface OurSpaceClientProps {
 	profile: Profile;
@@ -614,6 +629,8 @@ export function OurSpaceClient({
 			await signOut();
 		});
 	};
+	const hasOpenDialog =
+		noteOpen || expenseOpen || profileOpen || heroOpen || anniversaryOpen;
 
 	return (
 		<main className="min-h-svh overflow-x-clip bg-bg">
@@ -719,33 +736,35 @@ export function OurSpaceClient({
 				)}
 			</section>
 
-			<SpaceDialogs
-				anniversaryDate={anniversaryDate}
-				editingExpense={editingExpense}
-				editingNote={editingNote}
-				expenseOpen={expenseOpen}
-				heroImageUrl={heroImageUrl}
-				heroOpen={heroOpen}
-				noteOpen={noteOpen}
-				partner={partner}
-				profile={profile}
-				profileOpen={profileOpen}
-				anniversaryOpen={anniversaryOpen}
-				senderTimeZone={profileTimeZone}
-				onCloseAnniversary={() => setAnniversaryOpen(false)}
-				onCloseExpense={() => {
-					setExpenseOpen(false);
-					setEditingExpense(null);
-				}}
-				onCloseHero={() => setHeroOpen(false)}
-				onCloseNote={() => {
-					setNoteOpen(false);
-					setEditingNote(null);
-				}}
-				onCloseProfile={() => setProfileOpen(false)}
-				onExpenseSaved={upsertLocalExpense}
-				onNoteSaved={upsertLocalNote}
-			/>
+			{hasOpenDialog ? (
+				<SpaceDialogs
+					anniversaryDate={anniversaryDate}
+					editingExpense={editingExpense}
+					editingNote={editingNote}
+					expenseOpen={expenseOpen}
+					heroImageUrl={heroImageUrl}
+					heroOpen={heroOpen}
+					noteOpen={noteOpen}
+					partner={partner}
+					profile={profile}
+					profileOpen={profileOpen}
+					anniversaryOpen={anniversaryOpen}
+					senderTimeZone={profileTimeZone}
+					onCloseAnniversary={() => setAnniversaryOpen(false)}
+					onCloseExpense={() => {
+						setExpenseOpen(false);
+						setEditingExpense(null);
+					}}
+					onCloseHero={() => setHeroOpen(false)}
+					onCloseNote={() => {
+						setNoteOpen(false);
+						setEditingNote(null);
+					}}
+					onCloseProfile={() => setProfileOpen(false)}
+					onExpenseSaved={upsertLocalExpense}
+					onNoteSaved={upsertLocalNote}
+				/>
+			) : null}
 		</main>
 	);
 }
