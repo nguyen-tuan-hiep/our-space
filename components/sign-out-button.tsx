@@ -8,11 +8,14 @@ interface SignOutButtonProps {
 	className?: string;
 }
 
-function clearDashboardCaches() {
+function clearSpaceCaches() {
 	try {
 		for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
 			const key = window.localStorage.key(index);
-			if (key?.startsWith("our-space:dashboard:")) {
+			if (
+				key?.startsWith("our-space:home:") ||
+				key?.startsWith("our-space:dashboard:")
+			) {
 				window.localStorage.removeItem(key);
 			}
 		}
@@ -26,7 +29,7 @@ export function SignOutButton({ className }: SignOutButtonProps) {
 
 	const handleSignOut = () => {
 		startTransition(async () => {
-			clearDashboardCaches();
+			clearSpaceCaches();
 
 			try {
 				const { logoutOneSignal } = await import("@/lib/onesignal-web");

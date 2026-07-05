@@ -45,15 +45,6 @@ body {
 	@apply text-xs leading-5;
 }
 
-.dark {
-	color-scheme: dark;
-}
-
-.dark body {
-	background: var(--color-dark-bg);
-	color: var(--color-dark-text);
-}
-
 @keyframes toast-in {
 	from {
 		opacity: 0;

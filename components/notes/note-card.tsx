@@ -131,7 +131,7 @@ export function NoteCard({
 
         {canEdit && (
           <div
-            className="relative -mr-2 shrink-0 border border-neutral-300 rounded-full"
+            className="relative -mr-2 shrink-0"
             ref={activeNote?.id === note.id ? menuRef : null}
           >
             <button
@@ -142,7 +142,7 @@ export function NoteCard({
               aria-expanded={activeNote?.id === note.id ? "true" : undefined}
               aria-haspopup="menu"
               onClick={() => handleMenuOpen(note)}
-              className="grid size-8 place-items-center rounded-full text-neutral-500 transition hover:bg-bg"
+              className="grid size-8 place-items-center rounded-full text-neutral-500 transition hover:bg-mui/10"
             >
               <EllipsisVertical size={18} className="text-neutral-500" />
             </button>
@@ -151,13 +151,13 @@ export function NoteCard({
                 id="note-menu"
                 role="menu"
                 aria-labelledby={`note-menu-button-${note.id}`}
-                className="absolute right-0 top-9 z-20 w-36 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg"
+                className="absolute right-0 top-9 z-20 w-36 overflow-hidden rounded-lg border border-neutral-300 bg-paper shadow-lg"
               >
                 <button
                   type="button"
                   role="menuitem"
                   onClick={handleEditClick}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-neutral-700 transition hover:bg-neutral-100"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-neutral-700 transition hover:bg-mui/10"
                 >
                   <Edit2 size={15} />
                   Edit

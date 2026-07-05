@@ -104,13 +104,13 @@ export function ExpenseFeed({
 						<span className="min-w-0 font-serif text-2xl leading-1">
 							{title}
 						</span>
-						<div className="relative ml-auto grid size-9 shrink-0 place-items-center rounded-full hover:bg-bg transition">
+						<div className="relative ml-auto grid size-9 shrink-0 place-items-center rounded-full hover:bg-mui/10 transition">
 							<div
 								aria-hidden="true"
-								className={`grid size-9 place-items-center rounded-full border transition ${
+								className={`grid size-9 place-items-center rounded-full transition ${
 									categoryFilter === "all"
-										? "border-neutral-300 text-neutral-500"
-										: "border-neutral-700 bg-neutral-700 text-white"
+										? "text-neutral-500"
+										: "bg-mui/70 text-white"
 								}`}
 							>
 								<ListFilter size={17} />
@@ -188,7 +188,7 @@ export function ExpenseFeed({
 													aria-haspopup="menu"
 													onClick={() => handleMenuOpen(expense)}
 													disabled={isDeleting}
-													className="grid size-8 place-items-center rounded-full text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+													className="grid size-8 place-items-center rounded-full text-neutral-500 transition hover:bg-mui/10 disabled:cursor-not-allowed disabled:opacity-50"
 												>
 													<EllipsisVertical size={18} />
 												</button>

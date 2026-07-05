@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { DashboardClient } from "@/components/dashboard-client";
+import { OurSpaceClient } from "@/components/our-space-client";
 import { SetupRequired } from "@/components/setup-required";
 import { getAppSession, getAuthenticatedSession } from "@/lib/auth";
 import { getDashboardSettings } from "@/lib/data";
@@ -85,7 +85,7 @@ async function HomeContent() {
     "https://res.cloudinary.com/demo/image/upload/sample.jpg";
 
   return (
-    <DashboardClient
+    <OurSpaceClient
       profile={appSession.profile}
       partner={appSession.partner}
       initialNotes={[]}

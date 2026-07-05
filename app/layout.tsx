@@ -108,9 +108,6 @@ export default function RootLayout({
       style={
         {
           "--color-bg": themeColors.bg,
-          "--color-paper": themeColors.paper,
-          "--color-dark-bg": themeColors.darkBg,
-          "--color-dark-text": themeColors.darkText,
         } as React.CSSProperties
       }
     >

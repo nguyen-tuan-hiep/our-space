@@ -7,7 +7,7 @@ export default async function LoginPage() {
   if (auth) redirect("/");
 
   return (
-    <main className="min-h-svh bg-paper">
+    <main className="min-h-svh bg-bg">
       <section className="container-page grid min-h-svh items-center gap-10 py-10 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="max-w-3xl">
           <p className="eyebrow">Private couple hub</p>

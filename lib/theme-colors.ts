@@ -10,10 +10,6 @@ export const themeColors = {
 
   chartGrid: "#e8e3d8",
   darkBg: "#10100f",
-  darkText: "#f1f0ec",
-  heroButtonBorder: "rgba(255, 250, 240, 0.95)",
-  heroButtonBorderHover: "rgba(255, 250, 240, 1)",
-  heroButtonBg: "rgba(17, 17, 15, 0.2)",
 
   expenseCategories: {
     "Food & Drinks": "#F09EA7",
