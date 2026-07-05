@@ -1,23 +1,10 @@
 import type { ReactNode } from "react";
-import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
+import { ExpenseFeed } from "@/components/expenses/expense-feed";
+import { FinanceCharts } from "@/components/expenses/finance-charts";
 import type { FilterRange } from "@/lib/dashboard-utils";
 import type { IndividualExpense, Profile } from "@/lib/types";
 import { outlineButtonClass, primaryButtonClass } from "./shared-classes";
-
-const FinanceCharts = dynamic(
-	() =>
-		import("@/components/expenses/finance-charts").then(
-			(mod) => mod.FinanceCharts,
-		),
-	{ ssr: false },
-);
-
-const ExpenseFeed = dynamic(
-	() =>
-		import("@/components/expenses/expense-feed").then((mod) => mod.ExpenseFeed),
-	{ ssr: false },
-);
 
 interface FinancesPanelProps {
 	activePeriod: string;

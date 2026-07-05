@@ -48,8 +48,33 @@ const FinancesPanel = dynamic(
     import("@/components/our-space/finances-panel").then(
       (mod) => mod.FinancesPanel,
     ),
-  { ssr: false },
+  {
+    loading: FinancesPanelLoading,
+    ssr: false,
+  },
 );
+
+function FinancesPanelLoading() {
+  return (
+    <div className="grid gap-4 sm:gap-5">
+      <div className="flex items-center justify-between gap-4 sm:items-end">
+        <div className="min-w-0">
+          <h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
+            Finance overview
+          </h2>
+        </div>
+        <div className="grid size-11 shrink-0 place-items-center rounded-full bg-paper shadow-sm ring-1 ring-neutral-200/70 sm:hidden" />
+        <div className="hidden h-11 w-32 sm:block" />
+      </div>
+      <div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:rounded-lg sm:shadow-none">
+        Loading finance data...
+        <div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
+          <div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function MoodPanelLoading() {
   return (
@@ -59,7 +84,11 @@ function MoodPanelLoading() {
           <h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
             Mood tracker
           </h2>
+          <p className="mt-1 hidden text-sm text-neutral-500 sm:block">
+            A gentle daily check-in for both of you.
+          </p>
         </div>
+        <div className="grid size-11 shrink-0 place-items-center rounded-full bg-paper shadow-sm ring-1 ring-neutral-200/70 sm:hidden" />
       </div>
       <div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:rounded-lg sm:shadow-none">
         Loading mood data...
@@ -794,7 +823,7 @@ export function OurSpaceClient({
       <section className="container-page pb-[calc(env(safe-area-inset-bottom)+10rem)] pt-4 sm:py-8">
         <LoveQuotePanel quote={dailyLoveQuote} />
 
-        <div className="h-6 sm:hidden" />
+        <div className="h-4 sm:hidden" />
         <hr className="my-5 hidden border-t border-neutral-400 sm:block" />
 
         <PeriodControls

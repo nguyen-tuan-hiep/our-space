@@ -9,24 +9,24 @@ import { NativeButton, NativeTextarea } from "@/components/ui/native-controls";
 import type { DailyMood, MoodLevel, Profile } from "@/lib/types";
 
 export const moodOptions: Array<{
-  value: MoodLevel;
-  label: string;
-  emoji: string;
-  caption: string;
+	value: MoodLevel;
+	label: string;
+	emoji: string;
+	caption: string;
 }> = [
-  { value: "great", label: "Great", emoji: "🤩", caption: "Full of spark" },
-  { value: "excited", label: "Excited", emoji: "😍", caption: "Heart racing" },
-  { value: "happy", label: "Happy", emoji: "😊", caption: "Light & sweet" },
-  { value: "calm", label: "Calm", emoji: "😌", caption: "Soft day" },
-  { value: "okay", label: "Okay", emoji: "🙂", caption: "Steady" },
-  { value: "tired", label: "Tired", emoji: "🥱", caption: "Low battery" },
-  {
-    value: "stressed",
-    label: "Stressed",
-    emoji: "😵‍💫",
-    caption: "Need a pause",
-  },
-  { value: "sad", label: "Sad", emoji: "😔", caption: "Heavy heart" },
+	{ value: "great", label: "Great", emoji: "🤩", caption: "Full of spark" },
+	{ value: "excited", label: "Excited", emoji: "😍", caption: "Heart racing" },
+	{ value: "happy", label: "Happy", emoji: "😊", caption: "Light & sweet" },
+	{ value: "calm", label: "Calm", emoji: "😌", caption: "Soft day" },
+	{ value: "okay", label: "Okay", emoji: "🙂", caption: "Steady" },
+	{ value: "tired", label: "Tired", emoji: "🥱", caption: "Low battery" },
+	{
+		value: "stressed",
+		label: "Stressed",
+		emoji: "😵‍💫",
+		caption: "Need a pause",
+	},
+	{ value: "sad", label: "Sad", emoji: "😔", caption: "Heavy heart" },
 ];
 
 const moodMap = new Map(moodOptions.map((option) => [option.value, option]));
@@ -34,444 +34,461 @@ const weekDayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const dayMs = 24 * 60 * 60 * 1000;
 
 function localDateKey(value: string | Date, timeZone: string) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    timeZone,
-  }).formatToParts(new Date(value));
-  const getPart = (type: string) =>
-    parts.find((part) => part.type === type)?.value ?? "";
+	const parts = new Intl.DateTimeFormat("en-CA", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		timeZone,
+	}).formatToParts(new Date(value));
+	const getPart = (type: string) =>
+		parts.find((part) => part.type === type)?.value ?? "";
 
-  return `${getPart("year")}-${getPart("month")}-${getPart("day")}`;
+	return `${getPart("year")}-${getPart("month")}-${getPart("day")}`;
 }
 
 function formatMoodDate(dateKey: string, timeZone: string) {
-  return new Intl.DateTimeFormat("en-SG", {
-    weekday: "long",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone,
-  }).format(new Date(`${dateKey}T12:00:00.000Z`));
+	return new Intl.DateTimeFormat("en-SG", {
+		weekday: "long",
+		day: "2-digit",
+		month: "short",
+		year: "numeric",
+		timeZone,
+	}).format(new Date(`${dateKey}T12:00:00.000Z`));
 }
 
 function getMoodOption(mood?: MoodLevel | null) {
-  return mood ? moodMap.get(mood) : null;
+	return mood ? moodMap.get(mood) : null;
 }
 
 function dateKeyFromUtcDate(date: Date) {
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(
-    2,
-    "0",
-  )}-${String(date.getUTCDate()).padStart(2, "0")}`;
+	return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(
+		2,
+		"0",
+	)}-${String(date.getUTCDate()).padStart(2, "0")}`;
 }
 
 function parseDateKey(dateKey: string) {
-  const [year = 1970, month = 1, day = 1] = dateKey.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day));
+	const [year = 1970, month = 1, day = 1] = dateKey.split("-").map(Number);
+	return new Date(Date.UTC(year, month - 1, day));
 }
 
 function addDays(date: Date, amount: number) {
-  return new Date(date.getTime() + amount * dayMs);
+	return new Date(date.getTime() + amount * dayMs);
 }
 
 function getPeriodStart(activePeriod: string, filterRange: "week" | "month") {
-  if (filterRange === "month") {
-    const [year = 1970, month = 1] = activePeriod.split("-").map(Number);
-    return new Date(Date.UTC(year, month - 1, 1));
-  }
+	if (filterRange === "month") {
+		const [year = 1970, month = 1] = activePeriod.split("-").map(Number);
+		return new Date(Date.UTC(year, month - 1, 1));
+	}
 
-  return parseDateKey(activePeriod);
+	return parseDateKey(activePeriod);
 }
 
 function getMoodCalendarCells(
-  activePeriod: string,
-  filterRange: "week" | "month",
+	activePeriod: string,
+	filterRange: "week" | "month",
 ) {
-  const periodStart = getPeriodStart(activePeriod, filterRange);
+	const periodStart = getPeriodStart(activePeriod, filterRange);
 
-  if (filterRange === "week") {
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = addDays(periodStart, index);
-      return {
-        date,
-        dateKey: dateKeyFromUtcDate(date),
-        inPeriod: true,
-      };
-    });
-  }
+	if (filterRange === "week") {
+		return Array.from({ length: 7 }, (_, index) => {
+			const date = addDays(periodStart, index);
+			return {
+				date,
+				dateKey: dateKeyFromUtcDate(date),
+				inPeriod: true,
+			};
+		});
+	}
 
-  const mondayOffset = (periodStart.getUTCDay() + 6) % 7;
-  const gridStart = addDays(periodStart, -mondayOffset);
-  const currentMonth = periodStart.getUTCMonth();
+	const mondayOffset = (periodStart.getUTCDay() + 6) % 7;
+	const gridStart = addDays(periodStart, -mondayOffset);
+	const currentMonth = periodStart.getUTCMonth();
 
-  return Array.from({ length: 42 }, (_, index) => {
-    const date = addDays(gridStart, index);
-    return {
-      date,
-      dateKey: dateKeyFromUtcDate(date),
-      inPeriod: date.getUTCMonth() === currentMonth,
-    };
-  });
+	return Array.from({ length: 42 }, (_, index) => {
+		const date = addDays(gridStart, index);
+		return {
+			date,
+			dateKey: dateKeyFromUtcDate(date),
+			inPeriod: date.getUTCMonth() === currentMonth,
+		};
+	});
 }
 
 function personMoodCard({
-  avatar,
-  label,
-  mood,
-  timeZone,
+	avatar,
+	label,
+	mood,
+	timeZone,
 }: {
-  avatar: string;
-  label: string;
-  mood?: DailyMood;
-  timeZone: string;
+	avatar: string;
+	label: string;
+	mood?: DailyMood;
+	timeZone: string;
 }) {
-  const option = getMoodOption(mood?.mood);
+	const option = getMoodOption(mood?.mood);
 
-  return (
-    <div className="rounded-[1.35rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:shadow-none">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="grid size-11 shrink-0 place-items-center rounded-full bg-mui/10 text-xl">
-            {avatar}
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-neutral-900">
-              {label}
-            </p>
-            <p className="text-xs font-semibold text-neutral-500">
-              {mood
-                ? formatMoodDate(mood.mood_date, timeZone)
-                : "Not logged yet"}
-            </p>
-          </div>
-        </div>
-        <div className="text-3xl">{option?.emoji ?? "—"}</div>
-      </div>
-      <p className="mt-3 text-sm font-semibold text-neutral-700">
-        {option ? option.label : "No mood"}
-      </p>
-      {mood?.note ? (
-        <p className="mt-2 rounded-[1rem] bg-mui/10 px-3 py-2 text-sm leading-6 text-neutral-600 sm:rounded-lg">
-          {mood.note}
-        </p>
-      ) : null}
-    </div>
-  );
+	return (
+		<div className="rounded-[1.35rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:shadow-none">
+			<div className="flex items-center justify-between gap-3">
+				<div className="flex min-w-0 items-center gap-3">
+					<div className="grid size-11 shrink-0 place-items-center rounded-full bg-mui/10 text-xl">
+						{avatar}
+					</div>
+					<div className="min-w-0">
+						<p className="truncate text-sm font-bold text-neutral-900">
+							{label}
+						</p>
+						<p className="text-xs font-semibold text-neutral-500">
+							{mood
+								? formatMoodDate(mood.mood_date, timeZone)
+								: "Not logged yet"}
+						</p>
+					</div>
+				</div>
+				<div className="text-3xl">{option?.emoji ?? "—"}</div>
+			</div>
+			<p className="mt-3 text-sm font-semibold text-neutral-700">
+				{option ? option.label : "No mood"}
+			</p>
+			{mood?.note ? (
+				<p className="mt-2 rounded-[1rem] bg-mui/10 px-3 py-2 text-sm leading-6 text-neutral-600 sm:rounded-lg">
+					{mood.note}
+				</p>
+			) : null}
+		</div>
+	);
 }
 
 interface MoodPanelProps {
-  activePeriod: string;
-  currentTimeIso: string;
-  currentUserId: string;
-  filterRange: "week" | "month";
-  loading: boolean;
-  moods: DailyMood[];
-  partner: Profile;
-  partnerAvatar: string;
-  periodControl?: ReactNode;
-  profile: Profile;
-  profileAvatar: string;
-  timeZone: string;
-  onMoodDeleted: (moodId: string) => void;
-  onMoodSaved: (mood: DailyMood) => void;
+	activePeriod: string;
+	currentTimeIso: string;
+	currentUserId: string;
+	filterRange: "week" | "month";
+	loading: boolean;
+	moods: DailyMood[];
+	partner: Profile;
+	partnerAvatar: string;
+	periodControl?: ReactNode;
+	profile: Profile;
+	profileAvatar: string;
+	timeZone: string;
+	onMoodDeleted: (moodId: string) => void;
+	onMoodSaved: (mood: DailyMood) => void;
 }
 
 export function MoodPanel({
-  activePeriod,
-  currentTimeIso,
-  currentUserId,
-  filterRange,
-  loading,
-  moods,
-  partner,
-  partnerAvatar,
-  periodControl,
-  profile,
-  profileAvatar,
-  timeZone,
-  onMoodDeleted,
-  onMoodSaved,
+	activePeriod,
+	currentTimeIso,
+	currentUserId,
+	filterRange,
+	loading,
+	moods,
+	partner,
+	partnerAvatar,
+	periodControl,
+	profile,
+	profileAvatar,
+	timeZone,
+	onMoodDeleted,
+	onMoodSaved,
 }: MoodPanelProps) {
-  const toast = useToast();
-  const todayKey = useMemo(
-    () => localDateKey(currentTimeIso, timeZone),
-    [currentTimeIso, timeZone],
-  );
-  const calendarCells = useMemo(
-    () => getMoodCalendarCells(activePeriod, filterRange),
-    [activePeriod, filterRange],
-  );
-  const defaultSelectedDate = useMemo(() => {
-    const todayInPeriod = calendarCells.some(
-      (cell) => cell.inPeriod && cell.dateKey === todayKey,
-    );
+	const toast = useToast();
+	const todayKey = useMemo(
+		() => localDateKey(currentTimeIso, timeZone),
+		[currentTimeIso, timeZone],
+	);
+	const calendarCells = useMemo(
+		() => getMoodCalendarCells(activePeriod, filterRange),
+		[activePeriod, filterRange],
+	);
+	const defaultSelectedDate = useMemo(() => {
+		const todayInPeriod = calendarCells.some(
+			(cell) => cell.inPeriod && cell.dateKey === todayKey,
+		);
 
-    if (todayInPeriod) return todayKey;
-    return calendarCells.find((cell) => cell.inPeriod)?.dateKey ?? todayKey;
-  }, [calendarCells, todayKey]);
-  const [selectedDate, setSelectedDate] = useState(defaultSelectedDate);
-  const [mood, setMood] = useState<MoodLevel>("happy");
-  const [note, setNote] = useState("");
-  const [pending, startTransition] = useTransition();
+		if (todayInPeriod) return todayKey;
+		return calendarCells.find((cell) => cell.inPeriod)?.dateKey ?? todayKey;
+	}, [calendarCells, todayKey]);
+	const [selectedDate, setSelectedDate] = useState(defaultSelectedDate);
+	const [mood, setMood] = useState<MoodLevel>("great");
+	const [note, setNote] = useState("");
+	const [pending, startTransition] = useTransition();
 
-  useEffect(() => {
-    setSelectedDate(defaultSelectedDate);
-  }, [defaultSelectedDate]);
+	useEffect(() => {
+		setSelectedDate(defaultSelectedDate);
+	}, [defaultSelectedDate]);
 
-  const moodsByOwnerDate = useMemo(() => {
-    const map = new Map<string, DailyMood>();
-    moods.forEach((item) => {
-      map.set(`${item.owner_id}:${item.mood_date}`, item);
-    });
+	const moodsByOwnerDate = useMemo(() => {
+		const map = new Map<string, DailyMood>();
+		moods.forEach((item) => {
+			map.set(`${item.owner_id}:${item.mood_date}`, item);
+		});
 
-    return map;
-  }, [moods]);
+		return map;
+	}, [moods]);
 
-  const selectedMood = useMemo(
-    () => moodsByOwnerDate.get(`${currentUserId}:${selectedDate}`),
-    [currentUserId, moodsByOwnerDate, selectedDate],
-  );
-  const partnerSelectedMood = useMemo(
-    () => moodsByOwnerDate.get(`${partner.id}:${selectedDate}`),
-    [moodsByOwnerDate, partner.id, selectedDate],
-  );
+	const selectedMood = useMemo(
+		() => moodsByOwnerDate.get(`${currentUserId}:${selectedDate}`),
+		[currentUserId, moodsByOwnerDate, selectedDate],
+	);
+	const partnerSelectedMood = useMemo(
+		() => moodsByOwnerDate.get(`${partner.id}:${selectedDate}`),
+		[moodsByOwnerDate, partner.id, selectedDate],
+	);
 
-  useEffect(() => {
-    setMood(selectedMood?.mood ?? "happy");
-    setNote(selectedMood?.note ?? "");
-  }, [selectedMood]);
+	useEffect(() => {
+		setMood(selectedMood?.mood ?? "great");
+		setNote(selectedMood?.note ?? "");
+	}, [selectedMood]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
 
-    startTransition(async () => {
-      const result = await upsertMood(formData);
-      toast(result.message, { variant: result.ok ? "success" : "error" });
-      if (result.ok) onMoodSaved(result.mood);
-    });
-  };
+		startTransition(async () => {
+			const result = await upsertMood(formData);
+			toast(result.message, { variant: result.ok ? "success" : "error" });
+			if (result.ok) onMoodSaved(result.mood);
+		});
+	};
 
-  const handleDelete = () => {
-    if (!selectedMood) return;
+	const handleDelete = () => {
+		if (!selectedMood) return;
 
-    startTransition(async () => {
-      const result = await deleteMood(selectedMood.id);
-      toast(result.message, { variant: result.ok ? "success" : "error" });
-      if (result.ok) onMoodDeleted(selectedMood.id);
-    });
-  };
+		startTransition(async () => {
+			const result = await deleteMood(selectedMood.id);
+			toast(result.message, { variant: result.ok ? "success" : "error" });
+			if (result.ok) onMoodDeleted(selectedMood.id);
+		});
+	};
 
-  return (
-    <div className="grid gap-4 sm:gap-5">
-      <div className="flex items-center justify-between gap-4 sm:items-end">
-        <div className="min-w-0">
-          <h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
-            Mood tracker
-          </h2>
-          <p className="mt-1 hidden text-sm text-neutral-500 sm:block">
-            A gentle daily check-in for both of you.
-          </p>
-        </div>
-        <div className="sm:hidden">{periodControl}</div>
-      </div>
+	return (
+		<div className="grid gap-4 sm:gap-5">
+			<div className="flex items-center justify-between gap-4 sm:items-end">
+				<div className="min-w-0">
+					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
+						Mood tracker
+					</h2>
+					<p className="mt-1 hidden text-sm text-neutral-500 sm:block">
+						A gentle daily check-in for both of you.
+					</p>
+				</div>
+				<div className="sm:hidden">{periodControl}</div>
+			</div>
 
-      <div className="rounded-[1.7rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <CalendarDays size={18} className="text-mui" />
-              <p className="font-serif text-2xl leading-tight">
-                Mood calendar
-              </p>
-            </div>
-            <p className="mt-1 text-xs font-semibold text-neutral-500">
-              Big icon = you · small badge = partner
-            </p>
-          </div>
-          <span className="rounded-full bg-mui/10 px-3 py-1 text-xs font-bold text-mui">
-            {filterRange === "week" ? "Week" : "Month"}
-          </span>
-        </div>
+			<div className="rounded-[1.7rem] border border-neutral-200 bg-paper p-3 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
+				<div className="flex items-start justify-between gap-4">
+					<div>
+						<div className="flex items-center gap-2">
+							<CalendarDays
+								size={18}
+								className="text-mui"
+							/>
+							<p className="font-serif text-2xl leading-tight">Mood calendar</p>
+						</div>
+						<p className="mt-1 text-xs font-semibold text-neutral-500">
+							Big icon = you · small badge = partner
+						</p>
+					</div>
+					<span className="rounded-full bg-mui/10 px-3 py-1 text-xs font-bold text-mui">
+						{filterRange === "week" ? "Week" : "Month"}
+					</span>
+				</div>
 
-        <div className="mt-4 grid grid-cols-7 gap-1.5 text-center">
-          {weekDayLabels.map((label) => (
-            <div
-              key={label}
-              className="py-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-neutral-400"
-            >
-              {label}
-            </div>
-          ))}
+				<div className="mt-4">
+					<div className="grid grid-cols-7 gap-1 text-center sm:gap-1.5 lg:gap-2.5">
+						{weekDayLabels.map((label) => (
+							<div
+								key={label}
+								className="py-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-neutral-400"
+							>
+								{label}
+							</div>
+						))}
 
-          {loading ? (
-            <div className="col-span-7 rounded-[1.25rem] bg-neutral-50 p-5 text-center text-sm text-neutral-500 sm:rounded-lg">
-              Loading moods...
-            </div>
-          ) : (
-            calendarCells.map((cell) => {
-              const mine = moodsByOwnerDate.get(`${currentUserId}:${cell.dateKey}`);
-              const partnerMood = moodsByOwnerDate.get(`${partner.id}:${cell.dateKey}`);
-              const mineOption = getMoodOption(mine?.mood);
-              const partnerOption = getMoodOption(partnerMood?.mood);
-              const selected = selectedDate === cell.dateKey;
-              const isToday = todayKey === cell.dateKey;
+						{loading ? (
+							<div className="col-span-7 rounded-[1.25rem] bg-neutral-50 p-5 text-center text-sm text-neutral-500 sm:rounded-lg">
+								Loading moods...
+							</div>
+						) : (
+							calendarCells.map((cell) => {
+								const mine = moodsByOwnerDate.get(
+									`${currentUserId}:${cell.dateKey}`,
+								);
+								const partnerMood = moodsByOwnerDate.get(
+									`${partner.id}:${cell.dateKey}`,
+								);
+								const mineOption = getMoodOption(mine?.mood);
+								const partnerOption = getMoodOption(partnerMood?.mood);
+								const selected = selectedDate === cell.dateKey;
+								const isToday = todayKey === cell.dateKey;
 
-              return (
-                <button
-                  key={cell.dateKey}
-                  type="button"
-                  disabled={!cell.inPeriod}
-                  aria-pressed={selected}
-                  aria-label={`Mood for ${formatMoodDate(cell.dateKey, timeZone)}`}
-                  onClick={() => setSelectedDate(cell.dateKey)}
-                  className={[
-                    "relative min-h-[4.75rem] rounded-[1.2rem] border px-1.5 py-2 transition active:scale-[0.98] sm:min-h-[5.1rem] sm:rounded-lg",
-                    selected
-                      ? "border-neutral-950 bg-mui/80 text-white shadow-[0_12px_28px_rgba(30,25,20,0.24)]"
-                      : "border-neutral-200 bg-neutral-50/70 text-neutral-800 hover:border-mui/40 hover:bg-mui/10",
-                    !cell.inPeriod && "pointer-events-none opacity-25",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                >
-                  <span
-                    className={[
-                      "mx-auto block text-[11px] font-extrabold",
-                      selected ? "text-white/80" : "text-neutral-500",
-                    ].join(" ")}
-                  >
-                    {cell.date.getUTCDate()}
-                  </span>
+								return (
+									<button
+										key={cell.dateKey}
+										type="button"
+										disabled={!cell.inPeriod}
+										aria-pressed={selected}
+										aria-label={`Mood for ${formatMoodDate(cell.dateKey, timeZone)}`}
+										onClick={() => setSelectedDate(cell.dateKey)}
+										className={[
+											"relative h-[4.7rem] min-w-0 overflow-hidden rounded-[0.95rem] border px-0.5 py-1.5 transition active:scale-[0.98] sm:h-auto sm:min-h-[5.1rem] sm:rounded-lg sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
+											selected
+												? "border-mui/80 bg-mui/80 text-white shadow-[0_12px_28px_rgba(30,25,20,0.24)]"
+												: "border-neutral-200 bg-neutral-50/70 text-neutral-800 hover:border-mui/40 hover:bg-mui/10",
+											!cell.inPeriod && "pointer-events-none opacity-25",
+										]
+											.filter(Boolean)
+											.join(" ")}
+									>
+										<span
+											className={[
+												"mx-auto block text-[10px] font-extrabold sm:text-[11px] lg:text-xs",
+												selected ? "text-white/80" : "text-neutral-500",
+											].join(" ")}
+										>
+											{cell.date.getUTCDate()}
+										</span>
 
-                  <span className="relative mx-auto mt-1 block size-9">
-                    <span
-                      className={[
-                        "grid size-9 place-items-center rounded-full text-xl transition",
-                        selected ? "bg-white text-neutral-950" : "bg-paper text-neutral-700",
-                        !mineOption && !selected && "text-neutral-300",
-                      ].join(" ")}
-                    >
-                      {mineOption?.emoji ?? "♡"}
-                    </span>
-                    {partnerOption ? (
-                      <span className="absolute -bottom-0.5 -right-0.5 grid size-5 place-items-center rounded-full border-2 border-paper bg-white text-[12px] shadow-sm">
-                        {partnerOption.emoji}
-                      </span>
-                    ) : null}
-                  </span>
+										<span className="relative mx-auto mt-1 block size-10 sm:size-9 lg:mt-2 lg:size-11">
+											<span
+												className={[
+													"grid size-10 place-items-center rounded-full text-2xl transition",
+													selected
+														? "bg-white text-neutral-950"
+														: "bg-paper text-neutral-700",
+													!mineOption && !selected && "text-neutral-300",
+												].join(" ")}
+											>
+												{mineOption?.emoji ?? "♡"}
+											</span>
+											{partnerOption ? (
+												<span className="absolute -bottom-0.5 -right-0.5 grid size-[1.3rem] place-items-center rounded-full border-paper bg-white text-[13px] shadow-sm sm:size-5 sm:text-[12px] sm:-bottom-0.5 sm:-right-0.5 lg:size-6 lg:text-sm">
+													{partnerOption.emoji}
+												</span>
+											) : null}
+										</span>
 
-                  {isToday ? (
-                    <span
-                      className={[
-                        "absolute left-1/2 top-1 h-1.5 w-1.5 -translate-x-1/2 rounded-full",
-                        selected ? "bg-white" : "bg-mui",
-                      ].join(" ")}
-                    />
-                  ) : null}
-                </button>
-              );
-            })
-          )}
-        </div>
-      </div>
+										{isToday ? (
+											<span
+												className={[
+													"absolute left-1/2 top-1 h-1.5 w-1.5 -translate-x-1/2 rounded-full",
+													selected ? "bg-white" : "bg-mui",
+												].join(" ")}
+											/>
+										) : null}
+									</button>
+								);
+							})
+						)}
+					</div>
+				</div>
+			</div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {personMoodCard({
-          avatar: profileAvatar,
-          label: `${profile.display_name} · You`,
-          mood: selectedMood,
-          timeZone,
-        })}
-        {personMoodCard({
-          avatar: partnerAvatar,
-          label: partner.display_name,
-          mood: partnerSelectedMood,
-          timeZone,
-        })}
-      </div>
+			<div className="grid gap-3 sm:grid-cols-2">
+				{personMoodCard({
+					avatar: profileAvatar,
+					label: `${profile.display_name} · You`,
+					mood: selectedMood,
+					timeZone,
+				})}
+				{personMoodCard({
+					avatar: partnerAvatar,
+					label: partner.display_name,
+					mood: partnerSelectedMood,
+					timeZone,
+				})}
+			</div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-[1.7rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-mui/10 text-mui sm:rounded-lg">
-              <HeartPulse size={24} />
-            </div>
-            <div className="min-w-0">
-              <p className="font-serif text-2xl leading-tight">How are you?</p>
-              <p className="text-sm text-neutral-500">
-                {formatMoodDate(selectedDate, timeZone)}
-              </p>
-            </div>
-          </div>
-        </div>
+			<form
+				onSubmit={handleSubmit}
+				className="rounded-[1.7rem] border border-neutral-200 bg-paper p-3 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none"
+			>
+				<div className="flex items-center justify-between gap-3">
+					<div className="flex min-w-0 items-center gap-3">
+						<div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-mui/10 text-mui sm:rounded-lg">
+							<HeartPulse size={24} />
+						</div>
+						<div className="min-w-0">
+							<p className="font-serif text-2xl leading-tight">How are you?</p>
+							<p className="text-sm text-neutral-500">
+								{formatMoodDate(selectedDate, timeZone)}
+							</p>
+						</div>
+					</div>
+				</div>
 
-        <div className="mt-4 grid gap-4">
-          <input type="hidden" name="mood_date" value={selectedDate} />
-          <input type="hidden" name="mood" value={mood} />
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
-            {moodOptions.map((option) => {
-              const selected = mood === option.value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => setMood(option.value)}
-                  className={[
-                    "grid min-h-[4.8rem] place-items-center rounded-[1.25rem] border px-2 py-2 text-center transition active:scale-[0.98] sm:rounded-lg",
-                    selected
-                      ? "border-mui bg-mui/10 shadow-inner"
-                      : "border-neutral-200 bg-neutral-50/60 hover:bg-mui/10",
-                  ].join(" ")}
-                >
-                  <span className="text-2xl">{option.emoji}</span>
-                  <span className="text-[11px] font-bold text-neutral-700">
-                    {option.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+				<div className="mt-4 grid gap-4">
+					<input
+						type="hidden"
+						name="mood_date"
+						value={selectedDate}
+					/>
+					<input
+						type="hidden"
+						name="mood"
+						value={mood}
+					/>
+					<div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+						{moodOptions.map((option) => {
+							const selected = mood === option.value;
+							return (
+								<button
+									key={option.value}
+									type="button"
+									aria-pressed={selected}
+									onClick={() => setMood(option.value)}
+									className={[
+										"grid min-h-[4.8rem] place-items-center rounded-[1.25rem] border px-2 py-2 text-center transition active:scale-[0.98] sm:rounded-lg",
+										selected
+											? "border-mui bg-mui/10 shadow-inner"
+											: "border-neutral-200 bg-neutral-50/60 hover:bg-mui/10",
+									].join(" ")}
+								>
+									<span className="text-2xl">{option.emoji}</span>
+									<span className="text-[11px] font-bold text-neutral-700">
+										{option.label}
+									</span>
+								</button>
+							);
+						})}
+					</div>
 
-          <NativeTextarea
-            label="Small note (optional)"
-            name="note"
-            rows={3}
-            maxLength={500}
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-          />
+					<NativeTextarea
+						label="Small note (optional)"
+						name="note"
+						rows={3}
+						maxLength={500}
+						value={note}
+						onChange={(event) => setNote(event.target.value)}
+					/>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            {selectedMood ? (
-              <NativeButton
-                type="button"
-                variant="danger"
-                disabled={pending}
-                onClick={handleDelete}
-                className="sm:order-1"
-              >
-                <Trash2 size={17} />
-                Delete mood
-              </NativeButton>
-            ) : null}
-            <NativeButton
-              type="submit"
-              disabled={pending}
-              className="sm:order-2"
-            >
-              <Pencil size={17} />
-              {selectedMood ? "Update mood" : "Save mood"}
-            </NativeButton>
-          </div>
-        </div>
-      </form>
-    </div>
-  );
+					<div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+						{selectedMood ? (
+							<NativeButton
+								type="button"
+								variant="danger"
+								disabled={pending}
+								onClick={handleDelete}
+								className="sm:order-1"
+							>
+								<Trash2 size={17} />
+								Delete mood
+							</NativeButton>
+						) : null}
+						<NativeButton
+							type="submit"
+							disabled={pending}
+							className="sm:order-2"
+						>
+							<Pencil size={17} />
+							{selectedMood ? "Update mood" : "Save mood"}
+						</NativeButton>
+					</div>
+				</div>
+			</form>
+		</div>
+	);
 }
