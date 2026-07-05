@@ -71,7 +71,7 @@ export function PairingRequests({ profileId, requests }: PairingRequestsProps) {
 								<NativeButton
 									type="submit"
 									disabled={pending}
-									className="min-h-11 w-full sm:w-36"
+									className="min-h-12 w-full sm:min-h-11 sm:w-36"
 								>
 									{pending ? "Accepting..." : "Accept"}
 								</NativeButton>

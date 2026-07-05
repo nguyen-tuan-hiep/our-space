@@ -43,7 +43,7 @@ export function AnniversaryDialog({
       <NativeDialog
         open={open}
         onClose={handleClose}
-        maxWidth="xs"
+        maxWidth="sm"
         title="Edit anniversary"
       >
         <form

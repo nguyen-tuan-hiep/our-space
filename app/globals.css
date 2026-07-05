@@ -108,3 +108,191 @@ input[type="date"]::-webkit-date-and-time-value,
 input[type="time"]::-webkit-date-and-time-value {
 	text-align: left;
 }
+
+@supports (padding: max(0px)) {
+	body {
+		padding-left: env(safe-area-inset-left);
+		padding-right: env(safe-area-inset-right);
+	}
+}
+
+@media (max-width: 639px) {
+	html {
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	body {
+		overscroll-behavior-y: none;
+	}
+
+	.mobile-native-shell {
+		background:
+			radial-gradient(circle at 50% -10%, color-mix(in srgb, var(--color-paper) 75%, transparent), transparent 34rem),
+			var(--color-bg);
+	}
+}
+
+@keyframes mobile-tab-panel-in {
+	from {
+		opacity: 0;
+		transform: translate3d(18px, 0, 0) scale(0.99);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+.mobile-tab-panel-in {
+	animation: mobile-tab-panel-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.mobile-bottom-tab-indicator {
+	transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mobile-tab-panel-in,
+	.mobile-bottom-tab-indicator,
+	.mobile-sheet-motion {
+		animation: none;
+		transition: none;
+	}
+}
+
+@media (min-width: 640px) {
+	.mobile-tab-panel-in {
+		animation: none;
+	}
+}
+
+@keyframes native-dialog-backdrop-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes native-dialog-backdrop-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes native-sheet-in {
+	0% {
+		opacity: 0;
+		transform: translate3d(0, 110%, 0) scale(0.98);
+	}
+	100% {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+@keyframes native-sheet-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, 110%, 0) scale(0.98);
+	}
+}
+
+@keyframes native-modal-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, 8px, 0) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+@keyframes native-modal-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, 8px, 0) scale(0.96);
+	}
+}
+
+@keyframes native-action-sheet-in {
+	0% {
+		opacity: 0;
+		transform: translate3d(0, 24px, 0) scale(0.98);
+	}
+	100% {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+@keyframes native-bottom-nav-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, 18px, 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+.native-dialog-backdrop-in {
+	animation: native-dialog-backdrop-in 240ms ease-out both;
+}
+
+.native-dialog-backdrop-out {
+	animation: native-dialog-backdrop-out 220ms ease-in both;
+}
+
+.native-sheet-in {
+	animation: native-sheet-in 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.native-sheet-out {
+	animation: native-sheet-out 240ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.native-action-sheet-in {
+	animation: native-action-sheet-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.native-bottom-nav-in {
+	animation: native-bottom-nav-in 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (min-width: 640px) {
+	.native-sheet-in {
+		animation-name: native-modal-in;
+		animation-duration: 220ms;
+	}
+
+	.native-sheet-out {
+		animation-name: native-modal-out;
+		animation-duration: 180ms;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.native-dialog-backdrop-in,
+	.native-dialog-backdrop-out,
+	.native-sheet-in,
+	.native-sheet-out,
+	.native-action-sheet-in,
+	.native-bottom-nav-in {
+		animation: none;
+	}
+}

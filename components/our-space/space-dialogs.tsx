@@ -78,46 +78,36 @@ export function SpaceDialogs({
 }: SpaceDialogsProps) {
 	return (
 		<>
-			{noteOpen ? (
-				<NoteDialog
-					open={noteOpen}
-					onClose={onCloseNote}
-					recipient={partner}
-					senderTimeZone={senderTimeZone}
-					note={editingNote}
-					onSaved={onNoteSaved}
-				/>
-			) : null}
-			{expenseOpen ? (
-				<ExpenseDialog
-					open={expenseOpen}
-					onClose={onCloseExpense}
-					profile={profile}
-					expense={editingExpense}
-					onSaved={onExpenseSaved}
-				/>
-			) : null}
-			{profileOpen ? (
-				<ProfileDialog
-					open={profileOpen}
-					onClose={onCloseProfile}
-					profile={profile}
-				/>
-			) : null}
-			{heroOpen ? (
-				<HeroImageDialog
-					open={heroOpen}
-					onClose={onCloseHero}
-					currentUrl={heroImageUrl}
-				/>
-			) : null}
-			{anniversaryOpen ? (
-				<AnniversaryDialog
-					open={anniversaryOpen}
-					onClose={onCloseAnniversary}
-					currentDate={anniversaryDate}
-				/>
-			) : null}
+			<NoteDialog
+				open={noteOpen}
+				onClose={onCloseNote}
+				recipient={partner}
+				senderTimeZone={senderTimeZone}
+				note={editingNote}
+				onSaved={onNoteSaved}
+			/>
+			<ExpenseDialog
+				open={expenseOpen}
+				onClose={onCloseExpense}
+				profile={profile}
+				expense={editingExpense}
+				onSaved={onExpenseSaved}
+			/>
+			<ProfileDialog
+				open={profileOpen}
+				onClose={onCloseProfile}
+				profile={profile}
+			/>
+			<HeroImageDialog
+				open={heroOpen}
+				onClose={onCloseHero}
+				currentUrl={heroImageUrl}
+			/>
+			<AnniversaryDialog
+				open={anniversaryOpen}
+				onClose={onCloseAnniversary}
+				currentDate={anniversaryDate}
+			/>
 		</>
 	);
 }

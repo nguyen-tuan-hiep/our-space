@@ -71,7 +71,7 @@ export function SpaceHero({
 	onToggleMenu,
 }: SpaceHeroProps) {
 	return (
-		<section className="relative min-h-[50svh] bg-black text-white sm:min-h-[70svh]">
+		<section className="relative min-h-[42svh] overflow-hidden rounded-b-[2rem] bg-black text-white shadow-[0_24px_60px_rgba(30,25,20,0.2)] sm:min-h-[70svh] sm:rounded-b-none sm:shadow-none">
 			<Image
 				src={heroImageUrl}
 				alt="Our Space hero"
@@ -80,10 +80,10 @@ export function SpaceHero({
 				fetchPriority="high"
 				quality={50}
 				sizes="100vw"
-				className="object-cover opacity-75"
+				className="object-cover opacity-80 sm:opacity-75"
 			/>
-			<div className="container-page relative flex min-h-[50svh] flex-col py-5 sm:min-h-[70svh] sm:py-7">
-				<header className="flex items-center justify-between gap-4 border-b border-paper/25 pb-1">
+			<div className="container-page relative flex min-h-[42svh] flex-col pb-5 pt-[calc(env(safe-area-inset-top)+1rem)] sm:min-h-[70svh] sm:py-7">
+				<header className="flex items-center justify-between gap-3 border-b border-paper/15 pb-3 sm:gap-4 sm:border-paper/25 sm:pb-1">
 					<div className="flex min-w-0 items-start gap-4">
 						<div className="flex items-center gap-2">
 							<Image
@@ -94,17 +94,17 @@ export function SpaceHero({
 								height={28}
 								className="size-7 shrink-0"
 							/>
-							<p className="font-serif text-2xl tracking-wide sm:text-2xl">
+							<p className="font-serif text-xl tracking-wide sm:text-2xl">
 								Our Space 𑣲⋆
 							</p>
 						</div>
 					</div>
 					<div className="flex min-w-0 items-center justify-end gap-2 sm:gap-3">
 						<div className="flex min-w-0 items-center gap-2 sm:gap-3">
-							<div className="grid size-10 shrink-0 place-items-center rounded-full bg-white/15 text-xl backdrop-blur-md">
+							<div className="grid size-9 shrink-0 place-items-center rounded-full bg-white/20 text-lg backdrop-blur-md sm:size-10 sm:text-xl">
 								{profileAvatar}
 							</div>
-							<div className="min-w-0 text-right leading-tight sm:text-left">
+							<div className="hidden min-w-0 text-right leading-tight sm:block sm:text-left">
 								<p className="font-serif text-sm font-semibold">
 									{profile.display_name}
 								</p>
@@ -113,7 +113,7 @@ export function SpaceHero({
 								</p>
 							</div>
 							<div
-								className="relative"
+								className="relative hidden sm:block"
 								ref={mobileMenuRef}
 							>
 								<button
@@ -123,7 +123,7 @@ export function SpaceHero({
 									aria-expanded={mobileMenuOpen ? "true" : undefined}
 									aria-haspopup="menu"
 									onClick={onToggleMenu}
-									className="grid size-9 shrink-0 place-items-center rounded-full border border-paper/70 bg-black/35 p-0 transition hover:bg-black/50"
+									className="grid size-10 shrink-0 place-items-center rounded-full border border-paper/60 bg-black/35 p-0 transition active:scale-95 hover:bg-black/50 sm:size-9"
 								>
 									<MenuIcon size={18} />
 								</button>
@@ -131,7 +131,7 @@ export function SpaceHero({
 									<div
 										id="mobile-nav-menu"
 										role="menu"
-										className="absolute right-0 top-11 z-30 w-64 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-neutral-900 shadow-lg"
+										className="absolute right-0 top-12 z-30 w-64 overflow-hidden rounded-[1.25rem] border border-neutral-200 bg-white py-1 text-neutral-900 shadow-2xl sm:top-11 sm:rounded-lg sm:shadow-lg"
 									>
 										<button
 											type="button"
@@ -182,35 +182,35 @@ export function SpaceHero({
 					</div>
 				</header>
 
-				<div className="flex flex-1 flex-col justify-between">
+				<div className="flex flex-1 flex-col justify-between pt-4 sm:pt-0">
 					<div>
 						<p className="eyebrow !text-paper/70">Love in every line.</p>
 					</div>
 
 					<div>
-						<h1 className="mb-2 max-w-[10ch] font-serif text-3xl leading-1 sm:mb-6 sm:text-5xl md:text-6xl lg:text-7xl">
+						<h1 className="mb-3 max-w-[12ch] font-serif text-[2rem] leading-none sm:mb-6 sm:max-w-[10ch] sm:text-5xl md:text-6xl lg:text-7xl">
 							A private place for us.
 						</h1>
-						<div className="grid max-w-3xl grid-cols-2 gap-3">
-							<div className="rounded-lg bg-black/20 p-4 backdrop-blur-sm">
+						<div className="grid max-w-3xl grid-cols-2 gap-2 sm:gap-3">
+							<div className="rounded-[1.35rem] bg-black/25 p-3 backdrop-blur-md sm:rounded-lg sm:bg-black/20 sm:p-4 sm:backdrop-blur-sm">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Days together
 								</p>
-								<p className="mt-2 font-serif text-2xl sm:text-4xl md:text-5xl">
+								<p className="mt-1 font-serif text-2xl sm:mt-2 sm:text-4xl md:text-5xl">
 									{relationshipStats.daysTogether}
 								</p>
-								<p className="mt-2 text-sm text-paper/70">
+								<p className="mt-1 text-xs text-paper/70 sm:mt-2 sm:text-sm">
 									Since {anniversaryLabel}
 								</p>
 							</div>
-							<div className="rounded-lg bg-black/20 p-4 backdrop-blur-sm">
+							<div className="rounded-[1.35rem] bg-black/25 p-3 backdrop-blur-md sm:rounded-lg sm:bg-black/20 sm:p-4 sm:backdrop-blur-sm">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Next anniversary
 								</p>
-								<p className="mt-2 font-serif text-2xl sm:text-4xl md:text-5xl">
+								<p className="mt-1 font-serif text-2xl sm:mt-2 sm:text-4xl md:text-5xl">
 									{relationshipStats.countdown}
 								</p>
-								<p className="mt-2 text-sm text-paper/70">
+								<p className="mt-1 text-xs text-paper/70 sm:mt-2 sm:text-sm">
 									{relationshipStats.nextMonthlyLabel}
 								</p>
 							</div>

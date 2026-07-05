@@ -5,9 +5,9 @@ import { monthLabels, weekdayLabels } from "./period-utils";
 
 function periodTabClass(active: boolean) {
 	return [
-		"relative inline-flex min-h-10 flex-1 items-center justify-center px-4 text-sm font-bold transition",
+		"relative inline-flex min-h-11 flex-1 items-center justify-center rounded-full px-4 text-sm font-bold transition sm:rounded-none",
 		active
-			? "text-mui after:absolute after:inset-x-3 after:-bottom-px after:h-0.5 after:rounded-full after:bg-mui"
+			? "bg-paper text-mui shadow-sm after:absolute after:inset-x-3 after:-bottom-px after:hidden after:h-0.5 after:rounded-full after:bg-mui sm:bg-transparent sm:shadow-none sm:after:block"
 			: "text-neutral-900 hover:text-mui",
 	].join(" ");
 }
@@ -40,6 +40,7 @@ interface PeriodPickerDialogProps {
 		inCurrentMonth: boolean;
 	}>;
 	calendarMonthTitle: string;
+	closing?: boolean;
 	filterRange: FilterRange;
 	periodDescription: string;
 	profileTimeZone: string;
@@ -55,6 +56,7 @@ export function PeriodPickerDialog({
 	activePeriod,
 	calendarDays,
 	calendarMonthTitle,
+	closing = false,
 	filterRange,
 	periodDescription,
 	profileTimeZone,
@@ -69,12 +71,15 @@ export function PeriodPickerDialog({
 		<div
 			role="dialog"
 			aria-label="Choose period"
-			className="absolute right-0 top-14 z-[60] w-[min(23rem,calc(100vw-2rem))] overflow-hidden rounded-[2rem] border border-neutral-200 bg-paper p-4 text-neutral-900 shadow-2xl backdrop-blur"
+			className={[
+				"mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-[60] max-h-[calc(100svh-7rem)] overflow-y-auto rounded-[2rem] border border-neutral-200 bg-paper p-4 text-neutral-900 shadow-2xl backdrop-blur will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-14 sm:w-[min(23rem,calc(100vw-2rem))]",
+				closing ? "native-sheet-out" : "native-sheet-in",
+			].join(" ")}
 		>
 			<div
 				role="radiogroup"
 				aria-label="Period range"
-				className="grid grid-cols-2 border-b border-neutral-200"
+				className="grid grid-cols-2 rounded-full bg-mui/10 p-1 sm:rounded-none sm:border-b sm:border-neutral-200 sm:bg-transparent sm:p-0"
 			>
 				<button
 					type="button"

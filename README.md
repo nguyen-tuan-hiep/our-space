@@ -203,7 +203,7 @@ The dashboard intentionally does not convert currencies, because the product req
 
 ## Push Notifications
 
-This app uses OneSignal Web Push, Supabase Database Webhooks, and a Supabase Edge Function to send iPhone PWA lock-screen notifications when one partner creates a note or transaction.
+This app uses OneSignal Web Push, Supabase Database Webhooks, and a Supabase Edge Function to send iPhone PWA lock-screen notifications when one partner creates a note, creates a transaction, or sets/updates a mood.
 
 Current production values:
 
@@ -355,6 +355,7 @@ The Edge Function uses `SUPABASE_SERVICE_ROLE_KEY` to fetch sender and receiver 
 grant select, update on public.profiles to service_role;
 grant select on public.notes to service_role;
 grant select on public.individual_expenses to service_role;
+grant select on public.daily_moods to service_role;
 grant select on public.app_settings to service_role;
 ```
 
@@ -366,7 +367,7 @@ permission denied for table profiles
 
 ### Database Webhook Setup
 
-Create two Database Webhooks in the Supabase Dashboard:
+Create three Database Webhooks in the Supabase Dashboard:
 
 1. Go to `Database` -> `Webhooks` -> `Create a new hook`.
 2. Name the first hook `notify-on-note-insert`.
@@ -378,6 +379,7 @@ Create two Database Webhooks in the Supabase Dashboard:
 8. Prefer adding header `x-webhook-secret` with the same value as `NOTIFICATION_WEBHOOK_SECRET`.
 9. Save the hook.
 10. Repeat for `public.individual_expenses`, naming it `notify-on-expense-insert`.
+11. Repeat for `public.daily_moods`, naming it `notify-on-mood-change`, and set events to `Insert` and `Update`.
 
 Recommended webhook URL:
 
@@ -401,6 +403,8 @@ When a note row is inserted, the function reads `record.recipient_id`, targets t
 
 When an expense row is inserted, the function reads `record.owner_id`, finds that owner's `partner_id`, targets the partner profile id as OneSignal `external_id`, and sends a transaction notification.
 
+When a mood row is inserted or updated, the function reads `record.owner_id`, finds that owner's `partner_id`, targets the partner profile id as OneSignal `external_id`, and sends a mood update notification.
+
 ### Testing
 
 1. Deploy the frontend to HTTPS on Vercel.
@@ -409,7 +413,7 @@ When an expense row is inserted, the function reads `record.owner_id`, finds tha
 4. Sign in and tap `Enable notifications`.
 5. Confirm OneSignal Dashboard -> Audience -> Subscriptions shows the device as subscribed with the profile id as external id.
 6. Repeat steps 3-5 on another device with the same profile.
-7. Sign in as the other partner and create a note or transaction.
+7. Sign in as the other partner and create a note, transaction, or mood.
 8. Lock both receiving devices and confirm the notification appears on both.
 
 Useful SQL checks:

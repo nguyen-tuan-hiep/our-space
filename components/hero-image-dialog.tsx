@@ -100,7 +100,7 @@ export function HeroImageDialog({
           />
         </div>
         <label
-          className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 ${
+          className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-md border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 sm:min-h-11 ${
             uploading ? "pointer-events-none opacity-50" : ""
           }`}
         >

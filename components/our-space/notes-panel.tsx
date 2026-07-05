@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { NoteCard } from "@/components/notes/note-card";
 import type { FilterRange } from "@/lib/dashboard-utils";
@@ -13,6 +14,7 @@ interface NotesPanelProps {
 	timeZone: string;
 	onEditNote: (note: SharedNote) => void;
 	onNewNote: () => void;
+	periodControl?: ReactNode;
 }
 
 export function NotesPanel({
@@ -24,25 +26,27 @@ export function NotesPanel({
 	timeZone,
 	onEditNote,
 	onNewNote,
+	periodControl,
 }: NotesPanelProps) {
 	return (
-		<div className="grid gap-5">
-			<div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-				<div>
-					<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
+		<div className="grid gap-4 sm:gap-5">
+			<div className="flex items-center justify-between gap-4 sm:items-end">
+				<div className="min-w-0">
+					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
 						Shared notes
 					</h2>
 				</div>
+				<div className="sm:hidden">{periodControl}</div>
 				<button
 					type="button"
-					className={`${primaryButtonClass} w-full sm:w-auto`}
+					className={`${primaryButtonClass} hidden sm:inline-flex sm:w-auto`}
 					onClick={onNewNote}
 				>
 					<Plus size={17} />
 					New note
 				</button>
 			</div>
-			<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+			<div className="grid grid-cols-1 gap-3 sm:gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 				{notes.length ? (
 					notes.map((note) => (
 						<NoteCard
@@ -55,14 +59,14 @@ export function NotesPanel({
 						/>
 					))
 				) : loading ? (
-					<div className="border border-neutral-200 bg-paper p-6 text-neutral-500 md:col-span-3 xl:col-span-4">
+					<div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:rounded-none sm:shadow-none md:col-span-3 xl:col-span-4">
 						Loading notes...
 						<div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
 							<div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
 						</div>
 					</div>
 				) : (
-					<p className="border border-neutral-200 bg-paper p-6 text-neutral-500 sm:col-span-2 md:col-span-3 lg:col-span-4 rounded-lg">
+					<p className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:col-span-2 sm:rounded-lg sm:shadow-none md:col-span-3 lg:col-span-4">
 						No notes for this {filterRange}.
 					</p>
 				)}

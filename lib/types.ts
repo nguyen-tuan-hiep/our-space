@@ -78,6 +78,27 @@ export interface IndividualExpense {
   owner?: Pick<Profile, "id" | "display_name" | "avatar_url" | "currency">;
 }
 
+export type MoodLevel =
+  | "great"
+  | "excited"
+  | "happy"
+  | "calm"
+  | "okay"
+  | "tired"
+  | "stressed"
+  | "sad";
+
+export interface DailyMood {
+  id: string;
+  owner_id: string;
+  mood_date: string;
+  mood: MoodLevel;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+  owner?: Pick<Profile, "id" | "display_name" | "avatar_url" | "currency">;
+}
+
 export interface LoveQuote {
   text: string;
   author: string | null;

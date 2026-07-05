@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { useEffect, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -8,7 +8,7 @@ function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 export const style =
-	"peer appearance-none w-full px-3 h-10 text-sm text-neutral-900 bg-transparent rounded-lg border border-neutral-300 shadow-none focus:shadow-none outline-none transition-all duration-200 focus:border-mui focus:ring-1 focus:ring-mui";
+	"peer appearance-none w-full px-3 h-12 sm:h-11 text-sm text-neutral-900 bg-transparent rounded-xl sm:rounded-lg border border-neutral-300 shadow-none focus:shadow-none outline-none transition-all duration-200 focus:border-mui focus:ring-1 focus:ring-mui";
 
 
 export function NativeButton({
@@ -23,7 +23,7 @@ export function NativeButton({
 		<button
 			{...props}
 			className={cx(
-				"inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50",
+				"inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-bold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11 sm:rounded-md sm:active:scale-100",
 				variant === "contained" &&
 					"bg-neutral-900 text-white hover:bg-neutral-700",
 				variant === "outlined" &&
@@ -294,7 +294,7 @@ export function NativeTabs<T extends string>({
 						role="tab"
 						aria-selected={selected}
 						className={cx(
-							"min-h-10 px-4 text-sm font-bold transition",
+							"min-h-11 px-4 text-sm font-bold transition",
 							selected
 								? "border-b-2 border-mui text-mui"
 								: "text-neutral-500 hover:text-neutral-900",
@@ -325,6 +325,23 @@ export function NativeDialog({
 	maxWidth?: "xs" | "sm" | "md";
 }) {
 	const canUsePortal = typeof document !== "undefined";
+	const [shouldRender, setShouldRender] = useState(open);
+	const closing = shouldRender && !open;
+
+	useEffect(() => {
+		if (open) {
+			setShouldRender(true);
+			return;
+		}
+
+		if (!shouldRender) return;
+
+		const timeoutId = window.setTimeout(() => {
+			setShouldRender(false);
+		}, 300);
+
+		return () => window.clearTimeout(timeoutId);
+	}, [open, shouldRender]);
 
 	useEffect(() => {
 		if (!open) return;
@@ -337,10 +354,15 @@ export function NativeDialog({
 		return () => document.removeEventListener("keydown", handleKeyDown);
 	}, [onClose, open]);
 
-	if (!open) return null;
+	if (!shouldRender) return null;
 
 	const dialog = (
-		<div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+		<div
+			className={cx(
+				"native-dialog-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-0 backdrop-blur-sm sm:grid sm:place-items-center sm:p-4",
+				closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
+			)}
+		>
 			<button
 				type="button"
 				aria-label="Close dialog"
@@ -351,22 +373,24 @@ export function NativeDialog({
 				role="dialog"
 				aria-modal="true"
 				className={cx(
-					"relative max-h-[calc(100svh-2rem)] w-full overflow-hidden rounded-lg bg-paper shadow-2xl",
+					"mobile-sheet-motion relative max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full origin-bottom overflow-hidden rounded-t-[2.1rem] bg-paper shadow-2xl will-change-transform sm:max-h-[calc(100svh-2rem)] sm:origin-center sm:rounded-lg",
+					closing ? "native-sheet-out" : "native-sheet-in",
 					maxWidth === "xs" && "max-w-md",
 					maxWidth === "sm" && "max-w-xl",
 					maxWidth === "md" && "max-w-3xl",
 				)}
 			>
-				<div className="px-6 pt-6">
-					<div className="font-serif text-3xl leading-tight text-neutral-900">
+				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-neutral-300 sm:hidden" />
+				<div className="px-5 pt-4 sm:px-6 sm:pt-6">
+					<div className="font-serif text-2xl leading-tight text-neutral-900 sm:text-3xl">
 						{title}
 					</div>
 				</div>
-				<div className="max-h-[calc(100svh-12rem)] overflow-y-auto px-6 py-5">
+				<div className="max-h-[calc(100svh-env(safe-area-inset-top)-11rem)] overflow-y-auto px-5 py-5 overscroll-contain sm:max-h-[calc(100svh-12rem)] sm:px-6">
 					{children}
 				</div>
 				{actions ? (
-					<div className="flex justify-end gap-3 px-6 pb-6">{actions}</div>
+					<div className="flex justify-end gap-3 px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:pb-6">{actions}</div>
 				) : null}
 			</div>
 		</div>

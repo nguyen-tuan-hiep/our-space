@@ -25,6 +25,7 @@ export async function GET() {
   return NextResponse.json(
     {
       notes: data.notes,
+      moods: data.moods,
       heroImageUrl: getOptimizedHeroImageUrl(heroImageUrl),
       anniversaryDate:
         data.settings?.anniversary_date ??

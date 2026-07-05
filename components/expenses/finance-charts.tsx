@@ -219,11 +219,11 @@ export function FinanceCharts({
 	}, [chartData.length, isSmallDevice, yAxisWidth]);
 
 	return (
-		<div className="w-full min-w-0 rounded-lg border border-neutral-200 bg-paper p-5">
-			<div className="mb-5 flex min-w-0 flex-wrap items-end justify-between gap-4">
+		<div className="w-full min-w-0 rounded-[1.5rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
+			<div className="mb-5 flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:flex-wrap sm:items-end">
 				<div className="min-w-0">
 					<p className="eyebrow">Finance overview</p>
-					<h2 className="mt-2 font-serif text-4xl">
+					<h2 className="mt-1 font-serif text-2xl leading-tight sm:mt-2 sm:text-4xl">
 						{filterRange === "week" ? "Weekly ledgers" : "Monthly ledgers"}
 					</h2>
 					<p className="mt-2 text-sm text-neutral-500">
@@ -235,7 +235,7 @@ export function FinanceCharts({
 					</p>
 				</div>
 
-				<div className="flex flex-wrap gap-3">
+				<div className="flex flex-wrap gap-3 sm:w-auto">
 					<NativeSelect
 						label="Currency"
 						id="display-currency"
@@ -244,7 +244,7 @@ export function FinanceCharts({
 						onChange={(event) =>
 							setDisplayCurrency(event.target.value as CurrencyCode)
 						}
-						className="min-h-10"
+						className="min-h-11"
 					>
 						{profileCurrencyOptions.map((option) => (
 							<option
@@ -274,13 +274,13 @@ export function FinanceCharts({
 				</div>
 			) : null}
 
-			<div className="grid min-w-0 gap-6">
-				<div className="min-w-0 border border-neutral-400 p-4 rounded-lg border-dashed">
+			<div className="grid min-w-0 gap-4 sm:gap-6">
+				<div className="min-w-0 rounded-[1.25rem] border border-neutral-200 bg-neutral-50/40 p-4 sm:rounded-lg sm:border-neutral-400 sm:border-dashed sm:bg-transparent">
 					<div className="mb-4">
 						<p className="eyebrow">
 							{filterRange === "week" ? "Weekly ledgers" : "Monthly ledgers"}
 						</p>
-						<h3 className="mt-2 font-serif text-3xl">
+						<h3 className="mt-1 font-serif text-2xl leading-tight sm:mt-2 sm:text-3xl">
 							Both ledgers in {displayCurrency}
 						</h3>
 					</div>
@@ -338,11 +338,11 @@ export function FinanceCharts({
 					</div>
 				</div>
 
-				<div className="grid min-w-0 gap-6 md:grid-cols-2">
+				<div className="grid min-w-0 gap-4 sm:gap-6 md:grid-cols-2">
 					{perPerson.map((item) => (
 						<div
 							key={item.profile.id}
-							className="min-w-0 overflow-hidden border border-neutral-400 p-4 rounded-lg border-dashed flex flex-col justify-between"
+							className="flex min-w-0 flex-col justify-between overflow-hidden rounded-[1.25rem] border border-neutral-200 bg-neutral-50/40 p-4 sm:rounded-lg sm:border-neutral-400 sm:border-dashed sm:bg-transparent"
 						>
 							<div className="mb-2 flex items-center justify-between gap-3">
 								<div className="min-w-0">
@@ -364,7 +364,7 @@ export function FinanceCharts({
 
 							{/* 💡 Chia đôi layout: Biểu đồ 1 bên, Legend chi tiết 1 bên */}
 							<div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full min-w-0">
-								<div className="h-48 w-48 shrink-0">
+								<div className="h-44 w-44 shrink-0 sm:h-48 sm:w-48">
 									<ResponsiveContainer
 										width="100%"
 										height="100%"

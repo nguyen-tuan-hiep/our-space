@@ -7,8 +7,8 @@ interface LoveQuotePanelProps {
 
 export function LoveQuotePanel({ quote }: LoveQuotePanelProps) {
 	return (
-		<div className="flex flex-row items-center gap-3 sm:gap-4">
-			<div className="grid size-10 shrink-0 place-items-center rounded-full bg-paper text-neutral-700">
+		<div className="flex flex-row items-center gap-3 rounded-[1.5rem] bg-paper/85 p-4 shadow-sm ring-1 ring-neutral-200/60 sm:gap-4 sm:rounded-none sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0">
+			<div className="grid size-10 shrink-0 place-items-center rounded-full bg-mui/10 text-mui sm:bg-paper sm:text-neutral-700">
 				<Quote
 					size={18}
 					className="block"
@@ -19,16 +19,16 @@ export function LoveQuotePanel({ quote }: LoveQuotePanelProps) {
 					Quote of the day
 				</p>
 				{quote.text ? (
-					<p className="mt-2 font-serif text-xl leading-snug text-neutral-900 sm:text-2xl">
+					<p className="mt-1 font-serif text-lg leading-snug text-neutral-900 sm:mt-2 sm:text-2xl">
 						"{quote.text}"
 					</p>
 				) : (
-					<p className="mt-2 font-serif text-xl leading-snug text-neutral-500 sm:text-2xl">
+					<p className="mt-1 font-serif text-lg leading-snug text-neutral-500 sm:mt-2 sm:text-2xl">
 						Quote is unavailable right now.
 					</p>
 				)}
 				{quote.author ? (
-					<p className="mt-2 text-sm text-neutral-500">{quote.author}</p>
+					<p className="mt-1 text-sm text-neutral-500 sm:mt-2">{quote.author}</p>
 				) : null}
 			</div>
 		</div>

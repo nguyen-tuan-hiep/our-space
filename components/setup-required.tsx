@@ -90,7 +90,7 @@ export function SetupRequired({
 
 					{profile ? (
 						<div className="mt-6 flex justify-center">
-							<SignOutButton className="min-h-10 w-full text-white hover:bg-neutral-700 sm:w-56" />
+							<SignOutButton className="min-h-11 w-full text-white hover:bg-neutral-700 sm:w-56" />
 						</div>
 					) : null}
 				</div>

@@ -70,7 +70,7 @@ export function LoginForm() {
         <NativeButton
           type="submit"
           disabled={pending}
-          className="min-h-11"
+          className="min-h-12"
         >
           {pending
             ? mode === "signin"

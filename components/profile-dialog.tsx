@@ -81,11 +81,11 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 				<NativeTabs
 					value={tab}
 					onChange={setTab}
-					options={[
-						{ value: "profile", label: "Profile" },
-						{ value: "password", label: "Password" },
-					]}
-					className="mb-5 border-b border-neutral-200"
+						options={[
+							{ value: "profile", label: "Profile" },
+							{ value: "password", label: "Password" },
+						]}
+							className="mb-5 rounded-full border-0 bg-mui/10 p-1 sm:rounded-none sm:border-b sm:border-neutral-200 sm:bg-transparent sm:p-0 [&>button]:relative [&>button]:flex-1 [&>button]:rounded-full [&>button]:border-b-0 [&>button]:px-4 [&>button]:text-center [&>button]:text-neutral-900 [&>button]:hover:text-mui [&>button]:sm:rounded-none [&>button[aria-selected='true']]:bg-paper [&>button[aria-selected='true']]:text-mui [&>button[aria-selected='true']]:shadow-sm [&>button[aria-selected='true']]:sm:bg-transparent [&>button[aria-selected='true']]:sm:shadow-none"
 				/>
 
 				{tab === "profile" ? (
@@ -181,13 +181,13 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 											type="button"
 											aria-label={`Choose ${option} avatar`}
 											onClick={() => setAvatar(option)}
-											className={`grid aspect-square place-items-center border transition ${
+											className={`grid aspect-square place-items-center rounded-[1.1rem] border transition sm:rounded-lg ${
 												selected
 													? "border-[color-mix(in_srgb,#000000_48%,transparent)] bg-[color-mix(in_srgb,#000000_12%,transparent)] text-white"
 													: "border-bg-[color-mix(in_srgb,#000000_12%,transparent)] bg-paper hover:border-[color-mix(in_srgb,#000000_48%,transparent)]"
 											}`}
 										>
-											<span className="grid size-10 place-items-center rounded-full text-2xl">
+											<span className="grid size-10 place-items-center text-2xl">
 												{option}
 											</span>
 										</button>

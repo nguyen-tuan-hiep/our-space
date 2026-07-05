@@ -1,5 +1,6 @@
 import type {
   AppSettings,
+  DailyMood,
   IndividualExpense,
   Profile,
   SharedNote,
@@ -24,7 +25,9 @@ export async function getDashboardData(
   const supabase = await createClient();
   const settingsId = partner ? getCoupleSettingsId(profile, partner) : null;
 
-  const [{ data: notes }, { data: settings }] = await Promise.all([
+  const participantIds = partner ? [profile.id, partner.id] : [profile.id];
+
+  const [{ data: notes }, { data: moods }, { data: settings }] = await Promise.all([
     supabase
       .from("notes")
       .select(
@@ -34,6 +37,14 @@ export async function getDashboardData(
       .order("created_at", { ascending: false })
       .returns<SharedNote[]>(),
     supabase
+      .from("daily_moods")
+      .select(
+        "*, owner:profiles!daily_moods_owner_id_fkey(id, display_name, avatar_url, currency)",
+      )
+      .in("owner_id", participantIds)
+      .order("mood_date", { ascending: false })
+      .returns<DailyMood[]>(),
+    supabase
       .from("app_settings")
       .select("hero_image_url, anniversary_date")
       .eq("id", settingsId ?? "main")
@@ -42,6 +53,7 @@ export async function getDashboardData(
 
   return {
     notes: notes ?? [],
+    moods: moods ?? [],
     settings: settings ?? null,
   };
 }

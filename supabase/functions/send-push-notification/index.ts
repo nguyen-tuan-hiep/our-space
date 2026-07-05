@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.48.1";
 
 type WebhookPayload = {
   type: "INSERT" | "UPDATE" | "DELETE";
-  table: "notes" | "individual_expenses" | string;
+  table: "notes" | "individual_expenses" | "daily_moods" | string;
   schema: string;
   record?: Record<string, unknown>;
   old_record?: Record<string, unknown>;
@@ -39,6 +39,17 @@ const supabase =
         auth: { persistSession: false, autoRefreshToken: false },
       })
     : null;
+
+const moodLabels: Record<string, { label: string; emoji: string }> = {
+  great: { label: "Great", emoji: "🤩" },
+  excited: { label: "Excited", emoji: "😍" },
+  happy: { label: "Happy", emoji: "😊" },
+  calm: { label: "Calm", emoji: "😌" },
+  okay: { label: "Okay", emoji: "🙂" },
+  tired: { label: "Tired", emoji: "🥱" },
+  stressed: { label: "Stressed", emoji: "😵‍💫" },
+  sad: { label: "Sad", emoji: "😔" },
+};
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -82,9 +93,9 @@ function getProfileLabel(profile: Profile) {
 
 async function buildNotification(payload: WebhookPayload) {
   const record = payload.record;
-  if (!record || payload.type !== "INSERT") return null;
+  if (!record) return null;
 
-  if (payload.table === "notes") {
+  if (payload.table === "notes" && payload.type === "INSERT") {
     const authorId = getString(record, "author_id");
     const recipientId = getString(record, "recipient_id");
     const noteId = getString(record, "id");
@@ -107,7 +118,7 @@ async function buildNotification(payload: WebhookPayload) {
     };
   }
 
-  if (payload.table === "individual_expenses") {
+  if (payload.table === "individual_expenses" && payload.type === "INSERT") {
     const ownerId = getString(record, "owner_id");
     const expenseId = getString(record, "id");
     const expenseTitle = getString(record, "title") ?? "a new transaction";
@@ -124,6 +135,47 @@ async function buildNotification(payload: WebhookPayload) {
       data: {
         type: "expense",
         expense_id: expenseId,
+        owner_id: ownerId,
+        recipient_id: owner.partner_id,
+      },
+    };
+  }
+
+  if (
+    payload.table === "daily_moods" &&
+    (payload.type === "INSERT" || payload.type === "UPDATE")
+  ) {
+    const ownerId = getString(record, "owner_id");
+    const moodId = getString(record, "id");
+    const moodDate = getString(record, "mood_date");
+    const moodValue = getString(record, "mood");
+    if (!ownerId || !moodValue) return null;
+
+    if (
+      payload.type === "UPDATE" &&
+      payload.old_record &&
+      getString(payload.old_record, "mood") === moodValue &&
+      getString(payload.old_record, "note") === getString(record, "note")
+    ) {
+      return null;
+    }
+
+    const owner = await getProfile(ownerId);
+    if (!owner?.partner_id) return null;
+
+    const mood = moodLabels[moodValue] ?? { label: "their mood", emoji: "" };
+    const action = payload.type === "UPDATE" ? "updated" : "set";
+
+    return {
+      recipientExternalId: owner.partner_id,
+      title: "Mood update",
+      body: `${getProfileLabel(owner)} ${action} their mood to ${mood.label} ${mood.emoji}`.trim(),
+      url: `${appUrl}/?mood=${moodDate ?? moodId ?? ""}`,
+      data: {
+        type: "mood",
+        mood_id: moodId,
+        mood_date: moodDate,
+        mood: moodValue,
         owner_id: ownerId,
         recipient_id: owner.partner_id,
       },

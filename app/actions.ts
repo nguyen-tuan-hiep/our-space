@@ -21,8 +21,10 @@ import {
 } from "@/lib/constants";
 import type {
   CurrencyCode,
+  DailyMood,
   ExpenseCategory,
   IndividualExpense,
+  MoodLevel,
   SharedNote,
 } from "@/lib/types";
 
@@ -34,6 +36,17 @@ type ExpensePayload = {
   category: ExpenseCategory;
   notes: string | null;
 };
+
+const moodLevels: MoodLevel[] = [
+  "great",
+  "excited",
+  "happy",
+  "calm",
+  "okay",
+  "tired",
+  "stressed",
+  "sad",
+];
 
 function ok(message: string): { ok: true; message: string } {
   return { ok: true, message };
@@ -478,6 +491,55 @@ export async function deleteExpense(expenseId: string) {
   if (error) return fail(error.message);
   revalidatePath("/");
   return ok("Transaction removed!");
+}
+
+
+export async function upsertMood(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const moodDate = stringValue(formData, "mood_date");
+  const mood = stringValue(formData, "mood") as MoodLevel;
+  const note = nullableStringValue(formData, "note");
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(moodDate)) {
+    return fail("Please choose a valid date.");
+  }
+
+  if (!moodLevels.includes(mood)) {
+    return fail("Please choose a valid mood.");
+  }
+
+  if (note && note.length > 500) {
+    return fail("Mood note must be 500 characters or fewer.");
+  }
+
+  const { data, error } = await supabase
+    .from("daily_moods")
+    .upsert(
+      {
+        owner_id: user.id,
+        mood_date: moodDate,
+        mood,
+        note,
+      },
+      { onConflict: "owner_id,mood_date" },
+    )
+    .select(
+      "*, owner:profiles!daily_moods_owner_id_fkey(id, display_name, avatar_url, currency)",
+    )
+    .single<DailyMood>();
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return { ...ok("Mood saved."), mood: data };
+}
+
+export async function deleteMood(moodId: string) {
+  const { supabase } = await requireUser();
+  const { error } = await supabase.from("daily_moods").delete().eq("id", moodId);
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return ok("Mood removed.");
 }
 
 export async function loadFinanceDashboardData() {

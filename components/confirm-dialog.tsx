@@ -32,7 +32,7 @@ export function ConfirmDialog({
 		<NativeDialog
 			open={open}
 			onClose={pending ? () => undefined : handleClose}
-			maxWidth="xs"
+			maxWidth="sm"
 			title={title}
 			actions={
 				<>

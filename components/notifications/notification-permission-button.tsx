@@ -8,7 +8,7 @@ import { getOneSignal, isOneSignalConfigured } from "@/lib/onesignal-web";
 const menuItemClass =
   "flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-neutral-700 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50";
 const outlineButtonClass =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-mui bg-paper px-4 text-sm font-bold text-mui transition hover:bg-mui/10 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-mui bg-paper px-4 text-sm font-bold text-mui transition hover:bg-mui/10 disabled:cursor-not-allowed disabled:opacity-50";
 
 interface NotificationPermissionButtonProps {
   userId: string;

@@ -111,7 +111,12 @@ export function NoteCard({
   };
 
   return (
-    <article className="relative z-0 flex h-[20rem] flex-col overflow-visible rounded-lg border border-neutral-200 bg-paper p-5">
+    <article
+      className={[
+        "relative flex h-[20rem] flex-col overflow-visible rounded-[1.5rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none",
+        menuOpen ? "z-30" : "z-0",
+      ].join(" ")}
+    >
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] uppercase tracking-[0.1em] text-neutral-600">
@@ -124,7 +129,7 @@ export function NoteCard({
           <div className="text-[12px] text-neutral-400">
             {formatAppDateTime(note.created_at, timeZone)}
           </div>
-          <h3 className="my-4 mt-3 font-serif text-2xl leading-none">
+          <h3 className="my-3 font-serif text-2xl leading-none sm:my-4 sm:mt-3">
             {note.title}
           </h3>
         </div>
@@ -138,40 +143,54 @@ export function NoteCard({
               type="button"
               aria-label="more"
               id={`note-menu-button-${note.id}`}
-              aria-controls={activeNote?.id === note.id ? "note-menu" : undefined}
+              aria-controls={
+                activeNote?.id === note.id ? "note-menu" : undefined
+              }
               aria-expanded={activeNote?.id === note.id ? "true" : undefined}
               aria-haspopup="menu"
               onClick={() => handleMenuOpen(note)}
-              className="grid size-8 place-items-center rounded-full text-neutral-500 transition hover:bg-mui/10"
+              className="grid size-9 place-items-center rounded-full text-neutral-500 transition active:scale-95 hover:bg-mui/10 sm:size-8"
             >
               <EllipsisVertical size={18} className="text-neutral-500" />
             </button>
             {activeNote?.id === note.id ? (
+              <>
+                <button
+                  type="button"
+                  aria-label="Close note actions"
+                  className="fixed inset-0 z-[60] bg-black/5 backdrop-blur-[1px] sm:hidden"
+                  onClick={handleMenuClose}
+                />
               <div
                 id="note-menu"
                 role="menu"
                 aria-labelledby={`note-menu-button-${note.id}`}
-                className="absolute right-0 top-9 z-20 w-36 overflow-hidden rounded-lg border border-neutral-300 bg-paper shadow-lg"
+                className="native-action-sheet-in fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+7.6rem)] z-[70] overflow-hidden rounded-[1.6rem] border border-white/80 bg-paper/95 p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-40 sm:rounded-lg sm:border-neutral-200 sm:bg-paper sm:p-1 sm:shadow-lg sm:backdrop-blur-none"
               >
                 <button
                   type="button"
                   role="menuitem"
                   onClick={handleEditClick}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-neutral-700 transition hover:bg-mui/10"
+                  className="flex w-full items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left text-base font-bold text-neutral-800 transition active:scale-[0.99] hover:bg-mui/10 sm:rounded-md sm:px-3 sm:py-2 sm:text-sm sm:font-medium"
                 >
-                  <Edit2 size={15} />
+                  <span className="grid size-9 place-items-center rounded-full bg-mui/10 text-mui sm:size-auto sm:bg-transparent sm:text-inherit">
+                    <Edit2 size={16} />
+                  </span>
                   Edit
                 </button>
                 <button
                   type="button"
                   role="menuitem"
                   onClick={handleDeleteClick}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-danger transition hover:bg-danger-bg"
+                  className="mt-1 flex w-full items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left text-base font-bold text-danger transition active:scale-[0.99] hover:bg-danger-bg sm:mt-0 sm:rounded-md sm:px-3 sm:py-2 sm:text-sm sm:font-medium"
                 >
-                  <Trash2 size={15} className="text-danger" />
+                  <span className="grid size-9 place-items-center rounded-full bg-danger-bg text-danger sm:size-auto sm:bg-transparent">
+                    <Trash2 size={16} className="text-danger" />
+                  </span>
                   Delete
                 </button>
               </div>
+              </>
             ) : null}
           </div>
         )}
@@ -198,12 +217,12 @@ export function NoteCard({
       ) : null}
 
       {locked ? (
-        <div className="flex min-h-0 flex-1 flex-col border border-dashed border-neutral-400 bg-paper p-5">
+        <div className="flex min-h-0 flex-1 flex-col rounded-[1.25rem] border border-dashed border-neutral-300 bg-neutral-50/50 p-4 sm:rounded-none sm:border-neutral-400 sm:bg-paper sm:p-5">
           <p className="eyebrow">Unlocks in</p>
           <p className="mt-2 font-serif text-3xl">{countdown}</p>
           <div className="relative mt-4 min-h-0 flex-1 overflow-hidden select-none blur-md">
             <div className="h-full overflow-y-auto">
-              <p className="whitespace-pre-line text-sm leading-7">
+              <p className="whitespace-pre-line text-md leading-7">
                 {note.content}
               </p>
             </div>
@@ -211,9 +230,9 @@ export function NoteCard({
           </div>
         </div>
       ) : (
-        <div className="relative min-h-0 flex-1 border border-dashed border-neutral-400 overflow-hidden rounded-lg">
+        <div className="relative min-h-0 flex-1 overflow-hidden rounded-[1.25rem] border border-dashed border-neutral-300 bg-neutral-50/40 sm:rounded-lg sm:border-neutral-400 sm:bg-transparent">
           <div className="h-full overflow-y-auto">
-            <p className="whitespace-pre-line text-md leading-6 text-neutral-700 m-4 mb-6">
+            <p className="m-4 mb-6 whitespace-pre-line text-md leading-6 text-neutral-700">
               {note.content}
             </p>
           </div>

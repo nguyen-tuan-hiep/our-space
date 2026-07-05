@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
 import type { FilterRange } from "@/lib/dashboard-utils";
@@ -41,6 +42,7 @@ interface FinancesPanelProps {
 	onEditExpense: (expense: IndividualExpense) => void;
 	onLoadFinanceData: () => void;
 	onLogExpense: () => void;
+	periodControl?: ReactNode;
 }
 
 export function FinancesPanel({
@@ -66,18 +68,20 @@ export function FinancesPanel({
 	onEditExpense,
 	onLoadFinanceData,
 	onLogExpense,
+	periodControl,
 }: FinancesPanelProps) {
 	return (
-		<div className="grid gap-5">
-			<div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-				<div>
-					<h2 className="mt-2 font-serif text-4xl sm:text-5xl">
+		<div className="grid gap-4 sm:gap-5">
+			<div className="flex items-center justify-between gap-4 sm:items-end">
+				<div className="min-w-0">
+					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
 						Finance overview
 					</h2>
 				</div>
+				<div className="sm:hidden">{periodControl}</div>
 				<button
 					type="button"
-					className={`${primaryButtonClass} w-full sm:w-auto`}
+					className={`${primaryButtonClass} hidden sm:inline-flex sm:w-auto`}
 					disabled={financeLoading && !financeLoaded}
 					onClick={onLogExpense}
 				>
@@ -86,14 +90,14 @@ export function FinancesPanel({
 				</button>
 			</div>
 			{financeLoading && !financeLoaded ? (
-				<div className="rounded-lg border border-neutral-200 bg-paper p-6 text-neutral-500">
+				<div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:rounded-lg sm:shadow-none">
 					Loading finance data...
 					<div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
 						<div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
 					</div>
 				</div>
 			) : financeError ? (
-				<div className="grid gap-4 border border-neutral-200 bg-paper p-6 text-neutral-600">
+				<div className="grid gap-4 rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-600 shadow-sm sm:rounded-none sm:shadow-none">
 					<p>{financeError}</p>
 					<button
 						type="button"
@@ -117,7 +121,7 @@ export function FinancesPanel({
 						filterRange={filterRange}
 						selectedPeriod={activePeriod}
 					/>
-					<div className="grid gap-6 md:grid-cols-2">
+					<div className="grid gap-4 sm:gap-6 md:grid-cols-2">
 						<ExpenseFeed
 							title={`My ledger ${profileAvatar}`}
 							expenses={myExpenses}
