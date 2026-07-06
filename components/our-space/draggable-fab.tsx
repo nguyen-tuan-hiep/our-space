@@ -189,7 +189,7 @@ export function DraggableFab({ ariaLabel, children, onClick }: DraggableFabProps
           ? { left: position.x, top: position.y }
           : {
               right: "1.25rem",
-              bottom: "calc(env(safe-area-inset-bottom) + 7rem)",
+              bottom: "calc(env(safe-area-inset-bottom) + 4.5rem)",
             }
       }
     >

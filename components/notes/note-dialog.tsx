@@ -116,7 +116,7 @@ export function NoteDialog({
 					/>
 					<NativeTextarea
 						required
-						rows={8}
+						rows={10}
 						name="content"
 						label="Content"
 						defaultValue={note?.content ?? ""}

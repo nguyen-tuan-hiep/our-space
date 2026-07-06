@@ -390,7 +390,7 @@ export function NativeDialog({
 					{children}
 				</div>
 				{actions ? (
-					<div className="flex justify-end gap-3 px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:pb-6">{actions}</div>
+					<div className="flex justify-end gap-3 px-6 pb-6">{actions}</div>
 				) : null}
 			</div>
 		</div>

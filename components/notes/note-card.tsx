@@ -165,7 +165,7 @@ export function NoteCard({
                 id="note-menu"
                 role="menu"
                 aria-labelledby={`note-menu-button-${note.id}`}
-                className="native-action-sheet-in fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+7.6rem)] z-[70] overflow-hidden rounded-[1.6rem] border border-white/80 bg-paper/95 p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-40 sm:rounded-lg sm:border-neutral-200 sm:bg-paper sm:p-1 sm:shadow-lg sm:backdrop-blur-none"
+                className="native-action-sheet-in fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] z-[70] overflow-hidden rounded-[1.6rem] border border-white/80 bg-paper p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-40 sm:rounded-lg sm:border-neutral-200 sm:bg-paper sm:p-1 sm:shadow-lg sm:backdrop-blur-none"
               >
                 <button
                   type="button"

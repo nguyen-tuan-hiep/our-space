@@ -91,12 +91,12 @@ function MoodPanelLoading() {
         </div>
         <div className="grid size-11 shrink-0 place-items-center rounded-full bg-paper shadow-sm ring-1 ring-neutral-200/70 sm:hidden" />
       </div>
-      <div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:rounded-lg sm:shadow-none">
+      {/* <div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:rounded-lg sm:shadow-none">
         Loading mood data...
         <div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
           <div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

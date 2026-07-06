@@ -73,7 +73,7 @@ export function AnniversaryDialog({
               Cancel
             </NativeButton>
             <NativeButton type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Save"}
+              {pending ? "Saving..." : "Save anniversary"}
             </NativeButton>
           </div>
         </form>

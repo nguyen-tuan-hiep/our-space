@@ -80,16 +80,17 @@ export function PersonalPanel({
 								{profile.display_name}
 							</p>
 							<p className="truncate text-xs text-neutral-500">
-								{profile.country_code} · {profile.currency} · {profile.time_zone}
+								{profile.country_code} · {profile.currency} ·{" "}
+								{profile.time_zone}
 							</p>
 						</div>
 					</div>
 					<button
 						type="button"
-						className={`${outlineButtonClass} mt-4 w-full rounded-2xl sm:w-fit sm:rounded-md`}
+						className={`${outlineButtonClass} mt-4 w-full flex items-center justify-center gap-2 rounded-2xl sm:w-fit sm:rounded-md`}
 						onClick={onOpenProfile}
 					>
-						<Settings size={16} />
+						<Settings size={17} />
 						Edit profile
 					</button>
 				</div>
@@ -107,12 +108,16 @@ export function PersonalPanel({
 								{partner.display_name}
 							</p>
 							<p className="truncate text-xs text-neutral-500">
-								{partner.country_code} · {partner.currency} · {partner.time_zone}
+								{partner.country_code} · {partner.currency} ·{" "}
+								{partner.time_zone}
 							</p>
 						</div>
 					</div>
 					<div className="mt-4 rounded-2xl bg-mui/10 px-4 py-3 text-sm font-semibold text-neutral-600">
-						<Heart size={16} className="mr-2 inline text-mui" />
+						<Heart
+							size={16}
+							className="mr-2 inline text-mui"
+						/>
 						Connected in Our Space
 					</div>
 				</div>
@@ -138,18 +143,18 @@ export function PersonalPanel({
 				<div className="mt-4 grid grid-cols-2 gap-3">
 					<button
 						type="button"
-						className={`${outlineButtonClass} rounded-2xl sm:rounded-md`}
+						className={`${outlineButtonClass} w-full flex items-center justify-center gap-2 rounded-2xl sm:w-fit sm:rounded-md`}
 						onClick={onEditAnniversary}
 					>
-						<CalendarHeart size={16} />
+						<CalendarHeart size={17} />
 						Anniversary
 					</button>
 					<button
 						type="button"
-						className={`${outlineButtonClass} rounded-2xl sm:rounded-md`}
+						className={`${outlineButtonClass} w-full flex items-center justify-center gap-2 rounded-2xl sm:w-fit sm:rounded-md`}
 						onClick={onEditHeroImage}
 					>
-						<ImageUp size={16} />
+						<ImageUp size={17} />
 						Cover photo
 					</button>
 				</div>
