@@ -224,7 +224,7 @@ export function MobileSpaceTabs({
   return (
     <nav
       aria-label="Space sections"
-      className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-2 sm:hidden"
+      className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-40 p-3 sm:hidden"
     >
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-bg via-bg/90 to-transparent" />
       <div className="relative mx-auto max-w-md rounded-[2rem] border border-white/70 bg-paper/88 p-1.5 shadow-[0_-10px_30px_rgba(30,25,20,0.10),0_16px_50px_rgba(30,25,20,0.18)] backdrop-blur-2xl">
