@@ -41,6 +41,7 @@ import {
   getUtcDateKey,
   getUtcMonthStart,
 } from "@/components/our-space/period-utils";
+import { DraggableFab } from "@/components/our-space/draggable-fab";
 import { SpaceHero } from "@/components/our-space/space-hero";
 
 const FinancesPanel = dynamic(
@@ -936,9 +937,8 @@ export function OurSpaceClient({
 
       {!hasOpenDialog &&
       (activeSection === "notes" || activeSection === "finances") ? (
-        <button
-          type="button"
-          aria-label={
+        <DraggableFab
+          ariaLabel={
             activeSection === "notes" ? "Create new note" : "Log new expense"
           }
           onClick={
@@ -946,10 +946,9 @@ export function OurSpaceClient({
               ? () => setNoteOpen(true)
               : () => setExpenseOpen(true)
           }
-          className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] right-5 z-50 grid size-14 place-items-center rounded-full bg-neutral-950 text-white shadow-[0_18px_40px_rgba(30,25,20,0.35)] transition active:scale-95 sm:hidden"
         >
           <Plus size={24} />
-        </button>
+        </DraggableFab>
       ) : null}
 
       <SpaceDialogs
