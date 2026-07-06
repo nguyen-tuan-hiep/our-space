@@ -113,7 +113,7 @@ export function NoteCard({
   return (
     <article
       className={[
-        "relative flex h-[20rem] flex-col overflow-visible rounded-[1.5rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none",
+        "relative flex h-[20rem] flex-col overflow-visible rounded-[1.5rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5",
         menuOpen ? "z-30" : "z-0",
       ].join(" ")}
     >
@@ -217,10 +217,10 @@ export function NoteCard({
       ) : null}
 
       {locked ? (
-        <div className="flex min-h-0 flex-1 flex-col rounded-[1.25rem] border border-dashed border-neutral-300 bg-neutral-50/50 p-4 sm:rounded-none sm:border-neutral-400 sm:bg-paper sm:p-5">
+        <div className="flex min-h-0 flex-1 flex-col rounded-[1.25rem] border border-dashed border-neutral-300 p-4 sm:rounded-none sm:border-neutral-400 sm:bg-paper sm:p-5">
           <p className="eyebrow">Unlocks in</p>
           <p className="mt-2 font-serif text-3xl">{countdown}</p>
-          <div className="relative mt-4 min-h-0 flex-1 overflow-hidden select-none blur-md">
+          <div className="relative mt-4 min-h-0 flex-1 border border-dashed border-neutral-400 rounded-2xl overflow-hidden select-none blur-md">
             <div className="h-full overflow-y-auto">
               <p className="whitespace-pre-line text-md leading-7">
                 {note.content}
@@ -230,7 +230,7 @@ export function NoteCard({
           </div>
         </div>
       ) : (
-        <div className="relative min-h-0 flex-1 overflow-hidden rounded-[1.25rem] border border-dashed border-neutral-300 bg-neutral-50/40 sm:rounded-lg sm:border-neutral-400 sm:bg-transparent">
+        <div className="relative min-h-0 flex-1 overflow-hidden rounded-[1.25rem] border border-dashed border-neutral-400 rounded-2xl">
           <div className="h-full overflow-y-auto">
             <p className="m-4 mb-6 whitespace-pre-line text-md leading-6 text-neutral-700">
               {note.content}

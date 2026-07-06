@@ -6,8 +6,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const FAB_SIZE = 56;
 const EDGE_MARGIN = 16;
 const TOP_MARGIN = 16;
-const BOTTOM_NAV_CLEARANCE = 112;
+const BOTTOM_NAV_HEIGHT = 64;
+const BOTTOM_NAV_GAP = 16;
 const DRAG_THRESHOLD = 6;
+const CLICK_SUPPRESS_MS = 250;
 
 interface DraggableFabProps {
   ariaLabel: string;
@@ -20,20 +22,84 @@ type FabPosition = {
   y: number;
 };
 
+function getViewportSize() {
+  if (typeof window === "undefined") {
+    return {
+      width: 0,
+      height: 0,
+      offsetTop: 0,
+      offsetLeft: 0,
+    };
+  }
+
+  const visualViewport = window.visualViewport;
+
+  // Đảm bảo offsetTop không bị âm khi overscroll/pull-to-refresh
+  const offsetTop = Math.max(0, visualViewport?.offsetTop ?? 0);
+
+  return {
+    width: visualViewport?.width ?? window.innerWidth,
+    height: visualViewport?.height ?? window.innerHeight,
+    offsetTop,
+    offsetLeft: visualViewport?.offsetLeft ?? 0,
+  };
+}
+
+function readSafeAreaBottom() {
+  if (typeof window === "undefined") return 0;
+
+  const probe = document.createElement("div");
+  probe.style.position = "fixed";
+  probe.style.left = "0";
+  probe.style.bottom = "0";
+  probe.style.visibility = "hidden";
+  probe.style.pointerEvents = "none";
+  probe.style.paddingBottom = "env(safe-area-inset-bottom)";
+
+  document.body.appendChild(probe);
+
+  const value = Number.parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+
+  probe.remove();
+
+  return value;
+}
+
+function getNormalizedSafeBottom() {
+  const rawSafeBottom = readSafeAreaBottom();
+
+  return Math.min(Math.max(rawSafeBottom, 8), 16);
+}
+
+function getBottomClearance() {
+  return BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP + getNormalizedSafeBottom();
+}
+
+function getInitialPosition() {
+  const viewport = getViewportSize();
+
+  return clampPosition({
+    x: viewport.offsetLeft + viewport.width - FAB_SIZE - EDGE_MARGIN,
+    y: viewport.offsetTop + viewport.height - FAB_SIZE - getBottomClearance(),
+  });
+}
+
 function clampPosition(position: FabPosition) {
   if (typeof window === "undefined") return position;
 
+  const viewport = getViewportSize();
+
+  const minX = viewport.offsetLeft + EDGE_MARGIN;
+  const maxX = viewport.offsetLeft + viewport.width - FAB_SIZE - EDGE_MARGIN;
+  const minY = viewport.offsetTop + TOP_MARGIN;
   const maxY = Math.max(
-    TOP_MARGIN,
-    window.innerHeight - FAB_SIZE - BOTTOM_NAV_CLEARANCE,
+    minY,
+    viewport.offsetTop + viewport.height - FAB_SIZE - getBottomClearance(),
   );
 
   return {
-    x: Math.min(
-      Math.max(EDGE_MARGIN, position.x),
-      window.innerWidth - FAB_SIZE - EDGE_MARGIN,
-    ),
-    y: Math.min(Math.max(TOP_MARGIN, position.y), maxY),
+    x: Math.min(Math.max(minX, position.x), maxX),
+    y: Math.min(Math.max(minY, position.y), maxY),
   };
 }
 
@@ -41,22 +107,25 @@ function snapToHorizontalEdge(position: FabPosition) {
   if (typeof window === "undefined") return position;
 
   const clamped = clampPosition(position);
-  const viewportCenter = window.innerWidth / 2;
+  const viewport = getViewportSize();
+  const viewportCenter = viewport.offsetLeft + viewport.width / 2;
   const fabCenter = clamped.x + FAB_SIZE / 2;
 
   return {
     x:
       fabCenter < viewportCenter
-        ? EDGE_MARGIN
-        : window.innerWidth - FAB_SIZE - EDGE_MARGIN,
+        ? viewport.offsetLeft + EDGE_MARGIN
+        : viewport.offsetLeft + viewport.width - FAB_SIZE - EDGE_MARGIN,
     y: clamped.y,
   };
 }
 
-export function DraggableFab({ ariaLabel, children, onClick }: DraggableFabProps) {
+export function DraggableFab({
+  ariaLabel,
+  children,
+  onClick,
+}: DraggableFabProps) {
   const [position, setPosition] = useState<FabPosition | null>(null);
-
-  // 1. Thêm state để nhận biết đang kéo hay đã thả
   const [isDragging, setIsDragging] = useState(false);
 
   const dragState = useRef<{
@@ -67,34 +136,63 @@ export function DraggableFab({ ariaLabel, children, onClick }: DraggableFabProps
     offsetY: number;
     dragged: boolean;
   } | null>(null);
+
   const latestPosition = useRef<FabPosition | null>(null);
-  const suppressClick = useRef(false);
+  const suppressClickUntil = useRef(0);
 
   useEffect(() => {
-    if (!position) return;
+    const initialPosition = getInitialPosition();
 
-    const handleResize = () => {
+    latestPosition.current = initialPosition;
+    setPosition(initialPosition);
+  }, []);
+
+  useEffect(() => {
+    const handleViewportChange = () => {
+      // Bỏ qua nếu người dùng đang kéo quá đà (overscroll)
+      const isOverscrollingTop = window.scrollY < 0;
+      const isOverscrollingBottom =
+        window.scrollY >
+        document.documentElement.scrollHeight - window.innerHeight;
+
+      if (isOverscrollingTop || isOverscrollingBottom) {
+        return;
+      }
+
       setPosition((current) => {
-        if (!current) return current;
-        const next = snapToHorizontalEdge(current);
+        const next = snapToHorizontalEdge(current ?? getInitialPosition());
+
         latestPosition.current = next;
+
         return next;
       });
     };
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("orientationchange", handleResize);
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("orientationchange", handleViewportChange);
+    window.visualViewport?.addEventListener("resize", handleViewportChange);
+    window.visualViewport?.addEventListener("scroll", handleViewportChange);
+
     return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("orientationchange", handleResize);
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("orientationchange", handleViewportChange);
+      window.visualViewport?.removeEventListener(
+        "resize",
+        handleViewportChange,
+      );
+      window.visualViewport?.removeEventListener(
+        "scroll",
+        handleViewportChange,
+      );
     };
-  }, [position]);
+  }, []);
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
 
       const rect = event.currentTarget.getBoundingClientRect();
+
       dragState.current = {
         pointerId: event.pointerId,
         startX: event.clientX,
@@ -103,6 +201,8 @@ export function DraggableFab({ ariaLabel, children, onClick }: DraggableFabProps
         offsetY: event.clientY - rect.top,
         dragged: false,
       };
+
+      setIsDragging(false);
       event.currentTarget.setPointerCapture(event.pointerId);
     },
     [],
@@ -111,6 +211,7 @@ export function DraggableFab({ ariaLabel, children, onClick }: DraggableFabProps
   const handlePointerMove = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>) => {
       const currentDrag = dragState.current;
+
       if (!currentDrag || currentDrag.pointerId !== event.pointerId) return;
 
       const movedDistance = Math.hypot(
@@ -120,17 +221,16 @@ export function DraggableFab({ ariaLabel, children, onClick }: DraggableFabProps
 
       if (!currentDrag.dragged && movedDistance < DRAG_THRESHOLD) return;
 
-      // 2. Kích hoạt trạng thái dragging khi vượt qua DRAG_THRESHOLD
       if (!currentDrag.dragged) {
         currentDrag.dragged = true;
         setIsDragging(true);
       }
 
-      suppressClick.current = true;
       const nextPosition = clampPosition({
         x: event.clientX - currentDrag.offsetX,
         y: event.clientY - currentDrag.offsetY,
       });
+
       latestPosition.current = nextPosition;
       setPosition(nextPosition);
     },
@@ -142,14 +242,20 @@ export function DraggableFab({ ariaLabel, children, onClick }: DraggableFabProps
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
         event.currentTarget.releasePointerCapture(event.pointerId);
       }
-      if (dragState.current?.dragged && latestPosition.current) {
+
+      const wasDragged = dragState.current?.dragged;
+
+      if (wasDragged && latestPosition.current) {
         const snappedPosition = snapToHorizontalEdge(latestPosition.current);
+
         latestPosition.current = snappedPosition;
         setPosition(snappedPosition);
+
+        suppressClickUntil.current =
+          window.performance.now() + CLICK_SUPPRESS_MS;
       }
 
       dragState.current = null;
-      // 3. Tắt trạng thái dragging ngay khi thả tay ra để bắt đầu hiệu ứng snap
       setIsDragging(false);
     },
     [],
@@ -157,10 +263,9 @@ export function DraggableFab({ ariaLabel, children, onClick }: DraggableFabProps
 
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      if (suppressClick.current) {
+      if (window.performance.now() < suppressClickUntil.current) {
         event.preventDefault();
         event.stopPropagation();
-        suppressClick.current = false;
         return;
       }
 
@@ -178,18 +283,21 @@ export function DraggableFab({ ariaLabel, children, onClick }: DraggableFabProps
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
-      // 4. Bỏ class `transition` cũ đi và thay bằng logic toggle class ở cuối
-      className={`fixed z-50 grid size-14 touch-none select-none place-items-center rounded-full bg-neutral-950 text-white shadow-[0_18px_40px_rgba(30,25,20,0.35)] active:scale-95 sm:hidden ${
+      className={[
+        "fixed z-50 grid size-14 touch-none select-none place-items-center rounded-full bg-neutral-950 text-white shadow-[0_18px_40px_rgba(30,25,20,0.35)] active:scale-95 sm:hidden",
         isDragging
           ? "transition-none"
-          : "transition-all duration-300 ease-out"
-      }`}
+          : "transition-[left,top,transform,box-shadow] duration-300 ease-out",
+      ].join(" ")}
       style={
         position
-          ? { left: position.x, top: position.y }
+          ? {
+              left: position.x,
+              top: position.y,
+            }
           : {
-              right: "1.25rem",
-              bottom: "calc(env(safe-area-inset-bottom) + 4.5rem)",
+              right: EDGE_MARGIN,
+              bottom: BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP + 8,
             }
       }
     >

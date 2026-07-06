@@ -7,7 +7,7 @@ interface LoveQuotePanelProps {
 
 export function LoveQuotePanel({ quote }: LoveQuotePanelProps) {
 	return (
-		<div className="flex flex-row items-center gap-3 rounded-[1.5rem] bg-paper/85 p-4 shadow-sm ring-1 ring-neutral-200/60 sm:gap-4 sm:rounded-none sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0">
+		<div className="flex flex-row items-center gap-3 rounded-[1.5rem] bg-paper/85 p-4 shadow-md ring-1 ring-neutral-200/60 sm:gap-4 sm:rounded-none sm:bg-transparent sm:p-0 sm:ring-0">
 			<div className="grid size-10 shrink-0 place-items-center rounded-full bg-mui/10 text-mui sm:bg-paper sm:text-neutral-700">
 				<Quote
 					size={18}

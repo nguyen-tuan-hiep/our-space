@@ -100,42 +100,27 @@ export function PeriodPickerButton({
 				aria-haspopup="dialog"
 				aria-expanded={periodPickerOpen ? "true" : undefined}
 				onClick={onTogglePeriodPicker}
-				className="grid size-11 place-items-center rounded-full bg-paper text-neutral-700 shadow-sm ring-1 ring-neutral-200/70 transition active:scale-95 hover:bg-mui/10 hover:text-mui sm:ring-0"
+				className="grid size-11 place-items-center rounded-full bg-paper text-neutral-700 shadow-md ring-1 ring-neutral-200/70 transition active:scale-95 hover:bg-mui/10 hover:text-mui sm:ring-0"
 			>
 				<CalendarDays size={22} />
 			</button>
 
 			{shouldRenderPicker ? (
-				<>
-					{/* LỚP BACKDROP ĐÃ SỬA LẠI */}
-					<div
-						aria-hidden="true"
-						className={[
-							"fixed inset-0 z-50 bg-black/20 backdrop-blur-sm sm:hidden",
-							closing
-								? "native-dialog-backdrop-out"
-								: "native-dialog-backdrop-in",
-						].join(" ")}
-						onClick={onTogglePeriodPicker}
-					/>
-
-					{/* DIALOG GIỮ NGUYÊN */}
-					<PeriodPickerDialog
-						activePeriod={activePeriod}
-						calendarDays={calendarDays}
-						calendarMonthTitle={calendarMonthTitle}
-						closing={closing}
-						filterRange={filterRange}
-						periodDescription={periodDescription}
-						profileTimeZone={profileTimeZone}
-						todayKey={todayKey}
-						visibleYear={visibleYear}
-						onFilterRangeChange={onFilterRangeChange}
-						onMovePicker={onMovePicker}
-						onSelectMonth={onSelectMonth}
-						onSelectWeekFromDate={onSelectWeekFromDate}
-					/>
-				</>
+				<PeriodPickerDialog
+					activePeriod={activePeriod}
+					calendarDays={calendarDays}
+					calendarMonthTitle={calendarMonthTitle}
+					closing={closing}
+					filterRange={filterRange}
+					periodDescription={periodDescription}
+					profileTimeZone={profileTimeZone}
+					todayKey={todayKey}
+					visibleYear={visibleYear}
+					onFilterRangeChange={onFilterRangeChange}
+					onMovePicker={onMovePicker}
+					onSelectMonth={onSelectMonth}
+					onSelectWeekFromDate={onSelectWeekFromDate}
+				/>
 			) : null}
 		</div>
 	);
@@ -152,7 +137,7 @@ export function PeriodControls({
 	...periodPickerProps
 }: PeriodControlsProps) {
 	return (
-		<div className="relative top-auto z-50 -mx-8 hidden bg-transparent px-8 pb-0 pt-2 backdrop-blur sm:block lg:-mx-12 lg:px-12">
+		<div className="relative top-auto z-50 -mx-8 hidden bg-transparent px-8 pb-0 pt-1 backdrop-blur sm:block lg:-mx-12 lg:px-12">
 			<div className="flex items-center justify-between gap-4 md:gap-6">
 				<div
 					role="tablist"
@@ -239,16 +224,15 @@ export function MobileSpaceTabs({
 	return (
 		<nav
 			aria-label="Space sections"
-			className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-40 p-3 sm:hidden"
+			className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-40 sm:hidden"
 		>
-			<div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-bg via-bg/90 to-transparent" />
-			<div className="relative mx-auto max-w-md rounded-[2rem] border border-white/70 bg-paper/88 p-1.5 shadow-[0_-10px_30px_rgba(30,25,20,0.10),0_16px_50px_rgba(30,25,20,0.18)] backdrop-blur-2xl">
-				<div className="relative grid grid-cols-4 rounded-[1.65rem] bg-white/45 p-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)]">
+			<div className="relative border-t border-white/80 bg-white/50 px-2 pb-[clamp(0.5rem,env(safe-area-inset-bottom),1rem)] shadow-[0_-6px_32px_rgba(30,25,20,0.15)] backdrop-blur-md rounded-t-[1.8rem] box-content">
+				<div className="relative grid grid-cols-4 py-2">
 					<div
 						aria-hidden="true"
-						className="mobile-bottom-tab-indicator absolute inset-y-1 left-1 rounded-[1.35rem] bg-mui/20 shadow-[0_10px_24px_rgba(30,25,20,0.16)]"
+						className="mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-[1.35rem] bg-mui/20 shadow-[0_8px_20px_rgba(30,25,20,0.12)]"
 						style={{
-							width: "calc((100% - 0.5rem) / 4)",
+							width: "calc(100% / 4)",
 							transform: `translateX(${selectedIndex * 100}%)`,
 						}}
 					/>
@@ -263,7 +247,7 @@ export function MobileSpaceTabs({
 								role="tab"
 								aria-selected={selected}
 								className={[
-									"relative z-10 flex min-h-[3.65rem] flex-col items-center justify-center gap-1 rounded-[1.25rem] text-[10.5px] font-extrabold tracking-[-0.01em] transition duration-200 active:scale-[0.96]",
+									"relative z-10 flex min-h-[3rem] flex-col items-center justify-center gap-0.5 rounded-[1.25rem] text-[10.5px] font-extrabold tracking-[-0.01em] transition duration-200 active:scale-[0.96]",
 									selected ? "text-neutral-950" : "text-neutral-500",
 								].join(" ")}
 								onClick={() => onSelectSection(item.value)}

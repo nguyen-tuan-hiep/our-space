@@ -66,9 +66,9 @@ export function NotesPanel({
 						</div>
 					</div>
 				) : (
-					<p className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:col-span-2 sm:rounded-lg sm:shadow-none md:col-span-3 lg:col-span-4">
+					<div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:col-span-2 sm:rounded-lg sm:shadow-none md:col-span-3 lg:col-span-4 shadow-md">
 						No notes for this {filterRange}.
-					</p>
+					</div>
 				)}
 			</div>
 		</div>

@@ -61,13 +61,13 @@ export function PersonalPanel({
 						Personal
 					</h2>
 				</div>
-				<div className="grid size-11 place-items-center rounded-full bg-paper text-mui shadow-sm ring-1 ring-neutral-200/70 sm:hidden">
+				<div className="grid size-11 place-items-center rounded-full bg-paper text-mui shadow-md ring-1 ring-neutral-200/70 sm:hidden">
 					<UserRound size={22} />
 				</div>
 			</div>
 
 			<div className="grid gap-3 sm:grid-cols-2 sm:gap-5">
-				<div className="rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
+				<div className="rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
 					<div className="flex items-center gap-3">
 						<div className="grid size-14 place-items-center rounded-full bg-mui/10 text-2xl">
 							{profileAvatar}
@@ -95,7 +95,7 @@ export function PersonalPanel({
 					</button>
 				</div>
 
-				<div className="rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
+				<div className="rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
 					<div className="flex items-center gap-3">
 						<div className="grid size-14 place-items-center rounded-full bg-mui/10 text-2xl">
 							{partnerAvatar}
@@ -123,7 +123,7 @@ export function PersonalPanel({
 				</div>
 			</div>
 
-			<div className="rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
+			<div className="rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
 				<div className="flex items-start justify-between gap-4">
 					<div>
 						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
@@ -160,7 +160,7 @@ export function PersonalPanel({
 				</div>
 			</div>
 
-			<div className="grid gap-3 rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
+			<div className="grid gap-3 rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
 				<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
 					App actions
 				</p>

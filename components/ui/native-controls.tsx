@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import {
+	useEffect,
+	useState,
+	type ButtonHTMLAttributes,
+	type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -8,8 +13,7 @@ function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 export const style =
-	"peer appearance-none w-full px-3 h-12 sm:h-11 text-sm text-neutral-900 bg-transparent rounded-xl sm:rounded-lg border border-neutral-300 shadow-none focus:shadow-none outline-none transition-all duration-200 focus:border-mui focus:ring-1 focus:ring-mui";
-
+	"peer appearance-none w-full px-3 h-12 sm:h-11 text-sm text-neutral-900 bg-transparent rounded-2xl border border-neutral-300 shadow-none focus:shadow-none outline-none transition-all duration-200 focus:border-mui focus:ring-1 focus:ring-mui";
 
 export function NativeButton({
 	variant = "contained",
@@ -153,8 +157,8 @@ export function NativeTextarea({
 					rows={rows}
 					placeholder=" "
 					className={cx(
-            style,
-            "h-auto min-h-[120px] py-3",
+						style,
+						"h-auto min-h-[120px] py-3",
 						error && "border-danger focus:border-danger focus:ring-danger",
 						className,
 					)}
@@ -162,7 +166,7 @@ export function NativeTextarea({
 
 				{/* Label phong cách MUI Outlined */}
 				<label
-          className={cx(
+					className={cx(
 						// Ban đầu nhãn nằm lọt lòng giữa ô textarea giống placeholder
 						"absolute left-3 top-3 text-sm text-neutral-500 transition-all duration-200 pointer-events-none origin-[top_left] px-1 bg-paper",
 

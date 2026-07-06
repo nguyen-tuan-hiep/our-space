@@ -130,7 +130,7 @@ function personMoodCard({
 	const option = getMoodOption(mood?.mood);
 
 	return (
-		<div className="rounded-[1.35rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:shadow-none">
+		<div className="rounded-[1.35rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl">
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-w-0 items-center gap-3">
 					<div className="grid size-11 shrink-0 place-items-center rounded-full bg-mui/10 text-xl">
@@ -278,7 +278,7 @@ export function MoodPanel({
 				<div className="sm:hidden">{periodControl}</div>
 			</div>
 
-			<div className="rounded-[1.7rem] border border-neutral-200 bg-paper p-3 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
+			<div className="rounded-[1.7rem] border border-neutral-200 bg-paper p-3 shadow-md rounded-2xl sm:p-5">
 				<div className="flex items-start justify-between gap-4">
 					<div>
 						<div className="flex items-center gap-2">
@@ -404,7 +404,7 @@ export function MoodPanel({
 
 			<form
 				onSubmit={handleSubmit}
-				className="rounded-[1.7rem] border border-neutral-200 bg-paper p-3 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none"
+				className="rounded-[1.7rem] border border-neutral-200 bg-paper p-3 shadow-md rounded-2xl sm:p-5"
 			>
 				<div className="flex items-center justify-between gap-3">
 					<div className="flex min-w-0 items-center gap-3">
@@ -412,7 +412,7 @@ export function MoodPanel({
 							<HeartPulse size={24} />
 						</div>
 						<div className="min-w-0">
-							<p className="font-serif text-2xl leading-tight">How are you?</p>
+							<p className="font-serif text-2xl leading-tight">How are you today?</p>
 							<p className="text-sm text-neutral-500">
 								{formatMoodDate(selectedDate, timeZone)}
 							</p>

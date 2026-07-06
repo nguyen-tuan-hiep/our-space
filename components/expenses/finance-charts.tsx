@@ -219,7 +219,7 @@ export function FinanceCharts({
 	}, [chartData.length, isSmallDevice, yAxisWidth]);
 
 	return (
-		<div className="w-full min-w-0 rounded-[1.5rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
+		<div className="w-full min-w-0 rounded-[1.5rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
 			<div className="mb-5 flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:flex-wrap sm:items-end">
 				<div className="min-w-0">
 					<p className="eyebrow">Finance overview</p>
@@ -275,7 +275,7 @@ export function FinanceCharts({
 			) : null}
 
 			<div className="grid min-w-0 gap-4 sm:gap-6">
-				<div className="min-w-0 rounded-[1.25rem] border border-neutral-200 bg-neutral-50/40 p-4 sm:rounded-lg sm:border-neutral-400 sm:border-dashed sm:bg-transparent">
+				<div className="min-w-0 rounded-[1.25rem] border p-4 rounded-2xl border-neutral-400 border-dashed sm:bg-transparent">
 					<div className="mb-4">
 						<p className="eyebrow">
 							{filterRange === "week" ? "Weekly ledgers" : "Monthly ledgers"}
@@ -342,7 +342,7 @@ export function FinanceCharts({
 					{perPerson.map((item) => (
 						<div
 							key={item.profile.id}
-							className="flex min-w-0 flex-col justify-between overflow-hidden rounded-[1.25rem] border border-neutral-200 bg-neutral-50/40 p-4 sm:rounded-lg sm:border-neutral-400 sm:border-dashed sm:bg-transparent"
+							className="flex min-w-0 flex-col justify-between overflow-hidden rounded-[1.25rem] border border-neutral-400 border-dashed p-4 rounded-2xl"
 						>
 							<div className="mb-2 flex items-center justify-between gap-3">
 								<div className="min-w-0">

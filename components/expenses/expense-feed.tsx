@@ -96,7 +96,7 @@ export function ExpenseFeed({
   };
 
   return (
-    <div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-4 shadow-sm sm:rounded-lg sm:p-5 sm:shadow-none">
+    <div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
       <div className="mb-5">
         <div>
           <p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>
@@ -148,7 +148,7 @@ export function ExpenseFeed({
             return (
               <div
                 key={expense.id}
-                className="rounded-[1.25rem] border border-neutral-200 bg-neutral-50/40 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5)] sm:rounded-lg sm:border-neutral-400 sm:border-dashed sm:bg-transparent sm:shadow-none"
+                className="rounded-2xl border border-neutral-400 p-4 border-neutral-400 border-dashed"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">

@@ -74,7 +74,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "Our Space 𑣲⋆",
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
   },
   icons: {
     icon: [
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   viewportFit: "cover",
-  themeColor: themeColors.darkBg,
+  themeColor: "black",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
