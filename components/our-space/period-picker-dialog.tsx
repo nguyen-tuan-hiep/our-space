@@ -24,11 +24,11 @@ function calendarDayClass({
 	return [
 		"grid aspect-square place-items-center rounded-full text-sm font-semibold transition",
 		selected
-			? "bg-mui/10 text-mui shadow-inner"
+			? "bg-neutral-200 text-neutral-950 shadow-inner"
 			: inCurrentMonth
 				? "text-neutral-900 hover:bg-mui/10"
 				: "text-neutral-300 hover:bg-neutral-50",
-		today && !selected ? "ring-1 ring-mui/40" : "",
+		today ? "ring-1 ring-black" : "",
 	].join(" ");
 }
 
@@ -42,7 +42,7 @@ interface PeriodPickerDialogProps {
 	calendarMonthTitle: string;
 	closing?: boolean;
 	filterRange: FilterRange;
-	periodDescription: string;
+	selectedPeriodDescription: string;
 	profileTimeZone: string;
 	todayKey: string;
 	visibleYear: number;
@@ -59,7 +59,7 @@ export function PeriodPickerDialog({
 	calendarMonthTitle,
 	closing = false,
 	filterRange,
-	periodDescription,
+	selectedPeriodDescription,
 	profileTimeZone,
 	todayKey,
 	visibleYear,
@@ -172,6 +172,10 @@ export function PeriodPickerDialog({
 						const monthDate = new Date(Date.UTC(visibleYear, index, 1));
 						const monthKey = getPeriodKey(monthDate, profileTimeZone, "month");
 						const selected = monthKey === activePeriod;
+						const today = new Date(`${todayKey}T00:00:00.000Z`);
+						const currentMonth =
+							today.getUTCFullYear() === visibleYear &&
+							today.getUTCMonth() === index;
 						return (
 							<button
 								type="button"
@@ -179,8 +183,9 @@ export function PeriodPickerDialog({
 								className={[
 									"rounded-2xl px-3 py-3 text-sm font-bold transition",
 									selected
-										? "bg-mui/10 text-mui shadow-inner"
+										? "bg-neutral-200 text-neutral-950 shadow-inner"
 										: "text-neutral-700 hover:bg-mui/10",
+									currentMonth ? "ring-1 ring-black" : "",
 								].join(" ")}
 								onClick={() => onSelectMonth(index)}
 							>
@@ -192,7 +197,8 @@ export function PeriodPickerDialog({
 			)}
 
 			<p className="mt-4 rounded-2xl bg-mui/10 px-4 py-3 text-center text-xs font-semibold text-neutral-500">
-				Selected: <span className="text-neutral-900">{periodDescription}</span>
+				Selected:{" "}
+				<span className="text-neutral-900">{selectedPeriodDescription}</span>
 			</p>
 			</div>
 		</>

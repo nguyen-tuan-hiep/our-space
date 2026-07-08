@@ -243,7 +243,7 @@ export function LeafletMemoryMap({
 							</p>
 							<button
 								type="button"
-								className={`${primaryButtonClass} mt-4 w-full justify-center`}
+								className={`${primaryButtonClass} primary-action mt-4 w-full justify-center`}
 								onClick={onNewMemory}
 							>
 								Add memory

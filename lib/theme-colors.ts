@@ -1,15 +1,15 @@
 import type { ExpenseCategory } from "@/lib/types";
 
 export const themeColors = {
-  bg: "#e8e5df",
-  paper: "#f5f3ee",
-  mui: "#000000",
+  bg: "#fafafa",
+  paper: "#ffffff",
+  mui: "#09090b",
 
-  danger: "#c24d5e",
-  dangerBg: "#fdecef",
+  danger: "#dc2626",
+  dangerBg: "#fee2e2",
 
-  chartGrid: "#e8e3d8",
-  darkBg: "#10100f",
+  chartGrid: "#e5e5e5",
+  darkBg: "#09090b",
 
   expenseCategories: {
     "Food & Drinks": "#F09EA7",

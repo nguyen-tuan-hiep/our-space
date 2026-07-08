@@ -112,7 +112,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 							label="Display name"
 							defaultValue={profile.display_name}
 						/>
-						<div className="grid gap-3 sm:grid-cols-3">
+						<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 							<NativeSelect
 									name="country_code"
 									label="Country"
@@ -145,6 +145,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 									name="time_zone"
 									label="Time zone"
 									defaultValue={normalizeTimeZoneValue(profile.time_zone)}
+									containerClassName="col-span-2 sm:col-span-1"
 								>
 									{timeZoneOptions.map((timeZone) => (
 										<option

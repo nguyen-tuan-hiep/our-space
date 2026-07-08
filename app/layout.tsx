@@ -3,7 +3,6 @@ import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
-import { themeColors } from "@/lib/theme-colors";
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -68,6 +67,21 @@ const appleStartupImages = [
   ];
 });
 
+const themeBootstrapScript = `
+(() => {
+  try {
+    const stored = localStorage.getItem("our-space-theme");
+    const theme = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const resolved = theme === "system" ? (systemDark ? "dark" : "light") : theme;
+    document.documentElement.classList.toggle("dark", resolved === "dark");
+    document.documentElement.dataset.theme = theme;
+  } catch {
+    document.documentElement.dataset.theme = "system";
+  }
+})();
+`;
+
 export const metadata: Metadata = {
   title: "Our Space 𑣲⋆",
   description: "A private daily hub for two people, wherever they are.",
@@ -106,13 +120,10 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${beVietnamPro.variable} ${merriweather.variable}`}
-      style={
-        {
-          "--color-bg": themeColors.bg,
-        } as React.CSSProperties
-      }
+      suppressHydrationWarning
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         {appleStartupImages.map(({ url, media }) => (
           <link

@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { NoteCard } from "@/components/notes/note-card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { FilterRange } from "@/lib/dashboard-utils";
 import type { SharedNote } from "@/lib/types";
-import { primaryButtonClass } from "./shared-classes";
 
 interface NotesPanelProps {
 	currentUserId: string;
@@ -37,16 +38,17 @@ export function NotesPanel({
 					</h2>
 				</div>
 				<div className="sm:hidden">{periodControl}</div>
-				<button
+				<Button
 					type="button"
-					className={`${primaryButtonClass} hidden sm:inline-flex sm:w-auto`}
+					size="lg"
+					className="primary-action hidden h-11 rounded-2xl px-5 font-bold sm:inline-flex sm:w-auto"
 					onClick={onNewNote}
 				>
 					<Plus size={17} />
 					New note
-				</button>
+				</Button>
 			</div>
-			<div className="grid grid-cols-1 gap-3 sm:gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{notes.length ? (
 					notes.map((note) => (
 						<NoteCard
@@ -59,14 +61,20 @@ export function NotesPanel({
 						/>
 					))
 				) : loading ? (
-					<div className="rounded-2xl border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:shadow-none md:col-span-3 xl:col-span-4">
-						Loading notes...
-						<div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
-							<div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
+					Array.from({ length: 6 }).map((_, index) => (
+						<div
+							key={index}
+							className="app-card content-fade-in grid h-[20rem] gap-4 p-5"
+						>
+							<div className="space-y-3">
+								<Skeleton className="h-3 w-28 rounded-full" />
+								<Skeleton className="h-7 w-3/4 rounded-xl" />
+							</div>
+							<Skeleton className="min-h-0 flex-1 rounded-2xl" />
 						</div>
-					</div>
+					))
 				) : (
-					<div className="rounded-2xl border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:col-span-2 sm:shadow-none md:col-span-3 lg:col-span-4 shadow-md">
+					<div className="app-card content-fade-in p-6 text-neutral-500 sm:col-span-2 md:col-span-3 lg:col-span-4">
 						No notes for this {filterRange}.
 					</div>
 				)}

@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { Edit2, Trash2, EllipsisVertical, ListFilter } from "lucide-react";
+import { ListFilter } from "lucide-react";
+import { ActionMenu } from "@/components/common/action-menu";
 import { useToast } from "@/components/toast";
 import { NativeSelect } from "@/components/ui/native-controls";
-import { useDelayedRender } from "@/components/ui/use-delayed-render";
 import { deleteExpense } from "@/app/actions";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import {
 	expenseCategories,
 	expenseCategoryColors,
@@ -44,22 +44,11 @@ export function ExpenseFeed({
 
 	const [pending, startTransition] = useTransition();
 
-	const [activeExpense, setActiveExpense] = useState<IndividualExpense | null>(
-		null,
-	);
-	const [renderedMenuExpenseId, setRenderedMenuExpenseId] = useState<
-		string | null
-	>(null);
-
 	const [scrollGradient, setScrollGradient] = useState({
 		top: false,
 		bottom: false,
 	});
 
-	const menuOpen = Boolean(activeExpense);
-	const { closing: menuClosing, shouldRender: shouldRenderMenu } =
-		useDelayedRender(menuOpen);
-	const menuRef = useRef<HTMLDivElement | null>(null);
 	const scrollRef = useRef<HTMLDivElement | null>(null);
 
 	const filteredExpenses =
@@ -92,41 +81,6 @@ export function ExpenseFeed({
 	}, []);
 
 	useEffect(() => {
-		if (activeExpense) setRenderedMenuExpenseId(activeExpense.id);
-	}, [activeExpense]);
-
-	useEffect(() => {
-		if (shouldRenderMenu) return;
-		setRenderedMenuExpenseId(null);
-	}, [shouldRenderMenu]);
-
-	useEffect(() => {
-		if (!menuOpen) return;
-
-		const handlePointerDown = (event: PointerEvent) => {
-			const target = event.target;
-
-			if (target instanceof Node && !menuRef.current?.contains(target)) {
-				setActiveExpense(null);
-			}
-		};
-
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key === "Escape") {
-				setActiveExpense(null);
-			}
-		};
-
-		document.addEventListener("pointerdown", handlePointerDown);
-		document.addEventListener("keydown", handleKeyDown);
-
-		return () => {
-			document.removeEventListener("pointerdown", handlePointerDown);
-			document.removeEventListener("keydown", handleKeyDown);
-		};
-	}, [menuOpen]);
-
-	useEffect(() => {
 		const frame = window.requestAnimationFrame(updateScrollGradient);
 
 		window.addEventListener("resize", updateScrollGradient);
@@ -142,34 +96,8 @@ export function ExpenseFeed({
 		categoryFilter,
 	]);
 
-	const handleMenuOpen = (expense: IndividualExpense) => {
-		setActiveExpense((current) =>
-			current?.id === expense.id ? null : expense,
-		);
-	};
-
-	const handleMenuClose = () => {
-		setActiveExpense(null);
-	};
-
-	const handleEditClick = () => {
-		if (activeExpense && onEdit) {
-			onEdit(activeExpense);
-		}
-
-		handleMenuClose();
-	};
-
-	const handleDeleteClick = () => {
-		if (activeExpense) {
-			setExpenseToDelete(activeExpense);
-		}
-
-		handleMenuClose();
-	};
-
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-paper p-4 shadow-md sm:p-5">
+		<div className="app-card content-fade-in p-4 sm:p-5">
 			<div className="mb-5">
 				<p className="eyebrow">{readOnly ? "Read only" : "Personal"}</p>
 
@@ -184,7 +112,7 @@ export function ExpenseFeed({
 							className={`grid size-10 place-items-center rounded-full transition sm:size-9 ${
 								categoryFilter === "all"
 									? "text-neutral-500"
-									: "bg-mui/70 text-white"
+									: "bg-neutral-950 text-neutral-50"
 							}`}
 						>
 							<ListFilter size={17} />
@@ -228,7 +156,7 @@ export function ExpenseFeed({
 							return (
 								<div
 									key={expense.id}
-									className="rounded-2xl border border-dashed border-neutral-400 p-4"
+									className="rounded-2xl border border-neutral-900/10 bg-bg/70 p-4 shadow-[0_10px_28px_rgba(30,25,20,0.05)] transition hover:-translate-y-0.5 hover:border-neutral-900/20 hover:bg-paper"
 								>
 									<div className="flex items-start justify-between gap-3">
 										<div className="min-w-0 flex-1">
@@ -248,84 +176,16 @@ export function ExpenseFeed({
 											</p>
 
 											{canEdit ? (
-												<div
-													className="relative -mr-2"
-													ref={
-														activeExpense?.id === expense.id
-															? menuRef
-															: null
-													}
-												>
-													<button
-														type="button"
-														aria-label="more"
-														id={`expense-menu-button-${expense.id}`}
-														aria-controls={
-															activeExpense?.id === expense.id
-																? "expense-menu"
-																: undefined
-														}
-														aria-expanded={
-															activeExpense?.id === expense.id
-																? "true"
-																: undefined
-														}
-														aria-haspopup="menu"
-														onClick={() => handleMenuOpen(expense)}
+												<div className="relative -mr-2">
+													<ActionMenu
+														label={`Open actions for ${expense.title}`}
 														disabled={isDeleting}
-														className="grid size-9 place-items-center rounded-full text-neutral-500 transition hover:bg-mui/10 active:scale-[0.8] disabled:cursor-not-allowed disabled:opacity-50 sm:size-8"
-													>
-														<EllipsisVertical size={18} />
-													</button>
-
-													{shouldRenderMenu &&
-													renderedMenuExpenseId === expense.id ? (
-														<>
-															<button
-																type="button"
-																aria-label="Close expense actions"
-																className={[
-																	"fixed inset-0 z-[50] bg-black/20 backdrop-blur-sm sm:hidden",
-																	menuClosing
-																		? "native-dialog-backdrop-out"
-																		: "native-dialog-backdrop-in",
-																].join(" ")}
-																onClick={handleMenuClose}
-															/>
-
-															<div
-																id="expense-menu"
-																role="menu"
-																aria-labelledby={`expense-menu-button-${expense.id}`}
-																className={[
-																	"mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+5rem)] z-[70] overflow-hidden rounded-2xl border border-white/80 bg-paper p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-sm will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-44 sm:border-neutral-200 sm:p-1 sm:shadow-lg sm:backdrop-blur-none",
-																	menuClosing
-																		? "native-sheet-out"
-																		: "native-sheet-in",
-																].join(" ")}
-															>
-																<button
-																	type="button"
-																	role="menuitem"
-																	onClick={handleEditClick}
-																	className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-base font-bold text-neutral-800 transition hover:bg-mui/10 active:scale-[0.8] sm:px-3 sm:py-2 sm:text-sm sm:font-medium"
-																>
-																	<Edit2 size={15} />
-																	Edit
-																</button>
-
-																<button
-																	type="button"
-																	role="menuitem"
-																	onClick={handleDeleteClick}
-																	className="mt-1 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-base font-bold text-danger transition hover:bg-danger-bg active:scale-[0.8] sm:mt-0 sm:px-3 sm:py-2 sm:text-sm sm:font-medium"
-																>
-																	<Trash2 size={15} />
-																	Delete
-																</button>
-															</div>
-														</>
-													) : null}
+														sheetTitle="Transaction actions"
+														sheetDescription={expense.title}
+														deleteLabel="Delete"
+														onEdit={() => onEdit?.(expense)}
+														onDelete={() => setExpenseToDelete(expense)}
+													/>
 												</div>
 											) : null}
 										</div>
@@ -333,7 +193,7 @@ export function ExpenseFeed({
 
 									<div className="my-2 flex flex-wrap items-center gap-2">
 										<span
-											className="rounded-full px-2.5 py-1 text-xs font-bold text-neutral-900"
+											className="rounded-full px-2.5 py-1 text-xs font-bold text-black"
 											style={{
 												backgroundColor:
 													expenseCategoryColors[expense.category],
@@ -352,7 +212,7 @@ export function ExpenseFeed({
 							);
 						})
 					) : (
-						<p className="rounded-2xl border border-dashed border-neutral-400 py-10 text-center text-neutral-500">
+						<p className="rounded-2xl border border-dashed border-neutral-300 bg-white/35 py-10 text-center text-neutral-500">
 							{expenses.length
 								? "No transactions in this category."
 								: "No transactions yet."}

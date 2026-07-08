@@ -130,7 +130,7 @@ function personMoodCard({
 	const option = getMoodOption(mood?.mood);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl">
+		<div className="app-card content-fade-in p-4">
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-w-0 items-center gap-3">
 					<div className="grid size-11 shrink-0 place-items-center rounded-full bg-mui/10 text-xl">
@@ -278,7 +278,7 @@ export function MoodPanel({
 				<div className="sm:hidden">{periodControl}</div>
 			</div>
 
-			<div className="rounded-2xl border border-neutral-200 bg-paper p-3 shadow-md rounded-2xl sm:p-5">
+			<div className="app-card content-fade-in p-3 sm:p-5">
 				<div className="flex items-start justify-between gap-4">
 					<div>
 						<div className="flex items-center gap-2">
@@ -336,7 +336,7 @@ export function MoodPanel({
 										className={[
 											"relative h-[4.7rem] min-w-0 overflow-hidden rounded-2xl border px-0.5 py-1.5 transition active:scale-[0.8] sm:h-auto sm:min-h-[5.1rem] sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
 											selected
-												? "border-mui/80 bg-mui/80 text-white shadow-[0_12px_28px_rgba(30,25,20,0.24)]"
+												? "border-neutral-950 bg-neutral-950 text-neutral-50 shadow-[0_12px_28px_rgba(30,25,20,0.24)]"
 												: "border-neutral-200 bg-neutral-50/70 text-neutral-800 hover:border-mui/40 hover:bg-mui/10",
 											!cell.inPeriod && "pointer-events-none opacity-25",
 										]
@@ -346,7 +346,7 @@ export function MoodPanel({
 										<span
 											className={[
 												"mx-auto block text-[10px] font-extrabold sm:text-[11px] lg:text-xs",
-												selected ? "text-white/80" : "text-neutral-500",
+												selected ? "text-neutral-50/80" : "text-neutral-600",
 											].join(" ")}
 										>
 											{cell.date.getUTCDate()}
@@ -357,7 +357,7 @@ export function MoodPanel({
 												className={[
 													"grid size-10 place-items-center rounded-full text-2xl transition",
 													selected
-														? "bg-white text-neutral-950"
+														? "bg-paper text-neutral-950"
 														: "bg-paper text-neutral-700",
 													!mineOption && !selected && "text-neutral-300",
 												].join(" ")}
@@ -365,7 +365,7 @@ export function MoodPanel({
 												{mineOption?.emoji ?? "♡"}
 											</span>
 											{partnerOption ? (
-												<span className="absolute -bottom-0.5 -right-0.5 grid size-[1.3rem] place-items-center rounded-full border-paper bg-white text-[13px] shadow-sm sm:size-5 sm:text-[12px] sm:-bottom-0.5 sm:-right-0.5 lg:size-6 lg:text-sm">
+												<span className="absolute -bottom-0.5 -right-0.5 grid size-[1.3rem] place-items-center rounded-full border-paper bg-paper text-[13px] text-neutral-950 shadow-sm sm:size-5 sm:text-[12px] sm:-bottom-0.5 sm:-right-0.5 lg:size-6 lg:text-sm">
 													{partnerOption.emoji}
 												</span>
 											) : null}
@@ -375,7 +375,7 @@ export function MoodPanel({
 											<span
 												className={[
 													"absolute left-1/2 top-1 h-1.5 w-1.5 -translate-x-1/2 rounded-full",
-													selected ? "bg-white" : "bg-mui",
+													selected ? "bg-neutral-50" : "bg-mui",
 												].join(" ")}
 											/>
 										) : null}
@@ -404,7 +404,7 @@ export function MoodPanel({
 
 			<form
 				onSubmit={handleSubmit}
-				className="rounded-2xl border border-neutral-200 bg-paper p-3 shadow-md rounded-2xl sm:p-5"
+				className="app-card content-fade-in p-3 sm:p-5"
 			>
 				<div className="flex items-center justify-between gap-3">
 					<div className="flex min-w-0 items-center gap-3">

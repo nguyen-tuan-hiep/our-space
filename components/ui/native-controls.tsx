@@ -13,7 +13,7 @@ function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 export const style =
-	"peer appearance-none w-full px-3 h-12 sm:h-11 text-sm text-neutral-900 bg-transparent rounded-2xl border border-neutral-400 shadow-none focus:shadow-none outline-none transition-all duration-200 focus:border-mui focus:ring-1 focus:ring-mui";
+	"peer appearance-none w-full px-3 h-12 sm:h-11 text-sm text-neutral-900 bg-transparent rounded-2xl border border-neutral-400 shadow-none focus:shadow-none outline-none transition-all duration-200";
 
 export function NativeButton({
 	variant = "contained",
@@ -29,7 +29,7 @@ export function NativeButton({
 			className={cx(
 				"inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-bold transition active:scale-[0.8] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11",
 				variant === "contained" &&
-					"bg-neutral-900 text-white hover:bg-neutral-700",
+					"bg-neutral-950 text-neutral-50 hover:bg-neutral-800",
 				variant === "outlined" &&
 					"border border-mui bg-transparent text-mui hover:bg-mui/10",
 				variant === "text" && "bg-transparent text-mui hover:bg-mui/10",
@@ -39,44 +39,6 @@ export function NativeButton({
 		>
 			{children}
 		</button>
-	);
-}
-
-export function FieldLabel({
-	label,
-	children,
-	helperText,
-	error,
-	className,
-}: {
-	label: string;
-	children: ReactNode;
-	helperText?: string;
-	error?: boolean;
-	className?: string;
-}) {
-	return (
-		<label className={cx("grid", className)}>
-			<span
-				className={cx(
-					"text-[11px] font-semibold",
-					error ? "text-danger" : "text-neutral-500",
-				)}
-			>
-				{label}
-			</span>
-			{children}
-			{helperText ? (
-				<span
-					className={cx(
-						"text-xs leading-5",
-						error ? "text-danger" : "text-neutral-500",
-					)}
-				>
-					{helperText}
-				</span>
-			) : null}
-		</label>
 	);
 }
 

@@ -284,7 +284,7 @@ export function DraggableFab({
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
       className={[
-        "fixed z-40 grid size-14 touch-none select-none place-items-center rounded-full bg-neutral-950 text-white shadow-[0_18px_40px_rgba(30,25,20,0.35)] transition active:scale-[0.8] sm:hidden",
+        "primary-action fixed z-40 grid size-14 touch-none select-none place-items-center rounded-full bg-neutral-950 text-neutral-50 transition hover:scale-[1.03] active:scale-[0.92] sm:hidden",
         isDragging
           ? "transition-none"
           : "transition-[left,top,transform,box-shadow] duration-300 ease-out",

@@ -107,6 +107,11 @@ export async function getOneSignal(userId?: string) {
     throw new Error("This browser does not support service workers.");
   }
 
+  if (window.__oneSignal) {
+    if (userId) await window.__oneSignal.login(userId);
+    return window.__oneSignal;
+  }
+
   const existingInitPromise =
     oneSignalInitPromise ?? window.__oneSignalInitPromise;
 
@@ -116,26 +121,37 @@ export async function getOneSignal(userId?: string) {
     return oneSignal;
   }
 
-  window.OneSignalDeferred = window.OneSignalDeferred ?? [];
-  await loadOneSignalScript();
+  oneSignalInitPromise = (async () => {
+    window.OneSignalDeferred = window.OneSignalDeferred ?? [];
+    await loadOneSignalScript();
 
-  oneSignalInitPromise = runWhenOneSignalReady(async (oneSignal) => {
-    await oneSignal.init({
-      appId: ONESIGNAL_WEB_APP_ID,
-      serviceWorkerPath: "/sw.js",
-      serviceWorkerParam: { scope: "/" },
-      notifyButton: { enable: true },
+    const oneSignal = await runWhenOneSignalReady(async (sdk) => {
+      try {
+        await sdk.init({
+          appId: ONESIGNAL_WEB_APP_ID,
+          notifyButton: { enable: true },
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (!message.toLowerCase().includes("already initialized")) {
+          throw error;
+        }
+      }
+
+      window.OneSignal = sdk;
+      window.__oneSignal = sdk;
+      window.__oneSignalInitialized = true;
+      return sdk;
     });
 
-    window.OneSignal = oneSignal;
-    window.__oneSignal = oneSignal;
-    window.__oneSignalInitialized = true;
-    if (userId) await oneSignal.login(userId);
     return oneSignal;
-  });
+  })();
+
   window.__oneSignalInitPromise = oneSignalInitPromise;
 
-  return oneSignalInitPromise;
+  const oneSignal = await oneSignalInitPromise;
+  if (userId) await oneSignal.login(userId);
+  return oneSignal;
 }
 
 export async function logoutOneSignal() {

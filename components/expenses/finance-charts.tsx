@@ -219,7 +219,7 @@ export function FinanceCharts({
 	}, [chartData.length, isSmallDevice, yAxisWidth]);
 
 	return (
-		<div className="w-full min-w-0 rounded-2xl border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
+		<div className="app-card content-fade-in w-full min-w-0 p-4 sm:p-5">
 			<div className="mb-5 flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:flex-wrap sm:items-end">
 				<div className="min-w-0">
 					<p className="eyebrow">Finance overview</p>

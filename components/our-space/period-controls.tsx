@@ -10,7 +10,13 @@ import {
 } from "lucide-react";
 import type { FilterRange } from "@/lib/dashboard-utils";
 
-export type SpaceSection = "notes" | "finances" | "mood" | "memories" | "personal";
+export type SpaceSection =
+	| "notes"
+	| "finances"
+	| "mood"
+	| "memories"
+	| "personal";
+type PeriodPickerViewport = "mobile" | "tablet" | "desktop";
 
 const PeriodPickerDialog = dynamic(
 	() =>
@@ -22,10 +28,10 @@ const PeriodPickerDialog = dynamic(
 
 function spaceTabClass(active: boolean) {
 	return [
-		"relative inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-bold transition sm:px-6 active:scale-[0.8]",
+		"relative inline-flex min-h-10 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-bold transition duration-200 sm:px-6 active:scale-[0.96]",
 		active
-			? "bg-paper text-mui shadow-[0_10px_24px_rgba(30,25,20,0.16)]"
-			: "text-neutral-500 hover:text-neutral-800",
+			? "material-tonal shadow-[0_8px_22px_rgba(103,80,164,0.18)]"
+			: "text-neutral-600 hover:bg-neutral-200/70 hover:text-neutral-950 dark:hover:bg-neutral-100",
 	].join(" ");
 }
 
@@ -39,10 +45,12 @@ interface PeriodPickerButtonProps {
 	calendarMonthTitle: string;
 	filterRange: FilterRange;
 	periodDescription: string;
+	periodPickerViewport: PeriodPickerViewport;
 	periodLabel: string;
 	periodPickerOpen: boolean;
 	periodPickerRef: RefObject<HTMLDivElement | null>;
 	profileTimeZone: string;
+	selectedPeriodDescription: string;
 	todayKey: string;
 	visibleYear: number;
 	onFilterRangeChange: (range: FilterRange) => void;
@@ -58,10 +66,12 @@ export function PeriodPickerButton({
 	calendarMonthTitle,
 	filterRange,
 	periodDescription,
+	periodPickerViewport,
 	periodLabel,
 	periodPickerOpen,
 	periodPickerRef,
 	profileTimeZone,
+	selectedPeriodDescription,
 	todayKey,
 	visibleYear,
 	onFilterRangeChange,
@@ -70,12 +80,28 @@ export function PeriodPickerButton({
 	onSelectWeekFromDate,
 	onTogglePeriodPicker,
 }: PeriodPickerButtonProps) {
+	const [viewportMatches, setViewportMatches] = useState(false);
 	const [shouldRenderPicker, setShouldRenderPicker] =
 		useState(periodPickerOpen);
 	const closing = shouldRenderPicker && !periodPickerOpen;
 
 	useEffect(() => {
-		if (periodPickerOpen) {
+		const query =
+			periodPickerViewport === "mobile"
+				? "(max-width: 639px)"
+				: periodPickerViewport === "tablet"
+					? "(min-width: 640px) and (max-width: 1023px)"
+					: "(min-width: 1024px)";
+		const mediaQuery = window.matchMedia(query);
+		const updateMatch = () => setViewportMatches(mediaQuery.matches);
+
+		updateMatch();
+		mediaQuery.addEventListener("change", updateMatch);
+		return () => mediaQuery.removeEventListener("change", updateMatch);
+	}, [periodPickerViewport]);
+
+	useEffect(() => {
+		if (periodPickerOpen && viewportMatches) {
 			setShouldRenderPicker(true);
 			return;
 		}
@@ -87,7 +113,7 @@ export function PeriodPickerButton({
 		}, 300);
 
 		return () => window.clearTimeout(timeoutId);
-	}, [periodPickerOpen, shouldRenderPicker]);
+	}, [periodPickerOpen, shouldRenderPicker, viewportMatches]);
 
 	const handleClosePicker = () => {
 		if (periodPickerOpen) onTogglePeriodPicker();
@@ -105,7 +131,7 @@ export function PeriodPickerButton({
 				aria-haspopup="dialog"
 				aria-expanded={periodPickerOpen ? "true" : undefined}
 				onClick={onTogglePeriodPicker}
-				className="grid size-11 place-items-center rounded-full bg-paper text-neutral-700 shadow-md ring-1 ring-neutral-200/70 transition active:scale-[0.8] hover:bg-mui/10 hover:text-mui sm:ring-0"
+				className="grid size-12 place-items-center rounded-2xl bg-paper text-neutral-700 shadow-[0_3px_12px_rgba(29,27,32,0.12)] transition hover:bg-neutral-100 hover:text-mui active:scale-[0.96]"
 			>
 				<CalendarDays size={22} />
 			</button>
@@ -117,7 +143,7 @@ export function PeriodPickerButton({
 					calendarMonthTitle={calendarMonthTitle}
 					closing={closing}
 					filterRange={filterRange}
-					periodDescription={periodDescription}
+					selectedPeriodDescription={selectedPeriodDescription}
 					profileTimeZone={profileTimeZone}
 					todayKey={todayKey}
 					visibleYear={visibleYear}
@@ -134,21 +160,23 @@ export function PeriodPickerButton({
 
 interface PeriodControlsProps extends PeriodPickerButtonProps {
 	activeSection: SpaceSection;
+	hidePeriodPicker?: boolean;
 	onSelectSection: (section: SpaceSection) => void;
 }
 
 export function PeriodControls({
 	activeSection,
+	hidePeriodPicker = false,
 	onSelectSection,
 	...periodPickerProps
 }: PeriodControlsProps) {
 	return (
-		<div className="relative top-auto z-50 -mx-8 hidden bg-transparent px-8 pb-0 pt-1 backdrop-blur sm:block lg:-mx-12 lg:px-12">
-			<div className="flex items-center justify-between gap-4 md:gap-6">
+		<div className="sticky top-3 z-40 hidden rounded-[1.75rem] border border-neutral-900/10 bg-paper/88 p-2 shadow-[0_12px_36px_rgba(29,27,32,0.08)] backdrop-blur-xl sm:block lg:hidden">
+			<div className="flex flex-col gap-3 sm:flex-row md:items-center md:gap-6">
 				<div
 					role="tablist"
 					aria-label="Space section"
-					className="grid min-w-0 max-w-4xl flex-none grid-cols-4 rounded-2xl bg-mui/10 p-1 shadow-inner"
+					className="grid min-w-0 flex-1 grid-cols-4 rounded-[1.35rem] bg-bg/85 p-1"
 				>
 					<button
 						type="button"
@@ -205,18 +233,18 @@ export function PeriodControls({
 						<MapPinned
 							size={18}
 							className={
-								activeSection === "memories"
-									? "text-mui"
-									: "text-neutral-500"
+								activeSection === "memories" ? "text-mui" : "text-neutral-500"
 							}
 						/>
 						Memory
 					</button>
 				</div>
 
-				<div className="ml-auto">
-					<PeriodPickerButton {...periodPickerProps} />
-				</div>
+				{hidePeriodPicker ? null : (
+					<div className="ml-0 md:ml-auto">
+						<PeriodPickerButton {...periodPickerProps} />
+					</div>
+				)}
 			</div>
 		</div>
 	);
@@ -250,11 +278,11 @@ export function MobileSpaceTabs({
 			aria-label="Space sections"
 			className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-[50] sm:hidden"
 		>
-			<div className="relative border-t border-white/80 bg-white/50 px-2 pb-[clamp(0.5rem,env(safe-area-inset-bottom),1rem)] shadow-[0_-6px_32px_rgba(30,25,20,0.15)] backdrop-blur-md rounded-t-[1.8rem] box-content">
+			<div className="relative rounded-t-[1.8rem] border-t border-mui/10 bg-paper/92 px-2 pb-[clamp(0.5rem,env(safe-area-inset-bottom),1rem)] shadow-[0_-10px_34px_rgba(29,27,32,0.14)] backdrop-blur-xl">
 				<div className="relative grid grid-cols-5 py-2">
 					<div
 						aria-hidden="true"
-						className="mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-2xl bg-mui/20 shadow-[0_8px_20px_rgba(30,25,20,0.12)]"
+						className="mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-2xl bg-mui/14 shadow-[0_8px_20px_rgba(103,80,164,0.18)]"
 						style={{
 							width: "calc(100% / 5)",
 							transform: `translateX(${selectedIndex * 100}%)`,

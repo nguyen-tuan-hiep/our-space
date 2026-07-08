@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { ExpenseFeed } from "@/components/expenses/expense-feed";
 import { FinanceCharts } from "@/components/expenses/finance-charts";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { FilterRange } from "@/lib/dashboard-utils";
 import type { IndividualExpense, Profile } from "@/lib/types";
-import { outlineButtonClass, primaryButtonClass } from "./shared-classes";
 
 interface FinancesPanelProps {
 	activePeriod: string;
@@ -66,33 +67,37 @@ export function FinancesPanel({
 					</h2>
 				</div>
 				<div className="sm:hidden">{periodControl}</div>
-				<button
+				<Button
 					type="button"
-					className={`${primaryButtonClass} hidden sm:inline-flex sm:w-auto`}
+					size="lg"
+					className="primary-action hidden h-11 rounded-2xl px-5 font-bold sm:inline-flex sm:w-auto"
 					disabled={financeLoading && !financeLoaded}
 					onClick={onLogExpense}
 				>
 					<Plus size={17} />
 					Log expense
-				</button>
+				</Button>
 			</div>
 			{financeLoading && !financeLoaded ? (
-				<div className="rounded-2xl border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-md rounded-2xl">
-					Loading finance data...
-					<div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
-						<div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
+				<div className="grid gap-4 sm:gap-5">
+					<Skeleton className="h-80 rounded-3xl" />
+					<div className="grid gap-4 lg:grid-cols-2">
+						<Skeleton className="h-72 rounded-3xl" />
+						<Skeleton className="h-72 rounded-3xl" />
 					</div>
 				</div>
 			) : financeError ? (
-				<div className="grid gap-4 border border-neutral-200 bg-paper p-6 text-neutral-600 shadow-2xl rounded-2xl">
+				<div className="soft-panel content-fade-in grid gap-4 p-6 text-neutral-600">
 					<p>{financeError}</p>
-					<button
+					<Button
 						type="button"
-						className={`${outlineButtonClass} w-full sm:w-fit`}
+						variant="outline"
+						size="lg"
+						className="h-11 rounded-2xl px-5 font-bold sm:w-fit"
 						onClick={onLoadFinanceData}
 					>
 						Try again
-					</button>
+					</Button>
 				</div>
 			) : (
 				<>
@@ -108,7 +113,7 @@ export function FinancesPanel({
 						filterRange={filterRange}
 						selectedPeriod={activePeriod}
 					/>
-					<div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+					<div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
 						<ExpenseFeed
 							title={`My ledger ${profileAvatar}`}
 							expenses={myExpenses}
