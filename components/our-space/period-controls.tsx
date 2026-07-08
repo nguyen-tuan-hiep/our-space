@@ -89,6 +89,10 @@ export function PeriodPickerButton({
 		return () => window.clearTimeout(timeoutId);
 	}, [periodPickerOpen, shouldRenderPicker]);
 
+	const handleClosePicker = () => {
+		if (periodPickerOpen) onTogglePeriodPicker();
+	};
+
 	return (
 		<div
 			className="relative shrink-0"
@@ -118,6 +122,7 @@ export function PeriodPickerButton({
 					todayKey={todayKey}
 					visibleYear={visibleYear}
 					onFilterRangeChange={onFilterRangeChange}
+					onClose={handleClosePicker}
 					onMovePicker={onMovePicker}
 					onSelectMonth={onSelectMonth}
 					onSelectWeekFromDate={onSelectWeekFromDate}
@@ -243,7 +248,7 @@ export function MobileSpaceTabs({
 	return (
 		<nav
 			aria-label="Space sections"
-			className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-40 sm:hidden"
+			className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-[50] sm:hidden"
 		>
 			<div className="relative border-t border-white/80 bg-white/50 px-2 pb-[clamp(0.5rem,env(safe-area-inset-bottom),1rem)] shadow-[0_-6px_32px_rgba(30,25,20,0.15)] backdrop-blur-md rounded-t-[1.8rem] box-content">
 				<div className="relative grid grid-cols-5 py-2">

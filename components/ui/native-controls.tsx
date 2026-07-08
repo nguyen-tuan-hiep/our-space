@@ -363,7 +363,7 @@ export function NativeDialog({
 	const dialog = (
 		<div
 			className={cx(
-				"native-dialog-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-0 backdrop-blur-sm sm:grid sm:place-items-center sm:p-4",
+				"native-dialog-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/20 p-0 backdrop-blur-sm sm:grid sm:place-items-center sm:p-4",
 				closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
 			)}
 		>

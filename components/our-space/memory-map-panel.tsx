@@ -13,6 +13,7 @@ import { Edit2, EllipsisVertical, MapPin, Plus, Trash2 } from "lucide-react";
 import { deleteMemory } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useToast } from "@/components/toast";
+import { useDelayedRender } from "@/components/ui/use-delayed-render";
 import { getMemoryTypeOption } from "@/lib/memory-map";
 import type { MemoryMapEntry } from "@/lib/types";
 import { outlineButtonClass, primaryButtonClass } from "./shared-classes";
@@ -56,8 +57,10 @@ function MemoryCard({
 	memory,
 	timeZone,
 	active,
+	menuClosing,
 	deleting,
 	menuRef,
+	shouldRenderMenu,
 	onEdit,
 	onMenuClose,
 	onMenuOpen,
@@ -65,8 +68,10 @@ function MemoryCard({
 }: {
 	active: boolean;
 	deleting: boolean;
+	menuClosing: boolean;
 	memory: MemoryMapEntry;
 	menuRef: RefObject<HTMLDivElement | null>;
+	shouldRenderMenu: boolean;
 	timeZone: string;
 	onEdit: () => void;
 	onMenuClose: () => void;
@@ -90,7 +95,6 @@ function MemoryCard({
 		<article
 			className={[
 				"relative overflow-visible rounded-2xl border border-neutral-200 bg-paper shadow-md",
-				active ? "z-30" : "z-0",
 			].join(" ")}
 		>
 			{memory.photo_url ? (
@@ -131,19 +135,27 @@ function MemoryCard({
 						>
 							<EllipsisVertical size={18} />
 						</button>
-						{active ? (
+						{shouldRenderMenu ? (
 							<>
 								<button
 									type="button"
 									aria-label="Close memory actions"
-									className="fixed inset-0 z-[60] bg-black/5 backdrop-blur-[1px] sm:hidden"
+									className={[
+										"fixed inset-0 z-[50] bg-black/20 backdrop-blur-sm sm:hidden",
+										menuClosing
+											? "native-dialog-backdrop-out"
+											: "native-dialog-backdrop-in",
+									].join(" ")}
 									onClick={onMenuClose}
 								/>
 								<div
 									id="memory-menu"
 									role="menu"
 									aria-labelledby={`memory-menu-button-${memory.id}`}
-									className="native-action-sheet-in fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+7.6rem)] z-[70] overflow-hidden rounded-2xl border border-white/80 bg-paper p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-44 sm:border-neutral-200 sm:p-1 sm:shadow-lg sm:backdrop-blur-none"
+									className={[
+										"mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+5rem)] z-[70] overflow-hidden rounded-2xl border border-white/80 bg-paper p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-xl will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-44 sm:border-neutral-200 sm:p-1 sm:shadow-lg sm:backdrop-blur-none",
+										menuClosing ? "native-sheet-out" : "native-sheet-in",
+									].join(" ")}
 								>
 									<button
 										type="button"
@@ -204,13 +216,27 @@ export function MemoryMapPanel({
 }: MemoryMapPanelProps) {
 	const toast = useToast();
 	const [activeMemory, setActiveMemory] = useState<MemoryMapEntry | null>(null);
+	const [renderedMenuMemoryId, setRenderedMenuMemoryId] = useState<
+		string | null
+	>(null);
 	const [memoryToDelete, setMemoryToDelete] = useState<MemoryMapEntry | null>(
 		null,
 	);
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [pending, startTransition] = useTransition();
 	const menuOpen = Boolean(activeMemory);
+	const { closing: menuClosing, shouldRender: shouldRenderMenu } =
+		useDelayedRender(menuOpen);
 	const menuRef = useRef<HTMLDivElement | null>(null);
+
+	useEffect(() => {
+		if (activeMemory) setRenderedMenuMemoryId(activeMemory.id);
+	}, [activeMemory]);
+
+	useEffect(() => {
+		if (shouldRenderMenu) return;
+		setRenderedMenuMemoryId(null);
+	}, [shouldRenderMenu]);
 
 	useEffect(() => {
 		if (!menuOpen) return;
@@ -282,8 +308,12 @@ export function MemoryMapPanel({
 							key={memory.id}
 							active={activeMemory?.id === memory.id}
 							deleting={pending && deletingId === memory.id}
+							menuClosing={menuClosing}
 							menuRef={menuRef}
 							memory={memory}
+							shouldRenderMenu={
+								shouldRenderMenu && renderedMenuMemoryId === memory.id
+							}
 							timeZone={timeZone}
 							onEdit={() => onEditMemory(memory)}
 							onMenuClose={handleMenuClose}

@@ -47,6 +47,7 @@ interface PeriodPickerDialogProps {
 	todayKey: string;
 	visibleYear: number;
 	onFilterRangeChange: (range: FilterRange) => void;
+	onClose: () => void;
 	onMovePicker: (direction: "next" | "previous") => void;
 	onSelectMonth: (monthIndex: number) => void;
 	onSelectWeekFromDate: (date: Date) => void;
@@ -63,19 +64,31 @@ export function PeriodPickerDialog({
 	todayKey,
 	visibleYear,
 	onFilterRangeChange,
+	onClose,
 	onMovePicker,
 	onSelectMonth,
 	onSelectWeekFromDate,
 }: PeriodPickerDialogProps) {
 	return (
-		<div
-			role="dialog"
-			aria-label="Choose period"
-			className={[
-				"mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-[60] max-h-[calc(100svh-7rem)] overflow-y-auto rounded-2xl border border-neutral-200 bg-paper p-4 text-neutral-900 shadow-2xl backdrop-blur will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-14 sm:w-[min(23rem,calc(100vw-2rem))]",
-				closing ? "native-sheet-out" : "native-sheet-in",
-			].join(" ")}
-		>
+		<>
+			<button
+				type="button"
+				aria-label="Close period picker"
+				className={[
+					"fixed inset-0 z-[55] bg-black/20 backdrop-blur-sm",
+					closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
+				].join(" ")}
+				onClick={onClose}
+			/>
+			<div
+				role="dialog"
+				aria-modal="true"
+				aria-label="Choose period"
+				className={[
+					"mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-[60] max-h-[calc(100svh-7rem)] overflow-y-auto rounded-2xl border border-neutral-200 bg-paper p-4 text-neutral-900 shadow-2xl backdrop-blur will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-14 sm:w-[min(23rem,calc(100vw-2rem))]",
+					closing ? "native-sheet-out" : "native-sheet-in",
+				].join(" ")}
+			>
 			<div
 				role="radiogroup"
 				aria-label="Period range"
@@ -181,6 +194,7 @@ export function PeriodPickerDialog({
 			<p className="mt-4 rounded-2xl bg-mui/10 px-4 py-3 text-center text-xs font-semibold text-neutral-500">
 				Selected: <span className="text-neutral-900">{periodDescription}</span>
 			</p>
-		</div>
+			</div>
+		</>
 	);
 }

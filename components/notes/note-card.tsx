@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Edit2, Trash2, EllipsisVertical } from "lucide-react";
 import { useToast } from "@/components/toast";
+import { useDelayedRender } from "@/components/ui/use-delayed-render";
 import { deleteNote } from "@/app/actions";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
@@ -49,6 +50,8 @@ export function NoteCard({
 
 	const [activeNote, setActiveNote] = useState<SharedNote | null>(null);
 	const menuOpen = Boolean(activeNote);
+	const { closing: menuClosing, shouldRender: shouldRenderMenu } =
+		useDelayedRender(menuOpen);
 	const menuRef = useRef<HTMLDivElement | null>(null);
 
 	const locked = Boolean(
@@ -114,7 +117,6 @@ export function NoteCard({
 		<article
 			className={[
 				"relative flex h-[20rem] flex-col overflow-visible rounded-2xl border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5",
-				menuOpen ? "z-30" : "z-0",
 			].join(" ")}
 		>
 			<div className="flex justify-between items-start gap-2">
@@ -156,19 +158,28 @@ export function NoteCard({
 								className="text-neutral-500"
 							/>
 						</button>
-						{activeNote?.id === note.id ? (
+						{shouldRenderMenu &&
+						(activeNote?.id === note.id || menuClosing) ? (
 							<>
 								<button
 									type="button"
 									aria-label="Close note actions"
-									className="fixed inset-0 z-[60] bg-black/5 backdrop-blur-[1px] sm:hidden"
+									className={[
+										"fixed inset-0 z-[50] bg-black/5 backdrop-blur-sm sm:hidden",
+										menuClosing
+											? "native-dialog-backdrop-out"
+											: "native-dialog-backdrop-in",
+									].join(" ")}
 									onClick={handleMenuClose}
 								/>
 								<div
 									id="note-menu"
 									role="menu"
 									aria-labelledby={`note-menu-button-${note.id}`}
-									className="native-action-sheet-in fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] z-[70] overflow-hidden rounded-2xl border border-white/80 bg-paper p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-40 sm:border-neutral-200 sm:p-1 sm:shadow-lg sm:backdrop-blur-none"
+									className={[
+										"mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+5rem)] z-[70] overflow-hidden rounded-2xl border border-white/80 bg-paper p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-xl will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-40 sm:border-neutral-200 sm:p-1 sm:shadow-lg sm:backdrop-blur-none",
+										menuClosing ? "native-sheet-out" : "native-sheet-in",
+									].join(" ")}
 								>
 									<button
 										type="button"

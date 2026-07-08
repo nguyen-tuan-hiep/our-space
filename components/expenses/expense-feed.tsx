@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { Edit2, Trash2, EllipsisVertical, ListFilter } from "lucide-react";
 import { useToast } from "@/components/toast";
 import { NativeSelect } from "@/components/ui/native-controls";
+import { useDelayedRender } from "@/components/ui/use-delayed-render";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
@@ -46,6 +47,9 @@ export function ExpenseFeed({
 	const [activeExpense, setActiveExpense] = useState<IndividualExpense | null>(
 		null,
 	);
+	const [renderedMenuExpenseId, setRenderedMenuExpenseId] = useState<
+		string | null
+	>(null);
 
 	const [scrollGradient, setScrollGradient] = useState({
 		top: false,
@@ -53,6 +57,8 @@ export function ExpenseFeed({
 	});
 
 	const menuOpen = Boolean(activeExpense);
+	const { closing: menuClosing, shouldRender: shouldRenderMenu } =
+		useDelayedRender(menuOpen);
 	const menuRef = useRef<HTMLDivElement | null>(null);
 	const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -84,6 +90,15 @@ export function ExpenseFeed({
 			return nextGradient;
 		});
 	}, []);
+
+	useEffect(() => {
+		if (activeExpense) setRenderedMenuExpenseId(activeExpense.id);
+	}, [activeExpense]);
+
+	useEffect(() => {
+		if (shouldRenderMenu) return;
+		setRenderedMenuExpenseId(null);
+	}, [shouldRenderMenu]);
 
 	useEffect(() => {
 		if (!menuOpen) return;
@@ -263,12 +278,18 @@ export function ExpenseFeed({
 														<EllipsisVertical size={18} />
 													</button>
 
-													{activeExpense?.id === expense.id ? (
+													{shouldRenderMenu &&
+													renderedMenuExpenseId === expense.id ? (
 														<>
 															<button
 																type="button"
 																aria-label="Close expense actions"
-																className="fixed inset-0 z-[60] bg-black/5 backdrop-blur-[1px] sm:hidden"
+																className={[
+																	"fixed inset-0 z-[50] bg-black/20 backdrop-blur-sm sm:hidden",
+																	menuClosing
+																		? "native-dialog-backdrop-out"
+																		: "native-dialog-backdrop-in",
+																].join(" ")}
 																onClick={handleMenuClose}
 															/>
 
@@ -276,7 +297,12 @@ export function ExpenseFeed({
 																id="expense-menu"
 																role="menu"
 																aria-labelledby={`expense-menu-button-${expense.id}`}
-																className="native-action-sheet-in fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+7.6rem)] z-[70] overflow-hidden rounded-2xl border border-white/80 bg-paper p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-xl sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-44 sm:border-neutral-200 sm:p-1 sm:shadow-lg sm:backdrop-blur-none"
+																className={[
+																	"mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+5rem)] z-[70] overflow-hidden rounded-2xl border border-white/80 bg-paper p-2 shadow-[0_18px_60px_rgba(30,25,20,0.24)] backdrop-blur-sm will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-9 sm:w-44 sm:border-neutral-200 sm:p-1 sm:shadow-lg sm:backdrop-blur-none",
+																	menuClosing
+																		? "native-sheet-out"
+																		: "native-sheet-in",
+																].join(" ")}
 															>
 																<button
 																	type="button"

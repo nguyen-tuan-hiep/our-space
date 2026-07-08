@@ -123,7 +123,7 @@ export function SpaceHero({
 									aria-expanded={mobileMenuOpen ? "true" : undefined}
 									aria-haspopup="menu"
 									onClick={onToggleMenu}
-									className="grid size-10 shrink-0 place-items-center rounded-full border border-paper/60 bg-black/35 p-0 transition active:scale-[0.8] hover:bg-black/50 sm:size-9"
+									className="grid size-10 shrink-0 place-items-center rounded-full border border-paper/60 bg-black/20 p-0 transition active:scale-[0.8] hover:bg-black/50 sm:size-9"
 								>
 									<MenuIcon size={18} />
 								</button>
@@ -192,7 +192,7 @@ export function SpaceHero({
 							A private place for us.
 						</h1>
 						<div className="grid max-w-3xl grid-cols-2 gap-2 sm:gap-3">
-							<div className="rounded-2xl bg-black/25 p-3 backdrop-blur-md sm:bg-black/20 sm:p-4 sm:backdrop-blur-sm">
+							<div className="rounded-2xl bg-black/20 p-3 backdrop-blur-md sm:p-4 sm:backdrop-blur-sm">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Days together
 								</p>
@@ -203,7 +203,7 @@ export function SpaceHero({
 									Since {anniversaryLabel}
 								</p>
 							</div>
-							<div className="rounded-2xl bg-black/25 p-3 backdrop-blur-md sm:p-4 sm:backdrop-blur-sm">
+							<div className="rounded-2xl bg-black/20 p-3 backdrop-blur-md sm:p-4 sm:backdrop-blur-sm">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Next anniversary
 								</p>
