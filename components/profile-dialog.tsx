@@ -172,7 +172,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 						/>
 
 						<div>
-							<div className="grid max-h-72 grid-cols-5 gap-3 overflow-auto pr-1 sm:grid-cols-8">
+							<div className="grid max-h-72 grid-cols-5 gap-3 sm:grid-cols-8">
 								{avatarOptions.map((option) => {
 									const selected = avatar === option;
 									return (

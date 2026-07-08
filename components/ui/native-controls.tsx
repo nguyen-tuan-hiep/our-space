@@ -394,7 +394,7 @@ export function NativeDialog({
 					{children}
 				</div>
 				{actions ? (
-					<div className="flex justify-end gap-3 px-6 pb-6">{actions}</div>
+					<div className="flex justify-end gap-3 p-6">{actions}</div>
 				) : null}
 			</div>
 		</div>
