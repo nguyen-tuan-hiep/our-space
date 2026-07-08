@@ -13,7 +13,7 @@ function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 export const style =
-	"peer appearance-none w-full px-3 h-12 sm:h-11 text-sm text-neutral-900 bg-transparent rounded-2xl border border-neutral-300 shadow-none focus:shadow-none outline-none transition-all duration-200 focus:border-mui focus:ring-1 focus:ring-mui";
+	"peer appearance-none w-full px-3 h-12 sm:h-11 text-sm text-neutral-900 bg-transparent rounded-2xl border border-neutral-400 shadow-none focus:shadow-none outline-none transition-all duration-200 focus:border-mui focus:ring-1 focus:ring-mui";
 
 export function NativeButton({
 	variant = "contained",
@@ -27,7 +27,7 @@ export function NativeButton({
 		<button
 			{...props}
 			className={cx(
-				"inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-bold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11 sm:rounded-md sm:active:scale-100",
+				"inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-bold transition active:scale-[0.8] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11",
 				variant === "contained" &&
 					"bg-neutral-900 text-white hover:bg-neutral-700",
 				variant === "outlined" &&
@@ -377,7 +377,7 @@ export function NativeDialog({
 				role="dialog"
 				aria-modal="true"
 				className={cx(
-					"mobile-sheet-motion relative max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full origin-bottom overflow-hidden rounded-t-[2.1rem] bg-paper shadow-2xl will-change-transform sm:max-h-[calc(100svh-2rem)] sm:origin-center sm:rounded-lg",
+					"mobile-sheet-motion relative max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full origin-bottom overflow-hidden rounded-2xl bg-paper shadow-2xl will-change-transform sm:max-h-[calc(100svh-2rem)] sm:origin-center",
 					closing ? "native-sheet-out" : "native-sheet-in",
 					maxWidth === "xs" && "max-w-md",
 					maxWidth === "sm" && "max-w-xl",

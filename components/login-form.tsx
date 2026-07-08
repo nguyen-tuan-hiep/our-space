@@ -17,7 +17,7 @@ export function LoginForm() {
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-paper p-6 sm:p-8">
+    <div className="rounded-2xl border border-neutral-200 bg-paper p-6 sm:p-8">
       <NativeTabs
         value={mode}
         onChange={setMode}

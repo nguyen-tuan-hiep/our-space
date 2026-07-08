@@ -1,5 +1,10 @@
 import dynamic from "next/dynamic";
-import type { IndividualExpense, Profile, SharedNote } from "@/lib/types";
+import type {
+	IndividualExpense,
+	MemoryMapEntry,
+	Profile,
+	SharedNote,
+} from "@/lib/types";
 
 const NoteDialog = dynamic(
 	() => import("@/components/notes/note-dialog").then((mod) => mod.NoteDialog),
@@ -33,13 +38,23 @@ const AnniversaryDialog = dynamic(
 	{ ssr: false },
 );
 
+const MemoryMapDialog = dynamic(
+	() =>
+		import("@/components/our-space/memory-map-dialog").then(
+			(mod) => mod.MemoryMapDialog,
+		),
+	{ ssr: false },
+);
+
 interface SpaceDialogsProps {
 	anniversaryDate: string;
 	editingExpense: IndividualExpense | null;
+	editingMemory: MemoryMapEntry | null;
 	editingNote: SharedNote | null;
 	expenseOpen: boolean;
 	heroImageUrl: string;
 	heroOpen: boolean;
+	memoryOpen: boolean;
 	noteOpen: boolean;
 	partner: Profile;
 	profile: Profile;
@@ -49,19 +64,23 @@ interface SpaceDialogsProps {
 	onCloseAnniversary: () => void;
 	onCloseExpense: () => void;
 	onCloseHero: () => void;
+	onCloseMemory: () => void;
 	onCloseNote: () => void;
 	onCloseProfile: () => void;
 	onExpenseSaved: (expense: IndividualExpense) => void;
+	onMemorySaved: (memory: MemoryMapEntry) => void;
 	onNoteSaved: (note: SharedNote) => void;
 }
 
 export function SpaceDialogs({
 	anniversaryDate,
 	editingExpense,
+	editingMemory,
 	editingNote,
 	expenseOpen,
 	heroImageUrl,
 	heroOpen,
+	memoryOpen,
 	noteOpen,
 	partner,
 	profile,
@@ -71,9 +90,11 @@ export function SpaceDialogs({
 	onCloseAnniversary,
 	onCloseExpense,
 	onCloseHero,
+	onCloseMemory,
 	onCloseNote,
 	onCloseProfile,
 	onExpenseSaved,
+	onMemorySaved,
 	onNoteSaved,
 }: SpaceDialogsProps) {
 	return (
@@ -92,6 +113,12 @@ export function SpaceDialogs({
 				profile={profile}
 				expense={editingExpense}
 				onSaved={onExpenseSaved}
+			/>
+			<MemoryMapDialog
+				open={memoryOpen}
+				onClose={onCloseMemory}
+				memory={editingMemory}
+				onSaved={onMemorySaved}
 			/>
 			<ProfileDialog
 				open={profileOpen}

@@ -59,14 +59,14 @@ export function NotesPanel({
 						/>
 					))
 				) : loading ? (
-					<div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:rounded-none sm:shadow-none md:col-span-3 xl:col-span-4">
+					<div className="rounded-2xl border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:shadow-none md:col-span-3 xl:col-span-4">
 						Loading notes...
 						<div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
 							<div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
 						</div>
 					</div>
 				) : (
-					<div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:col-span-2 sm:rounded-lg sm:shadow-none md:col-span-3 lg:col-span-4 shadow-md">
+					<div className="rounded-2xl border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:col-span-2 sm:shadow-none md:col-span-3 lg:col-span-4 shadow-md">
 						No notes for this {filterRange}.
 					</div>
 				)}

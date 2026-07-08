@@ -77,14 +77,14 @@ export function FinancesPanel({
 				</button>
 			</div>
 			{financeLoading && !financeLoaded ? (
-				<div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-md rounded-2xl">
+				<div className="rounded-2xl border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-md rounded-2xl">
 					Loading finance data...
 					<div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
 						<div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
 					</div>
 				</div>
 			) : financeError ? (
-				<div className="grid gap-4 rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-600 shadow-2xl rounded-2xl">
+				<div className="grid gap-4 border border-neutral-200 bg-paper p-6 text-neutral-600 shadow-2xl rounded-2xl">
 					<p>{financeError}</p>
 					<button
 						type="button"

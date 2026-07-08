@@ -24,6 +24,8 @@ import type {
   DailyMood,
   ExpenseCategory,
   IndividualExpense,
+  MemoryMapEntry,
+  MemoryType,
   MoodLevel,
   SharedNote,
 } from "@/lib/types";
@@ -37,6 +39,17 @@ type ExpensePayload = {
   notes: string | null;
 };
 
+type MemoryPayload = {
+  title: string;
+  description: string | null;
+  memory_type: MemoryType;
+  latitude: number;
+  longitude: number;
+  visited_at: string;
+  photo_url: string | null;
+  photo_public_id: string | null;
+};
+
 const moodLevels: MoodLevel[] = [
   "great",
   "excited",
@@ -46,6 +59,16 @@ const moodLevels: MoodLevel[] = [
   "tired",
   "stressed",
   "sad",
+];
+
+const memoryTypes: MemoryType[] = [
+  "date",
+  "food",
+  "trip",
+  "anniversary",
+  "photo",
+  "milestone",
+  "other",
 ];
 
 function ok(message: string): { ok: true; message: string } {
@@ -105,6 +128,44 @@ function getExpensePayload(
       transaction_date: transactionDate.toISOString(),
       category,
       notes: nullableStringValue(formData, "notes"),
+    },
+  };
+}
+
+function getMemoryPayload(
+  formData: FormData,
+): { ok: true; payload: MemoryPayload } | { ok: false; message: string } {
+  const memoryType = stringValue(formData, "memory_type") as MemoryType;
+  const latitude = Number(stringValue(formData, "latitude"));
+  const longitude = Number(stringValue(formData, "longitude"));
+  const visitedAt = new Date(stringValue(formData, "visited_at"));
+  const title = stringValue(formData, "title");
+
+  if (!title) return fail("Please enter a memory title.");
+  if (!memoryTypes.includes(memoryType)) {
+    return fail("Please choose a valid memory type.");
+  }
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
+    return fail("Latitude must be between -90 and 90.");
+  }
+  if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+    return fail("Longitude must be between -180 and 180.");
+  }
+  if (Number.isNaN(visitedAt.getTime())) {
+    return fail("Please choose a valid memory date.");
+  }
+
+  return {
+    ok: true,
+    payload: {
+      title,
+      description: nullableStringValue(formData, "description"),
+      memory_type: memoryType,
+      latitude,
+      longitude,
+      visited_at: visitedAt.toISOString(),
+      photo_url: nullableStringValue(formData, "photo_url"),
+      photo_public_id: nullableStringValue(formData, "photo_public_id"),
     },
   };
 }
@@ -540,6 +601,87 @@ export async function deleteMood(moodId: string) {
   if (error) return fail(error.message);
   revalidatePath("/");
   return ok("Mood removed.");
+}
+
+export async function createMemory(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const memory = getMemoryPayload(formData);
+  if (!memory.ok) return memory;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, partner_id")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; partner_id: string | null }>();
+
+  if (profileError) return fail(profileError.message);
+  if (!profile?.partner_id) {
+    return fail("Please pair with your partner before adding memories.");
+  }
+
+  const coupleId = getCoupleSettingsId(profile, { id: profile.partner_id });
+  const { data, error } = await supabase
+    .from("memory_map_entries")
+    .insert({
+      ...memory.payload,
+      couple_id: coupleId,
+      created_by: user.id,
+    })
+    .select(
+      "*, creator:profiles!memory_map_entries_created_by_fkey(id, display_name, avatar_url, currency)",
+    )
+    .single<MemoryMapEntry>();
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return { ...ok("Memory added to the map."), memory: data };
+}
+
+export async function updateMemory(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const memoryId = stringValue(formData, "id");
+  const memory = getMemoryPayload(formData);
+  if (!memory.ok) return memory;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, partner_id")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; partner_id: string | null }>();
+
+  if (profileError) return fail(profileError.message);
+  if (!profile?.partner_id) {
+    return fail("Please pair with your partner before editing memories.");
+  }
+
+  const coupleId = getCoupleSettingsId(profile, { id: profile.partner_id });
+  const { data, error } = await supabase
+    .from("memory_map_entries")
+    .update({
+      ...memory.payload,
+      couple_id: coupleId,
+    })
+    .eq("id", memoryId)
+    .select(
+      "*, creator:profiles!memory_map_entries_created_by_fkey(id, display_name, avatar_url, currency)",
+    )
+    .single<MemoryMapEntry>();
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return { ...ok("Memory updated."), memory: data };
+}
+
+export async function deleteMemory(memoryId: string) {
+  const { supabase } = await requireUser();
+  const { error } = await supabase
+    .from("memory_map_entries")
+    .delete()
+    .eq("id", memoryId);
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return ok("Memory deleted.");
 }
 
 export async function loadFinanceDashboardData() {

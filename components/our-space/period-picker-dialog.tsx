@@ -72,7 +72,7 @@ export function PeriodPickerDialog({
 			role="dialog"
 			aria-label="Choose period"
 			className={[
-				"mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-[60] max-h-[calc(100svh-7rem)] overflow-y-auto rounded-[2rem] border border-neutral-200 bg-paper p-4 text-neutral-900 shadow-2xl backdrop-blur will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-14 sm:w-[min(23rem,calc(100vw-2rem))]",
+				"mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-[60] max-h-[calc(100svh-7rem)] overflow-y-auto rounded-2xl border border-neutral-200 bg-paper p-4 text-neutral-900 shadow-2xl backdrop-blur will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-14 sm:w-[min(23rem,calc(100vw-2rem))]",
 				closing ? "native-sheet-out" : "native-sheet-in",
 			].join(" ")}
 		>

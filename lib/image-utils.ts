@@ -1,7 +1,7 @@
 const CLOUDINARY_UPLOAD_SEGMENT = "/image/upload/";
 const HERO_IMAGE_TRANSFORM = "f_auto,q_auto:good,c_limit,w_1200";
 
-export function getOptimizedHeroImageUrl(imageUrl: string) {
+export function getOptimizedImageUrl(imageUrl: string) {
   try {
     const url = new URL(imageUrl);
     const uploadIndex = url.pathname.indexOf(CLOUDINARY_UPLOAD_SEGMENT);

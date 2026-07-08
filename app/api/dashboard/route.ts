@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAppSession } from "@/lib/auth";
 import { getDashboardData } from "@/lib/data";
-import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
+import { getOptimizedImageUrl } from "@/lib/image-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +26,8 @@ export async function GET() {
     {
       notes: data.notes,
       moods: data.moods,
-      heroImageUrl: getOptimizedHeroImageUrl(heroImageUrl),
+      memories: data.memories,
+      heroImageUrl: getOptimizedImageUrl(heroImageUrl),
       anniversaryDate:
         data.settings?.anniversary_date ??
         appSession.profile.created_at?.slice(0, 10) ??

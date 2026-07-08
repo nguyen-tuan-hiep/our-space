@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
 import { themeColors } from "@/lib/theme-colors";

@@ -181,7 +181,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 											type="button"
 											aria-label={`Choose ${option} avatar`}
 											onClick={() => setAvatar(option)}
-											className={`grid aspect-square place-items-center rounded-[1.1rem] border transition sm:rounded-lg ${
+											className={`grid aspect-square place-items-center border transition rounded-2xl ${
 												selected
 													? "border-[color-mix(in_srgb,#000000_48%,transparent)] bg-[color-mix(in_srgb,#000000_12%,transparent)] text-white"
 													: "border-bg-[color-mix(in_srgb,#000000_12%,transparent)] bg-paper hover:border-[color-mix(in_srgb,#000000_48%,transparent)]"

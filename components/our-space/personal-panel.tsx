@@ -67,7 +67,7 @@ export function PersonalPanel({
 			</div>
 
 			<div className="grid gap-3 sm:grid-cols-2 sm:gap-5">
-				<div className="rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
+				<div className="rounded-2xl border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
 					<div className="flex items-center gap-3">
 						<div className="grid size-14 place-items-center rounded-full bg-mui/10 text-2xl">
 							{profileAvatar}
@@ -87,7 +87,7 @@ export function PersonalPanel({
 					</div>
 					<button
 						type="button"
-						className={`${outlineButtonClass} mt-4 w-full flex items-center justify-center gap-2 rounded-2xl sm:w-fit sm:rounded-md`}
+						className={`${outlineButtonClass} mt-4 w-full flex items-center justify-center gap-2 rounded-2xl sm:w-fit`}
 						onClick={onOpenProfile}
 					>
 						<Settings size={17} />
@@ -95,7 +95,7 @@ export function PersonalPanel({
 					</button>
 				</div>
 
-				<div className="rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
+				<div className="rounded-2xl border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
 					<div className="flex items-center gap-3">
 						<div className="grid size-14 place-items-center rounded-full bg-mui/10 text-2xl">
 							{partnerAvatar}
@@ -123,7 +123,7 @@ export function PersonalPanel({
 				</div>
 			</div>
 
-			<div className="rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
+			<div className="rounded-2xl border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
 				<div className="flex items-start justify-between gap-4">
 					<div>
 						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
@@ -143,7 +143,7 @@ export function PersonalPanel({
 				<div className="mt-4 grid grid-cols-2 gap-3">
 					<button
 						type="button"
-						className={`${outlineButtonClass} w-full flex items-center justify-center gap-2 rounded-2xl sm:w-fit sm:rounded-md`}
+						className={`${outlineButtonClass} w-full flex items-center justify-center gap-2 rounded-2xl sm:w-fit`}
 						onClick={onEditAnniversary}
 					>
 						<CalendarHeart size={17} />
@@ -151,7 +151,7 @@ export function PersonalPanel({
 					</button>
 					<button
 						type="button"
-						className={`${outlineButtonClass} w-full flex items-center justify-center gap-2 rounded-2xl sm:w-fit sm:rounded-md`}
+						className={`${outlineButtonClass} w-full flex items-center justify-center gap-2 rounded-2xl sm:w-fit`}
 						onClick={onEditHeroImage}
 					>
 						<ImageUp size={17} />
@@ -160,7 +160,7 @@ export function PersonalPanel({
 				</div>
 			</div>
 
-			<div className="grid gap-3 rounded-[1.75rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
+			<div className="grid gap-3 rounded-2xl border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl sm:p-5">
 				<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
 					App actions
 				</p>
@@ -169,7 +169,7 @@ export function PersonalPanel({
 					<button
 						type="button"
 						disabled={pending}
-						className={`${primaryButtonClass} min-h-12 rounded-2xl bg-danger hover:brightness-95 sm:min-h-11 sm:rounded-md`}
+						className={`${primaryButtonClass} min-h-12 rounded-2xl bg-danger hover:brightness-95 sm:min-h-11`}
 						onClick={onSignOut}
 					>
 						<LogOut size={16} />

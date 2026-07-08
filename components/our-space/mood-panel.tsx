@@ -130,7 +130,7 @@ function personMoodCard({
 	const option = getMoodOption(mood?.mood);
 
 	return (
-		<div className="rounded-[1.35rem] border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl">
+		<div className="rounded-2xl border border-neutral-200 bg-paper p-4 shadow-md rounded-2xl">
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-w-0 items-center gap-3">
 					<div className="grid size-11 shrink-0 place-items-center rounded-full bg-mui/10 text-xl">
@@ -153,7 +153,7 @@ function personMoodCard({
 				{option ? option.label : "No mood"}
 			</p>
 			{mood?.note ? (
-				<p className="mt-2 rounded-[1rem] bg-mui/10 px-3 py-2 text-sm leading-6 text-neutral-600 sm:rounded-lg">
+				<p className="mt-2 rounded-2xl bg-mui/10 px-3 py-2 text-sm leading-6 text-neutral-600">
 					{mood.note}
 				</p>
 			) : null}
@@ -278,7 +278,7 @@ export function MoodPanel({
 				<div className="sm:hidden">{periodControl}</div>
 			</div>
 
-			<div className="rounded-[1.7rem] border border-neutral-200 bg-paper p-3 shadow-md rounded-2xl sm:p-5">
+			<div className="rounded-2xl border border-neutral-200 bg-paper p-3 shadow-md rounded-2xl sm:p-5">
 				<div className="flex items-start justify-between gap-4">
 					<div>
 						<div className="flex items-center gap-2">
@@ -309,7 +309,7 @@ export function MoodPanel({
 						))}
 
 						{loading ? (
-							<div className="col-span-7 rounded-[1.25rem] bg-neutral-50 p-5 text-center text-sm text-neutral-500 sm:rounded-lg">
+							<div className="col-span-7 rounded-2xl bg-neutral-50 p-5 text-center text-sm text-neutral-500">
 								Loading moods...
 							</div>
 						) : (
@@ -334,7 +334,7 @@ export function MoodPanel({
 										aria-label={`Mood for ${formatMoodDate(cell.dateKey, timeZone)}`}
 										onClick={() => setSelectedDate(cell.dateKey)}
 										className={[
-											"relative h-[4.7rem] min-w-0 overflow-hidden rounded-[0.95rem] border px-0.5 py-1.5 transition active:scale-[0.98] sm:h-auto sm:min-h-[5.1rem] sm:rounded-lg sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
+											"relative h-[4.7rem] min-w-0 overflow-hidden rounded-2xl border px-0.5 py-1.5 transition active:scale-[0.8] sm:h-auto sm:min-h-[5.1rem] sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
 											selected
 												? "border-mui/80 bg-mui/80 text-white shadow-[0_12px_28px_rgba(30,25,20,0.24)]"
 												: "border-neutral-200 bg-neutral-50/70 text-neutral-800 hover:border-mui/40 hover:bg-mui/10",
@@ -404,11 +404,11 @@ export function MoodPanel({
 
 			<form
 				onSubmit={handleSubmit}
-				className="rounded-[1.7rem] border border-neutral-200 bg-paper p-3 shadow-md rounded-2xl sm:p-5"
+				className="rounded-2xl border border-neutral-200 bg-paper p-3 shadow-md rounded-2xl sm:p-5"
 			>
 				<div className="flex items-center justify-between gap-3">
 					<div className="flex min-w-0 items-center gap-3">
-						<div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-mui/10 text-mui sm:rounded-lg">
+						<div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-mui/10 text-mui">
 							<HeartPulse size={24} />
 						</div>
 						<div className="min-w-0">
@@ -441,7 +441,7 @@ export function MoodPanel({
 									aria-pressed={selected}
 									onClick={() => setMood(option.value)}
 									className={[
-										"grid min-h-[4.8rem] place-items-center rounded-[1.25rem] border px-2 py-2 text-center transition active:scale-[0.98] sm:rounded-lg",
+										"grid min-h-[4.8rem] place-items-center rounded-2xl border px-2 py-2 text-center transition active:scale-[0.8]",
 										selected
 											? "border-mui bg-mui/10 shadow-inner"
 											: "border-neutral-200 bg-neutral-50/60 hover:bg-mui/10",

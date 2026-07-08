@@ -17,6 +17,7 @@ import type {
   DailyMood,
   IndividualExpense,
   LoveQuote,
+  MemoryMapEntry,
   Profile,
   SharedNote,
 } from "@/lib/types";
@@ -34,6 +35,7 @@ import {
   MobileSpaceTabs,
   PeriodControls,
   PeriodPickerButton,
+  type SpaceSection,
 } from "@/components/our-space/period-controls";
 import {
   addUtcMonths,
@@ -42,6 +44,7 @@ import {
   getUtcMonthStart,
 } from "@/components/our-space/period-utils";
 import { DraggableFab } from "@/components/our-space/draggable-fab";
+import { MemoryMapPanel } from "@/components/our-space/memory-map-panel";
 import { SpaceHero } from "@/components/our-space/space-hero";
 
 const FinancesPanel = dynamic(
@@ -67,7 +70,7 @@ function FinancesPanelLoading() {
         <div className="grid size-11 shrink-0 place-items-center rounded-full bg-paper shadow-sm ring-1 ring-neutral-200/70 sm:hidden" />
         <div className="hidden h-11 w-32 sm:block" />
       </div>
-      <div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-md rounded-2xl">
+      <div className="rounded-2xl border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-md rounded-2xl">
         Loading finance data...
         <div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
           <div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
@@ -91,7 +94,7 @@ function MoodPanelLoading() {
         </div>
         <div className="grid size-11 shrink-0 place-items-center rounded-full bg-paper shadow-sm ring-1 ring-neutral-200/70 sm:hidden" />
       </div>
-      {/* <div className="rounded-[1.5rem] border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:rounded-lg sm:shadow-none">
+      {/* <div className="rounded-2xl border border-neutral-200 bg-paper p-6 text-neutral-500 shadow-sm sm:shadow-none">
         Loading mood data...
         <div className="mx-auto mt-4 h-1.5 w-44 items-center overflow-hidden rounded-full">
           <div className="pwa-loading-bar h-full w-1/2 rounded-full bg-neutral-900" />
@@ -131,6 +134,7 @@ interface OurSpaceClientProps {
 type SpacePayload = {
   notes: SharedNote[];
   moods: DailyMood[];
+  memories: MemoryMapEntry[];
   heroImageUrl: string;
   anniversaryDate: string;
 };
@@ -139,8 +143,6 @@ type CachedSpacePayload = SpacePayload & {
   profileId: string;
   cachedAt: string;
 };
-
-type SpaceSection = "notes" | "finances" | "mood" | "personal";
 
 const spaceCachePrefix = "our-space:home:";
 const legacyDashboardCachePrefix = "our-space:dashboard:";
@@ -156,6 +158,7 @@ function isSpacePayload(value: unknown): value is SpacePayload {
   return (
     Array.isArray(payload.notes) &&
     Array.isArray(payload.moods) &&
+    Array.isArray(payload.memories) &&
     typeof payload.heroImageUrl === "string" &&
     typeof payload.anniversaryDate === "string"
   );
@@ -227,6 +230,7 @@ export function OurSpaceClient({
   const toast = useToast();
   const [noteOpen, setNoteOpen] = useState(false);
   const [expenseOpen, setExpenseOpen] = useState(false);
+  const [memoryOpen, setMemoryOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [heroOpen, setHeroOpen] = useState(false);
   const [anniversaryOpen, setAnniversaryOpen] = useState(false);
@@ -242,8 +246,12 @@ export function OurSpaceClient({
   const [editingNote, setEditingNote] = useState<SharedNote | null>(null);
   const [editingExpense, setEditingExpense] =
     useState<IndividualExpense | null>(null);
+  const [editingMemory, setEditingMemory] = useState<MemoryMapEntry | null>(
+    null,
+  );
   const [notes, setNotes] = useState(initialNotes);
   const [moods, setMoods] = useState<DailyMood[]>([]);
+  const [memories, setMemories] = useState<MemoryMapEntry[]>([]);
   const [heroImageUrl, setHeroImageUrl] = useState(initialHeroImageUrl);
   const [anniversaryDate, setAnniversaryDate] = useState(
     initialAnniversaryDate,
@@ -270,6 +278,7 @@ export function OurSpaceClient({
   const ignoredRealtimeNoteIds = useRef(new Set<string>());
   const ignoredRealtimeExpenseIds = useRef(new Set<string>());
   const ignoredRealtimeMoodIds = useRef(new Set<string>());
+  const ignoredRealtimeMemoryIds = useRef(new Set<string>());
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const desktopPeriodPickerRef = useRef<HTMLDivElement | null>(null);
   const mobilePeriodPickerRef = useRef<HTMLDivElement | null>(null);
@@ -387,11 +396,35 @@ export function OurSpaceClient({
       })),
     [filteredNotes, partner, profile],
   );
+  const displayMemories = useMemo(
+    () =>
+      memories.map((memory) => ({
+        ...memory,
+        creator:
+          memory.created_by === profile.id
+            ? {
+                id: profile.id,
+                display_name: profile.display_name,
+                avatar_url: profile.avatar_url,
+                currency: profile.currency,
+              }
+            : memory.created_by === partner.id
+              ? {
+                  id: partner.id,
+                  display_name: partner.display_name,
+                  avatar_url: partner.avatar_url,
+                  currency: partner.currency,
+                }
+              : memory.creator,
+      })),
+    [memories, partner, profile],
+  );
 
   const applySpacePayload = useCallback(
     (payload: SpacePayload, options?: { cache?: boolean }) => {
       setNotes(payload.notes);
       setMoods(payload.moods);
+      setMemories(payload.memories);
       setHeroImageUrl(payload.heroImageUrl);
       setAnniversaryDate(payload.anniversaryDate);
 
@@ -569,6 +602,40 @@ export function OurSpaceClient({
     );
   };
 
+  const upsertLocalMemory = (savedMemory: MemoryMapEntry) => {
+    ignoredRealtimeMemoryIds.current.add(savedMemory.id);
+    window.setTimeout(() => {
+      ignoredRealtimeMemoryIds.current.delete(savedMemory.id);
+    }, 10000);
+
+    setMemories((currentMemories) => {
+      const nextMemories = currentMemories.some(
+        (memory) => memory.id === savedMemory.id,
+      )
+        ? currentMemories.map((memory) =>
+            memory.id === savedMemory.id ? savedMemory : memory,
+          )
+        : [savedMemory, ...currentMemories];
+
+      return nextMemories.sort(
+        (first, second) =>
+          new Date(second.visited_at).getTime() -
+          new Date(first.visited_at).getTime(),
+      );
+    });
+  };
+
+  const removeLocalMemory = (memoryId: string) => {
+    ignoredRealtimeMemoryIds.current.add(memoryId);
+    window.setTimeout(() => {
+      ignoredRealtimeMemoryIds.current.delete(memoryId);
+    }, 10000);
+
+    setMemories((currentMemories) =>
+      currentMemories.filter((memory) => memory.id !== memoryId),
+    );
+  };
+
   useEffect(() => {
     let cleanup: (() => void) | undefined;
     let cancelled = false;
@@ -622,6 +689,24 @@ export function OurSpaceClient({
                 getRealtimeRecordId(payload.old);
 
               if (moodId && ignoredRealtimeMoodIds.current.has(moodId)) return;
+              void loadSpaceData({ silent: true });
+            },
+          )
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "memory_map_entries" },
+            (payload) => {
+              const memoryId =
+                getRealtimeRecordId(payload.new) ??
+                getRealtimeRecordId(payload.old);
+
+              if (
+                memoryId &&
+                ignoredRealtimeMemoryIds.current.has(memoryId)
+              ) {
+                return;
+              }
+
               void loadSpaceData({ silent: true });
             },
           )
@@ -765,7 +850,12 @@ export function OurSpaceClient({
     });
   };
   const hasOpenDialog =
-    noteOpen || expenseOpen || profileOpen || heroOpen || anniversaryOpen;
+    noteOpen ||
+    expenseOpen ||
+    memoryOpen ||
+    profileOpen ||
+    heroOpen ||
+    anniversaryOpen;
   const periodPickerProps = {
     activePeriod,
     calendarDays,
@@ -912,6 +1002,18 @@ export function OurSpaceClient({
               onMoodDeleted={removeLocalMood}
               onMoodSaved={upsertLocalMood}
             />
+          ) : activeSection === "memories" ? (
+            <MemoryMapPanel
+              loading={spaceLoading}
+              memories={displayMemories}
+              timeZone={profileTimeZone}
+              onEditMemory={(memory) => {
+                setEditingMemory(memory);
+                setMemoryOpen(true);
+              }}
+              onMemoryDeleted={removeLocalMemory}
+              onNewMemory={() => setMemoryOpen(true)}
+            />
           ) : (
             <PersonalPanel
               anniversaryLabel={anniversaryLabel}
@@ -936,15 +1038,23 @@ export function OurSpaceClient({
       />
 
       {!hasOpenDialog &&
-      (activeSection === "notes" || activeSection === "finances") ? (
+      (activeSection === "notes" ||
+        activeSection === "finances" ||
+        activeSection === "memories") ? (
         <DraggableFab
           ariaLabel={
-            activeSection === "notes" ? "Create new note" : "Log new expense"
+            activeSection === "notes"
+              ? "Create new note"
+              : activeSection === "finances"
+                ? "Log new expense"
+                : "Add memory"
           }
           onClick={
             activeSection === "notes"
               ? () => setNoteOpen(true)
-              : () => setExpenseOpen(true)
+              : activeSection === "finances"
+                ? () => setExpenseOpen(true)
+                : () => setMemoryOpen(true)
           }
         >
           <Plus size={24} />
@@ -954,10 +1064,12 @@ export function OurSpaceClient({
       <SpaceDialogs
         anniversaryDate={anniversaryDate}
         editingExpense={editingExpense}
+        editingMemory={editingMemory}
         editingNote={editingNote}
         expenseOpen={expenseOpen}
         heroImageUrl={heroImageUrl}
         heroOpen={heroOpen}
+        memoryOpen={memoryOpen}
         noteOpen={noteOpen}
         partner={partner}
         profile={profile}
@@ -970,12 +1082,17 @@ export function OurSpaceClient({
           setEditingExpense(null);
         }}
         onCloseHero={() => setHeroOpen(false)}
+        onCloseMemory={() => {
+          setMemoryOpen(false);
+          setEditingMemory(null);
+        }}
         onCloseNote={() => {
           setNoteOpen(false);
           setEditingNote(null);
         }}
         onCloseProfile={() => setProfileOpen(false)}
         onExpenseSaved={upsertLocalExpense}
+        onMemorySaved={upsertLocalMemory}
         onNoteSaved={upsertLocalNote}
       />
     </main>

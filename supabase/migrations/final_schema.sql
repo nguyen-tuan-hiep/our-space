@@ -43,8 +43,6 @@ create table public.notes (
   recipient_id uuid not null references public.profiles(id) on delete cascade,
   title text not null,
   content text not null,
-  attachment_url text,
-  attachment_public_id text,
   unlock_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -82,6 +80,29 @@ create table public.daily_moods (
   constraint daily_moods_one_per_owner_day_key unique (owner_id, mood_date)
 );
 
+create table public.memory_map_entries (
+  id uuid primary key default gen_random_uuid(),
+  couple_id text not null,
+  title text not null,
+  description text,
+  memory_type text not null default 'date',
+  latitude double precision not null,
+  longitude double precision not null,
+  visited_at timestamptz not null,
+  photo_url text,
+  photo_public_id text,
+  created_by uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint memory_map_entries_title_length_check check (char_length(title) between 1 and 140),
+  constraint memory_map_entries_description_length_check check (description is null or char_length(description) <= 1000),
+  constraint memory_map_entries_type_check check (
+    memory_type in ('date', 'food', 'trip', 'anniversary', 'photo', 'milestone', 'other')
+  ),
+  constraint memory_map_entries_latitude_check check (latitude between -90 and 90),
+  constraint memory_map_entries_longitude_check check (longitude between -180 and 180)
+);
+
 create table public.pairing_requests (
   id uuid primary key default gen_random_uuid(),
   requester_id uuid not null references public.profiles(id) on delete cascade,
@@ -115,6 +136,8 @@ create index notes_created_at_idx on public.notes(created_at desc);
 create index individual_expenses_owner_date_idx on public.individual_expenses(owner_id, transaction_date desc);
 create index individual_expenses_category_idx on public.individual_expenses(category);
 create index daily_moods_owner_date_idx on public.daily_moods(owner_id, mood_date desc);
+create index memory_map_entries_couple_visited_idx on public.memory_map_entries(couple_id, visited_at desc);
+create index memory_map_entries_created_by_idx on public.memory_map_entries(created_by);
 create unique index pairing_requests_one_pending_pair_idx
 on public.pairing_requests (
   least(requester_id, recipient_id),
@@ -148,6 +171,10 @@ for each row execute function public.set_updated_at();
 
 create trigger daily_moods_set_updated_at
 before update on public.daily_moods
+for each row execute function public.set_updated_at();
+
+create trigger memory_map_entries_set_updated_at
+before update on public.memory_map_entries
 for each row execute function public.set_updated_at();
 
 create trigger pairing_requests_set_updated_at
@@ -365,6 +392,7 @@ alter table public.profiles enable row level security;
 alter table public.notes enable row level security;
 alter table public.individual_expenses enable row level security;
 alter table public.daily_moods enable row level security;
+alter table public.memory_map_entries enable row level security;
 alter table public.pairing_requests enable row level security;
 alter table public.app_settings enable row level security;
 
@@ -443,6 +471,23 @@ create policy "Users can delete only their own moods"
 on public.daily_moods for delete
 using (owner_id = auth.uid());
 
+create policy "Users can read couple memory map entries"
+on public.memory_map_entries for select
+using (public.profile_is_partner(created_by));
+
+create policy "Users can create couple memory map entries"
+on public.memory_map_entries for insert
+with check (created_by = auth.uid());
+
+create policy "Partners can update couple memory map entries"
+on public.memory_map_entries for update
+using (public.profile_is_partner(created_by))
+with check (public.profile_is_partner(created_by));
+
+create policy "Partners can delete couple memory map entries"
+on public.memory_map_entries for delete
+using (public.profile_is_partner(created_by));
+
 create policy "Users can read their pairing requests"
 on public.pairing_requests for select
 using (requester_id = auth.uid() or recipient_id = auth.uid());
@@ -468,6 +513,7 @@ alter publication supabase_realtime add table public.profiles;
 alter publication supabase_realtime add table public.notes;
 alter publication supabase_realtime add table public.individual_expenses;
 alter publication supabase_realtime add table public.daily_moods;
+alter publication supabase_realtime add table public.memory_map_entries;
 alter publication supabase_realtime add table public.pairing_requests;
 alter publication supabase_realtime add table public.app_settings;
 
@@ -479,6 +525,7 @@ grant select, update on public.profiles to service_role;
 grant select, insert, update, delete on public.notes to authenticated;
 grant select, insert, update, delete on public.individual_expenses to authenticated;
 grant select, insert, update, delete on public.daily_moods to authenticated;
+grant select, insert, update, delete on public.memory_map_entries to authenticated;
 grant select, insert on public.pairing_requests to authenticated;
 grant select, insert, update on public.app_settings to authenticated;
 grant execute on function public.profile_is_partner(uuid) to authenticated;

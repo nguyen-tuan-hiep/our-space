@@ -4,12 +4,13 @@ import {
 	CalendarDays,
 	CircleDollarSign,
 	HeartPulse,
+	MapPinned,
 	NotebookPen,
 	UserRound,
 } from "lucide-react";
 import type { FilterRange } from "@/lib/dashboard-utils";
 
-export type SpaceSection = "notes" | "finances" | "mood" | "personal";
+export type SpaceSection = "notes" | "finances" | "mood" | "memories" | "personal";
 
 const PeriodPickerDialog = dynamic(
 	() =>
@@ -21,9 +22,9 @@ const PeriodPickerDialog = dynamic(
 
 function spaceTabClass(active: boolean) {
 	return [
-		"relative inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-full px-3 text-sm font-bold transition active:scale-[0.98] sm:min-w-44 sm:px-6 sm:active:scale-100",
+		"relative inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-bold transition sm:px-6 active:scale-[0.8]",
 		active
-			? "bg-paper text-neutral-950 shadow-[0_10px_24px_rgba(30,25,20,0.16)]"
+			? "bg-paper text-mui shadow-[0_10px_24px_rgba(30,25,20,0.16)]"
 			: "text-neutral-500 hover:text-neutral-800",
 	].join(" ");
 }
@@ -100,7 +101,7 @@ export function PeriodPickerButton({
 				aria-haspopup="dialog"
 				aria-expanded={periodPickerOpen ? "true" : undefined}
 				onClick={onTogglePeriodPicker}
-				className="grid size-11 place-items-center rounded-full bg-paper text-neutral-700 shadow-md ring-1 ring-neutral-200/70 transition active:scale-95 hover:bg-mui/10 hover:text-mui sm:ring-0"
+				className="grid size-11 place-items-center rounded-full bg-paper text-neutral-700 shadow-md ring-1 ring-neutral-200/70 transition active:scale-[0.8] hover:bg-mui/10 hover:text-mui sm:ring-0"
 			>
 				<CalendarDays size={22} />
 			</button>
@@ -142,7 +143,7 @@ export function PeriodControls({
 				<div
 					role="tablist"
 					aria-label="Space section"
-					className="grid min-w-0 max-w-2xl flex-none grid-cols-3 rounded-full bg-mui/10 p-1 shadow-inner"
+					className="grid min-w-0 max-w-4xl flex-none grid-cols-4 rounded-2xl bg-mui/10 p-1 shadow-inner"
 				>
 					<button
 						type="button"
@@ -189,6 +190,23 @@ export function PeriodControls({
 						/>
 						Mood
 					</button>
+					<button
+						type="button"
+						role="tab"
+						aria-selected={activeSection === "memories"}
+						className={spaceTabClass(activeSection === "memories")}
+						onClick={() => onSelectSection("memories")}
+					>
+						<MapPinned
+							size={18}
+							className={
+								activeSection === "memories"
+									? "text-mui"
+									: "text-neutral-500"
+							}
+						/>
+						Memory
+					</button>
 				</div>
 
 				<div className="ml-auto">
@@ -214,6 +232,7 @@ export function MobileSpaceTabs({
 		{ value: "notes", label: "Notes", icon: NotebookPen },
 		{ value: "finances", label: "Finance", icon: CircleDollarSign },
 		{ value: "mood", label: "Mood", icon: HeartPulse },
+		{ value: "memories", label: "Memory", icon: MapPinned },
 		{ value: "personal", label: "Personal", icon: UserRound },
 	];
 	const selectedIndex = Math.max(
@@ -227,12 +246,12 @@ export function MobileSpaceTabs({
 			className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-40 sm:hidden"
 		>
 			<div className="relative border-t border-white/80 bg-white/50 px-2 pb-[clamp(0.5rem,env(safe-area-inset-bottom),1rem)] shadow-[0_-6px_32px_rgba(30,25,20,0.15)] backdrop-blur-md rounded-t-[1.8rem] box-content">
-				<div className="relative grid grid-cols-4 py-2">
+				<div className="relative grid grid-cols-5 py-2">
 					<div
 						aria-hidden="true"
-						className="mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-[1.35rem] bg-mui/20 shadow-[0_8px_20px_rgba(30,25,20,0.12)]"
+						className="mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-2xl bg-mui/20 shadow-[0_8px_20px_rgba(30,25,20,0.12)]"
 						style={{
-							width: "calc(100% / 4)",
+							width: "calc(100% / 5)",
 							transform: `translateX(${selectedIndex * 100}%)`,
 						}}
 					/>
@@ -247,7 +266,7 @@ export function MobileSpaceTabs({
 								role="tab"
 								aria-selected={selected}
 								className={[
-									"relative z-10 flex min-h-[3rem] flex-col items-center justify-center gap-0.5 rounded-[1.25rem] text-[10.5px] font-extrabold tracking-[-0.01em] transition duration-200 active:scale-[0.96]",
+									"relative z-10 flex min-h-[3rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-[10.5px] font-extrabold tracking-[-0.01em] transition duration-200 active:scale-[0.8]",
 									selected ? "text-neutral-950" : "text-neutral-500",
 								].join(" ")}
 								onClick={() => onSelectSection(item.value)}

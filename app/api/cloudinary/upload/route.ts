@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { requireAppSession } from "@/lib/auth";
-import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
+import { getOptimizedImageUrl } from "@/lib/image-utils";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -12,6 +12,9 @@ cloudinary.config({
 export async function POST(request: Request) {
   await requireAppSession();
 
+  const requestUrl = new URL(request.url);
+  const uploadKind =
+    requestUrl.searchParams.get("kind") === "memory" ? "memory" : "hero";
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.startsWith("image/")) {
     return NextResponse.json({ error: "Missing image file." }, { status: 400 });
@@ -28,7 +31,7 @@ export async function POST(request: Request) {
     }>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
-          folder: "our-space/hero",
+          folder: uploadKind === "memory" ? "our-space/memories" : "our-space/hero",
           format: "jpg",
           quality: "auto:good",
           resource_type: "image",
@@ -52,7 +55,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ...result,
-      secure_url: getOptimizedHeroImageUrl(result.secure_url),
+      secure_url: getOptimizedImageUrl(result.secure_url),
     });
   } catch (error) {
     return NextResponse.json(

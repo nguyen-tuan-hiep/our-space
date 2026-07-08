@@ -99,6 +99,32 @@ export interface DailyMood {
   owner?: Pick<Profile, "id" | "display_name" | "avatar_url" | "currency">;
 }
 
+export type MemoryType =
+  | "date"
+  | "food"
+  | "trip"
+  | "anniversary"
+  | "photo"
+  | "milestone"
+  | "other";
+
+export interface MemoryMapEntry {
+  id: string;
+  couple_id: string;
+  title: string;
+  description: string | null;
+  memory_type: MemoryType;
+  latitude: number;
+  longitude: number;
+  visited_at: string;
+  photo_url: string | null;
+  photo_public_id: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  creator?: Pick<Profile, "id" | "display_name" | "avatar_url" | "currency">;
+}
+
 export interface LoveQuote {
   text: string;
   author: string | null;

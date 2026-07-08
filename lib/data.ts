@@ -2,6 +2,7 @@ import type {
   AppSettings,
   DailyMood,
   IndividualExpense,
+  MemoryMapEntry,
   Profile,
   SharedNote,
 } from "@/lib/types";
@@ -27,7 +28,12 @@ export async function getDashboardData(
 
   const participantIds = partner ? [profile.id, partner.id] : [profile.id];
 
-  const [{ data: notes }, { data: moods }, { data: settings }] = await Promise.all([
+  const [
+    { data: notes },
+    { data: moods },
+    { data: memories },
+    { data: settings },
+  ] = await Promise.all([
     supabase
       .from("notes")
       .select(
@@ -45,6 +51,14 @@ export async function getDashboardData(
       .order("mood_date", { ascending: false })
       .returns<DailyMood[]>(),
     supabase
+      .from("memory_map_entries")
+      .select(
+        "*, creator:profiles!memory_map_entries_created_by_fkey(id, display_name, avatar_url, currency)",
+      )
+      .eq("couple_id", settingsId ?? "main")
+      .order("visited_at", { ascending: false })
+      .returns<MemoryMapEntry[]>(),
+    supabase
       .from("app_settings")
       .select("hero_image_url, anniversary_date")
       .eq("id", settingsId ?? "main")
@@ -54,6 +68,7 @@ export async function getDashboardData(
   return {
     notes: notes ?? [],
     moods: moods ?? [],
+    memories: memories ?? [],
     settings: settings ?? null,
   };
 }

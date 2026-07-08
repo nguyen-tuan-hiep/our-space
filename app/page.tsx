@@ -5,7 +5,7 @@ import { OurSpaceClient } from "@/components/our-space-client";
 import { SetupRequired } from "@/components/setup-required";
 import { getAppSession, getAuthenticatedSession } from "@/lib/auth";
 import { getDashboardSettings } from "@/lib/data";
-import { getOptimizedHeroImageUrl } from "@/lib/image-utils";
+import { getOptimizedImageUrl } from "@/lib/image-utils";
 import { getDailyLoveQuote } from "@/lib/love-quotes";
 import type { PairingRequest, Profile } from "@/lib/types";
 import Loading from "./loading";
@@ -89,7 +89,7 @@ async function HomeContent() {
       profile={appSession.profile}
       partner={appSession.partner}
       initialNotes={[]}
-      heroImageUrl={getOptimizedHeroImageUrl(heroImageUrl)}
+      heroImageUrl={getOptimizedImageUrl(heroImageUrl)}
       anniversaryDate={
         settings?.anniversary_date ??
         appSession.profile.created_at?.slice(0, 10) ??
