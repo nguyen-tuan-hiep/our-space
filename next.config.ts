@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
       {
         key: "Content-Security-Policy",
         value:
-          "default-src 'self'; script-src 'self' https://cdn.onesignal.com",
+          "default-src 'self'; script-src 'self' https://cdn.onesignal.com; connect-src 'self' https://api.onesignal.com https://onesignal.com https://*.onesignal.com",
       },
     ];
 
