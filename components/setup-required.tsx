@@ -1,6 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { PairingForm } from "@/components/pairing-form";
-import { PairingRequests } from "@/components/pairing-requests";
+import { SetupPairingPanel } from "@/components/setup-pairing-panel";
 import { SignOutButton } from "@/components/sign-out-button";
 import { SetupRealtimeRefresh } from "@/components/setup-realtime-refresh";
 import type { PairingRequest, Profile } from "@/lib/types";
@@ -18,8 +17,6 @@ export function SetupRequired({
 	pairingRequests = [],
 	details = [],
 }: SetupRequiredProps) {
-	const hasPairingRequests = pairingRequests.length > 0;
-
 	return (
 		<main className="min-h-svh bg-bg">
 			<section className="container-page grid min-h-svh items-center py-8 sm:py-12">
@@ -63,24 +60,10 @@ export function SetupRequired({
 					) : null}
 
 					{profile ? (
-						<div className="mt-4 space-y-4">
-							{hasPairingRequests ? (
-								<div className="rounded-2xl border border-neutral-400 bg-paper p-4 sm:p-5">
-									<PairingRequests
-										profileId={profile.id}
-										requests={pairingRequests}
-									/>
-								</div>
-							) : null}
-
-							<div className="rounded-2xl border border-neutral-400 bg-paper p-4 sm:p-5">
-								<p className="mb-4 text-sm font-medium text-neutral-700">
-									Enter your partner's pairing code
-								</p>
-
-								<PairingForm />
-							</div>
-						</div>
+						<SetupPairingPanel
+							initialRequests={pairingRequests}
+							profileId={profile.id}
+						/>
 					) : (
 						<p className="mt-6 text-center text-sm leading-6 text-neutral-600">
 							Create your profile first. After that, your pairing code and the

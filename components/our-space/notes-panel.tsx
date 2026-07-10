@@ -14,6 +14,7 @@ interface NotesPanelProps {
 	notes: SharedNote[];
 	timeZone: string;
 	onEditNote: (note: SharedNote) => void;
+	onNoteDeleted: (noteId: string) => void;
 	onNewNote: () => void;
 	periodControl?: ReactNode;
 }
@@ -26,6 +27,7 @@ export function NotesPanel({
 	notes,
 	timeZone,
 	onEditNote,
+	onNoteDeleted,
 	onNewNote,
 	periodControl,
 }: NotesPanelProps) {
@@ -58,6 +60,7 @@ export function NotesPanel({
 							initialNowMs={initialNowMs}
 							timeZone={timeZone}
 							onEdit={onEditNote}
+							onDeleted={onNoteDeleted}
 						/>
 					))
 				) : loading ? (

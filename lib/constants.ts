@@ -276,10 +276,38 @@ export const supportedCountryCodes = [
   "ZW",
 ] as const;
 
+// just a subset of supportedCountryCodes that are more commonly used, for better UX in country selection dropdowns
+export const commonCountryCodes = [
+  "AU", // Australia
+  "BR", // Brazil
+  "CA", // Canada
+  "CN", // China
+  "DE", // Germany
+  "ES", // Spain
+  "FR", // France
+  "GB", // United Kingdom
+  "HK", // Hong Kong
+  "ID", // Indonesia
+  "IN", // India
+  "IT", // Italy
+  "JP", // Japan
+  "KR", // South Korea
+  "MY", // Malaysia
+  "NL", // Netherlands
+  "NZ", // New Zealand
+  "PH", // Philippines
+  "RU", // Russia
+  "SG", // Singapore
+  "TH", // Thailand
+  "TW", // Taiwan
+  "US", // United States
+  "VN", // Vietnam
+]
+
 export function getSupportedCurrencyCodes() {
-  if (typeof Intl.supportedValuesOf === "function") {
-    return Intl.supportedValuesOf("currency");
-  }
+  // if (typeof Intl.supportedValuesOf === "function") {
+  //   return Intl.supportedValuesOf("currency");
+  // }
 
   return commonCurrencies;
 }

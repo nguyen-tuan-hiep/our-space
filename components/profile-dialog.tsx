@@ -18,7 +18,7 @@ import {
 	getUtcTimeZoneOptions,
 	isCustomAvatarEmoji,
 	normalizeTimeZoneValue,
-	supportedCountryCodes,
+	commonCountryCodes,
 } from "@/lib/constants";
 import type { Profile } from "@/lib/types";
 
@@ -118,7 +118,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 									label="Country"
 									defaultValue={profile.country_code}
 								>
-									{supportedCountryCodes.map((country) => (
+									{commonCountryCodes.map((country) => (
 										<option
 											key={country}
 											value={country}

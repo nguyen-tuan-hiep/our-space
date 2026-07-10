@@ -16,7 +16,7 @@ import {
   getSupportedCurrencyCodes,
   getUtcTimeZoneOptions,
   normalizeTimeZoneValue,
-  supportedCountryCodes,
+  commonCountryCodes,
 } from "@/lib/constants";
 
 interface CreateProfileFormProps {
@@ -68,14 +68,14 @@ export function CreateProfileForm({ user }: CreateProfileFormProps) {
             name="country_code"
             label="Country"
             defaultValue={
-              supportedCountryCodes.includes(
-                browserCountry as (typeof supportedCountryCodes)[number],
+              commonCountryCodes.includes(
+                browserCountry as (typeof commonCountryCodes)[number],
               )
                 ? browserCountry
                 : "SG"
             }
           >
-            {supportedCountryCodes.map((country) => (
+            {commonCountryCodes.map((country) => (
               <option key={country} value={country}>
                 {country} - {countryNames.of(country)}
               </option>

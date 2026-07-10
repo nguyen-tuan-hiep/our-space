@@ -36,6 +36,7 @@ interface NoteCardProps {
 	initialNowMs: number;
 	timeZone: string;
 	onEdit: (note: SharedNote) => void;
+	onDeleted: (noteId: string) => void;
 }
 
 export function NoteCard({
@@ -44,6 +45,7 @@ export function NoteCard({
 	initialNowMs,
 	timeZone,
 	onEdit,
+	onDeleted,
 }: NoteCardProps) {
 	const toast = useToast();
 	const [now, setNow] = useState(() =>
@@ -126,7 +128,10 @@ export function NoteCard({
 							toast(result.message, {
 								variant: result.ok ? "success" : "error",
 							});
-							if (result.ok) setConfirmOpen(false);
+							if (result.ok) {
+								setConfirmOpen(false);
+								onDeleted(note.id);
+							}
 						})
 					}
 				/>

@@ -553,6 +553,17 @@ export function OurSpaceClient({
 		});
 	};
 
+	const removeLocalNote = (noteId: string) => {
+		ignoredRealtimeNoteIds.current.add(noteId);
+		window.setTimeout(() => {
+			ignoredRealtimeNoteIds.current.delete(noteId);
+		}, 10000);
+
+		setNotes((currentNotes) =>
+			currentNotes.filter((note) => note.id !== noteId),
+		);
+	};
+
 	const upsertLocalExpense = (savedExpense: IndividualExpense) => {
 		ignoredRealtimeExpenseIds.current.add(savedExpense.id);
 		window.setTimeout(() => {
@@ -1010,6 +1021,7 @@ export function OurSpaceClient({
 								setEditingNote(selectedNote);
 								setNoteOpen(true);
 							}}
+							onNoteDeleted={removeLocalNote}
 							onNewNote={() => setNoteOpen(true)}
 						/>
 					) : activeSection === "finances" ? (

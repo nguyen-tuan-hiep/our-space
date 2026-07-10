@@ -10,9 +10,14 @@ import type { PairingRequest } from "@/lib/types";
 interface PairingRequestsProps {
 	profileId: string;
 	requests: PairingRequest[];
+	onRequestResolved?: (requestId: string) => void;
 }
 
-export function PairingRequests({ profileId, requests }: PairingRequestsProps) {
+export function PairingRequests({
+	profileId,
+	requests,
+	onRequestResolved,
+}: PairingRequestsProps) {
 	const router = useRouter();
 	const toast = useToast();
 	const [pending, startTransition] = useTransition();
@@ -59,6 +64,7 @@ export function PairingRequests({ profileId, requests }: PairingRequestsProps) {
 										});
 
 										if (result.ok) router.refresh();
+										if (result.ok) onRequestResolved?.(request.id);
 									});
 								}}
 							>
