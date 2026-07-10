@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Bell, BellOff } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/toast";
 import { getOneSignal, isOneSignalConfigured } from "@/lib/onesignal-web";
 
@@ -179,6 +180,17 @@ export function NotificationPermissionButton({
     ? handleDisableNotifications
     : handleEnableNotifications;
 
+  if (checking) {
+    return variant === "menu-item" ? (
+      <div className="flex items-center gap-2 px-4 py-2.5">
+        <Skeleton className="size-4 rounded-full" />
+        <Skeleton className="h-4 flex-1 rounded-full" />
+      </div>
+    ) : (
+      <Skeleton className="h-11 w-48 rounded-2xl" />
+    );
+  }
+
   if (variant === "menu-item") {
     const Icon = enabled ? BellOff : Bell;
 
@@ -191,11 +203,7 @@ export function NotificationPermissionButton({
         className={menuItemClass}
       >
         <Icon size={16} />
-        {checking
-          ? "Checking notifications"
-          : enabled
-            ? "Turn off notifications"
-            : "Enable notifications"}
+        {enabled ? "Turn off notifications" : "Enable notifications"}
       </button>
     );
   }
@@ -210,11 +218,7 @@ export function NotificationPermissionButton({
       className={outlineButtonClass}
     >
       {enabled ? <BellOff size={17} /> : <Bell size={17} />}
-      {checking
-        ? "Checking notifications"
-        : enabled
-          ? "Turn off notifications"
-          : "Enable notifications"}
+      {enabled ? "Turn off notifications" : "Enable notifications"}
     </button>
   );
 }

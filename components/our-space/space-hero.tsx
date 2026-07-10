@@ -2,7 +2,6 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import type { RefObject } from "react";
 import {
-	Bell,
 	CalendarHeart,
 	ImageUp,
 	LogOut,
@@ -10,6 +9,7 @@ import {
 	Settings,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Profile } from "@/lib/types";
 import { menuItemClass } from "./shared-classes";
 
@@ -21,15 +21,10 @@ const NotificationPermissionButton = dynamic(
 	{
 		ssr: false,
 		loading: () => (
-			<button
-				type="button"
-				role="menuitem"
-				disabled
-				className={menuItemClass}
-			>
-				<Bell size={16} />
-				Checking notifications
-			</button>
+			<div className="flex items-center gap-2 px-4 py-2.5">
+				<Skeleton className="size-4 rounded-full" />
+				<Skeleton className="h-4 flex-1 rounded-full" />
+			</div>
 		),
 	},
 );

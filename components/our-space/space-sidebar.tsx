@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import {
-	Bell,
 	CalendarHeart,
 	CircleDollarSign,
 	HeartPulse,
@@ -14,6 +13,7 @@ import {
 	Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import type { SpaceSection } from "./period-controls";
 
@@ -25,15 +25,10 @@ const NotificationPermissionButton = dynamic(
 	{
 		ssr: false,
 		loading: () => (
-			<Button
-				type="button"
-				variant="ghost"
-				disabled
-				className="h-10 justify-start rounded-2xl"
-			>
-				<Bell size={16} />
-				Checking notifications
-			</Button>
+			<div className="flex h-10 items-center gap-2 rounded-2xl px-3">
+				<Skeleton className="size-4 rounded-full" />
+				<Skeleton className="h-4 flex-1 rounded-full" />
+			</div>
 		),
 	},
 );

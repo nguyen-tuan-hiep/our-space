@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { ExpenseFeed } from "@/components/expenses/expense-feed";
 import { FinanceCharts } from "@/components/expenses/finance-charts";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { FinancePanelSkeleton } from "@/components/our-space/tab-skeletons";
 import type { FilterRange } from "@/lib/dashboard-utils";
 import type { IndividualExpense, Profile } from "@/lib/types";
 
@@ -58,6 +58,10 @@ export function FinancesPanel({
 	onLogExpense,
 	periodControl,
 }: FinancesPanelProps) {
+	if (financeLoading && !financeLoaded) {
+		return <FinancePanelSkeleton />;
+	}
+
 	return (
 		<div className="grid gap-4 sm:gap-5">
 			<div className="flex items-center justify-between gap-4 sm:items-end">
@@ -78,15 +82,7 @@ export function FinancesPanel({
 					Log expense
 				</Button>
 			</div>
-			{financeLoading && !financeLoaded ? (
-				<div className="grid gap-4 sm:gap-5">
-					<Skeleton className="h-80 rounded-3xl" />
-					<div className="grid gap-4 lg:grid-cols-2">
-						<Skeleton className="h-72 rounded-3xl" />
-						<Skeleton className="h-72 rounded-3xl" />
-					</div>
-				</div>
-			) : financeError ? (
+			{financeError ? (
 				<div className="soft-panel content-fade-in grid gap-4 p-6 text-neutral-600">
 					<p>{financeError}</p>
 					<Button

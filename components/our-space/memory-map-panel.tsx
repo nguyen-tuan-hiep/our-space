@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MemoryPanelSkeleton } from "@/components/our-space/tab-skeletons";
 import { getMemoryTypeOption } from "@/lib/memory-map";
 import type { MemoryMapEntry } from "@/lib/types";
 
@@ -136,6 +137,10 @@ export function MemoryMapPanel({
 	);
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [pending, startTransition] = useTransition();
+
+	if (loading && memories.length === 0) {
+		return <MemoryPanelSkeleton />;
+	}
 
 	return (
 		<div className="grid gap-4 sm:gap-5">

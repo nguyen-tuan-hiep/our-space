@@ -12,7 +12,6 @@ import {
 } from "react";
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/toast";
-import { Skeleton } from "@/components/ui/skeleton";
 import { loadFinanceDashboardData, signOut } from "@/app/actions";
 import type {
 	DailyMood,
@@ -46,6 +45,12 @@ import {
 import { DraggableFab } from "@/components/our-space/draggable-fab";
 import { SpaceSidebar } from "@/components/our-space/space-sidebar";
 import { SpaceHero } from "@/components/our-space/space-hero";
+import {
+	FinancePanelSkeleton,
+	MemoryPanelSkeleton,
+	MoodPanelSkeleton,
+	PersonalPanelSkeleton,
+} from "@/components/our-space/tab-skeletons";
 
 const PersonalPanel = dynamic(
 	() =>
@@ -53,23 +58,10 @@ const PersonalPanel = dynamic(
 			(mod) => mod.PersonalPanel,
 		),
 	{
-		loading: PersonalPanelLoading,
+		loading: PersonalPanelSkeleton,
 		ssr: false,
 	},
 );
-
-function PersonalPanelLoading() {
-	return (
-		<div className="grid gap-4 sm:gap-5">
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12 lg:items-stretch">
-				<Skeleton className="h-[18rem] rounded-3xl lg:col-span-7" />
-				<Skeleton className="h-[18rem] rounded-3xl lg:col-span-5" />
-			</div>
-			<Skeleton className="h-52 rounded-3xl" />
-			<Skeleton className="h-32 rounded-3xl" />
-		</div>
-	);
-}
 
 const MemoryMapPanel = dynamic(
 	() =>
@@ -77,36 +69,29 @@ const MemoryMapPanel = dynamic(
 			(mod) => mod.MemoryMapPanel,
 		),
 	{
-		loading: MemoryMapPanelLoading,
+		loading: MemoryPanelSkeleton,
 		ssr: false,
 	},
 );
-
-function MemoryMapPanelLoading() {
-	return (
-		<div className="grid gap-4 sm:gap-5">
-			<Skeleton className="h-16 rounded-3xl" />
-			<Skeleton className="h-[34rem] rounded-3xl" />
-			<div className="grid gap-4 md:grid-cols-2">
-				<Skeleton className="h-64 rounded-3xl" />
-				<Skeleton className="h-64 rounded-3xl" />
-			</div>
-		</div>
-	);
-}
 
 const FinancesPanel = dynamic(
 	() =>
 		import("@/components/our-space/finances-panel").then(
 			(mod) => mod.FinancesPanel,
 		),
-	{ ssr: false },
+	{
+		loading: FinancePanelSkeleton,
+		ssr: false,
+	},
 );
 
 const MoodPanel = dynamic(
 	() =>
 		import("@/components/our-space/mood-panel").then((mod) => mod.MoodPanel),
-	{ ssr: false },
+	{
+		loading: MoodPanelSkeleton,
+		ssr: false,
+	},
 );
 
 const SpaceDialogs = dynamic(

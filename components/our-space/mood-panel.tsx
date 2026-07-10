@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { CalendarDays, HeartPulse, Pencil, Trash2 } from "lucide-react";
 import { deleteMood, upsertMood } from "@/app/actions";
 import { useToast } from "@/components/toast";
+import { Skeleton } from "@/components/ui/skeleton";
 import { NativeButton, NativeTextarea } from "@/components/ui/native-controls";
+import { MoodPanelSkeleton } from "@/components/our-space/tab-skeletons";
 import type { DailyMood, MoodLevel, Profile } from "@/lib/types";
 
 export const moodOptions: Array<{
@@ -195,6 +197,7 @@ export function MoodPanel({
 	onMoodSaved,
 }: MoodPanelProps) {
 	const toast = useToast();
+	const showInitialSkeleton = loading && moods.length === 0;
 	const todayKey = useMemo(
 		() => localDateKey(currentTimeIso, timeZone),
 		[currentTimeIso, timeZone],
@@ -242,6 +245,10 @@ export function MoodPanel({
 		setMood(selectedMood?.mood ?? "great");
 		setNote(selectedMood?.note ?? "");
 	}, [selectedMood]);
+
+	if (showInitialSkeleton) {
+		return <MoodPanelSkeleton />;
+	}
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -309,9 +316,12 @@ export function MoodPanel({
 						))}
 
 						{loading ? (
-							<div className="col-span-7 rounded-2xl bg-neutral-50 p-5 text-center text-sm text-neutral-500">
-								Loading moods...
-							</div>
+							Array.from({ length: 14 }).map((_, index) => (
+								<Skeleton
+									key={index}
+									className="h-[4.7rem] rounded-2xl sm:min-h-[5.1rem] lg:min-h-[6rem]"
+								/>
+							))
 						) : (
 							calendarCells.map((cell) => {
 								const mine = moodsByOwnerDate.get(
