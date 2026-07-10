@@ -6,7 +6,11 @@ import type {
   Profile,
   SharedNote,
 } from "@/lib/types";
-import { getExchangeRate } from "@/lib/exchange-rates";
+import {
+  fetchLatestExchangeRate,
+  getExchangeRate,
+  type ExchangeRateData,
+} from "@/lib/exchange-rates";
 import { createClient } from "@/lib/supabase/server";
 import { getCoupleSettingsId } from "@/lib/couple-settings";
 
@@ -18,6 +22,27 @@ type FinanceSettings = Pick<
   | "exchange_rate_updated_at"
   | "exchange_rate_source"
 >;
+type FinanceSettingsRow = FinanceSettings & { id: string };
+
+async function persistExchangeRate(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ids: string[],
+  exchangeRate: ExchangeRateData,
+  updatedBy: string,
+) {
+  if (!exchangeRate.rates || !exchangeRate.updatedAt) return;
+
+  await supabase.from("app_settings").upsert(
+    Array.from(new Set(ids)).map((id) => ({
+      id,
+      exchange_rates_base: exchangeRate.ratesBase,
+      exchange_rates: exchangeRate.rates,
+      exchange_rate_updated_at: exchangeRate.updatedAt,
+      exchange_rate_source: exchangeRate.source,
+      updated_by: updatedBy,
+    })),
+  );
+}
 
 export async function getDashboardData(
   profile: Profile,
@@ -103,14 +128,41 @@ export async function getFinanceData(profile: Profile, partner: Profile) {
     supabase
       .from("app_settings")
       .select(
-        "exchange_rates, exchange_rates_base, exchange_rate_updated_at, exchange_rate_source",
+        "id, exchange_rates, exchange_rates_base, exchange_rate_updated_at, exchange_rate_source",
       )
-      .eq("id", settingsId)
-      .maybeSingle<FinanceSettings>(),
+      .in("id", Array.from(new Set([settingsId, "main"])))
+      .returns<FinanceSettingsRow[]>(),
   ]);
+
+  const coupleSettings =
+    settings?.find((setting) => setting.id === settingsId) ?? null;
+  const defaultSettings =
+    settings?.find((setting) => setting.id === "main") ?? null;
+  const coupleExchangeRate = getExchangeRate(coupleSettings);
+  const defaultExchangeRate = getExchangeRate(defaultSettings);
+  let exchangeRate = coupleExchangeRate.updatedAt
+    ? coupleExchangeRate
+    : defaultExchangeRate;
+
+  if (!coupleExchangeRate.updatedAt && defaultExchangeRate.updatedAt) {
+    await persistExchangeRate(supabase, [settingsId], defaultExchangeRate, profile.id);
+  }
+
+  if (!exchangeRate.updatedAt) {
+    const liveExchangeRate = await fetchLatestExchangeRate();
+    if (liveExchangeRate?.updatedAt) {
+      exchangeRate = liveExchangeRate;
+      await persistExchangeRate(
+        supabase,
+        [settingsId],
+        liveExchangeRate,
+        profile.id,
+      );
+    }
+  }
 
   return {
     expenses: expenses ?? [],
-    exchangeRate: getExchangeRate(settings ?? null),
+    exchangeRate,
   };
 }
