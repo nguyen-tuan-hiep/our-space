@@ -46,7 +46,9 @@ export function NoteCard({
 	onEdit,
 }: NoteCardProps) {
 	const toast = useToast();
-	const [now, setNow] = useState(initialNowMs);
+	const [now, setNow] = useState(() =>
+		typeof window === "undefined" ? initialNowMs : Date.now(),
+	);
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const [pending, startTransition] = useTransition();
 
@@ -61,9 +63,10 @@ export function NoteCard({
 
 	useEffect(() => {
 		if (!note.unlock_at) return;
+		setNow(Date.now());
 		const timer = window.setInterval(() => setNow(Date.now()), 1000);
 		return () => window.clearInterval(timer);
-	}, [note.unlock_at]);
+	}, [note.id, note.unlock_at]);
 
 	const handleEditClick = () => {
 		onEdit(note);
