@@ -68,7 +68,7 @@ export function ActionMenu({
 		if (!shouldRenderMobile) return;
 		const timeoutId = window.setTimeout(() => setShouldRenderMobile(false), 260);
 		return () => window.clearTimeout(timeoutId);
-	}, [mobileOpen, shouldRenderMobile]);
+	}, [mobileOpen, shouldRenderMobile, menuId]);
 
 	useEffect(() => {
 		if (!mobileOpen) return;

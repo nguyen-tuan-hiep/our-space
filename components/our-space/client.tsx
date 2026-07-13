@@ -714,7 +714,7 @@ export function OurSpaceClient({
 					)
 					.on(
 						"postgres_changes",
-						{ event: "*", schema: "public", table: "app_settings" },
+						{ event: "*", schema: "public", table: "couple" },
 						() => void loadSpaceData({ silent: true }),
 					)
 					.subscribe();

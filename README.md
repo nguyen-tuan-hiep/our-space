@@ -63,7 +63,7 @@ CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_ONESIGNAL_APP_ID=d27ba552-6618-4673-9914-6cb8e637d287
+NEXT_PUBLIC_ONESIGNAL_APP_ID=your-onesignal-app-id
 ```
 
 `NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL` should be a high-quality Cloudinary URL for the couple hero image. Cloudinary uploads from note attachments are stored under `our-space/attachments`.
@@ -72,7 +72,7 @@ Supabase Edge Function secrets for push notifications:
 
 ```bash
 supabase secrets set \
-  ONESIGNAL_APP_ID=d27ba552-6618-4673-9914-6cb8e637d287 \
+  ONESIGNAL_APP_ID=your-onesignal-app-id \
   ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key \
   APP_URL=https://dailymoments.vercel.app \
   NOTIFICATION_WEBHOOK_SECRET=your-webhook-secret
@@ -221,8 +221,9 @@ Webhook secret: 89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d
 1. Create a OneSignal Web Push app.
 2. Configure the site URL as `https://dailymoments.vercel.app`.
 3. For iOS PWA support, make sure the app is installed from Safari with Add to Home Screen. iOS only supports Web Push for installed standalone web apps.
-4. Copy the OneSignal App ID into `NEXT_PUBLIC_ONESIGNAL_APP_ID` in Vercel. Current app ID: `d27ba552-6618-4673-9914-6cb8e637d287`.
+4. Copy the OneSignal App ID into `NEXT_PUBLIC_ONESIGNAL_APP_ID` in Vercel.
 5. Copy the OneSignal REST API key into the Supabase secret `ONESIGNAL_REST_API_KEY`.
+6. Make sure Vercel `NEXT_PUBLIC_ONESIGNAL_APP_ID` and Supabase `ONESIGNAL_APP_ID` are exactly the same OneSignal app. If they differ, subscriptions are created in one app while Edge Functions send through another app.
 
 The required OneSignal service worker files live in `public/`:
 
@@ -268,7 +269,7 @@ Set secrets:
 
 ```bash
 supabase secrets set \
-  ONESIGNAL_APP_ID=d27ba552-6618-4673-9914-6cb8e637d287 \
+  ONESIGNAL_APP_ID=your-onesignal-app-id \
   ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key \
   APP_URL=https://dailymoments.vercel.app \
   NOTIFICATION_WEBHOOK_SECRET=89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d \
@@ -315,7 +316,7 @@ https://uojaxhmrfhbtthypugwq.functions.supabase.co/send-push-notification
 ### Anniversary Reminder Webhook
 
 This repository also includes a second Edge Function named `notify-on-anniversary-reminder`.
-It checks `public.app_settings.anniversary_date` for each couple and sends push reminders at:
+It checks each paired couple, uses `public.couple.anniversary_date` when present, falls back to the couple profile creation date when settings have not been saved yet, and sends push reminders at:
 
 - 7 days before
 - 3 days before
@@ -338,13 +339,15 @@ https://uojaxhmrfhbtthypugwq.functions.supabase.co/notify-on-anniversary-reminde
 
 It accepts the same `x-webhook-secret` header or `?x-webhook-secret=...` query parameter.
 
-For a daily scheduler, point your cron or external webhook caller at this URL and send a POST request once per day. A manual smoke test can pass a test date in the body:
+The Edge Function does not run by itself. For anniversary reminders to be delivered, point a daily cron or external webhook caller at this URL and send a `POST` request once per day.
+
+A manual smoke test can pass a test date in the body. Add `dryRun: true` to inspect matched targets without sending a OneSignal notification:
 
 ```bash
 curl -sS -X POST \
   'https://uojaxhmrfhbtthypugwq.functions.supabase.co/notify-on-anniversary-reminder?x-webhook-secret=89c802fbcfad1d5cdd9ec247c4c5e30744e1443358459c5f49a4f86371dbba0d' \
   -H 'Content-Type: application/json' \
-  -d '{"date":"2026-06-28T00:00:00.000Z"}'
+  -d '{"dryRun":true,"date":"2026-06-28T00:00:00.000Z"}'
 ```
 
 ### Database Grants
@@ -356,7 +359,7 @@ grant select, update on public.profiles to service_role;
 grant select on public.notes to service_role;
 grant select on public.individual_expenses to service_role;
 grant select on public.daily_moods to service_role;
-grant select on public.app_settings to service_role;
+grant select on public.couple to service_role;
 ```
 
 If the function returns this error, the grants are missing:
@@ -408,7 +411,7 @@ When a mood row is inserted or updated, the function reads `record.owner_id`, fi
 ### Testing
 
 1. Deploy the frontend to HTTPS on Vercel.
-2. Confirm Vercel has `NEXT_PUBLIC_ONESIGNAL_APP_ID=d27ba552-6618-4673-9914-6cb8e637d287`.
+2. Confirm Vercel `NEXT_PUBLIC_ONESIGNAL_APP_ID` matches Supabase secret `ONESIGNAL_APP_ID`.
 3. Open `https://dailymoments.vercel.app` on a supported browser.
 4. Sign in and tap `Enable notifications`.
 5. Confirm OneSignal Dashboard -> Audience -> Subscriptions shows the device as subscribed with the profile id as external id.

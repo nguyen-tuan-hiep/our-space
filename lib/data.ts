@@ -1,5 +1,5 @@
 import type {
-  AppSettings,
+  Couple,
   DailyMood,
   IndividualExpense,
   MemoryMapEntry,
@@ -12,11 +12,11 @@ import {
   type ExchangeRateData,
 } from "@/lib/exchange-rates";
 import { createClient } from "@/lib/supabase/server";
-import { getCoupleSettingsId } from "@/lib/couple-settings";
+import { getCoupleId } from "@/lib/couple-settings";
 
-type DashboardSettings = Pick<AppSettings, "hero_image_url" | "anniversary_date">;
+type DashboardSettings = Pick<Couple, "hero_image_url" | "anniversary_date">;
 type FinanceSettings = Pick<
-  AppSettings,
+  Couple,
   | "exchange_rates"
   | "exchange_rates_base"
   | "exchange_rate_updated_at"
@@ -32,7 +32,7 @@ async function persistExchangeRate(
 ) {
   if (!exchangeRate.rates || !exchangeRate.updatedAt) return;
 
-  await supabase.from("app_settings").upsert(
+  await supabase.from("couple").upsert(
     Array.from(new Set(ids)).map((id) => ({
       id,
       exchange_rates_base: exchangeRate.ratesBase,
@@ -49,7 +49,7 @@ export async function getDashboardData(
   partner: Profile | null,
 ) {
   const supabase = await createClient();
-  const settingsId = partner ? getCoupleSettingsId(profile, partner) : null;
+  const settingsId = partner ? getCoupleId(profile, partner) : null;
 
   const participantIds = partner ? [profile.id, partner.id] : [profile.id];
 
@@ -84,7 +84,7 @@ export async function getDashboardData(
       .order("visited_at", { ascending: false })
       .returns<MemoryMapEntry[]>(),
     supabase
-      .from("app_settings")
+      .from("couple")
       .select("hero_image_url, anniversary_date")
       .eq("id", settingsId ?? "main")
       .maybeSingle<DashboardSettings>(),
@@ -103,9 +103,9 @@ export async function getDashboardSettings(
   partner: Profile | null,
 ) {
   const supabase = await createClient();
-  const settingsId = partner ? getCoupleSettingsId(profile, partner) : null;
+  const settingsId = partner ? getCoupleId(profile, partner) : null;
   const { data: settings } = await supabase
-    .from("app_settings")
+    .from("couple")
     .select("hero_image_url, anniversary_date")
     .eq("id", settingsId ?? "main")
     .maybeSingle<DashboardSettings>();
@@ -115,7 +115,7 @@ export async function getDashboardSettings(
 
 export async function getFinanceData(profile: Profile, partner: Profile) {
   const supabase = await createClient();
-  const settingsId = getCoupleSettingsId(profile, partner);
+  const settingsId = getCoupleId(profile, partner);
   const participantIds = [profile.id, partner.id];
 
   const [{ data: expenses }, { data: settings }] = await Promise.all([
@@ -126,7 +126,7 @@ export async function getFinanceData(profile: Profile, partner: Profile) {
       .order("transaction_date", { ascending: false })
       .returns<IndividualExpense[]>(),
     supabase
-      .from("app_settings")
+      .from("couple")
       .select(
         "id, exchange_rates, exchange_rates_base, exchange_rate_updated_at, exchange_rate_source",
       )

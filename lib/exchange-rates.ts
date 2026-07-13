@@ -1,9 +1,9 @@
-import type { AppSettings } from "@/lib/types";
+import type { Couple } from "@/lib/types";
 
 const rateMaxAgeMs = 6 * 60 * 60 * 1000;
 const defaultRateBase = "USD";
 type ExchangeRateSettings = Pick<
-  AppSettings,
+  Couple,
   | "exchange_rates"
   | "exchange_rates_base"
   | "exchange_rate_updated_at"

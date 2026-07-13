@@ -114,7 +114,7 @@ create table public.pairing_requests (
   constraint pairing_requests_status_check check (status in ('pending', 'accepted', 'declined', 'cancelled'))
 );
 
-create table public.app_settings (
+create table public.couple (
   id text primary key default 'main',
   hero_image_url text,
   hero_image_public_id text,
@@ -181,8 +181,8 @@ create trigger pairing_requests_set_updated_at
 before update on public.pairing_requests
 for each row execute function public.set_updated_at();
 
-create trigger app_settings_set_updated_at
-before update on public.app_settings
+create trigger couple_set_updated_at
+before update on public.couple
 for each row execute function public.set_updated_at();
 
 create or replace function public.handle_new_user_profile()
@@ -394,7 +394,7 @@ alter table public.individual_expenses enable row level security;
 alter table public.daily_moods enable row level security;
 alter table public.memory_map_entries enable row level security;
 alter table public.pairing_requests enable row level security;
-alter table public.app_settings enable row level security;
+alter table public.couple enable row level security;
 
 create policy "Users can read their profile and partner profile"
 on public.profiles for select
@@ -496,17 +496,17 @@ create policy "Users can create outgoing pairing requests"
 on public.pairing_requests for insert
 with check (requester_id = auth.uid() and recipient_id <> auth.uid());
 
-create policy "Couple can read app settings"
-on public.app_settings for select
+create policy "Couple can read couple settings"
+on public.couple for select
 using (auth.role() = 'authenticated');
 
-create policy "Couple can update app settings"
-on public.app_settings for update
+create policy "Couple can update couple settings"
+on public.couple for update
 using (auth.role() = 'authenticated')
 with check (auth.role() = 'authenticated');
 
-create policy "Couple can create app settings"
-on public.app_settings for insert
+create policy "Couple can create couple settings"
+on public.couple for insert
 with check (auth.role() = 'authenticated');
 
 alter publication supabase_realtime add table public.profiles;
@@ -515,7 +515,7 @@ alter publication supabase_realtime add table public.individual_expenses;
 alter publication supabase_realtime add table public.daily_moods;
 alter publication supabase_realtime add table public.memory_map_entries;
 alter publication supabase_realtime add table public.pairing_requests;
-alter publication supabase_realtime add table public.app_settings;
+alter publication supabase_realtime add table public.couple;
 
 grant usage on schema public to anon, authenticated;
 grant select on public.profiles to authenticated;
@@ -527,11 +527,12 @@ grant select, insert, update, delete on public.individual_expenses to authentica
 grant select, insert, update, delete on public.daily_moods to authenticated;
 grant select, insert, update, delete on public.memory_map_entries to authenticated;
 grant select, insert on public.pairing_requests to authenticated;
-grant select, insert, update on public.app_settings to authenticated;
+grant select, insert, update on public.couple to authenticated;
+grant select, insert, update on public.couple to service_role;
 grant execute on function public.profile_is_partner(uuid) to authenticated;
 grant execute on function public.request_pairing_with_code(text) to authenticated;
 grant execute on function public.accept_pairing_request(uuid) to authenticated;
 
-insert into public.app_settings (id, hero_image_url, anniversary_date)
+insert into public.couple (id, hero_image_url, anniversary_date)
 values ('main', null, current_date)
 on conflict (id) do nothing;

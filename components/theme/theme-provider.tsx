@@ -21,10 +21,15 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function getStoredTheme(): ThemePreference {
 	if (typeof window === "undefined") return "system";
-	const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-	return stored === "light" || stored === "dark" || stored === "system"
-		? stored
-		: "system";
+
+	try {
+		const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+		return stored === "light" || stored === "dark" || stored === "system"
+			? stored
+			: "system";
+	} catch {
+		return "system";
+	}
 }
 
 function getSystemTheme() {
@@ -61,7 +66,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 		() => ({
 			theme,
 			setTheme: (nextTheme) => {
-				window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+				try {
+					window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+				} catch {
+					// Theme changes should still apply when storage is unavailable.
+				}
+
 				setThemeState(nextTheme);
 				applyTheme(nextTheme);
 			},

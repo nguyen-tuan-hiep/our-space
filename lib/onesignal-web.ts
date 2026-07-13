@@ -52,8 +52,7 @@ declare global {
 }
 
 export const ONESIGNAL_WEB_APP_ID =
-  process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID ??
-  "d27ba552-6618-4673-9914-6cb8e637d287";
+  process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID ?? "";
 
 let oneSignalScriptPromise: Promise<void> | null = null;
 let oneSignalInitPromise: Promise<OneSignalWebSdk> | null = null;

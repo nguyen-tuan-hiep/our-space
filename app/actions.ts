@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { v2 as cloudinary } from "cloudinary";
 import { createClient } from "@/lib/supabase/server";
-import { getCoupleSettingsId } from "@/lib/couple-settings";
+import { getCoupleId } from "@/lib/couple-settings";
 import { getAppSession } from "@/lib/auth";
 import { getFinanceData } from "@/lib/data";
 import {
@@ -375,10 +375,10 @@ export async function updateHeroImage(formData: FormData) {
     return fail("Please pair with your partner before changing the hero image.");
   }
 
-  const settingsId = getCoupleSettingsId(profile, { id: profile.partner_id });
+  const settingsId = getCoupleId(profile, { id: profile.partner_id });
 
   const { data: currentSettings, error: settingsError } = await supabase
-    .from("app_settings")
+    .from("couple")
     .select("hero_image_public_id")
     .eq("id", settingsId)
     .maybeSingle();
@@ -406,7 +406,7 @@ export async function updateHeroImage(formData: FormData) {
     });
   }
 
-  const { error } = await supabase.from("app_settings").upsert({
+  const { error } = await supabase.from("couple").upsert({
     id: settingsId,
     hero_image_url: heroImageUrl,
     hero_image_public_id: heroImagePublicId,
@@ -437,8 +437,8 @@ export async function updateAnniversary(formData: FormData) {
     return fail("Please pair with your partner before editing anniversary.");
   }
 
-  const settingsId = getCoupleSettingsId(profile, { id: profile.partner_id });
-  const { error } = await supabase.from("app_settings").upsert({
+  const settingsId = getCoupleId(profile, { id: profile.partner_id });
+  const { error } = await supabase.from("couple").upsert({
     id: settingsId,
     anniversary_date: anniversaryDate,
     updated_by: user.id,
@@ -619,7 +619,7 @@ export async function createMemory(formData: FormData) {
     return fail("Please pair with your partner before adding memories.");
   }
 
-  const coupleId = getCoupleSettingsId(profile, { id: profile.partner_id });
+  const coupleId = getCoupleId(profile, { id: profile.partner_id });
   const { data, error } = await supabase
     .from("memory_map_entries")
     .insert({
@@ -654,7 +654,7 @@ export async function updateMemory(formData: FormData) {
     return fail("Please pair with your partner before editing memories.");
   }
 
-  const coupleId = getCoupleSettingsId(profile, { id: profile.partner_id });
+  const coupleId = getCoupleId(profile, { id: profile.partner_id });
   const { data, error } = await supabase
     .from("memory_map_entries")
     .update({

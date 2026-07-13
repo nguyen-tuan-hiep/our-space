@@ -37,7 +37,7 @@ export interface PairingRequest {
   recipient?: Pick<Profile, "id" | "display_name" | "avatar_url" | "pair_code">;
 }
 
-export interface AppSettings {
+export interface Couple {
   id: string;
   hero_image_url: string | null;
   hero_image_public_id: string | null;

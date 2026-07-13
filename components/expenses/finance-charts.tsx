@@ -28,7 +28,12 @@ import {
 	buildFinanceChartData,
 } from "@/lib/finance-chart-utils";
 import type { FilterRange } from "@/lib/dashboard-utils";
-import type { CurrencyCode, IndividualExpense, Profile } from "@/lib/types";
+import type {
+	CurrencyCode,
+	ExpenseCategory,
+	IndividualExpense,
+	Profile,
+} from "@/lib/types";
 
 function tooltipFormatter(
 	value: number,
@@ -68,7 +73,21 @@ function useSmallDevice() {
 	return isSmallDevice;
 }
 
-// 💡 Hàm vẽ Label hiển thị % trên các lát cắt của Pie
+type PieLabelProps = {
+	cx?: number;
+	cy?: number;
+	midAngle?: number;
+	innerRadius?: number;
+	outerRadius?: number;
+	percent?: number;
+};
+
+type CategoryBreakdown = {
+	category: ExpenseCategory;
+	value: number;
+	currency: CurrencyCode;
+};
+
 const renderCustomizedLabel = ({
 	cx,
 	cy,
@@ -76,8 +95,19 @@ const renderCustomizedLabel = ({
 	innerRadius,
 	outerRadius,
 	percent,
-}: any) => {
-	if (percent < 0.05) return null; // Không hiện nhãn nếu lát cắt quá nhỏ (< 5%) tránh đè chữ
+}: PieLabelProps) => {
+	if (
+		cx === undefined ||
+		cy === undefined ||
+		midAngle === undefined ||
+		innerRadius === undefined ||
+		outerRadius === undefined ||
+		percent === undefined ||
+		percent < 0.05
+	) {
+		return null;
+	}
+
 	const RADIAN = Math.PI / 180;
 	const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
 	const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -396,14 +426,13 @@ export function FinanceCharts({
 									</ResponsiveContainer>
 								</div>
 
-								{/* 💡 Custom Legend: Danh sách chi tiết danh mục + số tiền */}
 								<div className="flex-1 w-full space-y-1.5 overflow-y-auto max-h-48 text-xs">
 									{item.categories.length === 0 ? (
 										<p className="text-neutral-400 text-center py-4">
 											No data available
 										</p>
 									) : (
-										item.categories.map((cat: any) => (
+										(item.categories as CategoryBreakdown[]).map((cat) => (
 											<div
 												key={cat.category}
 												className="flex items-center justify-between gap-2 border-b border-neutral-100 pb-1"

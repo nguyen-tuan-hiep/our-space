@@ -33,7 +33,21 @@ export function SetupRequired({
 						<p className="mx-auto mt-5 max-w-2xl leading-7 text-neutral-600">
 							Share your pairing code with your partner. Only one person needs to enter the code, the other can accept the request here.
 						</p>
+						<p className="mt-3 text-sm text-neutral-500">
+							Signed in as {user.email ?? user.id}
+						</p>
 					</div>
+
+					{details.length ? (
+						<div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+							<p className="font-semibold">Setup status</p>
+							<ul className="mt-2 list-disc space-y-1 pl-5">
+								{details.map((detail) => (
+									<li key={detail}>{detail}</li>
+								))}
+							</ul>
+						</div>
+					) : null}
 
 					{profile?.pair_code ? (
 						<div className="mt-4 rounded-2xl border border-neutral-400 bg-paper p-5 text-center">

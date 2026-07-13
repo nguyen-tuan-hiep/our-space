@@ -145,7 +145,7 @@ export function buildFinanceChartData({
 
   return Array.from(rows.entries())
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([_key, row]) => row);
+    .map(([, row]) => row);
 }
 
 export function buildFinanceBreakdowns({

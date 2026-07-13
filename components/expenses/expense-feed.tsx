@@ -227,7 +227,7 @@ export function ExpenseFeed({
 					)}
 				</div>
 
-				{/* <div
+				<div
 					aria-hidden="true"
 					className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-6 rounded-t-2xl bg-gradient-to-b from-paper to-transparent transition-opacity duration-200 ${
 						scrollGradient.top ? "opacity-100" : "opacity-0"
@@ -239,7 +239,7 @@ export function ExpenseFeed({
 					className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 rounded-b-2xl bg-gradient-to-t from-paper to-transparent transition-opacity duration-200 ${
 						scrollGradient.bottom ? "opacity-100" : "opacity-0"
 					}`}
-				/> */}
+				/>
 			</div>
 
 			<ConfirmDialog

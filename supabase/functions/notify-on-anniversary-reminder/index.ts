@@ -1,8 +1,22 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.48.1";
 
-type AppSettingsRow = {
+type CoupleRow = {
   id: string;
   anniversary_date: string | null;
+};
+
+type ProfileRow = {
+  id: string;
+  partner_id: string | null;
+  created_at: string | null;
+};
+
+type ReminderTarget = {
+  coupleId: string;
+  anniversaryDate: string;
+  daysUntil: number;
+  message: string;
+  recipientExternalIds: string[];
 };
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -50,12 +64,24 @@ function isAuthorized(request: Request) {
   return headerSecret === webhookSecret || urlSecret === webhookSecret;
 }
 
-function parseCoupleProfileIds(settingsId: string) {
-  const match = settingsId.match(/^couple:([^:]+):([^:]+)$/);
+function normalizeCoupleId(coupleId: string) {
+  return coupleId.replace(/^couple:/, "");
+}
+
+function parseCoupleProfileIds(coupleId: string) {
+  const match = normalizeCoupleId(coupleId).match(/^([^:]+):([^:]+)$/);
   if (!match) return null;
 
   const [, firstProfileId, secondProfileId] = match;
   return [firstProfileId, secondProfileId] as const;
+}
+
+function getCoupleId(firstProfileId: string, secondProfileId: string) {
+  return [firstProfileId, secondProfileId].sort().join(":");
+}
+
+function getDatePart(value: string) {
+  return value.slice(0, 10);
 }
 
 function getUtcMidnight(value: Date) {
@@ -95,30 +121,53 @@ function getReminderMessage(daysUntil: number) {
 async function listReminderTargets(now: Date) {
   if (!supabase) throw new Error("Supabase client is not configured.");
 
-  const { data, error } = await supabase
-    .from("app_settings")
-    .select("id, anniversary_date")
-    .like("id", "couple:%")
-    .not("anniversary_date", "is", null)
-    .returns<AppSettingsRow[]>();
+  const [
+    { data: settingsRows, error: settingsError },
+    { data: profileRows, error: profileError },
+  ] = await Promise.all([
+      supabase
+        .from("couple")
+        .select("id, anniversary_date")
+        .not("anniversary_date", "is", null)
+        .returns<CoupleRow[]>(),
+      supabase
+        .from("profiles")
+        .select("id, partner_id, created_at")
+        .not("partner_id", "is", null)
+        .returns<ProfileRow[]>(),
+    ]);
 
-  if (error) throw new Error(error.message);
+  if (settingsError) throw new Error(settingsError.message);
+  if (profileError) throw new Error(profileError.message);
 
-  const targets: Array<{
-    settingsId: string;
-    anniversaryDate: string;
-    daysUntil: number;
-    message: string;
-    recipientExternalIds: string[];
-  }> = [];
+  const anniversaryBySettingsId = new Map<string, string>();
+  for (const row of settingsRows ?? []) {
+    const coupleId = normalizeCoupleId(row.id);
+    if (row.anniversary_date && coupleId !== "main") {
+      anniversaryBySettingsId.set(coupleId, getDatePart(row.anniversary_date));
+    }
+  }
 
-  for (const row of data ?? []) {
-    if (!row.anniversary_date) continue;
+  const profilesById = new Map(
+    (profileRows ?? []).map((profile) => [profile.id, profile]),
+  );
+  const targets: ReminderTarget[] = [];
+  const seenSettingsIds = new Set<string>();
 
-    const coupleProfileIds = parseCoupleProfileIds(row.id);
-    if (!coupleProfileIds) continue;
+  for (const profile of profileRows ?? []) {
+    if (!profile.partner_id) continue;
 
-    const nextAnniversaryUtcMs = getNextAnniversaryDate(row.anniversary_date, now);
+    const partner = profilesById.get(profile.partner_id);
+    if (!partner) continue;
+
+    const coupleId = getCoupleId(profile.id, profile.partner_id);
+    if (seenSettingsIds.has(coupleId)) continue;
+    seenSettingsIds.add(coupleId);
+
+    const anniversaryDate =
+      anniversaryBySettingsId.get(coupleId) ??
+      getDatePart(profile.created_at ?? partner.created_at ?? now.toISOString());
+    const nextAnniversaryUtcMs = getNextAnniversaryDate(anniversaryDate, now);
     const daysUntil = getDaysUntil(nextAnniversaryUtcMs, now);
     if (!reminderDays.includes(daysUntil as (typeof reminderDays)[number])) continue;
 
@@ -126,8 +175,30 @@ async function listReminderTargets(now: Date) {
     if (!message) continue;
 
     targets.push({
-      settingsId: row.id,
-      anniversaryDate: row.anniversary_date,
+      coupleId,
+      anniversaryDate,
+      daysUntil,
+      message,
+      recipientExternalIds: [profile.id, profile.partner_id],
+    });
+  }
+
+  for (const [coupleId, anniversaryDate] of anniversaryBySettingsId) {
+    if (seenSettingsIds.has(coupleId)) continue;
+
+    const coupleProfileIds = parseCoupleProfileIds(coupleId);
+    if (!coupleProfileIds) continue;
+
+    const nextAnniversaryUtcMs = getNextAnniversaryDate(anniversaryDate, now);
+    const daysUntil = getDaysUntil(nextAnniversaryUtcMs, now);
+    if (!reminderDays.includes(daysUntil as (typeof reminderDays)[number])) continue;
+
+    const message = getReminderMessage(daysUntil);
+    if (!message) continue;
+
+    targets.push({
+      coupleId,
+      anniversaryDate,
       daysUntil,
       message,
       recipientExternalIds: [...coupleProfileIds],
@@ -197,6 +268,7 @@ Deno.serve(async (request) => {
   }
 
   let now = new Date();
+  let dryRun = false;
   try {
     const body = await request.json().catch(() => null);
     if (body && typeof body === "object" && "date" in body) {
@@ -204,6 +276,9 @@ Deno.serve(async (request) => {
       if (!Number.isNaN(parsedDate.getTime())) {
         now = parsedDate;
       }
+    }
+    if (body && typeof body === "object" && "dryRun" in body) {
+      dryRun = Boolean((body as { dryRun?: boolean }).dryRun);
     }
   } catch {
     // Ignore invalid JSON and continue with the current date.
@@ -213,7 +288,20 @@ Deno.serve(async (request) => {
     const targets = await listReminderTargets(now);
 
     if (!targets.length) {
-      return jsonResponse({ ok: true, skipped: true });
+      return jsonResponse({
+        ok: true,
+        skipped: true,
+        checkedDate: now.toISOString().slice(0, 10),
+      });
+    }
+
+    if (dryRun) {
+      return jsonResponse({
+        ok: true,
+        dryRun: true,
+        checkedDate: now.toISOString().slice(0, 10),
+        targets,
+      });
     }
 
     const results = [];
@@ -226,14 +314,14 @@ Deno.serve(async (request) => {
         url: appUrl,
         data: {
           type: "anniversary-reminder",
-          settings_id: target.settingsId,
+          couple_id: target.coupleId,
           anniversary_date: target.anniversaryDate,
           reminder_days: target.daysUntil,
         },
       });
 
       results.push({
-        settingsId: target.settingsId,
+        coupleId: target.coupleId,
         daysUntil: target.daysUntil,
         oneSignalResponse,
       });

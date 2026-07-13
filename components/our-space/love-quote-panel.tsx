@@ -20,7 +20,7 @@ export function LoveQuotePanel({ quote }: LoveQuotePanelProps) {
 				</p>
 				{quote.text ? (
 					<p className="mt-1 font-serif text-lg leading-snug text-neutral-900 sm:mt-2 sm:text-2xl">
-						"{quote.text}"
+						&ldquo;{quote.text}&rdquo;
 					</p>
 				) : (
 					<p className="mt-1 font-serif text-lg leading-snug text-neutral-500 sm:mt-2 sm:text-2xl">

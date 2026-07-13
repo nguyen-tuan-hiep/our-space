@@ -1,8 +1,8 @@
 import type { Profile } from "@/lib/types";
 
-export function getCoupleSettingsId(
+export function getCoupleId(
   profile: Pick<Profile, "id">,
   partner: Pick<Profile, "id">,
 ) {
-  return `couple:${[profile.id, partner.id].sort().join(":")}`;
+  return [profile.id, partner.id].sort().join(":");
 }
