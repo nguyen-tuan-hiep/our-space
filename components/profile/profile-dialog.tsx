@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { SmilePlus } from "lucide-react";
 import { useToast } from "@/components/feedback/toast";
 import {
 	NativeButton,
@@ -12,15 +14,17 @@ import {
 } from "@/components/ui/native-controls";
 import { updatePassword, updateProfile } from "@/app/actions";
 import {
-	avatarOptions,
-	extractEmojiOnly,
 	getSupportedCurrencyCodes,
 	getUtcTimeZoneOptions,
-	isCustomAvatarEmoji,
 	normalizeTimeZoneValue,
 	commonCountryCodes,
 } from "@/lib/constants";
 import type { Profile } from "@/lib/types";
+import { EmojiStyle, type EmojiClickData } from "emoji-picker-react";
+
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
+	ssr: false,
+});
 
 interface ProfileDialogProps {
 	open: boolean;
@@ -33,13 +37,12 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 	const toast = useToast();
 	const [tab, setTab] = useState<"profile" | "password">("profile");
 	const [avatar, setAvatar] = useState(profile.avatar_url || "💖");
+	const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
 	const countryNames = useMemo(() => {
 		return new Intl.DisplayNames(["en"], { type: "region" });
 	}, []);
 	const currencyOptions = useMemo(() => getSupportedCurrencyCodes(), []);
 	const timeZoneOptions = useMemo(() => getUtcTimeZoneOptions(), []);
-	const customAvatarInvalid =
-		avatar.trim().length > 0 && !isCustomAvatarEmoji(avatar);
 	const [pending, startTransition] = useTransition();
 	const handleClose = () => {
 		if (document.activeElement instanceof HTMLElement) {
@@ -51,6 +54,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 	useEffect(() => {
 		if (!open) return;
 		setAvatar(profile.avatar_url || "💖");
+		setAvatarPickerOpen(false);
 	}, [open, profile.avatar_url]);
 
 	return (
@@ -157,45 +161,48 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 									))}
 							</NativeSelect>
 						</div>
-						<NativeInput
-							label="Custom emoji"
-							value={avatar}
-							onChange={(event) =>
-								setAvatar(extractEmojiOnly(event.target.value))
-							}
-							placeholder="Paste emoji"
-							error={customAvatarInvalid}
-							helperText={
-								customAvatarInvalid
-									? "Please enter one emoji only."
-									: "Paste an emoji, or choose one below."
-							}
-						/>
+							<div className="grid gap-3">
+								<input
+									type="hidden"
+									name="avatar"
+									value={avatar}
+								/>
+								<button
+									type="button"
+									aria-label="Choose profile emoji"
+									aria-expanded={avatarPickerOpen ? "true" : undefined}
+									className="flex min-h-12 items-center justify-between rounded-2xl border border-neutral-400 bg-transparent px-3 text-left text-neutral-900 transition hover:border-neutral-950/40 sm:min-h-11"
+									onClick={() => setAvatarPickerOpen((open) => !open)}
+								>
+									<span className="flex items-center gap-3">
+										<span className="grid size-9 place-items-center rounded-xl bg-bg text-2xl">
+											{avatar}
+										</span>
+										<span className="text-sm font-semibold text-neutral-700">
+											Profile emoji
+										</span>
+									</span>
+									<SmilePlus
+										size={18}
+										className="text-neutral-500"
+									/>
+								</button>
 
-						<div>
-							<div className="grid max-h-72 grid-cols-5 gap-3 sm:grid-cols-8">
-								{avatarOptions.map((option) => {
-									const selected = avatar === option;
-									return (
-										<button
-											key={option}
-											type="button"
-											aria-label={`Choose ${option} avatar`}
-											onClick={() => setAvatar(option)}
-											className={`grid aspect-square place-items-center border transition rounded-2xl ${
-												selected
-													? "border-[color-mix(in_srgb,#000000_48%,transparent)] bg-[color-mix(in_srgb,#000000_12%,transparent)] text-white"
-													: "border-bg-[color-mix(in_srgb,#000000_12%,transparent)] bg-paper hover:border-[color-mix(in_srgb,#000000_48%,transparent)]"
-											}`}
-										>
-											<span className="grid size-10 place-items-center text-2xl">
-												{option}
-											</span>
-										</button>
-									);
-								})}
+								{avatarPickerOpen ? (
+									<div className="overflow-hidden rounded-3xl border border-neutral-900/10 bg-paper p-2 shadow-[0_18px_44px_rgba(23,23,23,0.14)]">
+										<EmojiPicker
+											width="100%"
+											height={420}
+											emojiStyle={EmojiStyle.NATIVE}
+											previewConfig={{ showPreview: false }}
+											onEmojiClick={(emojiData: EmojiClickData) => {
+												setAvatar(emojiData.emoji);
+												setAvatarPickerOpen(false);
+											}}
+										/>
+									</div>
+								) : null}
 							</div>
-						</div>
 					</form>
 				) : (
 					<form

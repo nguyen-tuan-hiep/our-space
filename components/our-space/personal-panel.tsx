@@ -70,7 +70,7 @@ export function PersonalPanel({
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12 lg:items-stretch">
 				<div className="app-card app-card-interactive content-fade-in p-4 sm:p-5 lg:col-span-7 lg:min-h-[18rem] lg:p-7">
 					<div className="flex items-center gap-3 lg:items-start lg:gap-5">
-						<div className="grid size-14 place-items-center rounded-full bg-mui/10 text-2xl lg:size-24 lg:text-5xl">
+						<div className="grid size-14 place-items-center rounded-full bg-black/10 dark:bg-white/10 text-2xl lg:size-24 lg:text-5xl">
 							{profileAvatar}
 						</div>
 						<div className="min-w-0">
@@ -114,7 +114,7 @@ export function PersonalPanel({
 
 				<div className="app-card app-card-interactive content-fade-in p-4 sm:p-5 lg:col-span-5 lg:p-7">
 					<div className="flex items-center gap-3 lg:flex-col lg:items-start">
-						<div className="grid size-14 place-items-center rounded-full bg-mui/10 text-2xl lg:size-20 lg:text-4xl">
+						<div className="grid size-14 place-items-center rounded-full bg-black/10 dark:bg-white/10 text-2xl lg:size-20 lg:text-4xl">
 							{partnerAvatar}
 						</div>
 						<div className="min-w-0">

@@ -1,0 +1,444 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { Check, Clapperboard, Play, Plus, Star, X } from "lucide-react";
+import {
+	deleteMovie,
+	updateMovieStatus,
+} from "@/app/actions";
+import { ActionMenu } from "@/components/common/action-menu";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import { useToast } from "@/components/feedback/toast";
+import { MoviesPanelSkeleton } from "@/components/movies/movies-panel-skeleton";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Movie, MovieStatus } from "@/lib/types";
+
+interface MoviesPanelProps {
+	loading: boolean;
+	movies: Movie[];
+	onEditMovie: (movie: Movie) => void;
+	onMovieDeleted: (movieId: string) => void;
+	onMovieSaved: (movie: Movie) => void;
+	onNewMovie: () => void;
+}
+
+const columns: Array<{
+	status: MovieStatus;
+	title: string;
+	empty: string;
+}> = [
+	{
+		status: "watching",
+		title: "Watching",
+		empty: "No movies are currently playing.",
+	},
+	{
+		status: "wishlist",
+		title: "Wishlist",
+		empty: "No saved movies yet.",
+	},
+	{
+		status: "watched",
+		title: "Watched",
+		empty: "No watched movies yet.",
+	},
+];
+
+function getNextStatus(movie: Movie) {
+	if (movie.status === "wishlist") {
+		return {
+			status: "watching" as const,
+			label: "Mark watching",
+			icon: Play,
+		};
+	}
+
+	if (movie.status === "watching") {
+		return {
+			status: "watched" as const,
+			label: "Mark watched",
+			icon: Check,
+		};
+	}
+
+	return null;
+}
+
+function MovieCard({
+	movie,
+	onEdit,
+	onRequestDelete,
+	onShowDetails,
+}: {
+	movie: Movie;
+	onEdit: () => void;
+	onRequestDelete: () => void;
+	onShowDetails: () => void;
+}) {
+	return (
+		<article className="app-card app-card-interactive content-fade-in relative overflow-hidden p-0">
+			<button
+				type="button"
+				aria-label={`View details for ${movie.title}`}
+				className="relative block aspect-[2/3] w-full overflow-hidden bg-neutral-100 text-left"
+				onClick={onShowDetails}
+			>
+				{movie.poster_url ? (
+					<Image
+						src={movie.poster_url}
+						alt={`${movie.title} poster`}
+						fill
+						sizes="(min-width: 1280px) 18vw, (min-width: 640px) 30vw, 80vw"
+						className="object-cover"
+					/>
+				) : (
+					<div className="grid h-full place-items-center bg-neutral-950 p-4 text-center text-neutral-50">
+						<Clapperboard size={42} />
+						<span className="sr-only">{movie.title}</span>
+					</div>
+				)}
+			</button>
+			<div className="absolute right-3 top-3">
+				<ActionMenu
+					label={`Open actions for ${movie.title}`}
+					sheetTitle="Movie actions"
+					sheetDescription={movie.title}
+					onEdit={onEdit}
+					onDelete={onRequestDelete}
+				/>
+			</div>
+		</article>
+	);
+}
+
+function MovieDetailsDialog({
+	movie,
+	closing,
+	busy,
+	onClose,
+	onEdit,
+	onMoveStatus,
+}: {
+	movie: Movie | null;
+	closing: boolean;
+	busy: boolean;
+	onClose: () => void;
+	onEdit: (movie: Movie) => void;
+	onMoveStatus: (movie: Movie, status: MovieStatus) => void;
+}) {
+	useEffect(() => {
+		if (!movie) return;
+
+		const originalOverflow = document.body.style.overflow;
+		document.body.style.overflow = "hidden";
+
+		return () => {
+			document.body.style.overflow = originalOverflow;
+		};
+	}, [movie]);
+
+	if (!movie) return null;
+
+	const nextStatus = getNextStatus(movie);
+	const NextIcon = nextStatus?.icon;
+
+	return (
+		<>
+			<button
+				type="button"
+				aria-label="Close movie details"
+				className={[
+					"fixed inset-0 z-[70] bg-black/20 backdrop-blur-sm",
+					closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
+				].join(" ")}
+				onClick={onClose}
+			/>
+			<div
+				role="dialog"
+				aria-modal="true"
+				aria-label={movie.title}
+				className={[
+					"fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] grid max-h-[calc(100svh-env(safe-area-inset-bottom)-1.5rem)] overflow-hidden rounded-3xl border border-neutral-900/10 bg-paper shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[min(42rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2",
+					closing ? "native-sheet-out sm:native-popover-out" : "native-sheet-in sm:native-popover-in",
+				].join(" ")}
+			>
+				<button
+					type="button"
+					aria-label="Close movie details"
+					className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-full bg-paper/90 text-neutral-700 shadow-[0_8px_22px_rgba(23,23,23,0.16)] backdrop-blur hover:bg-neutral-950 hover:text-white"
+					onClick={onClose}
+				>
+					<X size={18} />
+				</button>
+
+				<div className="grid min-h-0 overflow-y-auto sm:grid-cols-[15rem_1fr]">
+					<div className="bg-neutral-100 p-4 sm:p-0">
+						<div className="relative mx-auto aspect-[2/3] w-[min(40vw,8.5rem)] overflow-hidden rounded-2xl bg-neutral-100 sm:h-full sm:w-full sm:rounded-none">
+							{movie.poster_url ? (
+								<Image
+									src={movie.poster_url}
+									alt={`${movie.title} poster`}
+									fill
+									sizes="(min-width: 640px) 15rem, 100vw"
+									className="object-cover"
+								/>
+							) : (
+								<div className="grid h-full place-items-center bg-neutral-950 text-neutral-50">
+									<Clapperboard size={52} />
+								</div>
+							)}
+						</div>
+					</div>
+
+					<div className="grid content-start gap-4 p-5 sm:p-6">
+						<div>
+							<div className="flex items-start gap-3">
+								<h2 className="min-w-0 flex-1 font-serif text-3xl leading-tight text-neutral-950">
+									{movie.title}
+								</h2>
+								{movie.reaction ? (
+									<span className="text-3xl leading-none">{movie.reaction}</span>
+								) : null}
+							</div>
+							<p className="mt-2 text-xs font-bold uppercase text-neutral-500">
+								{movie.category}
+							</p>
+						</div>
+
+						<div className="flex flex-wrap items-center gap-2">
+							{movie.rating ? (
+								<span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-800">
+									<Star
+										size={15}
+										fill="currentColor"
+									/>
+									{movie.rating.toFixed(1)}
+								</span>
+							) : null}
+							<span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600">
+								{movie.status === "wishlist"
+									? "Wishlist"
+									: movie.status === "watching"
+										? "Watching"
+										: "Watched"}
+							</span>
+						</div>
+
+						{movie.comment ? (
+							<p className="text-sm leading-7 text-neutral-600">
+								{movie.comment}
+							</p>
+						) : (
+							<p className="text-sm leading-7 text-neutral-500">
+								No comment yet.
+							</p>
+						)}
+
+						<div className="mt-2 flex flex-col gap-2 sm:flex-row">
+							<Button
+								type="button"
+								variant="outline"
+								className="h-11 rounded-2xl"
+								onClick={() => onEdit(movie)}
+							>
+								Edit
+							</Button>
+							{nextStatus ? (
+								<Button
+									type="button"
+									variant="outline"
+									className="h-11 rounded-2xl"
+									disabled={busy}
+									onClick={() => onMoveStatus(movie, nextStatus.status)}
+								>
+									{NextIcon ? <NextIcon size={16} /> : null}
+									{busy ? "Updating..." : nextStatus.label}
+								</Button>
+							) : null}
+						</div>
+					</div>
+				</div>
+			</div>
+		</>
+	);
+}
+
+export function MoviesPanel({
+	loading,
+	movies,
+	onEditMovie,
+	onMovieDeleted,
+	onMovieSaved,
+	onNewMovie,
+}: MoviesPanelProps) {
+	const toast = useToast();
+	const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+	const [detailMovie, setDetailMovie] = useState<Movie | null>(null);
+	const [detailClosing, setDetailClosing] = useState(false);
+	const [busyId, setBusyId] = useState<string | null>(null);
+	const [pending, startTransition] = useTransition();
+	const moviesByStatus = useMemo(
+		() =>
+			columns.map((column) => ({
+				...column,
+				movies: movies.filter((movie) => movie.status === column.status),
+			})),
+		[movies],
+	);
+
+	const handleDelete = () => {
+		if (!selectedMovie) return;
+		const movieId = selectedMovie.id;
+		setBusyId(movieId);
+
+		startTransition(async () => {
+			const result = await deleteMovie(movieId);
+			toast(result.message, {
+				variant: result.ok ? "success" : "error",
+			});
+			if (result.ok) {
+				onMovieDeleted(movieId);
+				setSelectedMovie(null);
+			}
+			setBusyId(null);
+		});
+	};
+
+	const handleMoveStatus = (movie: Movie, status: MovieStatus) => {
+		setBusyId(movie.id);
+		startTransition(async () => {
+			const result = await updateMovieStatus(movie.id, status);
+			toast(result.message, {
+				variant: result.ok ? "success" : "error",
+			});
+			if (result.ok) {
+				onMovieSaved(result.movie);
+				setDetailMovie((current) =>
+					current?.id === result.movie.id ? result.movie : current,
+				);
+			}
+			setBusyId(null);
+		});
+	};
+
+	const openMovieDetails = (movie: Movie) => {
+		setDetailClosing(false);
+		setDetailMovie(movie);
+	};
+
+	const closeMovieDetails = () => {
+		setDetailClosing(true);
+		window.setTimeout(() => {
+			setDetailMovie(null);
+			setDetailClosing(false);
+		}, 260);
+	};
+
+	if (loading && movies.length === 0) {
+		return (
+			<div className="grid gap-4 sm:gap-5">
+				<div className="flex items-center justify-between gap-4 sm:items-end">
+					<div className="min-w-0">
+						<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
+							Movies
+						</h2>
+					</div>
+					<Skeleton className="hidden h-11 w-32 rounded-2xl sm:block" />
+				</div>
+				<MoviesPanelSkeleton />
+			</div>
+		);
+	}
+
+	return (
+		<div className="grid gap-4 sm:gap-5">
+			<div className="flex items-center justify-between gap-4 sm:items-end">
+				<div className="min-w-0">
+					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
+						Movies
+					</h2>
+				</div>
+				<Button
+					type="button"
+					size="lg"
+					className="primary-action hidden h-11 rounded-2xl px-5 font-bold sm:inline-flex sm:w-auto"
+					onClick={onNewMovie}
+				>
+					<Plus size={17} />
+					New movie
+				</Button>
+			</div>
+
+			<div className="grid gap-6">
+				{moviesByStatus.map((column) => (
+					<section
+						key={column.status}
+						className="grid content-start gap-3"
+					>
+						<div className="flex items-center justify-between rounded-2xl bg-neutral-950 px-4 py-3 text-neutral-50">
+							<h3 className="font-bold">{column.title}</h3>
+							<span className="rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold">
+								{column.movies.length}
+							</span>
+						</div>
+
+						{column.movies.length ? (
+							<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+								{column.movies.map((movie) => (
+									<MovieCard
+										key={movie.id}
+										movie={movie}
+										onEdit={() => onEditMovie(movie)}
+										onRequestDelete={() => setSelectedMovie(movie)}
+										onShowDetails={() => openMovieDetails(movie)}
+									/>
+								))}
+							</div>
+						) : loading ? (
+							<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+								{Array.from({ length: 5 }).map((_, index) => (
+									<div
+										key={index}
+										className="app-card overflow-hidden p-0"
+									>
+										<Skeleton className="aspect-[2/3] rounded-none" />
+									</div>
+								))}
+							</div>
+						) : (
+							<div className="app-card p-5 text-sm font-semibold text-neutral-500">
+								{column.empty}
+							</div>
+						)}
+					</section>
+				))}
+			</div>
+
+			<ConfirmDialog
+				open={Boolean(selectedMovie)}
+				title="Delete movie?"
+				description={
+					selectedMovie
+						? `${selectedMovie.title} will be removed from your couple movie list.`
+						: "This movie will be removed."
+				}
+				pending={pending && Boolean(busyId)}
+				onClose={() => setSelectedMovie(null)}
+				onConfirm={handleDelete}
+			/>
+			<MovieDetailsDialog
+				movie={detailMovie}
+				closing={detailClosing}
+				busy={pending && busyId === detailMovie?.id}
+				onClose={closeMovieDetails}
+				onEdit={(movie) => {
+					closeMovieDetails();
+					window.setTimeout(() => onEditMovie(movie), 260);
+				}}
+				onMoveStatus={handleMoveStatus}
+			/>
+		</div>
+	);
+}

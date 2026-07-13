@@ -1,4 +1,10 @@
-import type { CurrencyCode, ExpenseCategory, MemoryType } from "@/lib/types";
+import type {
+  CurrencyCode,
+  ExpenseCategory,
+  MemoryType,
+  MovieCategory,
+  MovieStatus,
+} from "@/lib/types";
 import { themeColors } from "@/lib/theme-colors";
 
 export const expenseCategories: ExpenseCategory[] = [
@@ -38,15 +44,35 @@ export const memoryTypeValues = memoryTypeOptions.map((option) => option.value);
 export const memoryTypeColors: Record<MemoryType, string> =
   themeColors.memoryTypes;
 
-const legacyMemoryTypeMap: Record<string, MemoryType> = {
-  date: "💞 Date",
-  food: "🍜 Food",
-  trip: "✈️ Travel",
-  anniversary: "💍 Anniversary",
-  photo: "📸 Photo",
-  outdoor: "🏕️ Outdoor & Nature",
-  other: "📍 Others",
-};
+export const movieCategories: MovieCategory[] = [
+  "Action",
+  "Comedy",
+  "Drama",
+  "Horror",
+  "Romance",
+  "Sci-Fi",
+  "Thriller",
+  "Documentary",
+  "Animation",
+  "Adventure",
+  "Fantasy",
+  "Mystery",
+  "Crime",
+  "Family",
+  "Musical",
+  "War",
+  "Western",
+  "Biography",
+  "History",
+  "Sport",
+  "Short Film",
+];
+
+export const movieStatuses: MovieStatus[] = [
+  "wishlist",
+  "watching",
+  "watched",
+];
 
 export function getMemoryTypeEmoji(memoryType: string) {
   return memoryType.trim().split(/\s+/)[0] || "📍";

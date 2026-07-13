@@ -16,6 +16,8 @@ import {
   isValidCountryCode,
   isValidCurrencyCode,
   memoryTypeValues,
+  movieCategories,
+  movieStatuses,
   normalizeCountryCode,
   normalizeCurrencyCode,
   normalizeGroupedNumberInput,
@@ -27,6 +29,9 @@ import type {
   IndividualExpense,
   MemoryMapEntry,
   MemoryType,
+  Movie,
+  MovieCategory,
+  MovieStatus,
   MoodLevel,
   SharedNote,
 } from "@/lib/types";
@@ -49,6 +54,16 @@ type MemoryPayload = {
   visited_at: string;
   photo_url: string | null;
   photo_public_id: string | null;
+};
+
+type MoviePayload = {
+  title: string;
+  rating: number | null;
+  poster_url: string | null;
+  category: MovieCategory;
+  status: MovieStatus;
+  comment: string | null;
+  reaction: string | null;
 };
 
 const moodLevels: MoodLevel[] = [
@@ -159,6 +174,51 @@ function getMemoryPayload(
       visited_at: visitedAt.toISOString(),
       photo_url: nullableStringValue(formData, "photo_url"),
       photo_public_id: nullableStringValue(formData, "photo_public_id"),
+    },
+  };
+}
+
+function getMoviePayload(
+  formData: FormData,
+): { ok: true; payload: MoviePayload } | { ok: false; message: string } {
+  const title = stringValue(formData, "title");
+  const ratingValue = stringValue(formData, "rating");
+  const rating = ratingValue ? Number(ratingValue) : null;
+  const category = stringValue(formData, "category") as MovieCategory;
+  const status = stringValue(formData, "status") as MovieStatus;
+  const reaction = nullableStringValue(formData, "reaction");
+
+  if (!title) return fail("Please enter a movie title.");
+  if (title.length > 160) return fail("Movie title must be 160 characters or fewer.");
+  if (
+    rating !== null &&
+    (!Number.isFinite(rating) ||
+      rating < 1 ||
+      rating > 10 ||
+      !Number.isInteger(rating * 2))
+  ) {
+    return fail("Rating must be from 1 to 10 in 0.5 steps.");
+  }
+  if (!movieCategories.includes(category)) {
+    return fail("Please choose a valid movie category.");
+  }
+  if (!movieStatuses.includes(status)) {
+    return fail("Please choose a valid movie status.");
+  }
+  if (reaction && !isCustomAvatarEmoji(reaction)) {
+    return fail("Reaction must be one emoji.");
+  }
+
+  return {
+    ok: true,
+    payload: {
+      title,
+      rating,
+      poster_url: nullableStringValue(formData, "poster_url"),
+      category,
+      status,
+      comment: nullableStringValue(formData, "comment"),
+      reaction,
     },
   };
 }
@@ -675,6 +735,105 @@ export async function deleteMemory(memoryId: string) {
   if (error) return fail(error.message);
   revalidatePath("/");
   return ok("Memory deleted.");
+}
+
+export async function createMovie(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const movie = getMoviePayload(formData);
+  if (!movie.ok) return movie;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, partner_id")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; partner_id: string | null }>();
+
+  if (profileError) return fail(profileError.message);
+  if (!profile?.partner_id) {
+    return fail("Please pair with your partner before adding movies.");
+  }
+
+  const coupleId = getCoupleId(profile, { id: profile.partner_id });
+  const { data, error } = await supabase
+    .from("movies")
+    .insert({
+      ...movie.payload,
+      couple_id: coupleId,
+      created_by: user.id,
+    })
+    .select(
+      "*, creator:profiles!movies_created_by_fkey(id, display_name, avatar_url, currency)",
+    )
+    .single<Movie>();
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return { ...ok("Movie added."), movie: data };
+}
+
+export async function updateMovie(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const movieId = stringValue(formData, "id");
+  const movie = getMoviePayload(formData);
+  if (!movie.ok) return movie;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, partner_id")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; partner_id: string | null }>();
+
+  if (profileError) return fail(profileError.message);
+  if (!profile?.partner_id) {
+    return fail("Please pair with your partner before editing movies.");
+  }
+
+  const coupleId = getCoupleId(profile, { id: profile.partner_id });
+  const { data, error } = await supabase
+    .from("movies")
+    .update({
+      ...movie.payload,
+      couple_id: coupleId,
+    })
+    .eq("id", movieId)
+    .select(
+      "*, creator:profiles!movies_created_by_fkey(id, display_name, avatar_url, currency)",
+    )
+    .single<Movie>();
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return { ...ok("Movie updated."), movie: data };
+}
+
+export async function updateMovieStatus(movieId: string, status: MovieStatus) {
+  const { supabase } = await requireUser();
+
+  if (!movieStatuses.includes(status)) {
+    return fail("Please choose a valid movie status.");
+  }
+
+  const { data, error } = await supabase
+    .from("movies")
+    .update({ status })
+    .eq("id", movieId)
+    .select(
+      "*, creator:profiles!movies_created_by_fkey(id, display_name, avatar_url, currency)",
+    )
+    .single<Movie>();
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return { ...ok("Movie status updated."), movie: data };
+}
+
+export async function deleteMovie(movieId: string) {
+  const { supabase } = await requireUser();
+  const { error } = await supabase.from("movies").delete().eq("id", movieId);
+
+  if (error) return fail(error.message);
+  revalidatePath("/");
+  return ok("Movie deleted.");
 }
 
 export async function loadFinanceDashboardData() {

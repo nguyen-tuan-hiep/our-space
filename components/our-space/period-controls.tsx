@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import {
 	CalendarDays,
 	CircleDollarSign,
+	Clapperboard,
 	HeartPulse,
 	MapPinned,
 	NotebookPen,
@@ -15,6 +16,7 @@ export type SpaceSection =
 	| "finances"
 	| "mood"
 	| "memories"
+	| "movies"
 	| "personal";
 type PeriodPickerViewport = "mobile" | "tablet" | "desktop";
 
@@ -176,7 +178,7 @@ export function PeriodControls({
 				<div
 					role="tablist"
 					aria-label="Space section"
-					className="grid min-w-0 flex-1 grid-cols-4 rounded-[1.35rem] bg-bg/85 p-1"
+					className="grid min-w-0 flex-1 grid-cols-5 rounded-[1.35rem] bg-bg/85 p-1"
 				>
 					<button
 						type="button"
@@ -238,6 +240,21 @@ export function PeriodControls({
 						/>
 						Memory
 					</button>
+					<button
+						type="button"
+						role="tab"
+						aria-selected={activeSection === "movies"}
+						className={spaceTabClass(activeSection === "movies")}
+						onClick={() => onSelectSection("movies")}
+					>
+						<Clapperboard
+							size={18}
+							className={
+								activeSection === "movies" ? "text-mui" : "text-neutral-500"
+							}
+						/>
+						Movies
+					</button>
 				</div>
 
 				{hidePeriodPicker ? null : (
@@ -266,6 +283,7 @@ export function MobileSpaceTabs({
 		{ value: "finances", label: "Finance", icon: CircleDollarSign },
 		{ value: "mood", label: "Mood", icon: HeartPulse },
 		{ value: "memories", label: "Memory", icon: MapPinned },
+		{ value: "movies", label: "Movies", icon: Clapperboard },
 		{ value: "personal", label: "Personal", icon: UserRound },
 	];
 	const selectedIndex = Math.max(
@@ -279,12 +297,12 @@ export function MobileSpaceTabs({
 			className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-[50] sm:hidden"
 		>
 			<div className="relative rounded-t-[1.8rem] border-t border-mui/10 bg-paper/92 px-2 pb-[clamp(0.5rem,env(safe-area-inset-bottom),1rem)] shadow-[0_-10px_34px_rgba(29,27,32,0.14)] backdrop-blur-xl">
-				<div className="relative grid grid-cols-5 py-2">
+				<div className="relative grid grid-cols-6 py-2">
 					<div
 						aria-hidden="true"
 						className="mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-2xl bg-mui/14 shadow-[0_8px_20px_rgba(103,80,164,0.18)]"
 						style={{
-							width: "calc(100% / 5)",
+							width: "calc(100% / 6)",
 							transform: `translateX(${selectedIndex * 100}%)`,
 						}}
 					/>

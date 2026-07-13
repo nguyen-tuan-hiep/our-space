@@ -136,6 +136,47 @@ export interface LoveQuote {
   source: string;
 }
 
+export type MovieCategory =
+  | "Action"
+  | "Comedy"
+  | "Drama"
+  | "Horror"
+  | "Romance"
+  | "Sci-Fi"
+  | "Thriller"
+  | "Documentary"
+  | "Animation"
+  | "Adventure"
+  | "Fantasy"
+  | "Mystery"
+  | "Crime"
+  | "Family"
+  | "Musical"
+  | "War"
+  | "Western"
+  | "Biography"
+  | "History"
+  | "Sport"
+  | "Short Film";
+
+export type MovieStatus = "watched" | "wishlist" | "watching";
+
+export interface Movie {
+  id: string;
+  couple_id: string;
+  title: string;
+  rating: number | null;
+  comment: string | null;
+  poster_url: string | null;
+  reaction: string | null;
+  status: MovieStatus;
+  category: MovieCategory;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  creator?: Pick<Profile, "id" | "display_name" | "avatar_url" | "currency">;
+}
+
 export interface AppSession {
   user: User;
   profile: Profile;

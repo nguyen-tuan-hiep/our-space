@@ -5,6 +5,7 @@ import Image from "next/image";
 import {
 	CalendarHeart,
 	CircleDollarSign,
+	Clapperboard,
 	HeartPulse,
 	ImageUp,
 	LogOut,
@@ -62,6 +63,12 @@ const navItems: Array<{
 		label: "Memory",
 		description: "Places and moments",
 		icon: MapPinned,
+	},
+	{
+		value: "movies",
+		label: "Movies",
+		description: "Watchlist and reactions",
+		icon: Clapperboard,
 	},
 ];
 

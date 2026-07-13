@@ -18,6 +18,7 @@ import type {
 	IndividualExpense,
 	LoveQuote,
 	MemoryMapEntry,
+	Movie,
 	Profile,
 	SharedNote,
 } from "@/lib/types";
@@ -51,6 +52,7 @@ import {
 	MoodPanelSkeleton,
 	PersonalPanelSkeleton,
 } from "@/components/our-space/tab-skeletons";
+import { MoviesPanelSkeleton } from "@/components/movies/movies-panel-skeleton";
 
 const PersonalPanel = dynamic(
 	() =>
@@ -86,10 +88,18 @@ const FinancesPanel = dynamic(
 );
 
 const MoodPanel = dynamic(
-	() =>
-		import("@/components/mood/mood-panel").then((mod) => mod.MoodPanel),
+	() => import("@/components/mood/mood-panel").then((mod) => mod.MoodPanel),
 	{
 		loading: MoodPanelSkeleton,
+		ssr: false,
+	},
+);
+
+const MoviesPanel = dynamic(
+	() =>
+		import("@/components/movies/movies-panel").then((mod) => mod.MoviesPanel),
+	{
+		loading: MoviesPanelSkeleton,
 		ssr: false,
 	},
 );
@@ -116,6 +126,7 @@ type SpacePayload = {
 	notes: SharedNote[];
 	moods: DailyMood[];
 	memories: MemoryMapEntry[];
+	movies: Movie[];
 	heroImageUrl: string;
 	anniversaryDate: string;
 };
@@ -140,6 +151,7 @@ function isSpacePayload(value: unknown): value is SpacePayload {
 		Array.isArray(payload.notes) &&
 		Array.isArray(payload.moods) &&
 		Array.isArray(payload.memories) &&
+		Array.isArray(payload.movies) &&
 		typeof payload.heroImageUrl === "string" &&
 		typeof payload.anniversaryDate === "string"
 	);
@@ -212,6 +224,7 @@ export function OurSpaceClient({
 	const [noteOpen, setNoteOpen] = useState(false);
 	const [expenseOpen, setExpenseOpen] = useState(false);
 	const [memoryOpen, setMemoryOpen] = useState(false);
+	const [movieOpen, setMovieOpen] = useState(false);
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [heroOpen, setHeroOpen] = useState(false);
 	const [anniversaryOpen, setAnniversaryOpen] = useState(false);
@@ -231,9 +244,11 @@ export function OurSpaceClient({
 	const [editingMemory, setEditingMemory] = useState<MemoryMapEntry | null>(
 		null,
 	);
+	const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
 	const [notes, setNotes] = useState(initialNotes);
 	const [moods, setMoods] = useState<DailyMood[]>([]);
 	const [memories, setMemories] = useState<MemoryMapEntry[]>([]);
+	const [movies, setMovies] = useState<Movie[]>([]);
 	const [heroImageUrl, setHeroImageUrl] = useState(initialHeroImageUrl);
 	const [anniversaryDate, setAnniversaryDate] = useState(
 		initialAnniversaryDate,
@@ -261,6 +276,7 @@ export function OurSpaceClient({
 	const ignoredRealtimeExpenseIds = useRef(new Set<string>());
 	const ignoredRealtimeMoodIds = useRef(new Set<string>());
 	const ignoredRealtimeMemoryIds = useRef(new Set<string>());
+	const ignoredRealtimeMovieIds = useRef(new Set<string>());
 	const mobileMenuRef = useRef<HTMLDivElement | null>(null);
 	const desktopPeriodPickerRef = useRef<HTMLDivElement | null>(null);
 	const tabletPeriodPickerRef = useRef<HTMLDivElement | null>(null);
@@ -408,12 +424,36 @@ export function OurSpaceClient({
 			})),
 		[memories, partner, profile],
 	);
+	const displayMovies = useMemo(
+		() =>
+			movies.map((movie) => ({
+				...movie,
+				creator:
+					movie.created_by === profile.id
+						? {
+								id: profile.id,
+								display_name: profile.display_name,
+								avatar_url: profile.avatar_url,
+								currency: profile.currency,
+							}
+						: movie.created_by === partner.id
+							? {
+									id: partner.id,
+									display_name: partner.display_name,
+									avatar_url: partner.avatar_url,
+									currency: partner.currency,
+								}
+							: movie.creator,
+			})),
+		[movies, partner, profile],
+	);
 
 	const applySpacePayload = useCallback(
 		(payload: SpacePayload, options?: { cache?: boolean }) => {
 			setNotes(payload.notes);
 			setMoods(payload.moods);
 			setMemories(payload.memories);
+			setMovies(payload.movies);
 			setHeroImageUrl(payload.heroImageUrl);
 			setAnniversaryDate(payload.anniversaryDate);
 
@@ -636,6 +676,38 @@ export function OurSpaceClient({
 		);
 	};
 
+	const upsertLocalMovie = (savedMovie: Movie) => {
+		ignoredRealtimeMovieIds.current.add(savedMovie.id);
+		window.setTimeout(() => {
+			ignoredRealtimeMovieIds.current.delete(savedMovie.id);
+		}, 10000);
+
+		setMovies((currentMovies) => {
+			const nextMovies = currentMovies.some((movie) => movie.id === savedMovie.id)
+				? currentMovies.map((movie) =>
+						movie.id === savedMovie.id ? savedMovie : movie,
+					)
+				: [savedMovie, ...currentMovies];
+
+			return nextMovies.sort(
+				(first, second) =>
+					new Date(second.updated_at).getTime() -
+					new Date(first.updated_at).getTime(),
+			);
+		});
+	};
+
+	const removeLocalMovie = (movieId: string) => {
+		ignoredRealtimeMovieIds.current.add(movieId);
+		window.setTimeout(() => {
+			ignoredRealtimeMovieIds.current.delete(movieId);
+		}, 10000);
+
+		setMovies((currentMovies) =>
+			currentMovies.filter((movie) => movie.id !== movieId),
+		);
+	};
+
 	useEffect(() => {
 		let cleanup: (() => void) | undefined;
 		let cancelled = false;
@@ -701,6 +773,21 @@ export function OurSpaceClient({
 								getRealtimeRecordId(payload.old);
 
 							if (memoryId && ignoredRealtimeMemoryIds.current.has(memoryId)) {
+								return;
+							}
+
+							void loadSpaceData({ silent: true });
+						},
+					)
+					.on(
+						"postgres_changes",
+						{ event: "*", schema: "public", table: "movies" },
+						(payload) => {
+							const movieId =
+								getRealtimeRecordId(payload.new) ??
+								getRealtimeRecordId(payload.old);
+
+							if (movieId && ignoredRealtimeMovieIds.current.has(movieId)) {
 								return;
 							}
 
@@ -787,7 +874,11 @@ export function OurSpaceClient({
 		? formatPeriodLabel(activePeriod, profileTimeZone, filterRange)
 		: "Current period";
 	const pagePeriodDescription =
-		activeSection === "memories" ? "All memories" : periodDescription;
+		activeSection === "memories"
+			? "All memories"
+			: activeSection === "movies"
+				? "Couple watchlist"
+				: periodDescription;
 	const pickerPeriodDescription = pickerActivePeriod
 		? formatPeriodLabel(pickerActivePeriod, profileTimeZone, pickerRange)
 		: "Current period";
@@ -865,6 +956,7 @@ export function OurSpaceClient({
 		noteOpen ||
 		expenseOpen ||
 		memoryOpen ||
+		movieOpen ||
 		profileOpen ||
 		heroOpen ||
 		anniversaryOpen;
@@ -958,12 +1050,16 @@ export function OurSpaceClient({
 								? "Shared notes"
 								: activeSection === "finances"
 									? "Finance overview"
-									: activeSection === "mood"
+							: activeSection === "mood"
 										? "Mood tracker"
-										: "Memory map"}
+										: activeSection === "memories"
+											? "Memory map"
+											: activeSection === "movies"
+												? "Movies"
+												: "Personal"}
 						</h1>
 					</div>
-					{activeSection === "memories" ? null : (
+					{activeSection === "memories" || activeSection === "movies" ? null : (
 						<PeriodPickerButton
 							{...periodPickerProps}
 							periodLabel={periodLabel}
@@ -981,7 +1077,9 @@ export function OurSpaceClient({
 					<PeriodControls
 						activeSection={activeSection}
 						{...periodPickerProps}
-						hidePeriodPicker={activeSection === "memories"}
+						hidePeriodPicker={
+							activeSection === "memories" || activeSection === "movies"
+						}
 						periodLabel={periodLabel}
 						onSelectSection={setActiveSection}
 						periodPickerRef={tabletPeriodPickerRef}
@@ -1067,6 +1165,18 @@ export function OurSpaceClient({
 							onMemoryDeleted={removeLocalMemory}
 							onNewMemory={() => setMemoryOpen(true)}
 						/>
+					) : activeSection === "movies" ? (
+						<MoviesPanel
+							loading={spaceLoading}
+							movies={displayMovies}
+							onEditMovie={(movie) => {
+								setEditingMovie(movie);
+								setMovieOpen(true);
+							}}
+							onMovieDeleted={removeLocalMovie}
+							onMovieSaved={upsertLocalMovie}
+							onNewMovie={() => setMovieOpen(true)}
+						/>
 					) : (
 						<PersonalPanel
 							anniversaryLabel={anniversaryLabel}
@@ -1093,21 +1203,26 @@ export function OurSpaceClient({
 			{!hasOpenDialog &&
 			(activeSection === "notes" ||
 				activeSection === "finances" ||
-				activeSection === "memories") ? (
+				activeSection === "memories" ||
+				activeSection === "movies") ? (
 				<DraggableFab
 					ariaLabel={
 						activeSection === "notes"
 							? "Create new note"
 							: activeSection === "finances"
 								? "Log new expense"
-								: "Add memory"
+								: activeSection === "memories"
+									? "Add memory"
+									: "Add movie"
 					}
 					onClick={
 						activeSection === "notes"
 							? () => setNoteOpen(true)
 							: activeSection === "finances"
 								? () => setExpenseOpen(true)
-								: () => setMemoryOpen(true)
+								: activeSection === "memories"
+									? () => setMemoryOpen(true)
+									: () => setMovieOpen(true)
 					}
 				>
 					<Plus size={24} />
@@ -1118,11 +1233,13 @@ export function OurSpaceClient({
 				anniversaryDate={anniversaryDate}
 				editingExpense={editingExpense}
 				editingMemory={editingMemory}
+				editingMovie={editingMovie}
 				editingNote={editingNote}
 				expenseOpen={expenseOpen}
 				heroImageUrl={heroImageUrl}
 				heroOpen={heroOpen}
 				memoryOpen={memoryOpen}
+				movieOpen={movieOpen}
 				noteOpen={noteOpen}
 				partner={partner}
 				profile={profile}
@@ -1139,6 +1256,10 @@ export function OurSpaceClient({
 					setMemoryOpen(false);
 					setEditingMemory(null);
 				}}
+				onCloseMovie={() => {
+					setMovieOpen(false);
+					setEditingMovie(null);
+				}}
 				onCloseNote={() => {
 					setNoteOpen(false);
 					setEditingNote(null);
@@ -1146,6 +1267,7 @@ export function OurSpaceClient({
 				onCloseProfile={() => setProfileOpen(false)}
 				onExpenseSaved={upsertLocalExpense}
 				onMemorySaved={upsertLocalMemory}
+				onMovieSaved={upsertLocalMovie}
 				onNoteSaved={upsertLocalNote}
 			/>
 		</main>

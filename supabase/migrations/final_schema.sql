@@ -115,6 +115,27 @@ create table public.memory_map_entries (
   constraint memory_map_entries_longitude_check check (longitude between -180 and 180)
 );
 
+create table public.movies (
+  id uuid primary key default gen_random_uuid(),
+  couple_id text not null,
+  title text not null,
+  rating numeric(3, 1),
+  poster_url text,
+  category text not null,
+  status text not null default 'wishlist',
+  comment text,
+  reaction text,
+  created_by uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint movies_title_length_check check (char_length(title) between 1 and 160),
+  constraint movies_rating_check check (rating is null or (rating >= 1 and rating <= 10 and rating * 2 = floor(rating * 2))),
+  constraint movies_category_length_check check (char_length(category) between 1 and 80),
+  constraint movies_status_check check (status in ('wishlist', 'watching', 'watched')),
+  constraint movies_comment_length_check check (comment is null or char_length(comment) <= 1000),
+  constraint movies_reaction_length_check check (reaction is null or char_length(reaction) <= 32)
+);
+
 create table public.pairing_requests (
   id uuid primary key default gen_random_uuid(),
   requester_id uuid not null references public.profiles(id) on delete cascade,
@@ -150,6 +171,8 @@ create index individual_expenses_category_idx on public.individual_expenses(cate
 create index daily_moods_owner_date_idx on public.daily_moods(owner_id, mood_date desc);
 create index memory_map_entries_couple_visited_idx on public.memory_map_entries(couple_id, visited_at desc);
 create index memory_map_entries_created_by_idx on public.memory_map_entries(created_by);
+create index movies_couple_status_updated_idx on public.movies(couple_id, status, updated_at desc);
+create index movies_created_by_idx on public.movies(created_by);
 create unique index pairing_requests_one_pending_pair_idx
 on public.pairing_requests (
   least(requester_id, recipient_id),
@@ -187,6 +210,10 @@ for each row execute function public.set_updated_at();
 
 create trigger memory_map_entries_set_updated_at
 before update on public.memory_map_entries
+for each row execute function public.set_updated_at();
+
+create trigger movies_set_updated_at
+before update on public.movies
 for each row execute function public.set_updated_at();
 
 create trigger pairing_requests_set_updated_at
@@ -252,6 +279,25 @@ as $$
     from public.profiles p
     where p.id = profile_id
       and p.partner_id = auth.uid()
+  );
+$$;
+
+create or replace function public.profile_in_couple(target_couple_id text)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and p.partner_id is not null
+      and target_couple_id = (
+        select string_agg(id_text, ':' order by id_text)
+        from unnest(array[p.id::text, p.partner_id::text]) as ids(id_text)
+      )
   );
 $$;
 
@@ -405,6 +451,7 @@ alter table public.notes enable row level security;
 alter table public.individual_expenses enable row level security;
 alter table public.daily_moods enable row level security;
 alter table public.memory_map_entries enable row level security;
+alter table public.movies enable row level security;
 alter table public.pairing_requests enable row level security;
 alter table public.couple enable row level security;
 
@@ -500,6 +547,23 @@ create policy "Partners can delete couple memory map entries"
 on public.memory_map_entries for delete
 using (public.profile_is_partner(created_by));
 
+create policy "Users can read couple movies"
+on public.movies for select
+using (public.profile_in_couple(couple_id));
+
+create policy "Users can create couple movies"
+on public.movies for insert
+with check (created_by = auth.uid() and public.profile_in_couple(couple_id));
+
+create policy "Partners can update couple movies"
+on public.movies for update
+using (public.profile_in_couple(couple_id))
+with check (public.profile_in_couple(couple_id));
+
+create policy "Partners can delete couple movies"
+on public.movies for delete
+using (public.profile_in_couple(couple_id));
+
 create policy "Users can read their pairing requests"
 on public.pairing_requests for select
 using (requester_id = auth.uid() or recipient_id = auth.uid());
@@ -526,6 +590,7 @@ alter publication supabase_realtime add table public.notes;
 alter publication supabase_realtime add table public.individual_expenses;
 alter publication supabase_realtime add table public.daily_moods;
 alter publication supabase_realtime add table public.memory_map_entries;
+alter publication supabase_realtime add table public.movies;
 alter publication supabase_realtime add table public.pairing_requests;
 alter publication supabase_realtime add table public.couple;
 
@@ -538,10 +603,12 @@ grant select, insert, update, delete on public.notes to authenticated;
 grant select, insert, update, delete on public.individual_expenses to authenticated;
 grant select, insert, update, delete on public.daily_moods to authenticated;
 grant select, insert, update, delete on public.memory_map_entries to authenticated;
+grant select, insert, update, delete on public.movies to authenticated;
 grant select, insert on public.pairing_requests to authenticated;
 grant select, insert, update on public.couple to authenticated;
 grant select, insert, update on public.couple to service_role;
 grant execute on function public.profile_is_partner(uuid) to authenticated;
+grant execute on function public.profile_in_couple(text) to authenticated;
 grant execute on function public.request_pairing_with_code(text) to authenticated;
 grant execute on function public.accept_pairing_request(uuid) to authenticated;
 

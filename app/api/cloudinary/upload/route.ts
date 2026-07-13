@@ -13,8 +13,9 @@ export async function POST(request: Request) {
   await requireAppSession();
 
   const requestUrl = new URL(request.url);
+  const kindParam = requestUrl.searchParams.get("kind");
   const uploadKind =
-    requestUrl.searchParams.get("kind") === "memory" ? "memory" : "hero";
+    kindParam === "memory" || kindParam === "movie" ? kindParam : "hero";
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.startsWith("image/")) {
     return NextResponse.json({ error: "Missing image file." }, { status: 400 });
@@ -31,7 +32,12 @@ export async function POST(request: Request) {
     }>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
-          folder: uploadKind === "memory" ? "our-space/memories" : "our-space/hero",
+          folder:
+            uploadKind === "memory"
+              ? "our-space/memories"
+              : uploadKind === "movie"
+                ? "our-space/movies"
+                : "our-space/hero",
           format: "jpg",
           quality: "auto:good",
           resource_type: "image",

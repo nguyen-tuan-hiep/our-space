@@ -8,7 +8,7 @@ interface LoveQuotePanelProps {
 export function LoveQuotePanel({ quote }: LoveQuotePanelProps) {
 	return (
 		<div className="mobile-quote-in flex flex-row items-center gap-3 rounded-2xl bg-paper p-4 shadow-md sm:gap-4">
-			<div className="grid size-10 shrink-0 place-items-center rounded-full bg-black/10">
+			<div className="grid size-10 shrink-0 place-items-center rounded-full bg-black/10 dark:bg-white/10">
 				<Quote
 					size={18}
 					className="block"

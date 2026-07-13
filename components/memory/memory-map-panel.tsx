@@ -54,8 +54,8 @@ function MemoryCard({
 	onEdit,
 	onRequestDelete,
 }: {
-	deleting: boolean;
 	memory: MemoryMapEntry;
+	deleting: boolean;
 	timeZone: string;
 	onEdit: () => void;
 	onRequestDelete: () => void;
@@ -153,8 +153,7 @@ export function MemoryMapPanel({
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [pending, startTransition] = useTransition();
 
-	if (0) {
-		// if (loading && memories.length === 0) {
+		if (loading && memories.length === 0) {
 		return <MemoryPanelSkeleton />;
 	}
 

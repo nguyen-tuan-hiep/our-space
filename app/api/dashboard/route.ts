@@ -27,6 +27,7 @@ export async function GET() {
       notes: data.notes,
       moods: data.moods,
       memories: data.memories,
+      movies: data.movies,
       heroImageUrl: getOptimizedImageUrl(heroImageUrl),
       anniversaryDate:
         data.settings?.anniversary_date ??

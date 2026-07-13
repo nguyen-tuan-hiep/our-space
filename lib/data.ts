@@ -3,6 +3,7 @@ import type {
   DailyMood,
   IndividualExpense,
   MemoryMapEntry,
+  Movie,
   Profile,
   SharedNote,
 } from "@/lib/types";
@@ -57,6 +58,7 @@ export async function getDashboardData(
     { data: notes },
     { data: moods },
     { data: memories },
+    { data: movies },
     { data: settings },
   ] = await Promise.all([
     supabase
@@ -84,6 +86,14 @@ export async function getDashboardData(
       .order("visited_at", { ascending: false })
       .returns<MemoryMapEntry[]>(),
     supabase
+      .from("movies")
+      .select(
+        "*, creator:profiles!movies_created_by_fkey(id, display_name, avatar_url, currency)",
+      )
+      .eq("couple_id", settingsId ?? "main")
+      .order("updated_at", { ascending: false })
+      .returns<Movie[]>(),
+    supabase
       .from("couple")
       .select("hero_image_url, anniversary_date")
       .eq("id", settingsId ?? "main")
@@ -94,6 +104,7 @@ export async function getDashboardData(
     notes: notes ?? [],
     moods: moods ?? [],
     memories: memories ?? [],
+    movies: movies ?? [],
     settings: settings ?? null,
   };
 }

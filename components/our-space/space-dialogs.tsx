@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 import type {
 	IndividualExpense,
 	MemoryMapEntry,
+	Movie,
 	Profile,
 	SharedNote,
 } from "@/lib/types";
@@ -51,15 +52,23 @@ const MemoryMapDialog = dynamic(
 	{ ssr: false },
 );
 
+const MovieDialog = dynamic(
+	() =>
+		import("@/components/movies/movie-dialog").then((mod) => mod.MovieDialog),
+	{ ssr: false },
+);
+
 interface SpaceDialogsProps {
 	anniversaryDate: string;
 	editingExpense: IndividualExpense | null;
 	editingMemory: MemoryMapEntry | null;
+	editingMovie: Movie | null;
 	editingNote: SharedNote | null;
 	expenseOpen: boolean;
 	heroImageUrl: string;
 	heroOpen: boolean;
 	memoryOpen: boolean;
+	movieOpen: boolean;
 	noteOpen: boolean;
 	partner: Profile;
 	profile: Profile;
@@ -70,10 +79,12 @@ interface SpaceDialogsProps {
 	onCloseExpense: () => void;
 	onCloseHero: () => void;
 	onCloseMemory: () => void;
+	onCloseMovie: () => void;
 	onCloseNote: () => void;
 	onCloseProfile: () => void;
 	onExpenseSaved: (expense: IndividualExpense) => void;
 	onMemorySaved: (memory: MemoryMapEntry) => void;
+	onMovieSaved: (movie: Movie) => void;
 	onNoteSaved: (note: SharedNote) => void;
 }
 
@@ -81,11 +92,13 @@ export function SpaceDialogs({
 	anniversaryDate,
 	editingExpense,
 	editingMemory,
+	editingMovie,
 	editingNote,
 	expenseOpen,
 	heroImageUrl,
 	heroOpen,
 	memoryOpen,
+	movieOpen,
 	noteOpen,
 	partner,
 	profile,
@@ -96,10 +109,12 @@ export function SpaceDialogs({
 	onCloseExpense,
 	onCloseHero,
 	onCloseMemory,
+	onCloseMovie,
 	onCloseNote,
 	onCloseProfile,
 	onExpenseSaved,
 	onMemorySaved,
+	onMovieSaved,
 	onNoteSaved,
 }: SpaceDialogsProps) {
 	return (
@@ -124,6 +139,12 @@ export function SpaceDialogs({
 				onClose={onCloseMemory}
 				memory={editingMemory}
 				onSaved={onMemorySaved}
+			/>
+			<MovieDialog
+				open={movieOpen}
+				onClose={onCloseMovie}
+				movie={editingMovie}
+				onSaved={onMovieSaved}
 			/>
 			<ProfileDialog
 				open={profileOpen}
