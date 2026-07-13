@@ -4,13 +4,16 @@ export type CurrencyCode = string;
 export type LocationCode = string;
 
 export type ExpenseCategory =
-  | "Food & Drinks"
-  | "Shopping"
-  | "Travel/Transport"
-  | "Entertainment"
-  | "Groceries"
-  | "Utilities"
-  | "Others";
+  | "🍔 Food & Drinks"
+  | "🛍️ Shopping"
+  | "🚗 Transportation"
+  | "🍿 Entertainment"
+  | "🛒 Groceries"
+  | "🏠 Housing & Utilities"
+  | "🏥 Health"
+  | "🎞️ Film"
+  | "📱 Subscriptions"
+  | "📍 Others";
 
 export interface Profile {
   id: string;
@@ -100,13 +103,15 @@ export interface DailyMood {
 }
 
 export type MemoryType =
-  | "date"
-  | "food"
-  | "trip"
-  | "anniversary"
-  | "photo"
-  | "milestone"
-  | "other";
+  | "💞 Date"
+  | "🍜 Food"
+  | "✈️ Travel"
+  | "💍 Anniversary"
+  | "📸 Photo"
+  | "🏕️ Outdoor & Nature"
+  | "🎸 Concert & Show"
+  | "🎬 Movies"
+  | "📍 Others";
 
 export interface MemoryMapEntry {
   id: string;

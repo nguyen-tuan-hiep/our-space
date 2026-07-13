@@ -1,20 +1,60 @@
-import type { CurrencyCode, ExpenseCategory } from "@/lib/types";
+import type { CurrencyCode, ExpenseCategory, MemoryType } from "@/lib/types";
 import { themeColors } from "@/lib/theme-colors";
 
 export const expenseCategories: ExpenseCategory[] = [
-  "Food & Drinks",
-  "Shopping",
-  "Travel/Transport",
-  "Entertainment",
-  "Groceries",
-  "Utilities",
-  "Others",
+  "🍔 Food & Drinks",
+  "🛍️ Shopping",
+  "🚗 Transportation",
+  "🍿 Entertainment",
+  "🛒 Groceries",
+  "🏠 Housing & Utilities",
+  "🏥 Health",
+  "🎞️ Film",
+  "📱 Subscriptions",
+  "📍 Others",
 ];
 
 export const expenseCategoryColors: Record<ExpenseCategory, string> =
   themeColors.expenseCategories;
 
 export const ledgerSeriesColors = themeColors.ledgerSeries;
+
+export const memoryTypeOptions: Array<{
+  value: MemoryType;
+}> = [
+    { value: "💞 Date" },
+    { value: "🍜 Food" },
+    { value: "✈️ Travel" },
+    { value: "💍 Anniversary" },
+    { value: "📸 Photo" },
+    { value: "🏕️ Outdoor & Nature" },
+    { value: "🎸 Concert & Show" },
+    { value: "🎬 Movies" },
+    { value: "📍 Others" },
+  ];
+
+export const memoryTypeValues = memoryTypeOptions.map((option) => option.value);
+
+export const memoryTypeColors: Record<MemoryType, string> =
+  themeColors.memoryTypes;
+
+const legacyMemoryTypeMap: Record<string, MemoryType> = {
+  date: "💞 Date",
+  food: "🍜 Food",
+  trip: "✈️ Travel",
+  anniversary: "💍 Anniversary",
+  photo: "📸 Photo",
+  outdoor: "🏕️ Outdoor & Nature",
+  other: "📍 Others",
+};
+
+export function getMemoryTypeEmoji(memoryType: string) {
+  return memoryType.trim().split(/\s+/)[0] || "📍";
+}
+
+export function getMemoryTypeColor(memoryType: string) {
+  return memoryTypeColors[memoryType as MemoryType] ?? memoryTypeColors["📍 Others"];
+}
 
 export const defaultCountryCode = "SG";
 export const defaultCurrency = "SGD";

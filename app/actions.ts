@@ -15,6 +15,7 @@ import {
   isCustomAvatarEmoji,
   isValidCountryCode,
   isValidCurrencyCode,
+  memoryTypeValues,
   normalizeCountryCode,
   normalizeCurrencyCode,
   normalizeGroupedNumberInput,
@@ -61,15 +62,7 @@ const moodLevels: MoodLevel[] = [
   "sad",
 ];
 
-const memoryTypes: MemoryType[] = [
-  "date",
-  "food",
-  "trip",
-  "anniversary",
-  "photo",
-  "milestone",
-  "other",
-];
+const memoryTypes = memoryTypeValues;
 
 function ok(message: string): { ok: true; message: string } {
   return { ok: true, message };

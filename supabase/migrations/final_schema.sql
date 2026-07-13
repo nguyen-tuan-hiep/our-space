@@ -10,13 +10,28 @@ grant all on schema public to postgres, service_role;
 create extension if not exists pgcrypto;
 
 create type public.expense_category as enum (
-  'Food & Drinks',
-  'Shopping',
-  'Travel/Transport',
-  'Entertainment',
-  'Groceries',
-  'Utilities',
+  '🍔 Food & Drinks',
+  '🛍️ Shopping',
+  '🚗 Transportation',
+  '🍿 Entertainment',
+  '🛒 Groceries',
+  '🏠 Housing & Utilities',
+  '🏥 Health',
+  '🎞️ Film',
+  '📱 Subscriptions',
   'Others'
+);
+
+create type public.memory_type as enum (
+  '💞 Date',
+  '🍜 Food',
+  '✈️ Travel',
+  '💍 Anniversary',
+  '📸 Photo',
+  '🏕️ Outdoor & Nature',
+  '🎸 Concert & Show',
+  '🎬 Movies',
+  '📍 Others'
 );
 
 create table public.profiles (
@@ -85,7 +100,7 @@ create table public.memory_map_entries (
   couple_id text not null,
   title text not null,
   description text,
-  memory_type text not null default 'date',
+  memory_type public.memory_type not null default '💞 Date',
   latitude double precision not null,
   longitude double precision not null,
   visited_at timestamptz not null,
@@ -96,9 +111,6 @@ create table public.memory_map_entries (
   updated_at timestamptz not null default now(),
   constraint memory_map_entries_title_length_check check (char_length(title) between 1 and 140),
   constraint memory_map_entries_description_length_check check (description is null or char_length(description) <= 1000),
-  constraint memory_map_entries_type_check check (
-    memory_type in ('date', 'food', 'trip', 'anniversary', 'photo', 'milestone', 'other')
-  ),
   constraint memory_map_entries_latitude_check check (latitude between -90 and 90),
   constraint memory_map_entries_longitude_check check (longitude between -180 and 180)
 );

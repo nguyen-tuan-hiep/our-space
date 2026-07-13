@@ -12,7 +12,7 @@ import {
 import { Compass, LocateFixed, Minus, Plus } from "lucide-react";
 import { useToast } from "@/components/feedback/toast";
 import { primaryButtonClass } from "@/components/our-space/shared-classes";
-import { getMemoryTypeOption } from "@/lib/memory-map";
+import { getMemoryTypeColor, getMemoryTypeEmoji } from "@/lib/constants";
 import type { MemoryMapEntry } from "@/lib/types";
 
 interface LeafletMemoryMapProps {
@@ -34,7 +34,8 @@ function getMemoryBounds(memories: MemoryMapEntry[]) {
 }
 
 function createEmojiIcon(memory: MemoryMapEntry) {
-	const option = getMemoryTypeOption(memory.memory_type);
+	const emoji = getMemoryTypeEmoji(memory.memory_type);
+	const color = getMemoryTypeColor(memory.memory_type);
 	const escapedTitle = memory.title
 		.replaceAll("&", "&amp;")
 		.replaceAll("<", "&lt;")
@@ -45,8 +46,8 @@ function createEmojiIcon(memory: MemoryMapEntry) {
 		className: "memory-map-pin-wrapper",
 		html: `
       <div class="memory-map-pin" aria-label="${escapedTitle}">
-        <div class="memory-map-pin-bubble">${option.emoji}</div>
-        <div class="memory-map-pin-tip"></div>
+        <div class="memory-map-pin-bubble" style="background:${color}">${emoji}</div>
+        <div class="memory-map-pin-tip" style="background:${color}"></div>
         <div class="memory-map-pin-label">${escapedTitle}</div>
       </div>
     `,

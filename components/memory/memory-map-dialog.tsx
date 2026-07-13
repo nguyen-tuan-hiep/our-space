@@ -12,7 +12,7 @@ import {
 	NativeSelect,
 	NativeTextarea,
 } from "@/components/ui/native-controls";
-import { memoryTypeOptions } from "@/lib/memory-map";
+import { memoryTypeOptions } from "@/lib/constants";
 import type { MemoryMapEntry } from "@/lib/types";
 
 interface MemoryMapDialogProps {
@@ -181,14 +181,14 @@ export function MemoryMapDialog({
 							required
 							name="memory_type"
 							label="Type"
-							defaultValue={memory?.memory_type ?? "date"}
+							defaultValue={memory?.memory_type ?? memoryTypeOptions[0].value}
 						>
 							{memoryTypeOptions.map((option) => (
 								<option
 									key={option.value}
 									value={option.value}
 								>
-									{option.emoji} {option.label}
+									{option.value}
 								</option>
 							))}
 						</NativeSelect>

@@ -11,7 +11,7 @@ import { useToast } from "@/components/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MemoryPanelSkeleton } from "@/components/our-space/tab-skeletons";
-import { getMemoryTypeOption } from "@/lib/memory-map";
+import { getMemoryTypeColor } from "@/lib/constants";
 import type { MemoryMapEntry } from "@/lib/types";
 
 interface MemoryMapPanelProps {
@@ -60,7 +60,7 @@ function MemoryCard({
 	onEdit: () => void;
 	onRequestDelete: () => void;
 }) {
-	const memoryType = getMemoryTypeOption(memory.memory_type);
+	const memoryTypeColor = getMemoryTypeColor(memory.memory_type);
 	const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${memory.latitude},${memory.longitude}`;
 
 	return (
@@ -81,10 +81,13 @@ function MemoryCard({
 			<div className="flex flex-col flex-1 gap-3 p-4">
 				<div className="flex items-start justify-between gap-3">
 					<div className="min-w-0">
-						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-							{memoryType.emoji} {memoryType.label}
+						<p
+							className="inline-flex max-w-full items-center rounded-full border border-black/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-300"
+							style={{ backgroundColor: memoryTypeColor }}
+						>
+							{memory.memory_type}
 						</p>
-						<h3 className="mt-1 break-words font-serif text-2xl leading-tight text-neutral-950">
+						<h3 className="mt-2 break-words font-serif text-2xl leading-tight text-neutral-950">
 							{memory.title}
 						</h3>
 					</div>
