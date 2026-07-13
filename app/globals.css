@@ -197,7 +197,7 @@ input[type="time"]::-webkit-date-and-time-value {
 @keyframes mobile-tab-panel-in {
 	from {
 		opacity: 0;
-		transform: translate3d(18px, 0, 0) scale(0.99);
+		transform: translate3d(0, 14px, 0) scale(0.99);
 	}
 	to {
 		opacity: 1;
@@ -222,6 +222,93 @@ input[type="time"]::-webkit-date-and-time-value {
 
 .content-fade-in {
 	animation: content-fade-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes mobile-hero-media-in {
+	from {
+		opacity: 0;
+		transform: scale(1.04);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes mobile-hero-card-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, 16px, 0) scale(0.97);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+@keyframes mobile-menu-popover-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, -8px, 0) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+@keyframes mobile-tab-icon-pop {
+	0% {
+		transform: translateY(2px) scale(0.9);
+	}
+	70% {
+		transform: translateY(-1px) scale(1.08);
+	}
+	100% {
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes mobile-fab-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, 14px, 0) scale(0.88);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+@media (max-width: 639px) {
+	.mobile-hero-media-in {
+		animation: mobile-hero-media-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	}
+
+	.mobile-hero-card-in {
+		animation: mobile-hero-card-in 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	}
+
+	.mobile-hero-card-in:nth-child(2) {
+		animation-delay: 90ms;
+	}
+
+	.mobile-menu-popover-in {
+		animation: mobile-menu-popover-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+		transform-origin: top right;
+	}
+
+	.mobile-quote-in {
+		animation: content-fade-in 360ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	}
+
+	.mobile-tab-icon-selected {
+		animation: mobile-tab-icon-pop 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	}
+
+	.mobile-fab-in {
+		animation: mobile-fab-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	}
 }
 
 .app-card {
@@ -330,7 +417,13 @@ input[type="time"]::-webkit-date-and-time-value {
 	.mobile-tab-panel-in,
 	.content-fade-in,
 	.mobile-bottom-tab-indicator,
-	.mobile-sheet-motion {
+	.mobile-sheet-motion,
+	.mobile-hero-media-in,
+	.mobile-hero-card-in,
+	.mobile-menu-popover-in,
+	.mobile-quote-in,
+	.mobile-tab-icon-selected,
+	.mobile-fab-in {
 		animation: none;
 		transition: none;
 	}

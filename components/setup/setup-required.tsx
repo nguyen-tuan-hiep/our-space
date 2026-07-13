@@ -1,7 +1,7 @@
 import type { User } from "@supabase/supabase-js";
-import { SetupPairingPanel } from "@/components/setup-pairing-panel";
-import { SignOutButton } from "@/components/sign-out-button";
-import { SetupRealtimeRefresh } from "@/components/setup-realtime-refresh";
+import { SetupPairingPanel } from "@/components/setup/setup-pairing-panel";
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import { SetupRealtimeRefresh } from "@/components/setup/setup-realtime-refresh";
 import type { PairingRequest, Profile } from "@/lib/types";
 
 interface SetupRequiredProps {

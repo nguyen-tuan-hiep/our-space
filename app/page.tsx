@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { OurSpaceClient } from "@/components/our-space-client";
-import { SetupRequired } from "@/components/setup-required";
+import { OurSpaceClient } from "@/components/our-space/client";
+import { SetupRequired } from "@/components/setup/setup-required";
 import { getAppSession, getAuthenticatedSession } from "@/lib/auth";
 import { getDashboardSettings } from "@/lib/data";
 import { getOptimizedImageUrl } from "@/lib/image-utils";

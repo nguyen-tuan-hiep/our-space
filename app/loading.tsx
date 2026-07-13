@@ -4,10 +4,11 @@ function NoteCardSkeleton() {
   return (
     <div className="app-card grid h-[20rem] gap-4 p-5">
       <div className="space-y-3">
-        <Skeleton className="h-3 w-28 rounded-full" />
-        <Skeleton className="h-7 w-3/4 rounded-xl" />
+        <Skeleton className="h-4 w-28 rounded-full" />
+        <Skeleton className="h-3 w-1/2 rounded-full" />
+        <Skeleton className="h-7 w-full rounded-xl" />
       </div>
-      <Skeleton className="min-h-0 flex-1 rounded-2xl" />
+      <Skeleton className="min-h-1 flex-1 rounded-2xl" />
     </div>
   );
 }
@@ -42,7 +43,7 @@ export default function Loading() {
           <Skeleton className="size-12 rounded-2xl" />
         </div>
 
-        <Skeleton className="mt-0 h-20 rounded-2xl lg:mt-6" />
+        <Skeleton className="mt-0 h-28 rounded-2xl lg:mt-6" />
 
         <div className="mt-4 hidden rounded-[1.75rem] border border-neutral-900/10 bg-paper/88 p-2 sm:block lg:hidden">
           <div className="grid grid-cols-4 gap-1">
@@ -59,8 +60,6 @@ export default function Loading() {
             <Skeleton className="size-12 rounded-2xl sm:h-11 sm:w-32" />
           </div>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <NoteCardSkeleton />
-            <NoteCardSkeleton />
             <NoteCardSkeleton />
             <NoteCardSkeleton />
             <NoteCardSkeleton />

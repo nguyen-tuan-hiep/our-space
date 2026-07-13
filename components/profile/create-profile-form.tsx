@@ -7,7 +7,7 @@ import {
   NativeInput,
   NativeSelect,
 } from "@/components/ui/native-controls";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import type { User } from "@supabase/supabase-js";
 import { createMissingProfile } from "@/app/actions";
 import {

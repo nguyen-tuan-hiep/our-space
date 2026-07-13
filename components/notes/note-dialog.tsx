@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import dayjs from "dayjs";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import {
 	NativeButton,
 	NativeDialog,

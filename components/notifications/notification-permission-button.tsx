@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Bell, BellOff } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import { getOneSignal, isOneSignalConfigured } from "@/lib/onesignal-web";
 
 const menuItemClass =

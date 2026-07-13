@@ -4,7 +4,7 @@ import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { CalendarDays, HeartPulse, Pencil, Trash2 } from "lucide-react";
 import { deleteMood, upsertMood } from "@/app/actions";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NativeButton, NativeTextarea } from "@/components/ui/native-controls";
 import { MoodPanelSkeleton } from "@/components/our-space/tab-skeletons";

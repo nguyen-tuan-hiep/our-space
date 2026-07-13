@@ -131,7 +131,7 @@ export function ActionMenu({
 					<Button
 						type="button"
 						variant="ghost"
-						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:-translate-y-0.5 hover:bg-neutral-100 hover:shadow-[0_10px_24px_rgba(23,23,23,0.08)] active:translate-y-0 active:scale-[0.98]"
+						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:bg-neutral-100 hover:shadow-[0_10px_24px_rgba(23,23,23,0.08)] active:scale-[0.98]"
 						onClick={handleMobileEdit}
 					>
 						<Edit2 size={18} />
@@ -140,7 +140,7 @@ export function ActionMenu({
 					<Button
 						type="button"
 						variant="destructive"
-						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(220,38,38,0.14)] active:translate-y-0 active:scale-[0.98]"
+						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:shadow-[0_10px_24px_rgba(220,38,38,0.14)] active:scale-[0.98]"
 						onClick={handleMobileDelete}
 					>
 						<Trash2 size={18} />
@@ -241,7 +241,7 @@ export function ActionMenu({
 				aria-haspopup="dialog"
 				disabled={disabled}
 				className={cn(
-					"inline-flex rounded-full bg-bg text-neutral-600 shadow-[0_6px_16px_rgba(23,23,23,0.08)] hover:-translate-y-0.5 hover:bg-neutral-950 hover:text-neutral-50 hover:shadow-[0_12px_28px_rgba(23,23,23,0.16)] active:translate-y-0 active:scale-[0.92] sm:hidden",
+					"inline-flex rounded-full bg-bg text-neutral-600 shadow-[0_6px_16px_rgba(23,23,23,0.08)] hover:bg-neutral-950 hover:text-neutral-50 hover:shadow-[0_12px_28px_rgba(23,23,23,0.16)] active:scale-[0.92] sm:hidden",
 					triggerClassName,
 				)}
 				onClick={() => {

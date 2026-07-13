@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { NativeButton, NativeInput } from "@/components/ui/native-controls";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import { pairWithCode } from "@/app/actions";
 
 export function PairingForm() {

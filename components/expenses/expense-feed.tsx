@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { ListFilter } from "lucide-react";
 import { ActionMenu } from "@/components/common/action-menu";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import { NativeSelect } from "@/components/ui/native-controls";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
@@ -106,10 +106,10 @@ export function ExpenseFeed({
 						{title}
 					</span>
 
-					<div className="relative ml-auto grid size-10 shrink-0 place-items-center rounded-full transition hover:bg-mui/10 sm:size-9">
+					<div className="relative ml-auto grid size-10 shrink-0 place-items-center rounded-full transition hover:bg-mui/10">
 						<div
 							aria-hidden="true"
-							className={`grid size-10 place-items-center rounded-full transition sm:size-9 ${
+							className={`grid size-10 place-items-center rounded-full transition${
 								categoryFilter === "all"
 									? "text-neutral-500"
 									: "bg-neutral-950 text-neutral-50"
@@ -123,9 +123,7 @@ export function ExpenseFeed({
 							aria-label="Filter category"
 							value={categoryFilter}
 							onChange={(event) =>
-								setCategoryFilter(
-									event.target.value as ExpenseCategory | "all",
-								)
+								setCategoryFilter(event.target.value as ExpenseCategory | "all")
 							}
 							containerClassName="absolute inset-0 opacity-0"
 							className="size-9 min-h-9 cursor-pointer"
@@ -133,7 +131,10 @@ export function ExpenseFeed({
 							<option value="all">All categories</option>
 
 							{expenseCategories.map((category) => (
-								<option key={category} value={category}>
+								<option
+									key={category}
+									value={category}
+								>
 									{category}
 								</option>
 							))}
@@ -142,11 +143,20 @@ export function ExpenseFeed({
 				</div>
 			</div>
 
-			<div className="relative overflow-hidden rounded-2xl">
+			<div className="relative overflow-hidden">
 				<div
 					ref={scrollRef}
 					onScroll={updateScrollGradient}
-					className="grid max-h-[30rem] gap-3 overflow-y-auto rounded-2xl sm:gap-5"
+					className="grid max-h-[30rem] gap-3 overflow-y-auto rounded-2xl sm:gap-5
+
+					overflow-y-auto pr-2 leading-6 text-neutral-600
+												whitespace-pre-wrap break-words
+												[&::-webkit-scrollbar]:w-1.5
+												[&::-webkit-scrollbar-track]:bg-transparent
+												[&::-webkit-scrollbar-thumb]:rounded-full
+												[&::-webkit-scrollbar-thumb]:bg-neutral-200
+												hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300
+												dark:[&::-webkit-scrollbar-thumb]:bg-neutral-700"
 				>
 					{filteredExpenses.length ? (
 						filteredExpenses.map((expense) => {
@@ -156,17 +166,14 @@ export function ExpenseFeed({
 							return (
 								<div
 									key={expense.id}
-									className="rounded-2xl border border-neutral-900/10 bg-bg/70 p-4 shadow-[0_10px_28px_rgba(30,25,20,0.05)] transition hover:-translate-y-0.5 hover:border-neutral-900/20 hover:bg-paper"
+									className="rounded-2xl border border-neutral-300 bg-bg/70 p-4 shadow-[0_10px_28px_rgba(30,25,20,0.05)] transition hover:border-neutral-400 hover:bg-paper"
 								>
 									<div className="flex items-start justify-between gap-3">
 										<div className="min-w-0 flex-1">
 											<p className="font-semibold">{expense.title}</p>
 
 											<p className="mt-1 text-sm text-neutral-500">
-												{formatAppDateTime(
-													expense.transaction_date,
-													timeZone,
-												)}
+												{formatAppDateTime(expense.transaction_date, timeZone)}
 											</p>
 										</div>
 
@@ -176,7 +183,7 @@ export function ExpenseFeed({
 											</p>
 
 											{canEdit ? (
-												<div className="relative -mr-2">
+												<div className="relative">
 													<ActionMenu
 														label={`Open actions for ${expense.title}`}
 														disabled={isDeleting}
@@ -204,7 +211,7 @@ export function ExpenseFeed({
 									</div>
 
 									{expense.notes ? (
-										<div className="max-w-xs text-sm text-neutral-500">
+										<div className="relative mt-2 border-l-[3px] border-neutral-200 pl-3 dark:border-neutral-800 max-w-xs text-sm text-neutral-500">
 											{expense.notes}
 										</div>
 									) : null}
@@ -220,7 +227,7 @@ export function ExpenseFeed({
 					)}
 				</div>
 
-				<div
+				{/* <div
 					aria-hidden="true"
 					className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-6 rounded-t-2xl bg-gradient-to-b from-paper to-transparent transition-opacity duration-200 ${
 						scrollGradient.top ? "opacity-100" : "opacity-0"
@@ -232,7 +239,7 @@ export function ExpenseFeed({
 					className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 rounded-b-2xl bg-gradient-to-t from-paper to-transparent transition-opacity duration-200 ${
 						scrollGradient.bottom ? "opacity-100" : "opacity-0"
 					}`}
-				/>
+				/> */}
 			</div>
 
 			<ConfirmDialog

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import { ImageUp } from "lucide-react";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import { NativeButton, NativeDialog } from "@/components/ui/native-controls";
 import { updateHeroImage } from "@/app/actions";
 

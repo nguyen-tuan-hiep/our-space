@@ -7,7 +7,7 @@ import { MapPin, Plus } from "lucide-react";
 import { deleteMemory } from "@/app/actions";
 import { ActionMenu } from "@/components/common/action-menu";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MemoryPanelSkeleton } from "@/components/our-space/tab-skeletons";
@@ -25,7 +25,7 @@ interface MemoryMapPanelProps {
 
 const LeafletMemoryMap = dynamic(
 	() =>
-		import("@/components/our-space/memory-map-leaflet-surface").then(
+		import("@/components/memory/memory-map-leaflet-surface").then(
 			(mod) => mod.LeafletMemoryMap,
 		),
 	{
@@ -60,37 +60,36 @@ function MemoryCard({
 	onEdit: () => void;
 	onRequestDelete: () => void;
 }) {
-	const option = getMemoryTypeOption(memory.memory_type);
+	const memoryType = getMemoryTypeOption(memory.memory_type);
 	const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${memory.latitude},${memory.longitude}`;
 
 	return (
-		<article
-			className={[
-				"app-card app-card-interactive content-fade-in relative overflow-visible",
-			].join(" ")}
-		>
+		<article className="app-card app-card-interactive content-fade-in relative overflow-visible flex flex-col h-full">
 			{memory.photo_url ? (
-				<div className="relative aspect-[16/10] overflow-hidden rounded-t-2xl bg-neutral-100 sm:rounded-t-lg">
+				<div className="relative aspect-[16/9] shrink-0 overflow-hidden rounded-t-2xl bg-neutral-100 sm:rounded-t-lg">
 					<Image
 						src={memory.photo_url}
 						alt={memory.title}
 						fill
 						className="object-cover"
+
 					/>
 				</div>
 			) : null}
-			<div className="grid gap-3 p-4">
+
+			{/* Đổi grid thành flex flex-col flex-1 để chiếm hết chiều cao còn lại */}
+			<div className="flex flex-col flex-1 gap-3 p-4">
 				<div className="flex items-start justify-between gap-3">
 					<div className="min-w-0">
 						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-							{option.emoji} {option.label}
+							{memoryType.emoji} {memoryType.label}
 						</p>
-						<h3 className="mt-1 line-clamp-2 break-words font-serif text-2xl leading-tight text-neutral-950">
+						<h3 className="mt-1 break-words font-serif text-2xl leading-tight text-neutral-950">
 							{memory.title}
 						</h3>
 					</div>
 
-					<div className="relative -mr-2 shrink-0">
+					<div className="relative shrink-0">
 						<ActionMenu
 							label={`Open actions for ${memory.title}`}
 							disabled={deleting}
@@ -101,19 +100,32 @@ function MemoryCard({
 						/>
 					</div>
 				</div>
-				<div className="grid gap-1 text-sm text-neutral-600">
+
+				<div className="flex flex-col gap-1 text-sm text-neutral-600">
 					<p>{getMemoryDateLabel(memory.visited_at, timeZone)}</p>
-					{memory.description ? (
-						<p className="line-clamp-3 leading-6 text-neutral-600">
+
+					{/* Phần nội dung có đánh dấu gạch dọc và thanh cuộn */}
+					<div className="relative mt-2 border-l-[3px] border-neutral-200 pl-3 dark:border-neutral-800">
+						<div
+							className="max-h-[5rem] overflow-y-auto pr-3 leading-6 text-neutral-600
+												whitespace-pre-wrap break-words
+												[&::-webkit-scrollbar]:w-1.5
+												[&::-webkit-scrollbar-track]:bg-transparent
+												[&::-webkit-scrollbar-thumb]:rounded-full
+												[&::-webkit-scrollbar-thumb]:bg-neutral-200
+												hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300
+												dark:[&::-webkit-scrollbar-thumb]:bg-neutral-700"
+						>
 							{memory.description}
-						</p>
-					) : null}
+						</div>
+					</div>
 				</div>
+
 				<a
 					href={mapsUrl}
 					target="_blank"
 					rel="noreferrer"
-					className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-neutral-200 px-4 text-sm font-bold text-neutral-700 transition hover:border-mui hover:text-mui sm:w-fit"
+					className="mt-auto inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-neutral-200 px-4 text-sm font-bold text-neutral-700 transition hover:border-mui hover:text-mui"
 				>
 					<MapPin size={16} />
 					Open location
@@ -138,7 +150,8 @@ export function MemoryMapPanel({
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [pending, startTransition] = useTransition();
 
-	if (loading && memories.length === 0) {
+	if (0) {
+		// if (loading && memories.length === 0) {
 		return <MemoryPanelSkeleton />;
 	}
 

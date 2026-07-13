@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState, useTransition } from "react";
 import { ImageUp, LocateFixed } from "lucide-react";
 import { createMemory, updateMemory } from "@/app/actions";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import {
 	NativeButton,
 	NativeDialog,

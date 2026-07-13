@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 function isSupabaseAuthCookie(name: string) {
-  return /^sb-.+-auth-token/.test(name);
+  return /^sb-.+-auth-token(?:\.\d+)?$/.test(name);
 }
 
 function hasSupabaseAuthCookie(request: NextRequest) {
@@ -27,7 +27,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!auth/callback|_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|OneSignalSDKWorker.js|OneSignalSDKUpdaterWorker.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
-  ],
+  matcher: ["/"],
 };

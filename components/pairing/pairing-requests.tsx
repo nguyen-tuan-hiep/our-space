@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { NativeButton } from "@/components/ui/native-controls";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import { acceptPairingRequest } from "@/app/actions";
 import type { PairingRequest } from "@/lib/types";
 

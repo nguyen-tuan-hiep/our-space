@@ -3,7 +3,7 @@
 import { PerformanceLogger } from "@/components/layout/performance-logger";
 import { RuntimeErrorGuard } from "@/components/layout/runtime-error-guard";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { ToastProvider } from "@/components/toast";
+import { ToastProvider } from "@/components/feedback/toast";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (

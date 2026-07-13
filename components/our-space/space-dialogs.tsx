@@ -20,19 +20,24 @@ const ExpenseDialog = dynamic(
 );
 
 const ProfileDialog = dynamic(
-	() => import("@/components/profile-dialog").then((mod) => mod.ProfileDialog),
+	() =>
+		import("@/components/profile/profile-dialog").then(
+			(mod) => mod.ProfileDialog,
+		),
 	{ ssr: false },
 );
 
 const HeroImageDialog = dynamic(
 	() =>
-		import("@/components/hero-image-dialog").then((mod) => mod.HeroImageDialog),
+		import("@/components/our-space/hero-image-dialog").then(
+			(mod) => mod.HeroImageDialog,
+		),
 	{ ssr: false },
 );
 
 const AnniversaryDialog = dynamic(
 	() =>
-		import("@/components/anniversary-dialog").then(
+		import("@/components/our-space/anniversary-dialog").then(
 			(mod) => mod.AnniversaryDialog,
 		),
 	{ ssr: false },
@@ -40,7 +45,7 @@ const AnniversaryDialog = dynamic(
 
 const MemoryMapDialog = dynamic(
 	() =>
-		import("@/components/our-space/memory-map-dialog").then(
+		import("@/components/memory/memory-map-dialog").then(
 			(mod) => mod.MemoryMapDialog,
 		),
 	{ ssr: false },

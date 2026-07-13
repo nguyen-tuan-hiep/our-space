@@ -10,10 +10,10 @@ import {
 	useMap,
 } from "react-leaflet";
 import { Compass, LocateFixed, Minus, Plus } from "lucide-react";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
+import { primaryButtonClass } from "@/components/our-space/shared-classes";
 import { getMemoryTypeOption } from "@/lib/memory-map";
 import type { MemoryMapEntry } from "@/lib/types";
-import { primaryButtonClass } from "./shared-classes";
 
 interface LeafletMemoryMapProps {
 	memories: MemoryMapEntry[];
@@ -141,7 +141,7 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 				<button
 					type="button"
 					aria-label="Zoom in"
-					className="grid size-10 place-items-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur transition hover:bg-mui/10 hover:text-mui"
+					className="grid size-10 place-items-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur transition dark:text-black"
 					onClick={() => map.zoomIn()}
 				>
 					<Plus size={18} />
@@ -149,7 +149,7 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 				<button
 					type="button"
 					aria-label="Zoom out"
-					className="grid size-10 place-items-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur transition hover:bg-mui/10 hover:text-mui"
+					className="grid size-10 place-items-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur transition dark:text-black"
 					onClick={() => map.zoomOut()}
 				>
 					<Minus size={18} />
@@ -157,7 +157,7 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 				<button
 					type="button"
 					aria-label="Fit all memories"
-					className="grid size-10 place-items-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur transition hover:bg-mui/10 hover:text-mui"
+					className="grid size-10 place-items-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur transition dark:text-black"
 					onClick={fitToMemories}
 				>
 					<Compass size={18} />
@@ -166,7 +166,7 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 					type="button"
 					aria-label="Use current location"
 					disabled={locating}
-					className="grid size-10 place-items-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur transition hover:bg-mui/10 hover:text-mui disabled:opacity-60"
+					className="grid size-10 place-items-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur transition dark:text-black disabled:opacity-60"
 					onClick={locateCurrentPosition}
 				>
 					<LocateFixed size={18} />

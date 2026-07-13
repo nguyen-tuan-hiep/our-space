@@ -11,7 +11,7 @@ import {
 	useTransition,
 } from "react";
 import { Plus } from "lucide-react";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import { loadFinanceDashboardData, signOut } from "@/app/actions";
 import type {
 	DailyMood,
@@ -65,7 +65,7 @@ const PersonalPanel = dynamic(
 
 const MemoryMapPanel = dynamic(
 	() =>
-		import("@/components/our-space/memory-map-panel").then(
+		import("@/components/memory/memory-map-panel").then(
 			(mod) => mod.MemoryMapPanel,
 		),
 	{
@@ -87,7 +87,7 @@ const FinancesPanel = dynamic(
 
 const MoodPanel = dynamic(
 	() =>
-		import("@/components/our-space/mood-panel").then((mod) => mod.MoodPanel),
+		import("@/components/mood/mood-panel").then((mod) => mod.MoodPanel),
 	{
 		loading: MoodPanelSkeleton,
 		ssr: false,

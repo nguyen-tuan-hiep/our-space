@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { PairingForm } from "@/components/pairing-form";
-import { PairingRequests } from "@/components/pairing-requests";
+import { PairingForm } from "@/components/pairing/pairing-form";
+import { PairingRequests } from "@/components/pairing/pairing-requests";
 import { createClient } from "@/lib/supabase/browser";
 import type { PairingRequest } from "@/lib/types";
 

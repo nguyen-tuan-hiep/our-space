@@ -76,14 +76,14 @@ export function SpaceHero({
 				fetchPriority="high"
 				quality={50}
 				sizes="100vw"
-				className="object-cover opacity-82"
+				className="mobile-hero-media-in object-cover opacity-82"
 			/>
 			<div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-black/60" />
 			<div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/20" />
 			<div className="container-page relative flex min-h-[36svh] flex-col pb-3 pt-[calc(env(safe-area-inset-top)+1rem)] sm:min-h-[50svh] sm:py-6 lg:min-h-[56svh]">
 				<header className=" items-center justify-between gap-3 rounded-2xl bg-black/18 px-3 py-2 sm:flex sm:gap-4 sm:px-4">
 					<div className="flex min-w-0 items-start gap-4">
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 hidden sm:flex">
 							<Image
 								src="/icon.svg"
 								alt=""
@@ -129,7 +129,7 @@ export function SpaceHero({
 									<div
 										id="mobile-nav-menu"
 										role="menu"
-									className="absolute right-0 top-12 z-30 w-64 overflow-hidden rounded-2xl border border-white/70 bg-paper py-1 text-neutral-900 shadow-[0_20px_50px_rgba(29,27,32,0.22)] sm:top-11"
+									className="mobile-menu-popover-in absolute right-0 top-12 z-30 w-64 overflow-hidden rounded-2xl border border-white/70 bg-paper py-1 text-neutral-900 shadow-[0_20px_50px_rgba(29,27,32,0.22)] sm:top-11"
 								>
 									<div className="px-2 py-2">
 										<ThemeToggle onSelect={onCloseMenu} />
@@ -195,7 +195,7 @@ export function SpaceHero({
 							A private place for us.
 						</h1>
 						<div className="grid max-w-3xl grid-cols-2 gap-3 sm:gap-4">
-							<div className="rounded-3xl bg-[#1d1b20]/45 p-3 shadow-[0_12px_34px_rgba(0,0,0,0.22)] backdrop-blur-md sm:p-4">
+							<div className="mobile-hero-card-in rounded-3xl bg-[#1d1b20]/45 p-3 shadow-[0_12px_34px_rgba(0,0,0,0.22)] backdrop-blur-md sm:p-4">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Days together
 								</p>
@@ -206,7 +206,7 @@ export function SpaceHero({
 									Since {anniversaryLabel}
 								</p>
 							</div>
-							<div className="rounded-3xl bg-[#1d1b20]/45 p-3 shadow-[0_12px_34px_rgba(0,0,0,0.22)] backdrop-blur-md sm:p-4">
+							<div className="mobile-hero-card-in rounded-3xl bg-[#1d1b20]/45 p-3 shadow-[0_12px_34px_rgba(0,0,0,0.22)] backdrop-blur-md sm:p-4">
 								<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-paper/70">
 									Next anniversary
 								</p>

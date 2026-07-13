@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import {
   NativeButton,
   NativeInput,

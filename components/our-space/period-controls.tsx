@@ -299,7 +299,7 @@ export function MobileSpaceTabs({
 								role="tab"
 								aria-selected={selected}
 								className={[
-									"relative z-10 flex min-h-[3rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-[10.5px] font-extrabold tracking-[-0.01em] transition duration-200 active:scale-[0.8]",
+									"relative z-10 flex min-h-[3rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-[10.5px] font-extrabold transition duration-200 active:scale-[0.8]",
 									selected ? "text-neutral-950" : "text-neutral-500",
 								].join(" ")}
 								onClick={() => onSelectSection(item.value)}
@@ -307,7 +307,9 @@ export function MobileSpaceTabs({
 								<span
 									className={[
 										"grid size-7 place-items-center rounded-full transition duration-200",
-										selected ? "bg-white/16" : "bg-transparent",
+										selected
+											? "mobile-tab-icon-selected bg-white/16"
+											: "bg-transparent",
 									].join(" ")}
 								>
 									<Icon

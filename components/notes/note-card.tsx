@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { ActionMenu } from "@/components/common/action-menu";
-import { useToast } from "@/components/toast";
+import { useToast } from "@/components/feedback/toast";
 import { deleteNote } from "@/app/actions";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
@@ -81,7 +81,7 @@ export function NoteCard({
 	return (
 		<article
 			className={[
-				"app-card app-card-interactive content-fade-in relative flex h-[20rem] flex-col overflow-visible p-4 sm:p-5",
+				"app-card app-card-interactive content-fade-in relative flex  flex-col overflow-visible p-4 sm:p-5",
 			].join(" ")}
 		>
 			<div className="flex justify-between items-start gap-2">
@@ -102,7 +102,7 @@ export function NoteCard({
 				</div>
 
 				{canEdit && (
-					<div className="relative -mr-2 shrink-0">
+					<div className="relative shrink-0">
 						<ActionMenu
 							label={`Open actions for ${note.title}`}
 							sheetTitle="Note actions"
@@ -152,14 +152,28 @@ export function NoteCard({
 					</div>
 				</div>
 			) : (
-				<div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-neutral-900/10 bg-bg/70">
-					<div className="h-full overflow-y-auto">
-						<p className="m-4 whitespace-pre-line text-md leading-6 text-neutral-700">
+				<div className="relative min-h-0 flex-1 overflow-hidden">
+					{/* <div className="h-full overflow-y-auto">
+						<div className="m-4 whitespace-pre-line text-md leading-6 text-neutral-700">
 							{note.content}
-						</p>
+						</div>
+					</div> */}
+					<div className="relative border-l-[3px] border-neutral-200 pl-3 dark:border-neutral-800">
+						<div
+							className="max-h-[12rem] overflow-y-auto pr-3 leading-6 text-neutral-600
+												whitespace-pre-wrap break-words
+												[&::-webkit-scrollbar]:w-1.5
+												[&::-webkit-scrollbar-track]:bg-transparent
+												[&::-webkit-scrollbar-thumb]:rounded-full
+												[&::-webkit-scrollbar-thumb]:bg-neutral-200
+												hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300
+												dark:[&::-webkit-scrollbar-thumb]:bg-neutral-700"
+						>
+							{note.content}
+						</div>
+						{/* <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-paper to-transparent" />
+					<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-paper to-transparent" /> */}
 					</div>
-					<div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-paper to-transparent" />
-					<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-paper to-transparent" />
 				</div>
 			)}
 		</article>
