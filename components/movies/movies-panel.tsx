@@ -419,7 +419,7 @@ export function MoviesPanel({
 														// Custom easing Apple-style, thêm shadow và trục Y 3D
 														className={`transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] h-full origin-center rounded-2xl ${
 															isActive
-																? "scale-100 opacity-100 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] -translate-y-2 ring-1 ring-black/5" // Nổi lên, sáng, bóng đổ to
+																? "scale-100 opacity-100 shadow-[10px_10px_30px_-10px_rgba(0,0,0,0.5)] -translate-y-2 ring-1 ring-black/5" // Nổi lên, sáng, bóng đổ to
 																: "scale-[0.82] opacity-40 translate-y-3 pointer-events-none" // Chìm xuống, mờ, khóa click
 														}`}
 													>
