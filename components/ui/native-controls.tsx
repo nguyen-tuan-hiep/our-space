@@ -339,7 +339,7 @@ export function NativeDialog({
 				role="dialog"
 				aria-modal="true"
 				className={cx(
-					"mobile-sheet-motion relative max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full origin-bottom overflow-hidden rounded-2xl bg-paper shadow-2xl will-change-transform sm:max-h-[calc(100svh-2rem)] sm:origin-center",
+					"mobile-sheet-motion relative flex max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full origin-bottom flex-col overflow-hidden rounded-2xl bg-paper shadow-2xl will-change-transform sm:max-h-[calc(100svh-2rem)] sm:origin-center",
 					closing ? "native-sheet-out" : "native-sheet-in",
 					maxWidth === "xs" && "max-w-md",
 					maxWidth === "sm" && "max-w-xl",
@@ -352,11 +352,11 @@ export function NativeDialog({
 						{title}
 					</div>
 				</div>
-				<div className="max-h-[calc(100svh-env(safe-area-inset-top)-11rem)] overflow-y-auto px-5 py-5 overscroll-contain sm:max-h-[calc(100svh-12rem)] sm:px-6">
+				<div className="min-h-0 overflow-y-auto px-5 py-5 overscroll-contain sm:px-6">
 					{children}
 				</div>
 				{actions ? (
-					<div className="flex justify-end gap-3 p-6">{actions}</div>
+					<div className="shrink-0 flex justify-end gap-3 p-6">{actions}</div>
 				) : null}
 			</div>
 		</div>
