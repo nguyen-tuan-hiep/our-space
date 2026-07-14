@@ -109,10 +109,10 @@ export function ExpenseFeed({
 					<div className="relative ml-auto grid size-10 shrink-0 place-items-center rounded-full transition hover:bg-mui/10">
 						<div
 							aria-hidden="true"
-							className={`grid size-10 place-items-center rounded-full transition${
+							className={`grid size-10 place-items-center rounded-full transition ${
 								categoryFilter === "all"
 									? "text-neutral-500"
-									: "bg-neutral-950 text-neutral-50"
+									: "bg-black/10 text-black dark:bg-white/10 dark:text-white"
 							}`}
 						>
 							<ListFilter size={17} />

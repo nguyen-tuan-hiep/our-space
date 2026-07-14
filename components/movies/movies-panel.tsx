@@ -393,7 +393,7 @@ export function MoviesPanel({
 						{column.movies.length ? (
 							<>
 								{/* --- NÂNG CẤP CHẾ ĐỘ MOBILE --- */}
-								<div className="block sm:hidden -mx-4 px-4 overflow-hidden pt-6 pb-14">
+								<div className="block sm:hidden -mx-4 overflow-hidden p-6">
 									<Swiper
 										modules={[Pagination]}
 										cssMode={false}
@@ -407,7 +407,7 @@ export function MoviesPanel({
 										}}
 										spaceBetween={12} // Khoảng cách nhỏ lại để UI chặt chẽ hơn
 										slidesPerView="auto"
-										className="!overflow-visible [--swiper-pagination-color:#0a0a0a] [--swiper-pagination-bottom:-32px]"
+										className="!overflow-visible [--swiper-pagination-color:#0a0a0a] [--swiper-pagination-bottom:-20px]"
 									>
 										{column.movies.map((movie) => (
 											<SwiperSlide

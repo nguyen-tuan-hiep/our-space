@@ -135,7 +135,7 @@ function personMoodCard({
 		<div className="app-card content-fade-in p-4">
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-w-0 items-center gap-3">
-					<div className="grid size-11 shrink-0 place-items-center rounded-full bg-mui/10 text-xl">
+					<div className="grid size-11 shrink-0 place-items-center rounded-full bg-black/10 dark:bg-white/10 text-xl">
 						{avatar}
 					</div>
 					<div className="min-w-0">
