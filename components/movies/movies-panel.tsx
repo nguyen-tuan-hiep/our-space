@@ -3,10 +3,14 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { Check, Clapperboard, Play, Plus, Star, X } from "lucide-react";
-import {
-	deleteMovie,
-	updateMovieStatus,
-} from "@/app/actions";
+
+// --- Import Swiper React components, Modules và Styles ---
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+
+import { deleteMovie, updateMovieStatus } from "@/app/actions";
 import { ActionMenu } from "@/components/common/action-menu";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { useToast } from "@/components/feedback/toast";
@@ -78,11 +82,11 @@ function MovieCard({
 	onShowDetails: () => void;
 }) {
 	return (
-		<article className="app-card app-card-interactive content-fade-in relative overflow-hidden p-0">
+		<article className="app-card-interactive content-fade-in relative overflow-hidden p-0 w-full h-full rounded-2xl">
 			<button
 				type="button"
 				aria-label={`View details for ${movie.title}`}
-				className="relative block aspect-[2/3] w-full overflow-hidden bg-neutral-100 text-left"
+				className="relative block aspect-[2/3] w-full h-full overflow-hidden bg-neutral-100 text-left"
 				onClick={onShowDetails}
 			>
 				{movie.poster_url ? (
@@ -199,7 +203,9 @@ function MovieDetailsDialog({
 									{movie.title}
 								</h2>
 								{movie.reaction ? (
-									<span className="text-3xl leading-none">{movie.reaction}</span>
+									<span className="text-3xl leading-none">
+										{movie.reaction}
+									</span>
 								) : null}
 							</div>
 							<p className="mt-2 text-xs font-bold uppercase text-neutral-500">
@@ -375,7 +381,7 @@ export function MoviesPanel({
 				{moviesByStatus.map((column) => (
 					<section
 						key={column.status}
-						className="grid content-start gap-3"
+						className="grid content-start gap-3 min-w-0"
 					>
 						<div className="flex items-center justify-between rounded-2xl bg-neutral-950 px-4 py-3 text-neutral-50">
 							<h3 className="font-bold">{column.title}</h3>
@@ -385,17 +391,64 @@ export function MoviesPanel({
 						</div>
 
 						{column.movies.length ? (
-							<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
-								{column.movies.map((movie) => (
-									<MovieCard
-										key={movie.id}
-										movie={movie}
-										onEdit={() => onEditMovie(movie)}
-										onRequestDelete={() => setSelectedMovie(movie)}
-										onShowDetails={() => openMovieDetails(movie)}
-									/>
-								))}
-							</div>
+							<>
+								{/* --- NÂNG CẤP CHẾ ĐỘ MOBILE --- */}
+								<div className="block sm:hidden -mx-4 px-4 overflow-hidden pt-6 pb-14">
+									<Swiper
+										modules={[Pagination]}
+										cssMode={false}
+										grabCursor={true}
+										watchSlidesProgress={true}
+										centeredSlides={true}
+										pagination={{
+											clickable: true,
+											dynamicBullets: true,
+											dynamicMainBullets: 3,
+										}}
+										spaceBetween={12} // Khoảng cách nhỏ lại để UI chặt chẽ hơn
+										slidesPerView="auto"
+										className="!overflow-visible [--swiper-pagination-color:#0a0a0a] [--swiper-pagination-bottom:-32px]"
+									>
+										{column.movies.map((movie) => (
+											<SwiperSlide
+												key={movie.id}
+												className="!w-[175px]" // Tỷ lệ vàng cho mobile, không to tràn viền
+											>
+												{({ isActive }) => (
+													<div
+														// Custom easing Apple-style, thêm shadow và trục Y 3D
+														className={`transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] h-full origin-center rounded-2xl ${
+															isActive
+																? "scale-100 opacity-100 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] -translate-y-2 ring-1 ring-black/5" // Nổi lên, sáng, bóng đổ to
+																: "scale-[0.82] opacity-40 translate-y-3 pointer-events-none" // Chìm xuống, mờ, khóa click
+														}`}
+													>
+														<MovieCard
+															movie={movie}
+															onEdit={() => onEditMovie(movie)}
+															onRequestDelete={() => setSelectedMovie(movie)}
+															onShowDetails={() => openMovieDetails(movie)}
+														/>
+													</div>
+												)}
+											</SwiperSlide>
+										))}
+									</Swiper>
+								</div>
+
+								{/* --- CHẾ ĐỘ DESKTOP: GRID NHƯ CŨ --- */}
+								<div className="hidden sm:grid grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+									{column.movies.map((movie) => (
+										<MovieCard
+											key={movie.id}
+											movie={movie}
+											onEdit={() => onEditMovie(movie)}
+											onRequestDelete={() => setSelectedMovie(movie)}
+											onShowDetails={() => openMovieDetails(movie)}
+										/>
+									))}
+								</div>
+							</>
 						) : loading ? (
 							<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
 								{Array.from({ length: 5 }).map((_, index) => (
