@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useState, useTransition } from "react";
-import dynamic from "next/dynamic";
-import { ImageUp, SmilePlus, X } from "lucide-react";
+import { ImageUp, SmilePlus } from "lucide-react";
 import { createMovie, updateMovie } from "@/app/actions";
+import { EmojiPickerDialog } from "@/components/common/emoji-picker-dialog";
 import { useToast } from "@/components/feedback/toast";
 import {
 	NativeButton,
@@ -15,11 +15,6 @@ import {
 } from "@/components/ui/native-controls";
 import { movieCategories, movieStatuses } from "@/lib/constants";
 import type { Movie } from "@/lib/types";
-import { EmojiStyle, type EmojiClickData } from "emoji-picker-react";
-
-const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
-	ssr: false,
-});
 
 interface MovieDialogProps {
 	open: boolean;
@@ -191,32 +186,6 @@ export function MovieDialog({
 									Reaction
 								</label>
 							</div>
-
-							{reactionPickerOpen ? (
-								<div className="absolute right-0 top-[calc(100%+0.5rem)] z-[65] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-neutral-900/10 bg-paper p-2 shadow-[0_24px_70px_rgba(30,25,20,0.22)]">
-									<EmojiPicker
-										width="100%"
-										height={420}
-										emojiStyle={EmojiStyle.NATIVE}
-										previewConfig={{ showPreview: false }}
-										onEmojiClick={(emojiData: EmojiClickData) => {
-											setReaction(emojiData.emoji);
-											setReactionPickerOpen(false);
-										}}
-									/>
-									<button
-										type="button"
-										className="mt-2 inline-flex h-9 items-center gap-2 rounded-2xl px-3 text-sm font-bold text-neutral-600 hover:bg-neutral-100"
-										onClick={() => {
-											setReaction("");
-											setReactionPickerOpen(false);
-										}}
-									>
-										<X size={15} />
-										Clear
-									</button>
-								</div>
-							) : null}
 						</div>
 					</div>
 
@@ -228,7 +197,8 @@ export function MovieDialog({
 					/>
 
 					{posterUrl ? (
-						<div className="relative aspect-[2/3] w-40 overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100">
+						/* Thêm class 'mx-auto' vào dòng dưới đây để căn giữa */
+						<div className="mx-auto relative aspect-[2/3] w-40 overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100">
 							<Image
 								src={posterUrl}
 								alt="Movie poster preview"
@@ -238,9 +208,16 @@ export function MovieDialog({
 						</div>
 					) : null}
 
-					<div className="grid gap-3 sm:flex sm:items-center">
+					{/* Sử dụng dynamic class để:
+    - Nếu có poster (2 nút): chia 2 cột (grid-cols-2)
+    - Nếu chưa có poster (1 nút): chiếm full 1 cột (grid-cols-1)
+*/}
+					<div
+						className={`grid gap-3 w-full ${posterUrl ? "grid-cols-2" : "grid-cols-1"}`}
+					>
 						<label
-							className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 sm:min-h-11 ${
+							// Thay 'inline-flex' bằng 'flex w-full' để label giãn hết 100% cột grid
+							className={`flex w-full min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 sm:min-h-11 ${
 								uploading ? "pointer-events-none opacity-50" : ""
 							}`}
 						>
@@ -261,14 +238,18 @@ export function MovieDialog({
 								}}
 							/>
 						</label>
+
 						{posterUrl ? (
-							<NativeButton
-								type="button"
-								variant="text"
-								onClick={() => setPosterUrl("")}
-							>
-								Remove poster
-							</NativeButton>
+							<div className="flex w-full">
+								<NativeButton
+									type="button"
+									variant="text"
+									className="w-full"
+									onClick={() => setPosterUrl("")}
+								>
+									Remove poster
+								</NativeButton>
+							</div>
 						) : null}
 					</div>
 
@@ -279,6 +260,15 @@ export function MovieDialog({
 						defaultValue={movie?.comment ?? ""}
 					/>
 				</div>
+
+				<EmojiPickerDialog
+					open={reactionPickerOpen}
+					title="Choose reaction"
+					clearLabel="Clear reaction"
+					onClose={() => setReactionPickerOpen(false)}
+					onClear={() => setReaction("")}
+					onSelect={setReaction}
+				/>
 
 				<div className="mt-6 flex justify-end gap-3">
 					<NativeButton

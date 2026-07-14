@@ -160,8 +160,8 @@ function MovieDetailsDialog({
 				aria-modal="true"
 				aria-label={movie.title}
 				className={[
-					"fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] grid max-h-[calc(100svh-env(safe-area-inset-bottom)-1.5rem)] overflow-hidden rounded-3xl border border-neutral-900/10 bg-paper shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[min(42rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2",
-					closing ? "native-sheet-out sm:native-popover-out" : "native-sheet-in sm:native-popover-in",
+					"movie-details-dialog fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] grid max-h-[calc(100svh-env(safe-area-inset-bottom)-1.5rem)] overflow-hidden rounded-3xl border border-neutral-900/10 bg-paper shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[min(42rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2",
+					closing ? "native-sheet-out" : "native-sheet-in",
 				].join(" ")}
 			>
 				<button

@@ -497,6 +497,28 @@ input[type="time"]::-webkit-date-and-time-value {
 	}
 }
 
+@keyframes native-centered-modal-in {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -48%) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1);
+	}
+}
+
+@keyframes native-centered-modal-out {
+	from {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translate(-50%, -48%) scale(0.96);
+	}
+}
+
 @keyframes native-bottom-nav-in {
 	from {
 		opacity: 0;
@@ -612,6 +634,18 @@ input[type="time"]::-webkit-date-and-time-value {
 
 	.native-sheet-out {
 		animation-name: native-modal-out;
+		animation-duration: 180ms;
+	}
+
+	.movie-details-dialog.native-sheet-in,
+	.emoji-picker-dialog.native-sheet-in {
+		animation-name: native-centered-modal-in;
+		animation-duration: 220ms;
+	}
+
+	.movie-details-dialog.native-sheet-out,
+	.emoji-picker-dialog.native-sheet-out {
+		animation-name: native-centered-modal-out;
 		animation-duration: 180ms;
 	}
 }

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { SmilePlus } from "lucide-react";
+import { EmojiPickerDialog } from "@/components/common/emoji-picker-dialog";
 import { useToast } from "@/components/feedback/toast";
 import {
 	NativeButton,
@@ -20,11 +20,6 @@ import {
 	commonCountryCodes,
 } from "@/lib/constants";
 import type { Profile } from "@/lib/types";
-import { EmojiStyle, type EmojiClickData } from "emoji-picker-react";
-
-const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
-	ssr: false,
-});
 
 interface ProfileDialogProps {
 	open: boolean;
@@ -188,20 +183,6 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 									/>
 								</button>
 
-								{avatarPickerOpen ? (
-									<div className="overflow-hidden rounded-3xl border border-neutral-900/10 bg-paper p-2 shadow-[0_18px_44px_rgba(23,23,23,0.14)]">
-										<EmojiPicker
-											width="100%"
-											height={420}
-											emojiStyle={EmojiStyle.NATIVE}
-											previewConfig={{ showPreview: false }}
-											onEmojiClick={(emojiData: EmojiClickData) => {
-												setAvatar(emojiData.emoji);
-												setAvatarPickerOpen(false);
-											}}
-										/>
-									</div>
-								) : null}
 							</div>
 					</form>
 				) : (
@@ -234,6 +215,12 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 						/>
 					</form>
 				)}
+			<EmojiPickerDialog
+				open={avatarPickerOpen}
+				title="Choose profile emoji"
+				onClose={() => setAvatarPickerOpen(false)}
+				onSelect={setAvatar}
+			/>
 		</NativeDialog>
 	);
 }
