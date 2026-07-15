@@ -49,10 +49,6 @@ const appleStartupImages = [
     `(device-width: ${deviceWidth}px) and ` +
     `(device-height: ${deviceHeight}px) and ` +
     `(-webkit-device-pixel-ratio: ${ratio})`;
-  const landscapeDeviceMedia =
-    `(device-width: ${deviceHeight}px) and ` +
-    `(device-height: ${deviceWidth}px) and ` +
-    `(-webkit-device-pixel-ratio: ${ratio})`;
   const landscapeUrl = `/splash/apple-splash-${imageHeight}-${imageWidth}.jpg`;
 
   return [
@@ -62,7 +58,7 @@ const appleStartupImages = [
     },
     {
       url: landscapeUrl,
-      media: `${landscapeDeviceMedia} and (orientation: landscape)`,
+      media: `${portraitDeviceMedia} and (orientation: landscape)`,
     },
   ];
 });
