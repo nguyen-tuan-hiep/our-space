@@ -85,7 +85,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "Our Space 𑣲⋆",
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
   },
   icons: {
     icon: [
@@ -119,6 +119,12 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Our Space 𑣲⋆" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="default"
+        />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         {appleStartupImages.map(({ url, media }) => (
