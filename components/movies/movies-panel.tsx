@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { Check, Clapperboard, Play, Plus, Star, X } from "lucide-react";
+import { Check, Clapperboard, Play, Edit2, Plus, Star, X } from "lucide-react";
 
 // --- Import Swiper React components, Modules và Styles ---
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -178,8 +178,23 @@ function MovieDetailsDialog({
 				</button>
 
 				<div className="grid min-h-0 overflow-y-auto sm:grid-cols-[15rem_1fr]">
-					<div className="bg-neutral-100 p-4 sm:p-0">
-						<div className="relative mx-auto aspect-[2/3] w-[min(40vw,8.5rem)] overflow-hidden rounded-2xl bg-neutral-100 sm:h-full sm:w-full sm:rounded-none">
+					<div className="relative overflow-visible bg-neutral-950 px-4 pb-0 pt-5 sm:overflow-hidden sm:bg-neutral-100 sm:p-0">
+						{movie.poster_url ? (
+							<>
+								<div className="absolute inset-0 overflow-hidden sm:hidden">
+									<Image
+										src={movie.poster_url}
+										alt=""
+										fill
+										sizes="100vw"
+										className="scale-110 object-cover opacity-90 blur-md"
+										aria-hidden="true"
+									/>
+									<div className="absolute inset-0 bg-black/20" />
+								</div>
+							</>
+						) : null}
+						<div className="relative z-[1] mx-auto -mb-14 aspect-[2/3] w-[min(70vw,15rem)] overflow-hidden rounded-2xl bg-neutral-100 shadow-[0_16px_40px_rgba(0,0,0,0.28)] sm:mb-0 sm:h-full sm:w-full sm:rounded-none sm:shadow-none">
 							{movie.poster_url ? (
 								<Image
 									src={movie.poster_url}
@@ -196,40 +211,42 @@ function MovieDetailsDialog({
 						</div>
 					</div>
 
-					<div className="grid content-start gap-4 p-5 sm:p-6">
+					<div className="flex min-h-0 flex-col gap-4 p-5 pt-24 sm:p-6">
 						<div>
-							<div className="flex items-start gap-3">
-								<h2 className="min-w-0 flex-1 font-serif text-3xl leading-tight text-neutral-950">
+							<div>
+								<h2 className="font-serif text-3xl leading-tight text-neutral-950">
 									{movie.title}
 								</h2>
-								{movie.reaction ? (
-									<span className="text-3xl leading-none">
-										{movie.reaction}
-									</span>
-								) : null}
 							</div>
-							<p className="mt-2 text-xs font-bold uppercase text-neutral-500">
-								{movie.category}
-							</p>
 						</div>
 
-						<div className="flex flex-wrap items-center gap-2">
-							{movie.rating ? (
-								<span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-800">
-									<Star
-										size={15}
-										fill="currentColor"
-									/>
-									{movie.rating.toFixed(1)}
+						<div className="grid gap-2">
+							<div className="flex flex-wrap items-center gap-2">
+								<span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600">
+									{movie.category}
 								</span>
-							) : null}
-							<span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600">
-								{movie.status === "wishlist"
-									? "Wishlist"
-									: movie.status === "watching"
-										? "Watching"
-										: "Watched"}
-							</span>
+								<span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600">
+									{movie.status === "wishlist"
+										? "Wishlist"
+										: movie.status === "watching"
+											? "Watching"
+											: "Watched"}
+								</span>
+							</div>
+							<div className="flex flex-wrap items-center gap-2">
+								{movie.rating ? (
+									<span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-800">
+										<Star
+											size={15}
+											fill="currentColor"
+											/>
+										{movie.rating.toFixed(1)}
+									</span>
+								) : null}
+								{movie.reaction ? (
+									<span className="text-2xl leading-none">{movie.reaction}</span>
+								) : null}
+							</div>
 						</div>
 
 						{movie.comment ? (
@@ -242,20 +259,21 @@ function MovieDetailsDialog({
 							</p>
 						)}
 
-						<div className="mt-2 flex flex-col gap-2 sm:flex-row">
+						<div className="mt-auto flex flex-col gap-2 pt-2">
 							<Button
 								type="button"
 								variant="outline"
-								className="h-11 rounded-2xl"
+								className="h-11 w-full rounded-2xl"
 								onClick={() => onEdit(movie)}
 							>
+								<Edit2 size={16} />
 								Edit
 							</Button>
 							{nextStatus ? (
 								<Button
 									type="button"
 									variant="outline"
-									className="h-11 rounded-2xl"
+									className="h-11 w-full rounded-2xl"
 									disabled={busy}
 									onClick={() => onMoveStatus(movie, nextStatus.status)}
 								>
