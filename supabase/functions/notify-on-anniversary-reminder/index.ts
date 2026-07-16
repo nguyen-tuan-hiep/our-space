@@ -14,6 +14,8 @@ type ProfileRow = {
 type ReminderTarget = {
   coupleId: string;
   anniversaryDate: string;
+  targetDate: string;
+  milestoneMonths: number;
   daysUntil: number;
   message: string;
   recipientExternalIds: string[];
@@ -88,31 +90,64 @@ function getUtcMidnight(value: Date) {
   return Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
 }
 
-function getNextAnniversaryDate(anniversaryDate: string, now: Date) {
-  const [year = 0, month = 1, day = 1] = anniversaryDate.split("-").map(Number);
-  const currentYear = now.getUTCFullYear();
-  const candidateThisYear = Date.UTC(currentYear, month - 1, day);
-  const todayUtc = getUtcMidnight(now);
+function getDaysInMonth(year: number, zeroBasedMonth: number) {
+  return new Date(Date.UTC(year, zeroBasedMonth + 1, 0)).getUTCDate();
+}
 
-  return candidateThisYear >= todayUtc
-    ? candidateThisYear
-    : Date.UTC(currentYear + 1, month - 1, day);
+function getMonthlyMilestoneDate(startDate: string, monthsAfterStart: number) {
+  const [startYear = 0, startMonth = 1, startDay = 1] = startDate
+    .split("-")
+    .map(Number);
+  const zeroBasedStartMonth = startMonth - 1;
+  const absoluteMonth = zeroBasedStartMonth + monthsAfterStart;
+  const targetYear = startYear + Math.floor(absoluteMonth / 12);
+  const targetMonth = ((absoluteMonth % 12) + 12) % 12;
+  const targetDay = Math.min(startDay, getDaysInMonth(targetYear, targetMonth));
+
+  return Date.UTC(targetYear, targetMonth, targetDay);
+}
+
+function getNextMonthlyMilestone(startDate: string, now: Date) {
+  const [startYear = 0, startMonth = 1] = startDate.split("-").map(Number);
+  const todayUtc = getUtcMidnight(now);
+  const currentMonthOffset =
+    (now.getUTCFullYear() - startYear) * 12 + (now.getUTCMonth() - (startMonth - 1));
+  let milestoneMonths = Math.max(0, currentMonthOffset);
+  let targetUtcMs = getMonthlyMilestoneDate(startDate, milestoneMonths);
+
+  while (targetUtcMs < todayUtc) {
+    milestoneMonths += 1;
+    targetUtcMs = getMonthlyMilestoneDate(startDate, milestoneMonths);
+  }
+
+  return { targetUtcMs, milestoneMonths };
 }
 
 function getDaysUntil(targetUtcMs: number, now: Date) {
   return Math.round((targetUtcMs - getUtcMidnight(now)) / 86400000);
 }
 
-function getReminderMessage(daysUntil: number) {
+function formatMilestone(milestoneMonths: number) {
+  if (milestoneMonths > 0 && milestoneMonths % 12 === 0) {
+    const years = milestoneMonths / 12;
+    return `${years} year${years === 1 ? "" : "s"}`;
+  }
+
+  return `${milestoneMonths} month${milestoneMonths === 1 ? "" : "s"}`;
+}
+
+function getReminderMessage(daysUntil: number, milestoneMonths: number) {
+  const milestone = formatMilestone(milestoneMonths);
+
   switch (daysUntil) {
     case 7:
-      return "Your anniversary is in 1 week.";
+      return `Your ${milestone} anniversary is in 1 week.`;
     case 3:
-      return "Your anniversary is in 3 days.";
+      return `Your ${milestone} anniversary is in 3 days.`;
     case 1:
-      return "Your anniversary is tomorrow.";
+      return `Your ${milestone} anniversary is tomorrow.`;
     case 0:
-      return "Happy anniversary! Today is your day.";
+      return `Happy ${milestone} anniversary! Today is your day.`;
     default:
       return null;
   }
@@ -167,16 +202,22 @@ async function listReminderTargets(now: Date) {
     const anniversaryDate =
       anniversaryBySettingsId.get(coupleId) ??
       getDatePart(profile.created_at ?? partner.created_at ?? now.toISOString());
-    const nextAnniversaryUtcMs = getNextAnniversaryDate(anniversaryDate, now);
-    const daysUntil = getDaysUntil(nextAnniversaryUtcMs, now);
+    const { targetUtcMs, milestoneMonths } = getNextMonthlyMilestone(
+      anniversaryDate,
+      now,
+    );
+    const daysUntil = getDaysUntil(targetUtcMs, now);
+    if (milestoneMonths === 0) continue;
     if (!reminderDays.includes(daysUntil as (typeof reminderDays)[number])) continue;
 
-    const message = getReminderMessage(daysUntil);
+    const message = getReminderMessage(daysUntil, milestoneMonths);
     if (!message) continue;
 
     targets.push({
       coupleId,
       anniversaryDate,
+      targetDate: new Date(targetUtcMs).toISOString().slice(0, 10),
+      milestoneMonths,
       daysUntil,
       message,
       recipientExternalIds: [profile.id, profile.partner_id],
@@ -189,16 +230,22 @@ async function listReminderTargets(now: Date) {
     const coupleProfileIds = parseCoupleProfileIds(coupleId);
     if (!coupleProfileIds) continue;
 
-    const nextAnniversaryUtcMs = getNextAnniversaryDate(anniversaryDate, now);
-    const daysUntil = getDaysUntil(nextAnniversaryUtcMs, now);
+    const { targetUtcMs, milestoneMonths } = getNextMonthlyMilestone(
+      anniversaryDate,
+      now,
+    );
+    const daysUntil = getDaysUntil(targetUtcMs, now);
+    if (milestoneMonths === 0) continue;
     if (!reminderDays.includes(daysUntil as (typeof reminderDays)[number])) continue;
 
-    const message = getReminderMessage(daysUntil);
+    const message = getReminderMessage(daysUntil, milestoneMonths);
     if (!message) continue;
 
     targets.push({
       coupleId,
       anniversaryDate,
+      targetDate: new Date(targetUtcMs).toISOString().slice(0, 10),
+      milestoneMonths,
       daysUntil,
       message,
       recipientExternalIds: [...coupleProfileIds],
@@ -316,12 +363,16 @@ Deno.serve(async (request) => {
           type: "anniversary-reminder",
           couple_id: target.coupleId,
           anniversary_date: target.anniversaryDate,
+          target_date: target.targetDate,
+          milestone_months: target.milestoneMonths,
           reminder_days: target.daysUntil,
         },
       });
 
       results.push({
         coupleId: target.coupleId,
+        targetDate: target.targetDate,
+        milestoneMonths: target.milestoneMonths,
         daysUntil: target.daysUntil,
         oneSignalResponse,
       });
