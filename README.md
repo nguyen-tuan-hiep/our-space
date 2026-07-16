@@ -1,51 +1,60 @@
 # Our Space
 
-Our Space is a private Next.js application for a couple. It combines shared time-locked notes with two separate personal expense ledgers, dual-currency display, realtime Supabase sync, Cloudinary media uploads, MUI forms, Tailwind layouts, and Recharts visualization.
+Our Space is a private Next.js application for a couple. It combines shared notes, memories, moods, movies, personal expense ledgers, anniversary settings, realtime Supabase sync, Cloudinary media uploads, PWA support, OneSignal push notifications, and responsive Tailwind-based app screens.
 
 ## Stack
 
 - Next.js App Router with TypeScript strict mode
-- Tailwind CSS for layout, responsive grids, spacing, and project-level utility classes
-- Material UI for Card, Button, TextField, Select, Dialog, DateTimePicker, ThemeProvider, and CssBaseline
+- Tailwind CSS for layout, responsive grids, app surfaces, animation classes, and native-feeling controls
+- Local UI primitives in `components/ui/` plus native dialog/input/select controls
 - Supabase Auth, PostgreSQL, Row Level Security, and Realtime
-- Cloudinary for hero images, profile pictures, and note attachments
+- Cloudinary for hero images, memory photos, profile pictures, and movie posters
 - Recharts for finance trend and category charts
-- Local `components/toast.tsx` provider for toast notifications
+- OneSignal Web Push through Supabase Edge Functions
+- Local toast provider for feedback notifications
 
 ## Project Structure
 
 ```txt
 app/
-  actions.ts                         # Server actions for auth, notes, expenses
+  actions.ts                         # Server actions for auth, setup, notes, expenses, moods, memories, movies
   api/cloudinary/upload/route.ts      # Auth-protected Cloudinary upload endpoint
   auth/callback/route.ts              # Supabase OAuth/email callback
-  dashboard/page.tsx                  # Protected dashboard server page
-  login/page.tsx                      # Supabase password login
-  layout.tsx                          # Root layout with MUI cache/provider
-  page.tsx                            # Redirects to dashboard
-  globals.css                         # Tailwind globals and portfolio-inspired tokens
+  login/page.tsx                      # Supabase password login and forgot-password entry point
+  reset-password/page.tsx             # Password reset completion page
+  layout.tsx                          # Root layout, PWA metadata, iOS splash links, providers
+  page.tsx                            # Protected app server page
+  globals.css                         # Tailwind globals and app tokens
 components/
-  dashboard-client.tsx                # Realtime dashboard shell
+  auth/
+    login-form.tsx                    # Sign in, sign up, forgot-password request
+    reset-password-form.tsx           # New-password form after email reset callback
   expenses/
-    expense-dialog.tsx                # MUI expense form with fixed local currency
+    expense-dialog.tsx                # Expense form with fixed local currency
     expense-feed.tsx                  # Own editable ledger and partner read-only feed
     finance-charts.tsx                # Recharts week/month + category charts
-  layout/app-providers.tsx            # StyledEngineProvider, MUI ThemeProvider, Toasts
+  memory/
+    memory-map-panel.tsx              # Memory map surface and memory cards
+  movies/
+    movie-dialog.tsx                  # Movie create/edit form, poster upload, multi-category selection
+    movies-panel.tsx                  # Movie board and details dialog
+  layout/app-providers.tsx            # Theme, toast, realtime, and runtime providers
   notes/
     note-card.tsx                     # Blur/countdown time-locked note card
-    note-dialog.tsx                   # MUI note form and Cloudinary attachment upload
-  login-form.tsx
+    note-dialog.tsx                   # Note form
+  our-space/
+    client.tsx                        # Main realtime app shell
 lib/
   auth.ts                             # Current session/profile/partner helpers
   constants.ts                        # Currency/category constants and formatting
-  data.ts                             # Dashboard query and chart aggregation logic
+  data.ts                             # App data query and chart aggregation logic
   supabase/
-    admin.ts
     browser.ts
     server.ts
   types.ts                            # Shared TypeScript interfaces
 supabase/migrations/
-  001_initial_schema.sql              # Tables, enums, triggers, RLS, realtime
+  final_schema.sql                    # Fresh database schema
+  202607*.sql                         # Incremental migrations for moods, memories, movies, couple settings
 ```
 
 ## Environment Variables
@@ -66,7 +75,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_ONESIGNAL_APP_ID=your-onesignal-app-id
 ```
 
-`NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL` should be a high-quality Cloudinary URL for the couple hero image. Cloudinary uploads from note attachments are stored under `our-space/attachments`.
+`NEXT_PUBLIC_CLOUDINARY_HERO_IMAGE_URL` should be a high-quality Cloudinary URL for the couple hero image. Runtime uploads are organized by upload kind, including hero images, memories, and movie posters.
 
 Supabase Edge Function secrets for push notifications:
 
@@ -98,9 +107,17 @@ npm run build
 
 1. Create a Supabase project.
 2. Enable Email/Password auth in Supabase Auth.
-3. Run `supabase/migrations/001_initial_schema.sql` in the SQL editor or via Supabase CLI.
-4. Create exactly two auth users.
-5. Insert and link their profiles.
+3. Run the migrations in `supabase/migrations/` via Supabase CLI, or use `final_schema.sql` only for a fresh local database reset.
+4. Add auth redirect URLs for password reset:
+
+```txt
+http://localhost:3000/auth/callback
+https://your-production-domain.com/auth/callback
+```
+
+The reset email enters the app at `/auth/callback?next=/reset-password`; Supabase only needs `/auth/callback` in the allowlist.
+
+5. Create auth users and let the setup flow create/link profiles, or seed profiles manually for local testing.
 
 Example profile seed:
 
@@ -124,8 +141,20 @@ The schema defines:
 - `profiles`: user identity, country, fixed currency, partner link
 - `notes`: shared note CRUD with optional `unlock_at`, attachments, author/recipient
 - `individual_expenses`: owner-only writes, partner-readable rows, category enum, currency enum
+- `daily_moods`: per-profile mood tracking with partner visibility
+- `memory_map_entries`: shared memories with location and optional photos
+- `movies`: shared movie list with `movie_status` enum, optional multi-category `text[]`, poster URL, rating, and reaction
+- `couple`: couple-level settings such as hero image, anniversary date, and exchange-rate cache
 
-Run `supabase/migrations/002_add_onesignal_subscription.sql` if your database was created before push notifications were added. It stores the OneSignal browser subscription ID for the signed-in profile.
+Recent movie migrations:
+
+```txt
+20260716_change_movie_category_to_array.sql
+20260716_make_movie_category_optional.sql
+20260716_change_movie_status_to_enum.sql
+```
+
+These convert movie categories to an optional `text[]` and convert movie status from free text to the `public.movie_status` enum.
 
 RLS rules enforce:
 
@@ -135,44 +164,82 @@ RLS rules enforce:
 - Users can create/update/delete only notes they authored.
 - Users can read both ledgers but insert/update/delete only their own expenses.
 - Expense currency must match the owner profile currency through a database trigger.
+- Paired users can read and manage shared couple movies and memories.
 
-Realtime is enabled for `notes` and `individual_expenses`, so the dashboard refreshes when either partner changes data.
+Realtime is enabled for the shared app data so the main app refreshes when either partner changes notes, expenses, moods, memories, or movies.
 
-## Tailwind and MUI Coexistence
+## UI System
 
 Tailwind handles layout primitives and project identity:
 
 - `container-page`
 - `eyebrow`
-- dashboard grids
+- app grids
 - hero image composition
 - note blur state via `blur-md`
 
-MUI handles interactive and form-heavy surfaces:
+Local UI primitives handle interactive and form-heavy surfaces:
 
-- `Dialog`
-- `TextField`
-- `Button`
-- `Card`
-- `Chip`
-- `DateTimePicker`
-- `ToggleButtonGroup`
+- `components/ui/button.tsx`
+- `components/ui/dialog.tsx`
+- `components/ui/native-controls.tsx`
+- `components/common/action-menu.tsx`
+- `components/common/confirm-dialog.tsx`
 
 `components/layout/app-providers.tsx` wraps the app in:
 
-- `StyledEngineProvider injectFirst`
-- MUI `ThemeProvider`
-- MUI `CssBaseline`
-- MUI X `LocalizationProvider`
 - local `ToastProvider`
+- theme provider
+- runtime error guard
+- performance logger in supported environments
 
-This keeps Tailwind utility classes predictable while still allowing MUI theme overrides.
+The app avoids a separate component-theme runtime and keeps most visual behavior in Tailwind utility classes and small local primitives.
 
 ## Feature Notes
+
+### Authentication
+
+Email/password auth uses Supabase Auth. The login screen supports:
+
+- sign in
+- sign up
+- forgot password email flow
+- reset password completion at `/reset-password`
+
+Forgot password calls `supabase.auth.resetPasswordForEmail()` with:
+
+```txt
+/auth/callback?next=/reset-password
+```
+
+`app/auth/callback/route.ts` exchanges the Supabase auth code for a session, validates `next` as an internal path, then redirects to the reset-password form.
 
 ### Time-Locked Notes
 
 When `unlock_at` is in the future, `NoteCard` shows metadata and a countdown while the note body is blurred with Tailwind `blur-md`. The card updates every second and automatically reveals content after the lock expires.
+
+### Movies
+
+The Movies tab supports:
+
+- wishlist, watching, and watched columns
+- movie details dialog
+- poster upload through Cloudinary
+- rating selection in 0.5 increments
+- optional reaction emoji
+- optional multi-category selection
+
+The database stores movie status as `public.movie_status`:
+
+```sql
+create type public.movie_status as enum ('wishlist', 'watching', 'watched');
+```
+
+Movie categories are stored as optional `text[]` values. The server action validates each category against `movieCategories` before writing to Supabase. When status is `wishlist`, rating and reaction are cleared and disabled in the form.
+
+### Memories
+
+The Memories tab stores map-based memory entries with title, description, type, location, visit date, creator, and optional photo. Cloudinary uploads for memories are stored separately from hero and movie uploads.
 
 ### Expenses
 
@@ -192,7 +259,17 @@ The expense dialog disables currency editing and submits the current profile cur
 - category distribution
 - total spending in each profile's local currency
 
-The dashboard intentionally does not convert currencies, because the product requirement is to preserve localized ledgers.
+The app intentionally does not convert currencies in personal ledgers by default, because the product requirement is to preserve localized spending views.
+
+### PWA and iOS Splash Screens
+
+`app/layout.tsx` declares:
+
+- `/manifest.webmanifest`
+- Apple mobile web app meta tags
+- `apple-touch-startup-image` links for iPhone and iPad portrait/landscape splash screens
+
+iOS splash images only appear when the app is launched from a Home Screen installed PWA, not from a normal Safari tab. After changing splash images or startup metadata, remove the Home Screen app and add it again because iOS aggressively caches these assets.
 
 ## Production Notes
 
@@ -243,7 +320,7 @@ https://dailymoments.vercel.app/OneSignalSDKUpdaterWorker.js
 
 ### Frontend Flow
 
-`components/notifications/onesignal-bootstrap.tsx` initializes the OneSignal Web SDK on every page so OneSignal can verify the installation. The root layout also enables OneSignal's floating notify button, which is useful for creating the first subscription during OneSignal setup. The dashboard still renders an `Enable notifications` button, because iOS requires a direct user gesture before the native notification permission prompt can appear.
+The notification permission control initializes the OneSignal Web SDK when the user asks to enable notifications. iOS requires a direct user gesture before the native notification permission prompt can appear.
 
 When the user taps the button:
 
@@ -253,7 +330,7 @@ When the user taps the button:
 4. The current browser subscription is linked to the profile id as OneSignal's `external_id`.
 5. Every enabled device for the same profile id can receive the same notification.
 
-The mobile notification option lives in the avatar menu. The desktop/tablet notification button lives in the dashboard toolbar. Turning notifications off calls OneSignal `optOut()` for the current browser/device only.
+The mobile notification option lives in the avatar menu. Desktop/tablet surfaces expose the same notification action in app controls. Turning notifications off calls OneSignal `optOut()` for the current browser/device only.
 
 ### Edge Function Deploy
 

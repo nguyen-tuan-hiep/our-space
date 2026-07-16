@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { v2 as cloudinary } from "cloudinary";
 import { createClient } from "@/lib/supabase/server";
@@ -260,6 +261,22 @@ export async function signUpWithPassword(formData: FormData) {
 
   revalidatePath("/");
   return ok("Account created. Please sign in to continue.");
+}
+
+export async function requestPasswordReset(formData: FormData) {
+  const supabase = await createClient();
+  const email = stringValue(formData, "email").toLowerCase();
+  const origin = (await headers()).get("origin");
+
+  if (!email) return fail("Please enter your email.");
+  if (!origin) return fail("Could not determine reset link origin.");
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?next=/reset-password`,
+  });
+
+  if (error) return fail(error.message);
+  return ok("Password reset email sent. Please check your inbox.");
 }
 
 export async function signOut() {
