@@ -14,7 +14,11 @@ import {
 	NativeTextarea,
 } from "@/components/ui/native-controls";
 import { movieCategories, movieStatuses } from "@/lib/constants";
-import type { Movie } from "@/lib/types";
+import type { Movie, MovieStatus } from "@/lib/types";
+
+const ratingOptions = Array.from({ length: 19 }, (_, index) =>
+	String(1 + index * 0.5),
+);
 
 interface MovieDialogProps {
 	open: boolean;
@@ -31,6 +35,14 @@ function getStatusLabel(status: Movie["status"]) {
 			: "Watched";
 }
 
+function getMovieCategories(movie: Movie | null | undefined) {
+	if (!movie?.category) return [];
+	const category = movie.category as Movie["category"] | string;
+	return (Array.isArray(category) ? category : [category]).filter(
+		(category): category is string => Boolean(category),
+	);
+}
+
 export function MovieDialog({
 	open,
 	movie,
@@ -41,12 +53,18 @@ export function MovieDialog({
 	const [pending, startTransition] = useTransition();
 	const [uploading, setUploading] = useState(false);
 	const [posterUrl, setPosterUrl] = useState("");
+	const [status, setStatus] = useState<MovieStatus>("wishlist");
+	const [rating, setRating] = useState("");
+	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [reaction, setReaction] = useState("");
 	const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
 
 	useEffect(() => {
 		if (!open) return;
 		setPosterUrl(movie?.poster_url ?? "");
+		setStatus(movie?.status ?? "wishlist");
+		setRating(movie?.rating ? String(movie.rating) : "");
+		setSelectedCategories(getMovieCategories(movie));
 		setReaction(movie?.reaction ?? "");
 		setReactionPickerOpen(false);
 	}, [movie, open]);
@@ -56,6 +74,15 @@ export function MovieDialog({
 			document.activeElement.blur();
 		}
 		onClose();
+	};
+
+	const toggleCategory = (category: string) => {
+		setSelectedCategories((current) => {
+			if (current.includes(category)) {
+				return current.filter((item) => item !== category);
+			}
+			return [...current, category];
+		});
 	};
 
 	async function uploadPoster(file: File) {
@@ -91,7 +118,13 @@ export function MovieDialog({
 			<form
 				action={(formData) => {
 					formData.set("poster_url", posterUrl);
-					formData.set("reaction", reaction);
+					formData.set("status", status);
+					formData.set("reaction", status === "wishlist" ? "" : reaction);
+					formData.set("rating", status === "wishlist" ? "" : rating);
+					formData.delete("category");
+					selectedCategories.forEach((category) => {
+						formData.append("category", category);
+					});
 					if (movie) formData.set("id", movie.id);
 
 					startTransition(async () => {
@@ -116,12 +149,21 @@ export function MovieDialog({
 						defaultValue={movie?.title ?? ""}
 					/>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_20.75rem]">
 						<NativeSelect
 							required
 							name="status"
 							label="Status"
-							defaultValue={movie?.status ?? "wishlist"}
+							value={status}
+							onChange={(event) => {
+								const nextStatus = event.target.value as MovieStatus;
+								setStatus(nextStatus);
+								if (nextStatus === "wishlist") {
+									setRating("");
+									setReaction("");
+									setReactionPickerOpen(false);
+								}
+							}}
 						>
 							{movieStatuses.map((status) => (
 								<option
@@ -133,60 +175,104 @@ export function MovieDialog({
 							))}
 						</NativeSelect>
 
-						<NativeSelect
-							required
-							name="category"
-							label="Category"
-							defaultValue={movie?.category ?? movieCategories[0]}
-						>
-							{movieCategories.map((category) => (
-								<option
-									key={category}
-									value={category}
-								>
-									{category}
-								</option>
-							))}
-						</NativeSelect>
-					</div>
-
-					<div className="grid grid-cols-2 gap-3 sm:grid-cols-[10rem_10rem]">
-						<NativeInput
-							type="number"
-							name="rating"
-							label="Rating"
-							min="1"
-							max="10"
-							step="0.5"
-							defaultValue={movie?.rating ?? ""}
-						/>
-						<div className="relative">
-							<input
-								type="hidden"
-								name="reaction"
-								value={reaction}
-							/>
+						<div className="grid grid-cols-2 gap-3">
+							<NativeSelect
+								name="rating"
+								label="Rating"
+								value={rating}
+								disabled={status === "wishlist"}
+								className={
+									status === "wishlist" ? "cursor-not-allowed opacity-50" : ""
+								}
+								onChange={(event) => setRating(event.target.value)}
+							>
+								<option value="">No rating</option>
+								{ratingOptions.map((option) => (
+									<option
+										key={option}
+										value={option}
+									>
+										{option}
+									</option>
+								))}
+							</NativeSelect>
 							<div className="relative">
-								<button
-									type="button"
-									aria-label="Choose reaction emoji"
-									aria-expanded={reactionPickerOpen ? "true" : undefined}
-									className="peer flex h-12 w-full items-center justify-between rounded-2xl border border-neutral-400 bg-transparent px-3 text-left text-sm text-neutral-900 outline-none transition-all duration-200 sm:h-11"
-									onClick={() => setReactionPickerOpen((open) => !open)}
-								>
-									<span className="text-2xl leading-none">
-										{reaction || "🙂"}
-									</span>
-									<SmilePlus
-										size={17}
-										className="text-neutral-500"
-									/>
-								</button>
-								<label className="pointer-events-none absolute left-3 top-3 origin-[top_left] -translate-y-5 scale-75 bg-paper px-1 text-sm text-neutral-500 transition-all duration-200">
-									Reaction
-								</label>
+								<input
+									type="hidden"
+									name="reaction"
+									value={status === "wishlist" ? "" : reaction}
+								/>
+								<div className="relative">
+									<button
+										type="button"
+										aria-label="Choose reaction emoji"
+										aria-expanded={reactionPickerOpen ? "true" : undefined}
+										disabled={status === "wishlist"}
+										className={`peer flex h-12 w-full items-center justify-between rounded-2xl border border-neutral-400 bg-transparent px-3 text-left text-sm text-neutral-900 outline-none transition-all duration-200 sm:h-11 ${
+											status === "wishlist"
+												? "cursor-not-allowed opacity-50"
+												: ""
+										}`}
+										onClick={() => setReactionPickerOpen((open) => !open)}
+									>
+										<span className="text-2xl leading-none">
+											{reaction || "🙂"}
+										</span>
+										<SmilePlus
+											size={17}
+											className="text-neutral-500"
+										/>
+									</button>
+									<label className="pointer-events-none absolute left-3 top-3 origin-[top_left] -translate-y-5 scale-75 bg-paper px-1 text-sm text-neutral-500 transition-all duration-200">
+										Reaction
+									</label>
+								</div>
 							</div>
 						</div>
+					</div>
+
+					<div className="rounded-2xl border border-neutral-400 px-3 py-3">
+						<div className="mb-2 flex items-center justify-between gap-3">
+							<div className="text-xs font-semibold text-neutral-500">
+								Categories
+							</div>
+							<button
+								type="button"
+								className="text-[11px] font-semibold text-neutral-500 transition hover:text-neutral-950 disabled:pointer-events-none disabled:text-neutral-300"
+								disabled={selectedCategories.length === 0}
+								onClick={() => setSelectedCategories([])}
+							>
+								Clear
+							</button>
+						</div>
+						<div className="flex flex-wrap gap-1.5">
+							{movieCategories.map((category) => {
+								const selected = selectedCategories.includes(category);
+								return (
+									<button
+										key={category}
+										type="button"
+										aria-pressed={selected}
+										className={`rounded-full border px-2.5 py-1 text-xs font-bold transition ${
+											selected
+												? "border-neutral-950 bg-neutral-950 text-white"
+												: "border-neutral-300 bg-transparent text-neutral-600 hover:border-neutral-500"
+										}`}
+										onClick={() => toggleCategory(category)}
+									>
+										{category}
+									</button>
+								);
+							})}
+						</div>
+						{selectedCategories.map((category) => (
+							<input
+								key={category}
+								type="hidden"
+								name="category"
+								value={category}
+							/>
+						))}
 					</div>
 
 					<NativeInput

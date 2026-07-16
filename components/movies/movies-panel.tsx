@@ -54,7 +54,7 @@ function getNextStatus(movie: Movie) {
 	if (movie.status === "wishlist") {
 		return {
 			status: "watching" as const,
-			label: "Mark watching",
+			label: "Mark as watching",
 			icon: Play,
 		};
 	}
@@ -62,12 +62,20 @@ function getNextStatus(movie: Movie) {
 	if (movie.status === "watching") {
 		return {
 			status: "watched" as const,
-			label: "Mark watched",
+			label: "Mark as watched",
 			icon: Check,
 		};
 	}
 
 	return null;
+}
+
+function getMovieCategories(movie: Movie) {
+	if (!movie.category) return [];
+	const category = movie.category as Movie["category"] | string;
+	return (Array.isArray(category) ? category : [category]).filter(
+		(category): category is string => Boolean(category),
+	);
 }
 
 function MovieCard({
@@ -147,6 +155,7 @@ function MovieDetailsDialog({
 
 	const nextStatus = getNextStatus(movie);
 	const NextIcon = nextStatus?.icon;
+	const categories = getMovieCategories(movie);
 
 	return (
 		<>
@@ -222,9 +231,14 @@ function MovieDetailsDialog({
 
 						<div className="grid gap-2">
 							<div className="flex flex-wrap items-center gap-2">
-								<span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600">
-									{movie.category}
-								</span>
+								{categories.map((category) => (
+									<span
+										key={category}
+										className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600"
+									>
+										{category}
+									</span>
+								))}
 								<span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600">
 									{movie.status === "wishlist"
 										? "Wishlist"
@@ -339,9 +353,7 @@ export function MoviesPanel({
 			});
 			if (result.ok) {
 				onMovieSaved(result.movie);
-				setDetailMovie((current) =>
-					current?.id === result.movie.id ? result.movie : current,
-				);
+				closeMovieDetails();
 			}
 			setBusyId(null);
 		});

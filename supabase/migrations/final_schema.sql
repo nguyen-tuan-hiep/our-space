@@ -34,6 +34,12 @@ create type public.memory_type as enum (
   '📍 Others'
 );
 
+create type public.movie_status as enum (
+  'wishlist',
+  'watching',
+  'watched'
+);
+
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
@@ -121,8 +127,8 @@ create table public.movies (
   title text not null,
   rating numeric(3, 1),
   poster_url text,
-  category text not null,
-  status text not null default 'wishlist',
+  category text[],
+  status public.movie_status not null default 'wishlist',
   comment text,
   reaction text,
   created_by uuid not null references public.profiles(id) on delete cascade,
@@ -130,8 +136,32 @@ create table public.movies (
   updated_at timestamptz not null default now(),
   constraint movies_title_length_check check (char_length(title) between 1 and 160),
   constraint movies_rating_check check (rating is null or (rating >= 1 and rating <= 10 and rating * 2 = floor(rating * 2))),
-  constraint movies_category_length_check check (char_length(category) between 1 and 80),
-  constraint movies_status_check check (status in ('wishlist', 'watching', 'watched')),
+  constraint movies_category_values_check check (
+    category is null
+    or category <@ array[
+      'Action',
+      'Comedy',
+      'Drama',
+      'Horror',
+      'Romance',
+      'Sci-Fi',
+      'Thriller',
+      'Documentary',
+      'Animation',
+      'Adventure',
+      'Fantasy',
+      'Mystery',
+      'Crime',
+      'Family',
+      'Musical',
+      'War',
+      'Western',
+      'Biography',
+      'History',
+      'Sport',
+      'Short Film'
+    ]::text[]
+  ),
   constraint movies_comment_length_check check (comment is null or char_length(comment) <= 1000),
   constraint movies_reaction_length_check check (reaction is null or char_length(reaction) <= 32)
 );

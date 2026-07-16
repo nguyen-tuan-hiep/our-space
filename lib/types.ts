@@ -170,7 +170,7 @@ export interface Movie {
   poster_url: string | null;
   reaction: string | null;
   status: MovieStatus;
-  category: MovieCategory;
+  category: MovieCategory[] | null;
   created_by: string;
   created_at: string;
   updated_at: string;

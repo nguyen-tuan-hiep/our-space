@@ -60,7 +60,7 @@ type MoviePayload = {
   title: string;
   rating: number | null;
   poster_url: string | null;
-  category: MovieCategory;
+  category: MovieCategory[] | null;
   status: MovieStatus;
   comment: string | null;
   reaction: string | null;
@@ -95,6 +95,14 @@ function stringValue(formData: FormData, key: string) {
 function nullableStringValue(formData: FormData, key: string) {
   const value = stringValue(formData, key);
   return value.length ? value : null;
+}
+
+function stringValues(formData: FormData, key: string) {
+  return formData
+    .getAll(key)
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .filter(Boolean);
 }
 
 function numberValue(formData: FormData, key: string) {
@@ -184,7 +192,9 @@ function getMoviePayload(
   const title = stringValue(formData, "title");
   const ratingValue = stringValue(formData, "rating");
   const rating = ratingValue ? Number(ratingValue) : null;
-  const category = stringValue(formData, "category") as MovieCategory;
+  const categories = Array.from(
+    new Set(stringValues(formData, "category")),
+  ) as MovieCategory[];
   const status = stringValue(formData, "status") as MovieStatus;
   const reaction = nullableStringValue(formData, "reaction");
 
@@ -199,8 +209,8 @@ function getMoviePayload(
   ) {
     return fail("Rating must be from 1 to 10 in 0.5 steps.");
   }
-  if (!movieCategories.includes(category)) {
-    return fail("Please choose a valid movie category.");
+  if (categories.some((category) => !movieCategories.includes(category))) {
+    return fail("Please choose valid movie categories.");
   }
   if (!movieStatuses.includes(status)) {
     return fail("Please choose a valid movie status.");
@@ -215,7 +225,7 @@ function getMoviePayload(
       title,
       rating,
       poster_url: nullableStringValue(formData, "poster_url"),
-      category,
+      category: categories.length ? categories : null,
       status,
       comment: nullableStringValue(formData, "comment"),
       reaction,
