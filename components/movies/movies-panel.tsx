@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Check, Clapperboard, Play, Edit2, Plus, Star, X } from "lucide-react";
 
 // --- Import Swiper React components, Modules và Styles ---
@@ -16,6 +16,7 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { useToast } from "@/components/feedback/toast";
 import { MoviesPanelSkeleton } from "@/components/movies/movies-panel-skeleton";
 import { Button } from "@/components/ui/button";
+import { NativeDialog } from "@/components/ui/native-controls";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Movie, MovieStatus } from "@/lib/types";
 
@@ -127,30 +128,17 @@ function MovieCard({
 
 function MovieDetailsDialog({
 	movie,
-	closing,
 	busy,
 	onClose,
 	onEdit,
 	onMoveStatus,
 }: {
 	movie: Movie | null;
-	closing: boolean;
 	busy: boolean;
 	onClose: () => void;
 	onEdit: (movie: Movie) => void;
 	onMoveStatus: (movie: Movie, status: MovieStatus) => void;
 }) {
-	useEffect(() => {
-		if (!movie) return;
-
-		const originalOverflow = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
-
-		return () => {
-			document.body.style.overflow = originalOverflow;
-		};
-	}, [movie]);
-
 	if (!movie) return null;
 
 	const nextStatus = getNextStatus(movie);
@@ -158,148 +146,137 @@ function MovieDetailsDialog({
 	const categories = getMovieCategories(movie);
 
 	return (
-		<>
+		<NativeDialog
+			open={Boolean(movie)}
+			onClose={onClose}
+			title={movie.title}
+			maxWidth="md"
+			showHandle={false}
+			showTitle={false}
+			contentClassName="!p-0"
+		>
 			<button
 				type="button"
 				aria-label="Close movie details"
-				className={[
-					"fixed inset-0 z-[70] bg-black/20 backdrop-blur-sm",
-					closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
-				].join(" ")}
+				className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-full bg-paper/90 text-neutral-700 shadow-[0_8px_22px_rgba(23,23,23,0.16)] backdrop-blur hover:bg-neutral-950 hover:text-white"
 				onClick={onClose}
-			/>
-			<div
-				role="dialog"
-				aria-modal="true"
-				aria-label={movie.title}
-				className={[
-					"movie-details-dialog fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] grid max-h-[calc(100svh-env(safe-area-inset-bottom)-1.5rem)] overflow-hidden rounded-3xl border border-neutral-900/10 bg-paper shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[min(42rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2",
-					closing ? "native-sheet-out" : "native-sheet-in",
-				].join(" ")}
 			>
-				<button
-					type="button"
-					aria-label="Close movie details"
-					className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-full bg-paper/90 text-neutral-700 shadow-[0_8px_22px_rgba(23,23,23,0.16)] backdrop-blur hover:bg-neutral-950 hover:text-white"
-					onClick={onClose}
-				>
-					<X size={18} />
-				</button>
+				<X size={18} />
+			</button>
 
-				<div className="grid min-h-0 overflow-y-auto sm:grid-cols-[15rem_1fr]">
-					<div className="relative overflow-visible bg-neutral-950 px-4 pb-0 pt-5 sm:overflow-hidden sm:bg-neutral-100 sm:p-0">
-						{movie.poster_url ? (
-							<>
-								<div className="absolute inset-0 overflow-hidden sm:hidden">
-									<Image
-										src={movie.poster_url}
-										alt=""
-										fill
-										sizes="100vw"
-										className="scale-110 object-cover opacity-90 blur-md"
-										aria-hidden="true"
-									/>
-									<div className="absolute inset-0 bg-black/20" />
-								</div>
-							</>
-						) : null}
-						<div className="relative z-[1] mx-auto -mb-14 aspect-[2/3] w-[min(70vw,15rem)] overflow-hidden rounded-2xl bg-neutral-100 shadow-[0_16px_40px_rgba(0,0,0,0.28)] sm:mb-0 sm:h-full sm:w-full sm:rounded-none sm:shadow-none">
-							{movie.poster_url ? (
+			<div className="grid min-h-0 sm:grid-cols-[15rem_1fr]">
+				<div className="relative overflow-visible bg-neutral-950 px-4 pb-0 pt-5 sm:overflow-hidden sm:bg-neutral-100 sm:p-0">
+					{movie.poster_url ? (
+						<>
+							<div className="absolute inset-0 overflow-hidden sm:hidden">
 								<Image
 									src={movie.poster_url}
-									alt={`${movie.title} poster`}
+									alt=""
 									fill
-									sizes="(min-width: 640px) 15rem, 100vw"
-									className="object-cover"
+									sizes="100vw"
+									className="scale-110 object-cover opacity-90 blur-md"
+									aria-hidden="true"
 								/>
-							) : (
-								<div className="grid h-full place-items-center bg-neutral-950 text-neutral-50">
-									<Clapperboard size={52} />
-								</div>
-							)}
+								<div className="absolute inset-0 bg-black/20" />
+							</div>
+						</>
+					) : null}
+					<div className="relative z-[1] mx-auto -mb-14 aspect-[2/3] w-[min(70vw,15rem)] overflow-hidden rounded-2xl bg-neutral-100 shadow-[0_16px_40px_rgba(0,0,0,0.28)] sm:mb-0 sm:h-full sm:w-full sm:rounded-none sm:shadow-none">
+						{movie.poster_url ? (
+							<Image
+								src={movie.poster_url}
+								alt={`${movie.title} poster`}
+								fill
+								sizes="(min-width: 640px) 15rem, 100vw"
+								className="object-cover"
+							/>
+						) : (
+							<div className="grid h-full place-items-center bg-neutral-950 text-neutral-50">
+								<Clapperboard size={52} />
+							</div>
+						)}
+					</div>
+				</div>
+
+				<div className="flex min-h-0 flex-col gap-4 p-5 pt-24 sm:p-6">
+					<div>
+						<div>
+							<h2 className="font-serif text-3xl leading-tight text-neutral-950">
+								{movie.title}
+							</h2>
 						</div>
 					</div>
 
-					<div className="flex min-h-0 flex-col gap-4 p-5 pt-24 sm:p-6">
-						<div>
-							<div>
-								<h2 className="font-serif text-3xl leading-tight text-neutral-950">
-									{movie.title}
-								</h2>
-							</div>
-						</div>
-
-						<div className="grid gap-2">
-							<div className="flex flex-wrap items-center gap-2">
-								{categories.map((category) => (
-									<span
-										key={category}
-										className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600"
-									>
-										{category}
-									</span>
-								))}
-								<span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600">
-									{movie.status === "wishlist"
-										? "Wishlist"
-										: movie.status === "watching"
-											? "Watching"
-											: "Watched"}
+					<div className="grid gap-2">
+						<div className="flex flex-wrap items-center gap-2">
+							{categories.map((category) => (
+								<span
+									key={category}
+									className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600"
+								>
+									{category}
 								</span>
-							</div>
-							<div className="flex flex-wrap items-center gap-2">
-								{movie.rating ? (
-									<span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-800">
-										<Star
-											size={15}
-											fill="currentColor"
-											/>
-										{movie.rating.toFixed(1)}
-									</span>
-								) : null}
-								{movie.reaction ? (
-									<span className="text-2xl leading-none">{movie.reaction}</span>
-								) : null}
-							</div>
+							))}
+							<span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600">
+								{movie.status === "wishlist"
+									? "Wishlist"
+									: movie.status === "watching"
+										? "Watching"
+										: "Watched"}
+							</span>
 						</div>
+						<div className="flex flex-wrap items-center gap-2">
+							{movie.rating ? (
+								<span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-800">
+									<Star
+										size={15}
+										fill="currentColor"
+									/>
+									{movie.rating.toFixed(1)}
+								</span>
+							) : null}
+							{movie.reaction ? (
+								<span className="text-2xl leading-none">{movie.reaction}</span>
+							) : null}
+						</div>
+					</div>
 
-						{movie.comment ? (
-							<p className="text-sm leading-7 text-neutral-600">
-								{movie.comment}
-							</p>
-						) : (
-							<p className="text-sm leading-7 text-neutral-500">
-								No comment yet.
-							</p>
-						)}
+					{movie.comment ? (
+						<p className="text-sm leading-7 text-neutral-600">
+							{movie.comment}
+						</p>
+					) : (
+						<p className="text-sm leading-7 text-neutral-500">
+							No comment yet.
+						</p>
+					)}
 
-						<div className="mt-auto flex flex-col gap-2 pt-2">
+					<div className="mt-auto flex flex-col gap-2 pt-2">
+						<Button
+							type="button"
+							variant="outline"
+							className="h-11 w-full rounded-2xl"
+							onClick={() => onEdit(movie)}
+						>
+							<Edit2 size={16} />
+							Edit
+						</Button>
+						{nextStatus ? (
 							<Button
 								type="button"
 								variant="outline"
 								className="h-11 w-full rounded-2xl"
-								onClick={() => onEdit(movie)}
+								disabled={busy}
+								onClick={() => onMoveStatus(movie, nextStatus.status)}
 							>
-								<Edit2 size={16} />
-								Edit
+								{NextIcon ? <NextIcon size={16} /> : null}
+								{busy ? "Updating..." : nextStatus.label}
 							</Button>
-							{nextStatus ? (
-								<Button
-									type="button"
-									variant="outline"
-									className="h-11 w-full rounded-2xl"
-									disabled={busy}
-									onClick={() => onMoveStatus(movie, nextStatus.status)}
-								>
-									{NextIcon ? <NextIcon size={16} /> : null}
-									{busy ? "Updating..." : nextStatus.label}
-								</Button>
-							) : null}
-						</div>
+						) : null}
 					</div>
 				</div>
 			</div>
-		</>
+		</NativeDialog>
 	);
 }
 
@@ -314,7 +291,6 @@ export function MoviesPanel({
 	const toast = useToast();
 	const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 	const [detailMovie, setDetailMovie] = useState<Movie | null>(null);
-	const [detailClosing, setDetailClosing] = useState(false);
 	const [busyId, setBusyId] = useState<string | null>(null);
 	const [pending, startTransition] = useTransition();
 	const moviesByStatus = useMemo(
@@ -360,16 +336,11 @@ export function MoviesPanel({
 	};
 
 	const openMovieDetails = (movie: Movie) => {
-		setDetailClosing(false);
 		setDetailMovie(movie);
 	};
 
 	const closeMovieDetails = () => {
-		setDetailClosing(true);
-		window.setTimeout(() => {
-			setDetailMovie(null);
-			setDetailClosing(false);
-		}, 260);
+		setDetailMovie(null);
 	};
 
 	if (loading && movies.length === 0) {
@@ -513,7 +484,6 @@ export function MoviesPanel({
 			/>
 			<MovieDetailsDialog
 				movie={detailMovie}
-				closing={detailClosing}
 				busy={pending && busyId === detailMovie?.id}
 				onClose={closeMovieDetails}
 				onEdit={(movie) => {

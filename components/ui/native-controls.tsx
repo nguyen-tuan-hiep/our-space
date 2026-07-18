@@ -288,6 +288,9 @@ export function NativeDialog({
 	title,
 	children,
 	actions,
+	showHandle = true,
+	showTitle = true,
+	contentClassName,
 	maxWidth = "sm",
 }: {
 	open: boolean;
@@ -295,6 +298,9 @@ export function NativeDialog({
 	title: ReactNode;
 	children: ReactNode;
 	actions?: ReactNode;
+	showHandle?: boolean;
+	showTitle?: boolean;
+	contentClassName?: string;
 	maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
 }) {
 	const canUsePortal = typeof document !== "undefined";
@@ -355,13 +361,22 @@ export function NativeDialog({
 					maxWidth === "xl" && "sm:w-[min(92vw,64rem)] sm:max-w-none",
 				)}
 			>
-				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-neutral-300 sm:hidden" />
-				<div className="px-5 pt-4 sm:px-6 sm:pt-6">
-					<div className="font-serif text-2xl leading-tight text-neutral-900 sm:text-3xl">
-						{title}
+				{showHandle ? (
+					<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-neutral-300 sm:hidden" />
+				) : null}
+				{showTitle ? (
+					<div className="px-5 pt-4 sm:px-6 sm:pt-6">
+						<div className="font-serif text-2xl leading-tight text-neutral-900 sm:text-3xl">
+							{title}
+						</div>
 					</div>
-				</div>
-				<div className="min-h-0 overflow-y-auto px-5 py-5 overscroll-contain sm:px-6">
+				) : null}
+				<div
+					className={cx(
+						"min-h-0 overflow-y-auto p-5 overscroll-contain sm:p-6",
+						contentClassName,
+					)}
+				>
 					{children}
 				</div>
 				{actions ? (
