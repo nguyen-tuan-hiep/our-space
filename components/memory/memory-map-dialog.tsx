@@ -138,7 +138,7 @@ export function MemoryMapDialog({
 		<NativeDialog
 			open={open}
 			onClose={handleClose}
-			maxWidth="md"
+			maxWidth="sm"
 			title={memory ? "Edit memory" : "Add memory to map"}
 		>
 			<form
@@ -170,13 +170,16 @@ export function MemoryMapDialog({
 				}}
 			>
 				<div className="grid gap-4">
-					<div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
+					<div className="grid gap-3">
 						<NativeInput
 							required
 							name="title"
 							label="Memory title"
 							defaultValue={memory?.title ?? ""}
 						/>
+					</div>
+
+					<div className="grid grid-cols-2 gap-3">
 						<NativeSelect
 							required
 							name="memory_type"
@@ -192,27 +195,6 @@ export function MemoryMapDialog({
 								</option>
 							))}
 						</NativeSelect>
-					</div>
-
-					<div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
-						<div className="rounded-2xl border border-neutral-200 bg-mui/10 px-4 py-3 text-sm font-semibold text-neutral-700">
-							{latitude && longitude
-								? "Current location added."
-								: "Use your current location to place this memory on the map."}
-						</div>
-						<NativeButton
-							type="button"
-							variant="outlined"
-							className="sm:mt-0"
-							disabled={locating}
-							onClick={useCurrentLocation}
-						>
-							<LocateFixed size={17} />
-							{locating ? "Locating..." : "Current"}
-						</NativeButton>
-					</div>
-
-					<div className="grid gap-3 sm:grid-cols-3">
 						<NativeInput
 							required
 							type="date"
@@ -224,6 +206,24 @@ export function MemoryMapDialog({
 						/>
 					</div>
 
+					<div className="grid gap-3">
+						{/* <div className="rounded-2xl border border-neutral-200 bg-mui/10 px-4 py-3 text-sm font-semibold leading-5 text-neutral-700">
+							{latitude && longitude
+								? "Current location added."
+								: "Use your current location to place this memory on the map."}
+						</div> */}
+						<NativeButton
+							type="button"
+							variant="outlined"
+							className="w-full"
+							disabled={locating}
+							onClick={useCurrentLocation}
+						>
+							<LocateFixed size={17} />
+							{locating ? "Locating..." : "Use current location"}
+						</NativeButton>
+					</div>
+
 					<NativeTextarea
 						rows={5}
 						name="description"
@@ -232,7 +232,7 @@ export function MemoryMapDialog({
 					/>
 
 					{photoUrl ? (
-						<div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100">
+						<div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 aspect-[16/10]">
 							<Image
 								src={photoUrl}
 								alt="Memory upload preview"
@@ -242,7 +242,7 @@ export function MemoryMapDialog({
 						</div>
 					) : null}
 
-					<div className="grid gap-3 sm:flex sm:items-center">
+					<div className={photoUrl ? "grid grid-cols-2 gap-3" : "grid gap-3"}>
 						<label
 							className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 sm:min-h-11 ${
 								uploading ? "pointer-events-none opacity-50" : ""
@@ -268,7 +268,7 @@ export function MemoryMapDialog({
 						{photoUrl ? (
 							<NativeButton
 								type="button"
-								variant="text"
+								variant="outlined"
 								onClick={() => {
 									setPhotoUrl("");
 									setPhotoPublicId("");
@@ -280,16 +280,18 @@ export function MemoryMapDialog({
 					</div>
 				</div>
 
-				<div className="mt-6 flex justify-end gap-3">
+				<div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:justify-end">
 					<NativeButton
 						type="button"
 						variant="text"
+						className="w-full sm:w-auto"
 						onClick={handleClose}
 					>
 						Cancel
 					</NativeButton>
 					<NativeButton
 						type="submit"
+						className="w-full sm:w-auto"
 						disabled={pending || uploading}
 					>
 						{pending ? "Saving..." : "Save memory"}

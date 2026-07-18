@@ -104,12 +104,15 @@ export function NativeTextarea({
 	error,
 	className,
 	rows = 8,
+	style: inlineStyle,
 	...props
 }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
 	label: string;
 	helperText?: string;
 	error?: boolean;
 }) {
+	const textareaMinHeight = `${Math.max(rows, 3) * 1.5 + 1.5}rem`;
+
 	return (
 		<div className="w-full">
 			{/* Container chính cần relative */}
@@ -118,9 +121,13 @@ export function NativeTextarea({
 					{...props}
 					rows={rows}
 					placeholder=" "
+					style={{
+						minHeight: textareaMinHeight,
+						...inlineStyle,
+					}}
 					className={cx(
 						style,
-						"h-auto min-h-[120px] py-3",
+						"h-auto py-3",
 						error && "border-danger focus:border-danger focus:ring-danger",
 						className,
 					)}
@@ -288,7 +295,7 @@ export function NativeDialog({
 	title: ReactNode;
 	children: ReactNode;
 	actions?: ReactNode;
-	maxWidth?: "xs" | "sm" | "md";
+	maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
 }) {
 	const canUsePortal = typeof document !== "undefined";
 	const [shouldRender, setShouldRender] = useState(open);
@@ -341,9 +348,11 @@ export function NativeDialog({
 				className={cx(
 					"mobile-sheet-motion relative flex max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full origin-bottom flex-col overflow-hidden rounded-2xl bg-paper shadow-2xl will-change-transform sm:max-h-[calc(100svh-2rem)] sm:origin-center",
 					closing ? "native-sheet-out" : "native-sheet-in",
-					maxWidth === "xs" && "max-w-md",
-					maxWidth === "sm" && "max-w-xl",
-					maxWidth === "md" && "max-w-3xl",
+					maxWidth === "xs" && "sm:w-[min(92vw,28rem)] sm:max-w-none",
+					maxWidth === "sm" && "sm:w-[min(92vw,36rem)] sm:max-w-none",
+					maxWidth === "md" && "sm:w-[min(92vw,48rem)] sm:max-w-none",
+					maxWidth === "lg" && "sm:w-[min(92vw,56rem)] sm:max-w-none",
+					maxWidth === "xl" && "sm:w-[min(92vw,64rem)] sm:max-w-none",
 				)}
 			>
 				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-neutral-300 sm:hidden" />

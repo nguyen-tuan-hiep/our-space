@@ -60,68 +60,67 @@ export function HeroImageDialog({
 			onClose={handleClose}
 			maxWidth="sm"
 			title="Edit hero image"
-			actions={
-				<form
-					action={(formData) => {
-						formData.set("hero_image_url", heroUrl);
-						formData.set("hero_image_public_id", publicId);
-						startTransition(async () => {
-							const result = await updateHeroImage(formData);
-							toast(result.message, {
-								variant: result.ok ? "success" : "error",
-							});
-							if (result.ok) handleClose();
+		>
+			<form
+				action={(formData) => {
+					formData.set("hero_image_url", heroUrl);
+					formData.set("hero_image_public_id", publicId);
+					startTransition(async () => {
+						const result = await updateHeroImage(formData);
+						toast(result.message, {
+							variant: result.ok ? "success" : "error",
 						});
-					}}
-        >
+						if (result.ok) handleClose();
+					});
+				}}
+			>
+				<div className="grid gap-4">
+					<div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100">
+						<Image
+							src={heroUrl}
+							alt="Current hero"
+							fill
+							className="object-cover"
+						/>
+					</div>
+					<label
+						className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 sm:min-h-11 ${
+							uploading ? "pointer-events-none opacity-50" : ""
+						}`}
+					>
+						<ImageUp size={17} />
+						{uploading ? "Uploading..." : "Upload new hero image"}
+						<input
+							aria-label="Upload hero image file"
+							hidden
+							type="file"
+							accept="image/*"
+							onChange={(event) => {
+								const file = event.target.files?.[0];
+								if (file) void uploadHero(file);
+							}}
+						/>
+					</label>
+				</div>
 
-          {/* Cancel and Save button */}
-          <div className="flex justify-end gap-3">
+				<div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:justify-end">
 					<NativeButton
 						type="button"
 						variant="text"
+						className="w-full sm:w-auto"
 						onClick={handleClose}
 					>
 						Cancel
 					</NativeButton>
-						<NativeButton
-							type="submit"
-							disabled={pending || uploading}
-						>
-							{pending ? "Saving..." : "Save image"}
-						</NativeButton>
-            </div>
-				</form>
-			}
-		>
-			<div className="grid gap-5">
-				<div className="relative aspect-[16/9] overflow-hidden border border-neutral-200 bg-neutral-100">
-					<Image
-						src={heroUrl}
-						alt="Current hero"
-						fill
-						className="object-cover"
-					/>
+					<NativeButton
+						type="submit"
+						className="w-full sm:w-auto"
+						disabled={pending || uploading}
+					>
+						{pending ? "Saving..." : "Save image"}
+					</NativeButton>
 				</div>
-				<label
-					className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 sm:min-h-11 ${
-						uploading ? "pointer-events-none opacity-50" : ""
-					}`}
-				>
-					<ImageUp size={17} />
-					{uploading ? "Uploading..." : "Upload new hero image"}
-					<input
-						aria-label="Upload hero image file"
-						hidden
-						type="file"
-						accept="image/*"
-						onChange={(event) => {
-							const file = event.target.files?.[0];
-							if (file) void uploadHero(file);
-						}}
-					/>
-				</label>
-			</div>
+			</form>
 		</NativeDialog>
 	);
 }

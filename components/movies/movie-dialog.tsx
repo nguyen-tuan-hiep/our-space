@@ -112,7 +112,7 @@ export function MovieDialog({
 		<NativeDialog
 			open={open}
 			onClose={handleClose}
-			maxWidth="md"
+			maxWidth="sm"
 			title={movie ? "Edit movie" : "Add movie"}
 		>
 			<form

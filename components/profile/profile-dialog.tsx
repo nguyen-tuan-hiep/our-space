@@ -56,40 +56,22 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 		<NativeDialog
 			open={open}
 			onClose={handleClose}
-			maxWidth="sm"
+			maxWidth="xs"
 			title="Edit profile"
-			actions={
-				<>
-					<NativeButton type="button" variant="text" onClick={handleClose}>
-						Cancel
-					</NativeButton>
-					<NativeButton
-						type="submit"
-						form={tab === "profile" ? "profile-form" : "password-form"}
-						disabled={pending}
-					>
-						{pending
-							? "Saving..."
-							: tab === "profile"
-								? "Save profile"
-								: "Change password"}
-					</NativeButton>
-				</>
-			}
 		>
+			<div className="grid gap-5">
 				<NativeTabs
 					value={tab}
 					onChange={setTab}
-						options={[
-							{ value: "profile", label: "Profile" },
-							{ value: "password", label: "Password" },
-						]}
-							className="mb-5 rounded-full border-0 bg-mui/10 p-1 sm:rounded-none sm:border-b sm:border-neutral-200 sm:bg-transparent sm:p-0 [&>button]:relative [&>button]:flex-1 [&>button]:rounded-full [&>button]:border-b-0 [&>button]:px-4 [&>button]:text-center [&>button]:text-neutral-900 [&>button]:hover:text-mui [&>button]:sm:rounded-none [&>button[aria-selected='true']]:bg-paper [&>button[aria-selected='true']]:text-mui [&>button[aria-selected='true']]:shadow-sm [&>button[aria-selected='true']]:sm:bg-transparent [&>button[aria-selected='true']]:sm:shadow-none"
+					options={[
+						{ value: "profile", label: "Profile" },
+						{ value: "password", label: "Password" },
+					]}
+					className="rounded-full border-0 bg-mui/10 p-1 sm:rounded-none sm:border-b sm:border-neutral-200 sm:bg-transparent sm:p-0 [&>button]:relative [&>button]:flex-1 [&>button]:rounded-full [&>button]:border-b-0 [&>button]:px-4 [&>button]:text-center [&>button]:text-neutral-900 [&>button]:hover:text-mui [&>button]:sm:rounded-none [&>button[aria-selected='true']]:bg-paper [&>button[aria-selected='true']]:text-mui [&>button[aria-selected='true']]:shadow-sm [&>button[aria-selected='true']]:sm:bg-transparent [&>button[aria-selected='true']]:sm:shadow-none"
 				/>
 
 				{tab === "profile" ? (
 					<form
-						id="profile-form"
 						className="grid gap-4"
 						action={(formData) => {
 							formData.set("avatar", avatar);
@@ -104,10 +86,10 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 								}
 							});
 						}}
-					>
-						<NativeInput
-							required
-							name="display_name"
+						>
+							<NativeInput
+								required
+								name="display_name"
 							label="Display name"
 							defaultValue={profile.display_name}
 						/>
@@ -154,8 +136,8 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 											{timeZone.label}
 										</option>
 									))}
-							</NativeSelect>
-						</div>
+								</NativeSelect>
+							</div>
 							<div className="grid gap-3">
 								<input
 									type="hidden"
@@ -182,12 +164,28 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 										className="text-neutral-500"
 									/>
 								</button>
-
 							</div>
-					</form>
-				) : (
+
+							<div className="mt-2 grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+								<NativeButton
+									type="button"
+									variant="text"
+									className="w-full sm:w-auto"
+									onClick={handleClose}
+								>
+									Cancel
+								</NativeButton>
+								<NativeButton
+									type="submit"
+									className="w-full sm:w-auto"
+									disabled={pending}
+								>
+									{pending ? "Saving..." : "Save profile"}
+								</NativeButton>
+							</div>
+						</form>
+					) : (
 					<form
-						id="password-form"
 						className="grid gap-4"
 						action={(formData) => {
 							startTransition(async () => {
@@ -213,8 +211,26 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 							type="password"
 							autoComplete="new-password"
 						/>
+						<div className="mt-2 grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+							<NativeButton
+								type="button"
+								variant="text"
+								className="w-full sm:w-auto"
+								onClick={handleClose}
+							>
+								Cancel
+							</NativeButton>
+							<NativeButton
+								type="submit"
+								className="w-full sm:w-auto"
+								disabled={pending}
+							>
+								{pending ? "Saving..." : "Change password"}
+							</NativeButton>
+						</div>
 					</form>
 				)}
+			</div>
 			<EmojiPickerDialog
 				open={avatarPickerOpen}
 				title="Choose profile emoji"

@@ -230,7 +230,7 @@ export function ExpenseDialog({
               </NativeSelect>
 
               <NativeTextarea
-                rows={3}
+                rows={4}
                 name="notes"
                 label="Notes"
                 defaultValue={expense?.notes ?? ""}
