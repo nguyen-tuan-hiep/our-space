@@ -272,7 +272,7 @@ export async function requestPasswordReset(formData: FormData) {
   if (!origin) return fail("Could not determine reset link origin.");
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?next=/reset-password`,
+    redirectTo: `${origin}/auth/confirm?next=/reset-password`,
   });
 
   if (error) return fail(error.message);

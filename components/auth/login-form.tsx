@@ -16,7 +16,11 @@ import {
 
 type AuthMode = "signin" | "signup" | "forgot";
 
-export function LoginForm() {
+type LoginFormProps = {
+  message?: string | null;
+};
+
+export function LoginForm({ message }: LoginFormProps) {
   const router = useRouter();
   const toast = useToast();
   const [mode, setMode] = useState<AuthMode>("signin");
@@ -25,6 +29,11 @@ export function LoginForm() {
 
   return (
     <div className="rounded-2xl border border-neutral-200 bg-paper p-6 sm:p-8">
+      {message ? (
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+          {message}
+        </p>
+      ) : null}
       {isForgot ? null : (
         <NativeTabs
           value={mode}

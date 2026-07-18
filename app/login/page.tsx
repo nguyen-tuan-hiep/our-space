@@ -2,9 +2,28 @@ import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import { getAuthenticatedSession } from "@/lib/auth";
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams?: Promise<{
+    reset?: string;
+  }>;
+};
+
+function resetMessage(value: string | undefined) {
+  if (value === "expired") {
+    return "This reset link is invalid or has expired. Please request a new one.";
+  }
+
+  if (value === "invalid") {
+    return "This reset link is missing required information. Please request a new one.";
+  }
+
+  return null;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const auth = await getAuthenticatedSession();
   if (auth) redirect("/");
+  const params = await searchParams;
 
   return (
     <main className="min-h-svh bg-bg">
@@ -19,7 +38,7 @@ export default async function LoginPage() {
             moments together.
           </p>
         </div>
-        <LoginForm />
+        <LoginForm message={resetMessage(params?.reset)} />
       </section>
     </main>
   );

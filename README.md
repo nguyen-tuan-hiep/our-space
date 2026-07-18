@@ -111,11 +111,17 @@ npm run build
 4. Add auth redirect URLs for password reset:
 
 ```txt
-http://localhost:3000/auth/callback
-https://your-production-domain.com/auth/callback
+http://localhost:3000/auth/confirm
+https://your-production-domain.com/auth/confirm
 ```
 
-The reset email enters the app at `/auth/callback?next=/reset-password`; Supabase only needs `/auth/callback` in the allowlist.
+Update the Supabase Reset Password email template link to use `token_hash` so the server can create a recovery session:
+
+```html
+<a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery">Reset password</a>
+```
+
+The reset email enters the app at `/auth/confirm?next=/reset-password`; Supabase only needs `/auth/confirm` in the allowlist.
 
 5. Create auth users and let the setup flow create/link profiles, or seed profiles manually for local testing.
 
@@ -209,10 +215,10 @@ Email/password auth uses Supabase Auth. The login screen supports:
 Forgot password calls `supabase.auth.resetPasswordForEmail()` with:
 
 ```txt
-/auth/callback?next=/reset-password
+/auth/confirm?next=/reset-password
 ```
 
-`app/auth/callback/route.ts` exchanges the Supabase auth code for a session, validates `next` as an internal path, then redirects to the reset-password form.
+`app/auth/confirm/route.ts` verifies Supabase's `token_hash` for `type=recovery`, stores the recovery session in cookies, validates `next` as an internal path, then redirects to the reset-password form.
 
 ### Time-Locked Notes
 
