@@ -217,9 +217,9 @@ export function ActionMenu({
 					<DropdownMenuItem
 						variant="destructive"
 						onClick={onDelete}
-						className="group mt-1 gap-3 rounded-2xl px-3 py-3 hover:bg-danger-bg"
+						className="group mt-1 gap-3 rounded-2xl border border-transparent bg-transparent px-3 py-3 text-danger hover:bg-danger-bg"
 					>
-						<span className="grid size-9 place-items-center rounded-xl bg-danger-bg text-danger transition group-hover:bg-danger group-hover:text-white">
+						<span className="grid size-9 place-items-center rounded-xl bg-danger-bg text-danger transition">
 							<Trash2 size={16} />
 						</span>
 						<span>

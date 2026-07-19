@@ -13,13 +13,45 @@ import {
 	NativeTextarea,
 } from "@/components/ui/native-controls";
 import { memoryTypeOptions } from "@/lib/constants";
-import type { MemoryMapEntry } from "@/lib/types";
+import type { MemoryMapEntry, Profile } from "@/lib/types";
 
 interface MemoryMapDialogProps {
 	open: boolean;
 	memory?: MemoryMapEntry | null;
 	onClose: () => void;
 	onSaved?: (memory: MemoryMapEntry) => void;
+	profile: Profile;
+}
+
+function getUserDescription(memory: MemoryMapEntry | null | undefined, userId: string) {
+	return memory?.description_by_user?.[userId] ?? "";
+}
+
+function UserFieldLabel({ profile }: { profile: Profile }) {
+	const avatar = profile.avatar_url;
+	const isImage = avatar?.startsWith("http://") || avatar?.startsWith("https://");
+	const imageSrc = isImage ? avatar : null;
+
+	return (
+		<div className="mb-2 flex items-center gap-2">
+			<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-100 text-base">
+				{imageSrc ? (
+					<Image
+						src={imageSrc}
+						alt=""
+						fill
+						sizes="2rem"
+						className="object-cover"
+					/>
+				) : (
+					avatar ?? "🙂"
+				)}
+			</span>
+			<span className="min-w-0 truncate text-sm font-bold text-neutral-800">
+				{profile.display_name}
+			</span>
+		</div>
+	);
 }
 
 function getGeolocationUnavailableMessage() {
@@ -54,6 +86,7 @@ export function MemoryMapDialog({
 	memory,
 	onClose,
 	onSaved,
+	profile,
 }: MemoryMapDialogProps) {
 	const toast = useToast();
 	const [pending, startTransition] = useTransition();
@@ -224,12 +257,15 @@ export function MemoryMapDialog({
 						</NativeButton>
 					</div>
 
-					<NativeTextarea
-						rows={5}
-						name="description"
-						label="Description"
-						defaultValue={memory?.description ?? ""}
-					/>
+					<div>
+						<UserFieldLabel profile={profile} />
+						<NativeTextarea
+							rows={4}
+							name={`description:${profile.id}`}
+							label="Your description"
+							defaultValue={getUserDescription(memory, profile.id)}
+						/>
+					</div>
 
 					{photoUrl ? (
 						<div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 aspect-[16/10]">
@@ -269,6 +305,7 @@ export function MemoryMapDialog({
 							<NativeButton
 								type="button"
 								variant="outlined"
+								className="!border-transparent !text-danger hover:!bg-danger-bg"
 								onClick={() => {
 									setPhotoUrl("");
 									setPhotoPublicId("");

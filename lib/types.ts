@@ -117,7 +117,7 @@ export interface MemoryMapEntry {
   id: string;
   couple_id: string;
   title: string;
-  description: string | null;
+  description_by_user: Record<string, string> | null;
   memory_type: MemoryType;
   latitude: number;
   longitude: number;
@@ -166,7 +166,7 @@ export interface Movie {
   couple_id: string;
   title: string;
   rating: number | null;
-  comment: string | null;
+  comment_by_user: Record<string, string> | null;
   poster_url: string | null;
   reaction: string | null;
   status: MovieStatus;

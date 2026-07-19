@@ -33,7 +33,8 @@ export function NativeButton({
 				variant === "outlined" &&
 					"border border-mui bg-transparent text-mui hover:bg-mui/10",
 				variant === "text" && "bg-transparent text-mui hover:bg-mui/10",
-				variant === "danger" && "bg-danger text-white hover:brightness-95",
+				variant === "danger" &&
+					"border border-transparent bg-transparent text-danger hover:bg-danger-bg",
 				className,
 			)}
 		>

@@ -105,7 +105,7 @@ create table public.memory_map_entries (
   id uuid primary key default gen_random_uuid(),
   couple_id text not null,
   title text not null,
-  description text,
+  description_by_user jsonb not null default '{}'::jsonb,
   memory_type public.memory_type not null default '💞 Date',
   latitude double precision not null,
   longitude double precision not null,
@@ -116,7 +116,6 @@ create table public.memory_map_entries (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint memory_map_entries_title_length_check check (char_length(title) between 1 and 140),
-  constraint memory_map_entries_description_length_check check (description is null or char_length(description) <= 1000),
   constraint memory_map_entries_latitude_check check (latitude between -90 and 90),
   constraint memory_map_entries_longitude_check check (longitude between -180 and 180)
 );
@@ -129,7 +128,7 @@ create table public.movies (
   poster_url text,
   category text[],
   status public.movie_status not null default 'wishlist',
-  comment text,
+  comment_by_user jsonb not null default '{}'::jsonb,
   reaction text,
   created_by uuid not null references public.profiles(id) on delete cascade,
   created_at timestamptz not null default now(),
@@ -162,7 +161,6 @@ create table public.movies (
       'Short Film'
     ]::text[]
   ),
-  constraint movies_comment_length_check check (comment is null or char_length(comment) <= 1000),
   constraint movies_reaction_length_check check (reaction is null or char_length(reaction) <= 32)
 );
 

@@ -12,11 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MemoryPanelSkeleton } from "@/components/our-space/tab-skeletons";
 import { getMemoryTypeColor } from "@/lib/constants";
-import type { MemoryMapEntry } from "@/lib/types";
+import type { MemoryMapEntry, Profile } from "@/lib/types";
 
 interface MemoryMapPanelProps {
 	loading: boolean;
 	memories: MemoryMapEntry[];
+	partner: Profile;
+	profile: Profile;
 	timeZone: string;
 	onEditMemory: (memory: MemoryMapEntry) => void;
 	onMemoryDeleted: (memoryId: string) => void;
@@ -47,14 +49,69 @@ function getMemoryDateLabel(value: string, timeZone: string) {
 	}).format(new Date(value));
 }
 
+function UserAvatar({ profile }: { profile: Profile }) {
+	const avatar = profile.avatar_url;
+	const isImage = avatar?.startsWith("http://") || avatar?.startsWith("https://");
+	const imageSrc = isImage ? avatar : null;
+
+	return (
+		<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-100 text-base">
+			{imageSrc ? (
+				<Image
+					src={imageSrc}
+					alt=""
+					fill
+					sizes="2rem"
+					className="object-cover"
+				/>
+			) : (
+				avatar ?? "🙂"
+			)}
+		</span>
+	);
+}
+
+function getUserDescription(memory: MemoryMapEntry, userId: string) {
+	return memory.description_by_user?.[userId] ?? null;
+}
+
+function UserDescriptionBlock({
+	memory,
+	profile,
+}: {
+	memory: MemoryMapEntry;
+	profile: Profile;
+}) {
+	const description = getUserDescription(memory, profile.id);
+
+	return (
+		<div className="flex items-center gap-2">
+			<UserAvatar profile={profile} />
+			<p
+				className={[
+					"min-w-0 max-h-12 flex-1 overflow-y-auto whitespace-pre-wrap break-words pr-1 text-sm leading-5",
+					description ? "text-neutral-600" : "text-neutral-400",
+				].join(" ")}
+			>
+				<span className="font-bold text-neutral-800">
+					{profile.display_name}:
+				</span>{" "}
+				{description || "No description yet."}
+			</p>
+		</div>
+	);
+}
+
 function MemoryCard({
 	memory,
+	participants,
 	timeZone,
 	deleting,
 	onEdit,
 	onRequestDelete,
 }: {
 	memory: MemoryMapEntry;
+	participants: [Profile, Profile];
 	deleting: boolean;
 	timeZone: string;
 	onEdit: () => void;
@@ -104,23 +161,16 @@ function MemoryCard({
 					</div>
 				</div>
 
-				<div className="flex flex-col gap-1 text-sm text-neutral-600">
+				<div className="flex flex-col gap-2 text-sm text-neutral-600">
 					<p>{getMemoryDateLabel(memory.visited_at, timeZone)}</p>
-
-					{/* Phần nội dung có đánh dấu gạch dọc và thanh cuộn */}
-					<div className="relative mt-2 border-l-[3px] border-neutral-200 pl-3 dark:border-neutral-800">
-						<div
-							className="max-h-[5rem] overflow-y-auto pr-3 leading-6 text-neutral-600
-												whitespace-pre-wrap break-words
-												[&::-webkit-scrollbar]:w-1.5
-												[&::-webkit-scrollbar-track]:bg-transparent
-												[&::-webkit-scrollbar-thumb]:rounded-full
-												[&::-webkit-scrollbar-thumb]:bg-neutral-200
-												hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300
-												dark:[&::-webkit-scrollbar-thumb]:bg-neutral-700"
-						>
-							{memory.description}
-						</div>
+					<div className="grid gap-2 rounded-2xl border border-neutral-200 bg-bg/60 p-2.5">
+						{participants.map((participant) => (
+							<UserDescriptionBlock
+								key={participant.id}
+								memory={memory}
+								profile={participant}
+							/>
+						))}
 					</div>
 				</div>
 
@@ -141,6 +191,8 @@ function MemoryCard({
 export function MemoryMapPanel({
 	loading,
 	memories,
+	partner,
+	profile,
 	timeZone,
 	onEditMemory,
 	onMemoryDeleted,
@@ -152,8 +204,9 @@ export function MemoryMapPanel({
 	);
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [pending, startTransition] = useTransition();
+	const participants: [Profile, Profile] = [profile, partner];
 
-		if (loading && memories.length === 0) {
+	if (loading && memories.length === 0) {
 		return <MemoryPanelSkeleton />;
 	}
 
@@ -202,6 +255,7 @@ export function MemoryMapPanel({
 							key={memory.id}
 							deleting={pending && deletingId === memory.id}
 							memory={memory}
+							participants={participants}
 							timeZone={timeZone}
 							onEdit={() => onEditMemory(memory)}
 							onRequestDelete={() => setMemoryToDelete(memory)}

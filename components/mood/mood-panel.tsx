@@ -479,10 +479,10 @@ export function MoodPanel({
 						{selectedMood ? (
 							<NativeButton
 								type="button"
-								variant="danger"
+								variant="outlined"
 								disabled={pending}
 								onClick={handleDelete}
-								className="sm:order-1"
+								className="!border-transparent !text-danger hover:!bg-danger-bg sm:order-1"
 							>
 								<Trash2 size={17} />
 								Delete mood

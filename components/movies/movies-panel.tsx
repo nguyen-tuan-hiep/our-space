@@ -28,11 +28,13 @@ import { MoviesPanelSkeleton } from "@/components/our-space/tab-skeletons";
 import { Button } from "@/components/ui/button";
 import { NativeDialog } from "@/components/ui/native-controls";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Movie, MovieStatus } from "@/lib/types";
+import type { Movie, MovieStatus, Profile } from "@/lib/types";
 
 interface MoviesPanelProps {
 	loading: boolean;
 	movies: Movie[];
+	partner: Profile;
+	profile: Profile;
 	onEditMovie: (movie: Movie) => void;
 	onMovieDeleted: (movieId: string) => void;
 	onMovieSaved: (movie: Movie) => void;
@@ -97,6 +99,59 @@ function getMovieCategories(movie: Movie) {
 	);
 }
 
+function UserAvatar({ profile }: { profile: Profile }) {
+	const avatar = profile.avatar_url;
+	const isImage = avatar?.startsWith("http://") || avatar?.startsWith("https://");
+	const imageSrc = isImage ? avatar : null;
+
+	return (
+		<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-100 text-base">
+			{imageSrc ? (
+				<Image
+					src={imageSrc}
+					alt=""
+					fill
+					sizes="2rem"
+					className="object-cover"
+				/>
+			) : (
+				avatar ?? "🙂"
+			)}
+		</span>
+	);
+}
+
+function getUserComment(movie: Movie, userId: string) {
+	return movie.comment_by_user?.[userId] ?? null;
+}
+
+function UserCommentBlock({
+	movie,
+	profile,
+}: {
+	movie: Movie;
+	profile: Profile;
+}) {
+	const comment = getUserComment(movie, profile.id);
+
+	return (
+		<div className="flex items-center gap-2">
+			<UserAvatar profile={profile} />
+			<p
+				className={[
+					"min-w-0 max-h-12 flex-1 overflow-y-auto whitespace-pre-wrap break-words pr-1 text-sm leading-5",
+					comment ? "text-neutral-600" : "text-neutral-400",
+				].join(" ")}
+			>
+				<span className="font-bold text-neutral-800">
+					{profile.display_name}:
+				</span>{" "}
+				{comment || "No comment yet."}
+			</p>
+		</div>
+	);
+}
+
 function MovieCard({
 	movie,
 	onEdit,
@@ -147,12 +202,14 @@ function MovieCard({
 function MovieDetailsDialog({
 	movie,
 	busy,
+	participants,
 	onClose,
 	onEdit,
 	onMoveStatus,
 }: {
 	movie: Movie | null;
 	busy: boolean;
+	participants: [Profile, Profile];
 	onClose: () => void;
 	onEdit: (movie: Movie) => void;
 	onMoveStatus: (movie: Movie, status: MovieStatus) => void;
@@ -259,15 +316,15 @@ function MovieDetailsDialog({
 						</div>
 					</div>
 
-					{movie.comment ? (
-						<p className="text-sm leading-7 text-neutral-600">
-							{movie.comment}
-						</p>
-					) : (
-						<p className="text-sm leading-7 text-neutral-500">
-							No comment yet.
-						</p>
-					)}
+					<div className="grid gap-2 rounded-2xl border border-neutral-200 bg-bg/60 p-2.5">
+						{participants.map((participant) => (
+							<UserCommentBlock
+								key={participant.id}
+								movie={movie}
+								profile={participant}
+							/>
+						))}
+					</div>
 
 					<div className="mt-auto flex flex-col gap-2 pt-2">
 						<Button
@@ -301,6 +358,8 @@ function MovieDetailsDialog({
 export function MoviesPanel({
 	loading,
 	movies,
+	partner,
+	profile,
 	onEditMovie,
 	onMovieDeleted,
 	onMovieSaved,
@@ -311,6 +370,7 @@ export function MoviesPanel({
 	const [detailMovie, setDetailMovie] = useState<Movie | null>(null);
 	const [busyId, setBusyId] = useState<string | null>(null);
 	const [pending, startTransition] = useTransition();
+	const participants: [Profile, Profile] = [profile, partner];
 	const moviesByStatus = useMemo(
 		() =>
 			columns.map((column) => ({
@@ -503,6 +563,7 @@ export function MoviesPanel({
 			<MovieDetailsDialog
 				movie={detailMovie}
 				busy={pending && busyId === detailMovie?.id}
+				participants={participants}
 				onClose={closeMovieDetails}
 				onEdit={(movie) => {
 					closeMovieDetails();

@@ -170,7 +170,7 @@ export function SpaceHero({
 											type="button"
 											role="menuitem"
 											disabled={pending}
-											className={menuItemClass}
+											className={`${menuItemClass} border border-transparent bg-transparent text-danger hover:bg-danger-bg`}
 											onClick={onSignOut}
 										>
 											<LogOut size={16} />

@@ -1155,6 +1155,8 @@ export function OurSpaceClient({
 						<MemoryMapPanel
 							loading={spaceDataLoading}
 							memories={displayMemories}
+							partner={partner}
+							profile={profile}
 							timeZone={profileTimeZone}
 							onEditMemory={(memory) => {
 								setEditingMemory(memory);
@@ -1167,6 +1169,8 @@ export function OurSpaceClient({
 						<MoviesPanel
 							loading={spaceDataLoading}
 							movies={displayMovies}
+							partner={partner}
+							profile={profile}
 							onEditMovie={(movie) => {
 								setEditingMovie(movie);
 								setMovieOpen(true);

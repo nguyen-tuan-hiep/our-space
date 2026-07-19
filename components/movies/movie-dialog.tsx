@@ -14,7 +14,7 @@ import {
 	NativeTextarea,
 } from "@/components/ui/native-controls";
 import { movieCategories, movieStatuses } from "@/lib/constants";
-import type { Movie, MovieStatus } from "@/lib/types";
+import type { Movie, MovieStatus, Profile } from "@/lib/types";
 
 const ratingOptions = Array.from({ length: 19 }, (_, index) =>
 	String(1 + index * 0.5),
@@ -25,6 +25,38 @@ interface MovieDialogProps {
 	movie?: Movie | null;
 	onClose: () => void;
 	onSaved?: (movie: Movie) => void;
+	profile: Profile;
+}
+
+function getUserComment(movie: Movie | null | undefined, userId: string) {
+	return movie?.comment_by_user?.[userId] ?? "";
+}
+
+function UserFieldLabel({ profile }: { profile: Profile }) {
+	const avatar = profile.avatar_url;
+	const isImage = avatar?.startsWith("http://") || avatar?.startsWith("https://");
+	const imageSrc = isImage ? avatar : null;
+
+	return (
+		<div className="mb-2 flex items-center gap-2">
+			<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-100 text-base">
+				{imageSrc ? (
+					<Image
+						src={imageSrc}
+						alt=""
+						fill
+						sizes="2rem"
+						className="object-cover"
+					/>
+				) : (
+					avatar ?? "🙂"
+				)}
+			</span>
+			<span className="min-w-0 truncate text-sm font-bold text-neutral-800">
+				{profile.display_name}
+			</span>
+		</div>
+	);
 }
 
 function getStatusLabel(status: Movie["status"]) {
@@ -48,6 +80,7 @@ export function MovieDialog({
 	movie,
 	onClose,
 	onSaved,
+	profile,
 }: MovieDialogProps) {
 	const toast = useToast();
 	const [pending, startTransition] = useTransition();
@@ -329,8 +362,8 @@ export function MovieDialog({
 							<div className="flex w-full">
 								<NativeButton
 									type="button"
-									variant="text"
-									className="w-full"
+									variant="outlined"
+									className="w-full !border-transparent !text-danger hover:!bg-danger-bg"
 									onClick={() => setPosterUrl("")}
 								>
 									Remove poster
@@ -339,12 +372,15 @@ export function MovieDialog({
 						) : null}
 					</div>
 
-					<NativeTextarea
-						rows={5}
-						name="comment"
-						label="Comment"
-						defaultValue={movie?.comment ?? ""}
-					/>
+					<div>
+						<UserFieldLabel profile={profile} />
+						<NativeTextarea
+							rows={4}
+							name={`comment:${profile.id}`}
+							label="Your comment"
+							defaultValue={getUserComment(movie, profile.id)}
+						/>
+					</div>
 				</div>
 
 				<EmojiPickerDialog

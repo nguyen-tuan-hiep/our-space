@@ -218,13 +218,18 @@ function MemoryCardSkeleton({ withImage = true }: { withImage?: boolean }) {
 					<Skeleton className="size-10 rounded-full" />
 				</div>
 
-				<div className="flex flex-col gap-1">
+				<div className="flex flex-col gap-2">
 					<Skeleton className="h-4 w-32 rounded-full" />
-					<div className="mt-2 border-l-[3px] border-neutral-200 pl-3 dark:border-neutral-800">
-						<div className="space-y-2 pr-3">
-							<Skeleton className="h-4 w-full rounded-full" />
-							<Skeleton className="h-4 w-11/12 rounded-full" />
-						</div>
+					<div className="grid gap-2 rounded-2xl border border-neutral-200 bg-bg/60 p-2.5">
+						{Array.from({ length: 2 }).map((_, index) => (
+							<div
+								key={index}
+								className="flex items-center gap-2"
+							>
+								<Skeleton className="size-8 shrink-0 rounded-full" />
+								<Skeleton className="h-4 min-w-0 flex-1 rounded-full" />
+							</div>
+						))}
 					</div>
 				</div>
 

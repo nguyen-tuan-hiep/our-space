@@ -45,9 +45,15 @@ export function SignOutButton({ className }: SignOutButtonProps) {
 	return (
 		<NativeButton
 			type="button"
+			variant="outlined"
 			disabled={pending}
 			onClick={handleSignOut}
-			className={className}
+			className={[
+				"!border-transparent !text-danger hover:!bg-danger-bg",
+				className,
+			]
+				.filter(Boolean)
+				.join(" ")}
 		>
 			Logout
 		</NativeButton>

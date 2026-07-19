@@ -138,12 +138,14 @@ export function SpaceDialogs({
 				open={memoryOpen}
 				onClose={onCloseMemory}
 				memory={editingMemory}
+				profile={profile}
 				onSaved={onMemorySaved}
 			/>
 			<MovieDialog
 				open={movieOpen}
 				onClose={onCloseMovie}
 				movie={editingMovie}
+				profile={profile}
 				onSaved={onMovieSaved}
 			/>
 			<ProfileDialog

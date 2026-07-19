@@ -48,7 +48,7 @@ type ExpensePayload = {
 
 type MemoryPayload = {
   title: string;
-  description: string | null;
+  description_by_user: Record<string, string>;
   memory_type: MemoryType;
   latitude: number;
   longitude: number;
@@ -63,7 +63,7 @@ type MoviePayload = {
   poster_url: string | null;
   category: MovieCategory[] | null;
   status: MovieStatus;
-  comment: string | null;
+  comment_by_user: Record<string, string>;
   reaction: string | null;
 };
 
@@ -96,6 +96,10 @@ function stringValue(formData: FormData, key: string) {
 function nullableStringValue(formData: FormData, key: string) {
   const value = stringValue(formData, key);
   return value.length ? value : null;
+}
+
+function userTextEntry(formData: FormData, key: string, userId: string) {
+  return { [userId]: stringValue(formData, `${key}:${userId}`) };
 }
 
 function stringValues(formData: FormData, key: string) {
@@ -151,14 +155,19 @@ function getExpensePayload(
 
 function getMemoryPayload(
   formData: FormData,
+  userId: string,
 ): { ok: true; payload: MemoryPayload } | { ok: false; message: string } {
   const memoryType = stringValue(formData, "memory_type") as MemoryType;
   const latitude = Number(stringValue(formData, "latitude"));
   const longitude = Number(stringValue(formData, "longitude"));
   const visitedAt = new Date(stringValue(formData, "visited_at"));
   const title = stringValue(formData, "title");
+  const descriptionByUser = userTextEntry(formData, "description", userId);
 
   if (!title) return fail("Please enter a memory title.");
+  if (Object.values(descriptionByUser).some((value) => value.length > 1000)) {
+    return fail("Memory descriptions must be 1000 characters or fewer.");
+  }
   if (!memoryTypes.includes(memoryType)) {
     return fail("Please choose a valid memory type.");
   }
@@ -176,7 +185,7 @@ function getMemoryPayload(
     ok: true,
     payload: {
       title,
-      description: nullableStringValue(formData, "description"),
+      description_by_user: descriptionByUser,
       memory_type: memoryType,
       latitude,
       longitude,
@@ -189,6 +198,7 @@ function getMemoryPayload(
 
 function getMoviePayload(
   formData: FormData,
+  userId: string,
 ): { ok: true; payload: MoviePayload } | { ok: false; message: string } {
   const title = stringValue(formData, "title");
   const ratingValue = stringValue(formData, "rating");
@@ -198,9 +208,13 @@ function getMoviePayload(
   ) as MovieCategory[];
   const status = stringValue(formData, "status") as MovieStatus;
   const reaction = nullableStringValue(formData, "reaction");
+  const commentByUser = userTextEntry(formData, "comment", userId);
 
   if (!title) return fail("Please enter a movie title.");
   if (title.length > 160) return fail("Movie title must be 160 characters or fewer.");
+  if (Object.values(commentByUser).some((value) => value.length > 1000)) {
+    return fail("Movie comments must be 1000 characters or fewer.");
+  }
   if (
     rating !== null &&
     (!Number.isFinite(rating) ||
@@ -228,7 +242,7 @@ function getMoviePayload(
       poster_url: nullableStringValue(formData, "poster_url"),
       category: categories.length ? categories : null,
       status,
-      comment: nullableStringValue(formData, "comment"),
+      comment_by_user: commentByUser,
       reaction,
     },
   };
@@ -685,8 +699,6 @@ export async function deleteMood(moodId: string) {
 
 export async function createMemory(formData: FormData) {
   const { supabase, user } = await requireUser();
-  const memory = getMemoryPayload(formData);
-  if (!memory.ok) return memory;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -698,6 +710,9 @@ export async function createMemory(formData: FormData) {
   if (!profile?.partner_id) {
     return fail("Please pair with your partner before adding memories.");
   }
+
+  const memory = getMemoryPayload(formData, profile.id);
+  if (!memory.ok) return memory;
 
   const coupleId = getCoupleId(profile, { id: profile.partner_id });
   const { data, error } = await supabase
@@ -720,8 +735,6 @@ export async function createMemory(formData: FormData) {
 export async function updateMemory(formData: FormData) {
   const { supabase, user } = await requireUser();
   const memoryId = stringValue(formData, "id");
-  const memory = getMemoryPayload(formData);
-  if (!memory.ok) return memory;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -734,11 +747,27 @@ export async function updateMemory(formData: FormData) {
     return fail("Please pair with your partner before editing memories.");
   }
 
+  const memory = getMemoryPayload(formData, profile.id);
+  if (!memory.ok) return memory;
+
   const coupleId = getCoupleId(profile, { id: profile.partner_id });
+  const { data: existingMemory, error: existingMemoryError } = await supabase
+    .from("memory_map_entries")
+    .select("description_by_user")
+    .eq("id", memoryId)
+    .eq("couple_id", coupleId)
+    .maybeSingle<{ description_by_user: Record<string, string> | null }>();
+
+  if (existingMemoryError) return fail(existingMemoryError.message);
+
   const { data, error } = await supabase
     .from("memory_map_entries")
     .update({
       ...memory.payload,
+      description_by_user: {
+        ...(existingMemory?.description_by_user ?? {}),
+        ...memory.payload.description_by_user,
+      },
       couple_id: coupleId,
     })
     .eq("id", memoryId)
@@ -766,8 +795,6 @@ export async function deleteMemory(memoryId: string) {
 
 export async function createMovie(formData: FormData) {
   const { supabase, user } = await requireUser();
-  const movie = getMoviePayload(formData);
-  if (!movie.ok) return movie;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -779,6 +806,9 @@ export async function createMovie(formData: FormData) {
   if (!profile?.partner_id) {
     return fail("Please pair with your partner before adding movies.");
   }
+
+  const movie = getMoviePayload(formData, profile.id);
+  if (!movie.ok) return movie;
 
   const coupleId = getCoupleId(profile, { id: profile.partner_id });
   const { data, error } = await supabase
@@ -801,8 +831,6 @@ export async function createMovie(formData: FormData) {
 export async function updateMovie(formData: FormData) {
   const { supabase, user } = await requireUser();
   const movieId = stringValue(formData, "id");
-  const movie = getMoviePayload(formData);
-  if (!movie.ok) return movie;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -815,11 +843,27 @@ export async function updateMovie(formData: FormData) {
     return fail("Please pair with your partner before editing movies.");
   }
 
+  const movie = getMoviePayload(formData, profile.id);
+  if (!movie.ok) return movie;
+
   const coupleId = getCoupleId(profile, { id: profile.partner_id });
+  const { data: existingMovie, error: existingMovieError } = await supabase
+    .from("movies")
+    .select("comment_by_user")
+    .eq("id", movieId)
+    .eq("couple_id", coupleId)
+    .maybeSingle<{ comment_by_user: Record<string, string> | null }>();
+
+  if (existingMovieError) return fail(existingMovieError.message);
+
   const { data, error } = await supabase
     .from("movies")
     .update({
       ...movie.payload,
+      comment_by_user: {
+        ...(existingMovie?.comment_by_user ?? {}),
+        ...movie.payload.comment_by_user,
+      },
       couple_id: coupleId,
     })
     .eq("id", movieId)

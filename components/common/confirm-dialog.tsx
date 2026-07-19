@@ -69,7 +69,7 @@ export function ConfirmDialog({
 						variant="destructive"
 						disabled={pending}
 						onClick={onConfirm}
-						className="h-11 rounded-2xl bg-danger px-5 font-bold text-white hover:bg-danger hover:brightness-95"
+						className="h-11 rounded-2xl border-transparent bg-transparent px-5 font-bold text-danger hover:bg-danger-bg"
 					>
 						{pending ? "Deleting..." : confirmLabel}
 					</AlertDialogAction>
