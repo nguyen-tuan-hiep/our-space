@@ -279,9 +279,12 @@ function MoviePosterSkeleton({
 function MovieSectionSkeleton({ section }: { section: string }) {
 	return (
 		<section className="grid min-w-0 content-start gap-3">
-			<div className="flex items-center justify-between rounded-2xl bg-neutral-950 px-4 py-3">
-				<Skeleton className="h-5 w-24 rounded-full bg-white/20" />
-				<Skeleton className="h-6 w-9 rounded-full bg-white/20" />
+			<div className="flex items-center justify-between rounded-2xl border border-neutral-900/10 bg-paper/88 px-4 py-3 shadow-sm">
+				<div className="flex min-w-0 items-center gap-3">
+					<Skeleton className="size-9 shrink-0 rounded-full" />
+					<Skeleton className="h-5 w-24 rounded-full" />
+				</div>
+				<Skeleton className="h-6 w-9 rounded-full" />
 			</div>
 
 			<div className="block overflow-hidden p-6 sm:hidden -mx-4">

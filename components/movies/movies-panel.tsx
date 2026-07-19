@@ -2,7 +2,17 @@
 
 import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
-import { Check, Clapperboard, Play, Edit2, Plus, Star, X } from "lucide-react";
+import {
+	Bookmark,
+	Check,
+	CircleCheck,
+	Clapperboard,
+	Edit2,
+	Play,
+	Plus,
+	Star,
+	X,
+} from "lucide-react";
 
 // --- Import Swiper React components, Modules và Styles ---
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -33,21 +43,29 @@ const columns: Array<{
 	status: MovieStatus;
 	title: string;
 	empty: string;
+	icon: typeof Play;
+	iconClassName: string;
 }> = [
 	{
 		status: "watching",
 		title: "Watching",
 		empty: "No movies are currently playing.",
+		icon: Play,
+		iconClassName: "border-sky-200 bg-sky-50 text-sky-700",
 	},
 	{
 		status: "wishlist",
 		title: "Wishlist",
 		empty: "No saved movies yet.",
+		icon: Bookmark,
+		iconClassName: "border-amber-200 bg-amber-50 text-amber-700",
 	},
 	{
 		status: "watched",
 		title: "Watched",
 		empty: "No watched movies yet.",
+		icon: CircleCheck,
+		iconClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
 	},
 ];
 
@@ -375,9 +393,18 @@ export function MoviesPanel({
 						key={column.status}
 						className="grid content-start gap-3 min-w-0"
 					>
-						<div className="flex items-center justify-between rounded-2xl bg-neutral-950 px-4 py-3 text-neutral-50">
-							<h3 className="font-bold">{column.title}</h3>
-							<span className="rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold">
+						<div className="flex items-center justify-between rounded-2xl border border-neutral-900/10 bg-paper/88 px-4 py-3 shadow-sm">
+							<div className="flex min-w-0 items-center gap-3">
+								<span
+									className={`grid size-9 shrink-0 place-items-center rounded-full border ${column.iconClassName}`}
+								>
+									<column.icon size={17} />
+								</span>
+								<h3 className="truncate font-bold text-neutral-900">
+									{column.title}
+								</h3>
+							</div>
+							<span className="rounded-full border border-neutral-900/10 bg-neutral-100 px-2.5 py-1 text-xs font-bold text-neutral-700">
 								{column.movies.length}
 							</span>
 						</div>
