@@ -88,7 +88,6 @@ async function HomeContent() {
     <OurSpaceClient
       profile={appSession.profile}
       partner={appSession.partner}
-      initialNotes={[]}
       heroImageUrl={getOptimizedImageUrl(heroImageUrl)}
       anniversaryDate={
         settings?.anniversary_date ??

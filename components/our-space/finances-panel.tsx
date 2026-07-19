@@ -69,6 +69,9 @@ export function FinancesPanel({
 					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
 						Finance overview
 					</h2>
+					<p className="mt-1 text-sm text-neutral-500">
+						Manage your shared expenses side by side.
+					</p>
 				</div>
 				<div className="sm:hidden">{periodControl}</div>
 				<Button

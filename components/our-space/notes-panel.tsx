@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { NoteCard } from "@/components/notes/note-card";
+import { NotesPanelSkeleton } from "@/components/our-space/tab-skeletons";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { FilterRange } from "@/lib/dashboard-utils";
 import type { SharedNote } from "@/lib/types";
 
@@ -31,6 +31,10 @@ export function NotesPanel({
 	onNewNote,
 	periodControl,
 }: NotesPanelProps) {
+	if (loading && notes.length === 0) {
+		return <NotesPanelSkeleton />;
+	}
+
 	return (
 		<div className="grid gap-4 sm:gap-5">
 			<div className="flex items-center justify-between gap-4 sm:items-end">
@@ -38,6 +42,9 @@ export function NotesPanel({
 					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
 						Shared notes
 					</h2>
+					<p className="mt-1 text-sm text-neutral-500">
+						The digital scrapbook for our love story.
+					</p>
 				</div>
 				<div className="sm:hidden">{periodControl}</div>
 				<Button
@@ -62,19 +69,6 @@ export function NotesPanel({
 							onEdit={onEditNote}
 							onDeleted={onNoteDeleted}
 						/>
-					))
-				) : loading ? (
-					Array.from({ length: 6 }).map((_, index) => (
-						<div
-							key={index}
-							className="app-card content-fade-in grid h-[20rem] gap-4 p-5"
-						>
-							<div className="space-y-3">
-								<Skeleton className="h-3 w-28 rounded-full" />
-								<Skeleton className="h-7 w-3/4 rounded-xl" />
-							</div>
-							<Skeleton className="min-h-0 flex-1 rounded-2xl" />
-						</div>
 					))
 				) : (
 					<div className="app-card content-fade-in p-6 text-neutral-500 sm:col-span-2 md:col-span-3 lg:col-span-4">

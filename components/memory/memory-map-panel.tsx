@@ -31,7 +31,7 @@ const LeafletMemoryMap = dynamic(
 	{
 		ssr: false,
 		loading: () => (
-			<div className="app-card overflow-hidden p-2 sm:p-3">
+			<div className="relative overflow-hidden rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.2)]">
 				<Skeleton className="min-h-[22rem] rounded-2xl sm:min-h-[31rem]" />
 			</div>
 		),
@@ -164,7 +164,7 @@ export function MemoryMapPanel({
 					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
 						Memory map
 					</h2>
-					<p className="mt-1 hidden text-sm text-neutral-500 sm:block">
+					<p className="mt-1 text-sm text-neutral-500">
 						Pin the places where your story happened.
 					</p>
 				</div>

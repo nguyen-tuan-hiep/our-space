@@ -56,7 +56,10 @@ export default function Loading() {
 
         <div className="mobile-tab-panel-in mt-4 sm:material-section sm:mt-5 sm:p-5 lg:mt-6 lg:p-6">
           <div className="flex items-center justify-between gap-4 sm:items-end">
-            <Skeleton className="h-10 w-52 rounded-2xl sm:h-14" />
+            <div className="min-w-0 space-y-2">
+              <Skeleton className="h-10 w-52 rounded-2xl sm:h-14" />
+              <Skeleton className="h-4 w-64 max-w-full rounded-full" />
+            </div>
             <Skeleton className="size-12 rounded-2xl sm:h-11 sm:w-32" />
           </div>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

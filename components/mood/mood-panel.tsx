@@ -278,7 +278,7 @@ export function MoodPanel({
 					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
 						Mood tracker
 					</h2>
-					<p className="mt-1 hidden text-sm text-neutral-500 sm:block">
+					<p className="mt-1 text-sm text-neutral-500">
 						A gentle daily check-in for both of you.
 					</p>
 				</div>

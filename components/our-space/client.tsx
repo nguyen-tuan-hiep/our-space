@@ -50,9 +50,9 @@ import {
 	FinancePanelSkeleton,
 	MemoryPanelSkeleton,
 	MoodPanelSkeleton,
+	MoviesPanelSkeleton,
 	PersonalPanelSkeleton,
 } from "@/components/our-space/tab-skeletons";
-import { MoviesPanelSkeleton } from "@/components/movies/movies-panel-skeleton";
 
 const PersonalPanel = dynamic(
 	() =>
@@ -115,7 +115,6 @@ const SpaceDialogs = dynamic(
 interface OurSpaceClientProps {
 	profile: Profile;
 	partner: Profile;
-	initialNotes: SharedNote[];
 	heroImageUrl: string;
 	anniversaryDate: string;
 	currentTimeIso: string;
@@ -213,7 +212,6 @@ function getRealtimeRecordId(
 export function OurSpaceClient({
 	profile,
 	partner,
-	initialNotes,
 	heroImageUrl: initialHeroImageUrl,
 	anniversaryDate: initialAnniversaryDate,
 	currentTimeIso,
@@ -245,7 +243,7 @@ export function OurSpaceClient({
 		null,
 	);
 	const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
-	const [notes, setNotes] = useState(initialNotes);
+	const [notes, setNotes] = useState<SharedNote[]>([]);
 	const [moods, setMoods] = useState<DailyMood[]>([]);
 	const [memories, setMemories] = useState<MemoryMapEntry[]>([]);
 	const [movies, setMovies] = useState<Movie[]>([]);
@@ -254,7 +252,7 @@ export function OurSpaceClient({
 		initialAnniversaryDate,
 	);
 	const [dailyLoveQuote] = useState(initialDailyLoveQuote);
-	const [spaceLoading, setSpaceLoading] = useState(initialNotes.length === 0);
+	const [spaceDataLoading, setSpaceDataLoading] = useState(true);
 	const [expenses, setExpenses] = useState<IndividualExpense[]>([]);
 	const [financeLoaded, setFinanceLoaded] = useState(false);
 	const [financeLoading, setFinanceLoading] = useState(false);
@@ -466,7 +464,7 @@ export function OurSpaceClient({
 
 	const loadSpaceData = useCallback(
 		async (options?: { signal?: AbortSignal; silent?: boolean }) => {
-			if (!options?.silent) setSpaceLoading(true);
+			if (!options?.silent) setSpaceDataLoading(true);
 
 			try {
 				const response = await fetch("/api/dashboard", {
@@ -491,7 +489,7 @@ export function OurSpaceClient({
 
 				console.warn("Space data refresh failed", error);
 			} finally {
-				setSpaceLoading(false);
+				setSpaceDataLoading(false);
 			}
 		},
 		[applySpacePayload],
@@ -501,7 +499,7 @@ export function OurSpaceClient({
 		const cached = readCachedSpacePayload(profile.id);
 		if (cached) {
 			applySpacePayload(cached, { cache: false });
-			setSpaceLoading(false);
+			setSpaceDataLoading(false);
 		}
 
 		const controller = new AbortController();
@@ -1045,7 +1043,7 @@ export function OurSpaceClient({
 						<p className="text-sm font-semibold text-neutral-500">
 							{pagePeriodDescription}
 						</p>
-						<h1 className="mt-1 font-serif text-4xl leading-none text-neutral-950 xl:text-5xl">
+						{/* <h1 className="mt-1 font-serif text-4xl leading-none text-neutral-950 xl:text-5xl">
 							{activeSection === "notes"
 								? "Shared notes"
 								: activeSection === "finances"
@@ -1057,7 +1055,7 @@ export function OurSpaceClient({
 											: activeSection === "movies"
 												? "Movies"
 												: "Personal"}
-						</h1>
+						</h1> */}
 					</div>
 					{activeSection === "memories" || activeSection === "movies" ? null : (
 						<PeriodPickerButton
@@ -1096,7 +1094,7 @@ export function OurSpaceClient({
 							currentUserId={profile.id}
 							filterRange={filterRange}
 							initialNowMs={initialClock.getTime()}
-							loading={spaceLoading}
+							loading={spaceDataLoading}
 							notes={displayNotes}
 							timeZone={profileTimeZone}
 							periodControl={mobilePeriodControl}
@@ -1142,7 +1140,7 @@ export function OurSpaceClient({
 							currentTimeIso={clock.toISOString()}
 							currentUserId={profile.id}
 							filterRange={filterRange}
-							loading={spaceLoading}
+							loading={spaceDataLoading}
 							moods={filteredMoods}
 							partner={partner}
 							partnerAvatar={partnerAvatar}
@@ -1155,7 +1153,7 @@ export function OurSpaceClient({
 						/>
 					) : activeSection === "memories" ? (
 						<MemoryMapPanel
-							loading={spaceLoading}
+							loading={spaceDataLoading}
 							memories={displayMemories}
 							timeZone={profileTimeZone}
 							onEditMemory={(memory) => {
@@ -1167,7 +1165,7 @@ export function OurSpaceClient({
 						/>
 					) : activeSection === "movies" ? (
 						<MoviesPanel
-							loading={spaceLoading}
+							loading={spaceDataLoading}
 							movies={displayMovies}
 							onEditMovie={(movie) => {
 								setEditingMovie(movie);

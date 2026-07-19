@@ -14,7 +14,7 @@ import { deleteMovie, updateMovieStatus } from "@/app/actions";
 import { ActionMenu } from "@/components/common/action-menu";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { useToast } from "@/components/feedback/toast";
-import { MoviesPanelSkeleton } from "@/components/movies/movies-panel-skeleton";
+import { MoviesPanelSkeleton } from "@/components/our-space/tab-skeletons";
 import { Button } from "@/components/ui/button";
 import { NativeDialog } from "@/components/ui/native-controls";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -344,19 +344,7 @@ export function MoviesPanel({
 	};
 
 	if (loading && movies.length === 0) {
-		return (
-			<div className="grid gap-4 sm:gap-5">
-				<div className="flex items-center justify-between gap-4 sm:items-end">
-					<div className="min-w-0">
-						<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
-							Movies
-						</h2>
-					</div>
-					<Skeleton className="hidden h-11 w-32 rounded-2xl sm:block" />
-				</div>
-				<MoviesPanelSkeleton />
-			</div>
-		);
+		return <MoviesPanelSkeleton />;
 	}
 
 	return (
@@ -366,6 +354,9 @@ export function MoviesPanel({
 					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
 						Movies
 					</h2>
+					<p className="mt-1 text-sm text-neutral-500">
+						Keeping track of your favorite movies.
+					</p>
 				</div>
 				<Button
 					type="button"
