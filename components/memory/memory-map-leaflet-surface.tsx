@@ -45,14 +45,23 @@ function createEmojiIcon(memory: MemoryMapEntry) {
 	return L.divIcon({
 		className: "memory-map-pin-wrapper",
 		html: `
-      <div class="memory-map-pin" aria-label="${escapedTitle}">
-        <div class="memory-map-pin-bubble" style="background:${color}">${emoji}</div>
-        <div class="memory-map-pin-tip" style="background:${color}"></div>
-        <div class="memory-map-pin-label">${escapedTitle}</div>
-      </div>
-    `,
-		iconAnchor: [24, 55],
-		iconSize: [48, 58],
+			<div class="memory-map-pin" aria-label="${escapedTitle}">
+				<div
+					class="memory-map-pin-bubble"
+					style="background:${color}"
+				>
+					${emoji}
+				</div>
+
+				<div class="memory-map-pin-tip"></div>
+
+				<div class="memory-map-pin-label">
+					${escapedTitle}
+				</div>
+			</div>
+		`,
+		iconAnchor: [24, 59],
+		iconSize: [48, 76],
 	});
 }
 
@@ -197,62 +206,62 @@ export function LeafletMemoryMap({
 }: LeafletMemoryMapProps) {
 	return (
 		// <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-surface p-2 shadow-md sm:p-4">
-			<div className="relative min-h-[22rem] overflow-hidden rounded-2xl sm:min-h-[31rem] shadow-[0_0_15px_rgba(0,0,0,0.2)]">
-				<MapContainer
-					center={defaultCenter}
-					zoom={defaultZoom}
-					minZoom={2}
-					maxZoom={18}
-					scrollWheelZoom
-					touchZoom
-					dragging
-          zoomControl={false}
-          attributionControl={false}
-					className="absolute inset-0 z-0 h-full w-full"
-				>
-					<TileLayer
-						attribution=""
-						url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+		<div className="relative min-h-[22rem] overflow-hidden rounded-2xl sm:min-h-[31rem] shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+			<MapContainer
+				center={defaultCenter}
+				zoom={defaultZoom}
+				minZoom={2}
+				maxZoom={18}
+				scrollWheelZoom
+				touchZoom
+				dragging
+				zoomControl={false}
+				attributionControl={false}
+				className="absolute inset-0 z-0 h-full w-full"
+			>
+				<TileLayer
+					attribution=""
+					url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+				/>
+				<FitMemoryBounds memories={memories} />
+				<MapControls memories={memories} />
+				{memories.map((memory) => (
+					<Marker
+						key={memory.id}
+						position={[memory.latitude, memory.longitude]}
+						icon={createEmojiIcon(memory)}
+						eventHandlers={{
+							click: () => onEditMemory(memory),
+						}}
 					/>
-					<FitMemoryBounds memories={memories} />
-					<MapControls memories={memories} />
-					{memories.map((memory) => (
-						<Marker
-							key={memory.id}
-							position={[memory.latitude, memory.longitude]}
-							icon={createEmojiIcon(memory)}
-							eventHandlers={{
-								click: () => onEditMemory(memory),
-							}}
-						/>
-					))}
-				</MapContainer>
+				))}
+			</MapContainer>
 
-				<div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.16),transparent_28%,rgba(255,255,255,0.14))]" />
+			<div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.16),transparent_28%,rgba(255,255,255,0.14))]" />
 
-				{!memories.length ? (
-					<div className="absolute inset-0 z-[40] grid place-items-center px-5 text-center">
-						<div className="max-w-sm rounded-2xl border border-white/70 bg-surface/85 p-5 shadow-lg backdrop-blur">
-							<div className="mx-auto grid size-12 place-items-center rounded-full bg-primary-subtle text-primary">
-								<Compass size={22} />
-							</div>
-							<p className="mt-3 font-serif text-2xl text-foreground">
-								No places yet
-							</p>
-							<p className="mt-2 text-sm leading-6 text-muted-foreground">
-								Add the first place you spent together
-							</p>
-							<button
-								type="button"
-								className={`${primaryButtonClass} primary-action mt-4 w-full justify-center`}
-								onClick={onNewMemory}
-							>
-								Add memory
-							</button>
+			{!memories.length ? (
+				<div className="absolute inset-0 z-[40] grid place-items-center px-5 text-center">
+					<div className="max-w-sm rounded-2xl border border-white/70 bg-surface/85 p-5 shadow-lg backdrop-blur">
+						<div className="mx-auto grid size-12 place-items-center rounded-full bg-primary-subtle text-primary">
+							<Compass size={22} />
 						</div>
+						<p className="mt-3 font-serif text-2xl text-foreground">
+							No places yet
+						</p>
+						<p className="mt-2 text-sm leading-6 text-muted-foreground">
+							Add the first place you spent together
+						</p>
+						<button
+							type="button"
+							className={`${primaryButtonClass} primary-action mt-4 w-full justify-center`}
+							onClick={onNewMemory}
+						>
+							Add memory
+						</button>
 					</div>
-				) : null}
-			</div>
+				</div>
+			) : null}
+		</div>
 		// </div>
 	);
 }

@@ -328,10 +328,7 @@ export function MobileSpaceTabs({
               >
                 <span
                   className={[
-                    "grid size-7 place-items-center rounded-full transition duration-200",
-                    selected
-                      ? "mobile-tab-icon-selected bg-surface-elevated/70"
-                      : "bg-transparent",
+                    "grid size-7 place-items-center rounded-full transition duration-200 bg-transparent",
                   ].join(" ")}
                 >
                   <Icon

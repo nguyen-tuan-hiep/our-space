@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState, useTransition } from "react";
-import { MapPin, Plus } from "lucide-react";
+import { ImageIcon, MapPin, Plus } from "lucide-react";
 import { deleteMemory } from "@/app/actions";
 import { ActionMenu } from "@/components/common/action-menu";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
@@ -129,16 +129,25 @@ function MemoryCard({
 
 	return (
 		<article className="app-card app-card-interactive content-fade-in relative overflow-visible flex flex-col h-full">
-			{memory.photo_url ? (
-				<div className="relative aspect-[16/9] shrink-0 overflow-hidden rounded-t-2xl bg-surface-hover sm:rounded-t-lg">
+			<div className="relative aspect-[16/9] shrink-0 overflow-hidden rounded-t-2xl bg-surface-hover sm:rounded-t-lg">
+				{memory.photo_url ? (
 					<Image
 						src={memory.photo_url}
 						alt={memory.title}
 						fill
 						className="object-cover"
 					/>
-				</div>
-			) : null}
+				) : (
+					<div className="absolute inset-0 grid place-items-center bg-primary-subtle text-muted-foreground">
+						<div className="grid place-items-center gap-2">
+							<ImageIcon size={28} strokeWidth={1.8} />
+							<span className="text-xs font-semibold uppercase tracking-[0.16em]">
+								No photo yet
+							</span>
+						</div>
+					</div>
+				)}
+			</div>
 
 			{/* Đổi grid thành flex flex-col flex-1 để chiếm hết chiều cao còn lại */}
 			<div className="flex flex-col flex-1 gap-3 p-4 bg-surface/92 rounded-b-2xl">

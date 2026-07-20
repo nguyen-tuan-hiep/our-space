@@ -344,7 +344,7 @@ export function MoodPanel({
 										aria-label={`Mood for ${formatMoodDate(cell.dateKey, timeZone)}`}
 										onClick={() => setSelectedDate(cell.dateKey)}
 										className={[
-											"relative h-[4.7rem] min-w-0 overflow-hidden rounded-2xl border px-0.5 py-1.5 transition active:scale-[0.8] sm:h-auto sm:min-h-[5.1rem] sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
+											"relative h-[4.7rem] min-w-0 overflow-hidden rounded-2xl border px-0.5 py-1.5 transition active:scale-[0.9] sm:h-auto sm:min-h-[5.1rem] sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
 											selected
 												? "border-primary bg-primary text-primary-foreground shadow-[0_12px_28px_rgba(30,25,20,0.24)]"
 												: "border-primary-border bg-primary-subtle text-foreground hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground",
@@ -453,7 +453,7 @@ export function MoodPanel({
 									aria-pressed={selected}
 									onClick={() => setMood(option.value)}
 									className={[
-										"group grid min-h-[4.8rem] place-items-center rounded-2xl border px-2 py-2 text-center transition active:scale-[0.8]",
+										"group grid min-h-[4.8rem] place-items-center rounded-2xl border px-2 py-2 text-center transition active:scale-[0.9]",
 										selected
 											? "border-primary bg-primary text-primary-foreground shadow-[0_12px_28px_rgba(30,25,20,0.18)]"
 											: "border-primary-border bg-primary-subtle text-foreground hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground",

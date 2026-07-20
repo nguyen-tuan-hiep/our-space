@@ -120,7 +120,7 @@ export function SpaceSidebar({
 
 					<p
 						className="
-              truncate text-xs font-semibold
+              text-xs font-semibold
               text-muted-foreground
             "
 					>
@@ -307,7 +307,7 @@ export function SpaceSidebar({
 							Since
 						</p>
 
-						<p className="mt-1 truncate text-muted-foreground">
+						<p className="mt-1 text-muted-foreground">
 							{relationshipStats.nextMonthlyLabel}
 						</p>
 					</div>

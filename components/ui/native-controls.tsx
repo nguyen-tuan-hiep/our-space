@@ -27,7 +27,7 @@ export function NativeButton({
 		<button
 			{...props}
 			className={cx(
-				"inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-bold transition active:scale-[0.8] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11",
+				"inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-bold transition active:scale-[0.9] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11",
 				variant === "contained" &&
 					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-pressed",
 				variant === "outlined" &&

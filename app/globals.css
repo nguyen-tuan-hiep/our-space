@@ -709,10 +709,6 @@ input[type="time"]::-webkit-date-and-time-value {
 		animation: content-fade-in 360ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 	}
 
-	.mobile-tab-icon-selected {
-		animation: mobile-tab-icon-pop 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-	}
-
 	.mobile-fab-in {
 		animation: mobile-fab-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 	}
@@ -835,12 +831,11 @@ input[type="time"]::-webkit-date-and-time-value {
 	box-shadow:
 		0 1px 0 color-mix(in srgb, var(--theme-surface) 18%, transparent) inset,
 		0 18px 38px rgba(23, 23, 23, 0.24);
-	transform: translateY(-2px);
 }
 
 .primary-action:active {
 	box-shadow: 0 8px 18px rgba(23, 23, 23, 0.18);
-	transform: translateY(0) scale(0.98);
+	transform: scale(0.9);
 }
 
 .mobile-bottom-tab-indicator {
@@ -856,7 +851,6 @@ input[type="time"]::-webkit-date-and-time-value {
 	.mobile-hero-card-in,
 	.mobile-menu-popover-in,
 	.mobile-quote-in,
-	.mobile-tab-icon-selected,
 	.mobile-fab-in {
 		animation: none;
 		transition: none;
@@ -987,12 +981,20 @@ input[type="time"]::-webkit-date-and-time-value {
 .memory-map-pin-wrapper {
 	background: transparent;
 	border: 0;
+	overflow: visible !important;
 }
 
 .memory-map-pin {
+	--memory-pin-border: color-mix(
+		in srgb,
+		var(--theme-surface) 90%,
+		transparent
+	);
+
 	align-items: center;
 	display: flex;
 	flex-direction: column;
+	overflow: visible;
 	position: relative;
 	transform: translateY(0);
 	transition: transform 180ms ease;
@@ -1004,8 +1006,7 @@ input[type="time"]::-webkit-date-and-time-value {
 
 .memory-map-pin-bubble {
 	align-items: center;
-	background: #fffaf1;
-	border: 1px solid color-mix(in srgb, var(--theme-surface) 90%, transparent);
+	border: 1px solid var(--memory-pin-border);
 	border-radius: 999px;
 	box-shadow: 0 12px 28px rgba(30, 25, 20, 0.24);
 	display: grid;
@@ -1013,19 +1014,20 @@ input[type="time"]::-webkit-date-and-time-value {
 	height: 3rem;
 	justify-content: center;
 	outline: 4px solid color-mix(in srgb, var(--theme-surface) 72%, transparent);
+	position: relative;
 	width: 3rem;
+	z-index: 2;
 }
 
 .memory-map-pin-tip {
-	background: #fffaf1;
-	border-bottom: 1px solid color-mix(in srgb, var(--theme-surface) 90%, transparent);
-	border-right: 1px solid color-mix(in srgb, var(--theme-surface) 90%, transparent);
-	border-radius: 3px;
-	box-shadow: 6px 6px 12px rgba(30, 25, 20, 0.12);
-	height: 0.75rem;
-	margin-top: -0.25rem;
-	transform: rotate(45deg);
-	width: 0.75rem;
+	background: var(--memory-pin-border);
+	clip-path: polygon(5% 0, 95% 0, 50% 100%);
+	filter: drop-shadow(0 4px 3px rgba(30, 25, 20, 0.18));
+	height: 1rem;
+	margin-top: -0.2rem;
+	position: relative;
+	width: 1.45rem;
+	z-index: 1;
 }
 
 .memory-map-pin-label {
@@ -1043,12 +1045,18 @@ input[type="time"]::-webkit-date-and-time-value {
 	pointer-events: none;
 	position: absolute;
 	text-overflow: ellipsis;
-	top: 3.55rem;
+	top: 4.1rem;
 	transform: translateX(-50%) scale(0.96);
 	transition:
 		opacity 180ms ease,
 		transform 180ms ease;
 	white-space: nowrap;
+	z-index: 10;
+}
+
+.memory-map-pin:hover .memory-map-pin-label {
+	opacity: 1;
+	transform: translateX(-50%) scale(1);
 }
 
 .memory-map-pin:hover .memory-map-pin-label {

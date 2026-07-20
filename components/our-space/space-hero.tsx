@@ -111,7 +111,7 @@ export function SpaceHero({
                 </p>
               </div>
               <div className="relative hidden sm:block" ref={mobileMenuRef}>
-                <button
+                {/* <button
                   type="button"
                   aria-label="Open profile menu"
                   aria-controls={mobileMenuOpen ? "mobile-nav-menu" : undefined}
@@ -121,7 +121,7 @@ export function SpaceHero({
                   className="grid size-10 shrink-0 place-items-center rounded-full border border-white/35 bg-white/12 p-0 transition hover:bg-white/20 active:scale-[0.92] sm:size-9"
                 >
                   <MenuIcon size={18} />
-                </button>
+                </button> */}
                 {mobileMenuOpen ? (
                   <div
                     id="mobile-nav-menu"
