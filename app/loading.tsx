@@ -15,8 +15,8 @@ function NoteCardSkeleton() {
 
 export default function Loading() {
   return (
-    <main className="min-h-svh overflow-x-clip bg-bg mobile-native-shell lg:pl-72">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-neutral-900/10 bg-paper/95 p-4 lg:flex">
+    <main className="min-h-svh overflow-x-clip bg-primaryLight dark:bg-primaryDark mobile-native-shell lg:pl-72">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-neutral-900/10 bg-secondaryLight/95 dark:border-white/10 dark:bg-secondaryDark/95 p-4 lg:flex">
         <Skeleton className="h-16 rounded-3xl" />
         <div className="mt-6 grid gap-2">
           <Skeleton className="h-14 rounded-2xl" />
@@ -43,9 +43,16 @@ export default function Loading() {
           <Skeleton className="size-12 rounded-2xl" />
         </div>
 
-        <Skeleton className="mt-0 h-28 rounded-2xl lg:mt-6" />
+        <div className="mt-0 flex items-center gap-3 rounded-2xl bg-secondaryLight p-4 shadow-md dark:bg-secondaryDark sm:gap-4 lg:mt-6">
+          <Skeleton className="size-10 shrink-0 rounded-full" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-3 w-28 rounded-full" />
+            <Skeleton className="h-5 w-full max-w-xl rounded-full" />
+            <Skeleton className="h-4 w-36 rounded-full" />
+          </div>
+        </div>
 
-        <div className="mt-4 hidden rounded-[1.75rem] border border-neutral-900/10 bg-paper/88 p-2 sm:block lg:hidden">
+        <div className="mt-4 hidden rounded-[1.75rem] border border-neutral-900/10 bg-secondaryLight/88 dark:border-white/10 dark:bg-secondaryDark/88 p-2 sm:block lg:hidden">
           <div className="grid grid-cols-4 gap-1">
             <Skeleton className="h-12 rounded-2xl" />
             <Skeleton className="h-12 rounded-2xl" />

@@ -41,7 +41,7 @@ export function ConfirmDialog({
 			open={open}
 			onOpenChange={handleOpenChange}
 		>
-			<AlertDialogContent className="mx-4 max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-neutral-900/10 bg-paper p-0 text-neutral-950 shadow-[0_24px_70px_rgba(30,25,20,0.24)] sm:max-w-md">
+			<AlertDialogContent className="mx-4 max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-neutral-900/10 bg-secondaryLight dark:bg-secondaryDark p-0 text-neutral-950 shadow-[0_24px_70px_rgba(30,25,20,0.24)] sm:max-w-md">
 				<div className="grid gap-4 px-5 pb-2 pt-5 sm:px-6 sm:pt-6">
 					<AlertDialogHeader className="place-items-start gap-2 text-left">
 						<div className="flex items-center gap-3">
@@ -57,7 +57,7 @@ export function ConfirmDialog({
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 				</div>
-				<AlertDialogFooter className="m-0 mt-3 flex flex-col-reverse gap-2 rounded-none border-t border-neutral-900/10 bg-bg/70 p-4 sm:flex-row sm:justify-end sm:p-5">
+				<AlertDialogFooter className="m-0 mt-3 flex flex-col-reverse gap-2 rounded-none border-t border-neutral-900/10 bg-primaryLight dark:bg-primaryDark/70 p-4 sm:flex-row sm:justify-end sm:p-5">
 					<AlertDialogCancel
 						disabled={pending}
 						onClick={onClose}

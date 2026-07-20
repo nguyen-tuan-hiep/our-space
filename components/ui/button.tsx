@@ -9,13 +9,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-neutral-950 text-neutral-50 shadow-[0_10px_24px_rgba(23,23,23,0.18)] hover:bg-neutral-800",
+          "bg-accentLight text-onAccentLight dark:bg-accentDark dark:text-onAccentDark shadow-[0_10px_24px_rgba(23,23,23,0.18)] hover:bg-accentHoverLight dark:hover:bg-accentHoverDark",
         outline:
-          "border-neutral-900/15 bg-paper text-neutral-900 shadow-[0_4px_14px_rgba(23,23,23,0.06)] hover:border-neutral-900/25 hover:bg-neutral-100 hover:text-neutral-950 aria-expanded:bg-neutral-100 aria-expanded:text-neutral-950 dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border-neutral-900/15 bg-secondaryLight text-neutral-900 shadow-[0_4px_14px_rgba(23,23,23,0.06)] hover:border-neutral-900/25 hover:bg-hoverLight hover:text-neutral-950 aria-expanded:bg-hoverLight aria-expanded:text-neutral-950 dark:border-accentDark/20 dark:bg-hoverDark/55 dark:text-white dark:hover:border-accentDark/40 dark:hover:bg-accentContainerDark dark:hover:text-onAccentContainerDark dark:aria-expanded:bg-hoverDark dark:aria-expanded:text-white",
         secondary:
-          "border-neutral-900/10 bg-bg text-neutral-900 hover:bg-paper aria-expanded:bg-paper aria-expanded:text-neutral-950",
+          "border-neutral-900/10 bg-accentContainerLight text-onAccentContainerLight hover:bg-secondaryLight aria-expanded:bg-secondaryLight aria-expanded:text-neutral-950 dark:border-accentDark/16 dark:bg-accentContainerDark dark:text-onAccentContainerDark dark:hover:bg-hoverDark dark:hover:text-white dark:aria-expanded:bg-hoverDark dark:aria-expanded:text-white",
         ghost:
-          "bg-paper/35 text-neutral-700 hover:bg-neutral-300 hover:text-neutral-950 aria-expanded:bg-neutral-100 aria-expanded:text-neutral-950 dark:hover:bg-muted/50",
+          "bg-secondaryLight text-neutral-700 hover:bg-accentLight/20 hover:text-neutral-950 aria-expanded:bg-hoverLight aria-expanded:text-neutral-950 dark:bg-secondaryDark dark:text-neutral-900 dark:hover:bg-hoverDark dark:hover:text-white dark:aria-expanded:bg-hoverDark dark:aria-expanded:text-white",
         destructive:
           "border-transparent bg-transparent text-danger hover:bg-danger-bg hover:text-danger focus-visible:border-danger/40 focus-visible:ring-danger/20",
         link: "text-primary underline-offset-4 hover:underline",

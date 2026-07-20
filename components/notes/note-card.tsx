@@ -81,7 +81,7 @@ export function NoteCard({
 	return (
 		<article
 			className={[
-				"app-card app-card-interactive content-fade-in relative flex  flex-col overflow-visible p-4 sm:p-5",
+				"app-card app-card-interactive content-fade-in relative flex flex-col overflow-visible p-4 sm:p-5",
 			].join(" ")}
 		>
 			<div className="flex justify-between items-start gap-2">
@@ -138,17 +138,17 @@ export function NoteCard({
 			) : null}
 
 			{locked ? (
-				<div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-neutral-900/10 bg-bg/75 p-4 sm:p-5">
+				<div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-accentLight/15 dark:border-accentDark/15 bg-hoverLight/85 dark:bg-hoverDark/85 p-4 sm:p-5">
 					<p className="eyebrow">Unlocks in</p>
 					<p className="mt-2 font-serif text-3xl">{countdown}</p>
-					<div className="relative mt-4 min-h-0 flex-1 select-none overflow-hidden rounded-2xl border border-neutral-900/10 bg-paper/80 blur-md">
+					<div className="relative mt-4 min-h-0 flex-1 select-none overflow-hidden rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-secondaryLight/90 dark:bg-secondaryDark/90 blur-md">
 						<div className="h-full overflow-y-auto">
 							<p className="whitespace-pre-line text-md leading-7">
 								{note.content}
 							</p>
 						</div>
 
-						<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-paper to-transparent" />
+						<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-secondaryLight dark:from-secondaryDark to-transparent" />
 					</div>
 				</div>
 			) : (
@@ -158,21 +158,21 @@ export function NoteCard({
 							{note.content}
 						</div>
 					</div> */}
-					<div className="relative border-l-[3px] border-neutral-200 pl-3 dark:border-neutral-800">
+					<div className="relative rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/55 dark:bg-hoverDark/45 p-4">
 						<div
 							className="max-h-[12rem] overflow-y-auto pr-3 leading-6 text-neutral-600
 												whitespace-pre-wrap break-words
 												[&::-webkit-scrollbar]:w-1.5
 												[&::-webkit-scrollbar-track]:bg-transparent
 												[&::-webkit-scrollbar-thumb]:rounded-full
-												[&::-webkit-scrollbar-thumb]:bg-neutral-200
-												hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300
-												dark:[&::-webkit-scrollbar-thumb]:bg-neutral-700"
+												[&::-webkit-scrollbar-thumb]:bg-hoverLight
+												hover:[&::-webkit-scrollbar-thumb]:bg-accentLight/20
+												dark:[&::-webkit-scrollbar-thumb]:bg-hoverDark"
 						>
 							{note.content}
 						</div>
-						{/* <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-paper to-transparent" />
-					<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-paper to-transparent" /> */}
+						{/* <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-secondaryLight dark:from-secondaryDark to-transparent" />
+					<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-secondaryLight dark:from-secondaryDark to-transparent" /> */}
 					</div>
 				</div>
 			)}

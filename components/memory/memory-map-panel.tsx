@@ -55,7 +55,7 @@ function UserAvatar({ profile }: { profile: Profile }) {
 	const imageSrc = isImage ? avatar : null;
 
 	return (
-		<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-100 text-base">
+		<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-hoverLight dark:bg-hoverDark text-base">
 			{imageSrc ? (
 				<Image
 					src={imageSrc}
@@ -123,7 +123,7 @@ function MemoryCard({
 	return (
 		<article className="app-card app-card-interactive content-fade-in relative overflow-visible flex flex-col h-full">
 			{memory.photo_url ? (
-				<div className="relative aspect-[16/9] shrink-0 overflow-hidden rounded-t-2xl bg-neutral-100 sm:rounded-t-lg">
+				<div className="relative aspect-[16/9] shrink-0 overflow-hidden rounded-t-2xl bg-hoverLight dark:bg-hoverDark sm:rounded-t-lg">
 					<Image
 						src={memory.photo_url}
 						alt={memory.title}
@@ -135,11 +135,11 @@ function MemoryCard({
 			) : null}
 
 			{/* Đổi grid thành flex flex-col flex-1 để chiếm hết chiều cao còn lại */}
-			<div className="flex flex-col flex-1 gap-3 p-4">
+			<div className="flex flex-col flex-1 gap-3 p-4 bg-secondaryLight/92 dark:bg-secondaryDark/92 rounded-b-2xl">
 				<div className="flex items-start justify-between gap-3">
 					<div className="min-w-0">
 						<p
-							className="inline-flex max-w-full items-center rounded-full border border-black/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-300"
+							className="inline-flex max-w-full items-center rounded-full border border-accentLight/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-800"
 							style={{ backgroundColor: memoryTypeColor }}
 						>
 							{memory.memory_type}
@@ -163,7 +163,7 @@ function MemoryCard({
 
 				<div className="flex flex-col gap-2 text-sm text-neutral-600">
 					<p>{getMemoryDateLabel(memory.visited_at, timeZone)}</p>
-					<div className="grid gap-2 rounded-2xl border border-neutral-200 bg-bg/60 p-2.5">
+					<div className="grid gap-2 rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/60 p-2.5">
 						{participants.map((participant) => (
 							<UserDescriptionBlock
 								key={participant.id}
@@ -178,7 +178,7 @@ function MemoryCard({
 					href={mapsUrl}
 					target="_blank"
 					rel="noreferrer"
-					className="mt-auto inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-neutral-200 px-4 text-sm font-bold text-neutral-700 transition hover:border-mui hover:text-mui"
+					className="mt-auto inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-neutral-200 px-4 text-sm font-bold text-neutral-700 transition hover:border-accentLight dark:hover:border-accentDark hover:text-accentLight dark:hover:text-accentDark"
 				>
 					<MapPin size={16} />
 					Open location
@@ -234,7 +234,7 @@ export function MemoryMapPanel({
 
 			<div className="relative">
 				{loading ? (
-					<div className="absolute inset-0 z-40 grid place-items-center rounded-2xl bg-paper/70 p-4 backdrop-blur-sm">
+					<div className="absolute inset-0 z-40 grid place-items-center rounded-2xl bg-secondaryLight/70 dark:bg-secondaryDark/70 p-4 backdrop-blur-sm">
 						<div className="grid w-full max-w-sm gap-3">
 							<Skeleton className="h-4 w-32 rounded-full" />
 							<Skeleton className="h-20 rounded-2xl" />

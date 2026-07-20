@@ -49,7 +49,7 @@ export function SignOutButton({ className }: SignOutButtonProps) {
 			disabled={pending}
 			onClick={handleSignOut}
 			className={[
-				"!border-transparent !text-danger hover:!bg-danger-bg",
+				"!border-danger/30 !bg-danger-bg !text-danger hover:!bg-danger hover:!text-white dark:!border-danger/40 dark:!bg-danger/20 dark:!text-white dark:hover:!bg-danger dark:hover:!text-white",
 				className,
 			]
 				.filter(Boolean)

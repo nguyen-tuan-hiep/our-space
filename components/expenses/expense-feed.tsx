@@ -106,13 +106,13 @@ export function ExpenseFeed({
 						{title}
 					</span>
 
-					<div className="relative ml-auto grid size-10 shrink-0 place-items-center rounded-full transition hover:bg-mui/10">
+					<div className="relative ml-auto grid size-10 shrink-0 place-items-center rounded-full transition hover:bg-accentContainerLight dark:hover:bg-accentContainerDark">
 						<div
 							aria-hidden="true"
 							className={`grid size-10 place-items-center rounded-full transition ${
 								categoryFilter === "all"
 									? "text-neutral-500"
-									: "bg-black/10 text-black dark:bg-white/10 dark:text-white"
+									: "bg-accentContainerLight text-accentLight dark:bg-accentContainerDark dark:text-accentDark"
 							}`}
 						>
 							<ListFilter size={17} />
@@ -154,9 +154,9 @@ export function ExpenseFeed({
 												[&::-webkit-scrollbar]:w-1.5
 												[&::-webkit-scrollbar-track]:bg-transparent
 												[&::-webkit-scrollbar-thumb]:rounded-full
-												[&::-webkit-scrollbar-thumb]:bg-neutral-200
-												hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300
-												dark:[&::-webkit-scrollbar-thumb]:bg-neutral-700"
+												[&::-webkit-scrollbar-thumb]:bg-hoverLight
+												hover:[&::-webkit-scrollbar-thumb]:bg-accentLight/20
+												dark:[&::-webkit-scrollbar-thumb]:bg-hoverDark"
 				>
 					{filteredExpenses.length ? (
 						filteredExpenses.map((expense) => {
@@ -166,7 +166,7 @@ export function ExpenseFeed({
 							return (
 								<div
 									key={expense.id}
-									className="rounded-2xl border border-neutral-300 bg-bg/70 p-4 shadow-[0_10px_28px_rgba(30,25,20,0.05)] transition hover:border-neutral-400 hover:bg-paper"
+									className="rounded-2xl border border-accentLight/12 dark:border-accentDark/12 bg-hoverLight/65 dark:bg-hoverDark/55 p-4 shadow-[0_10px_28px_rgba(30,25,20,0.05)] transition"
 								>
 									<div className="flex items-start justify-between gap-3">
 										<div className="min-w-0 flex-1">
@@ -200,7 +200,7 @@ export function ExpenseFeed({
 
 									<div className="my-2 flex flex-wrap items-center gap-2">
 										<span
-											className="rounded-full px-2.5 py-1 text-xs font-bold text-black"
+											className="rounded-full px-2.5 py-1 text-xs font-bold text-accentLight"
 											style={{
 												backgroundColor:
 													expenseCategoryColors[expense.category],
@@ -219,7 +219,7 @@ export function ExpenseFeed({
 							);
 						})
 					) : (
-						<p className="rounded-2xl border border-dashed border-neutral-300 bg-white/35 py-10 text-center text-neutral-500">
+						<p className="rounded-2xl border border-dashed border-accentLight/20 dark:border-accentDark/20 bg-hoverLight/55 dark:bg-hoverDark/45 py-10 text-center text-neutral-500">
 							{expenses.length
 								? "No transactions in this category."
 								: "No transactions yet."}
@@ -229,14 +229,14 @@ export function ExpenseFeed({
 
 				<div
 					aria-hidden="true"
-					className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-6 rounded-t-2xl bg-gradient-to-b from-paper to-transparent transition-opacity duration-200 ${
+					className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-10 rounded-t-2xl bg-gradient-to-b from-secondaryLight dark:from-secondaryDark to-transparent transition-opacity duration-200 ${
 						scrollGradient.top ? "opacity-100" : "opacity-0"
 					}`}
 				/>
 
 				<div
 					aria-hidden="true"
-					className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 rounded-b-2xl bg-gradient-to-t from-paper to-transparent transition-opacity duration-200 ${
+					className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 rounded-b-2xl bg-gradient-to-t from-secondaryLight dark:from-secondaryDark to-transparent transition-opacity duration-200 ${
 						scrollGradient.bottom ? "opacity-100" : "opacity-0"
 					}`}
 				/>

@@ -32,9 +32,15 @@ function spaceTabClass(active: boolean) {
 	return [
 		"relative inline-flex min-h-10 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-bold transition duration-200 sm:px-6 active:scale-[0.96]",
 		active
-			? "material-tonal shadow-[0_8px_22px_rgba(103,80,164,0.18)]"
-			: "text-neutral-600 hover:bg-neutral-200/70 hover:text-neutral-950 dark:hover:bg-neutral-100",
+			? "material-tonal"
+			: "text-neutral-600 hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:text-neutral-400 dark:hover:bg-accentContainerDark dark:hover:text-onAccentContainerDark",
 	].join(" ");
+}
+
+function spaceTabIconClass(active: boolean) {
+	return active
+		? "text-current"
+		: "text-neutral-500 dark:text-neutral-400";
 }
 
 interface PeriodPickerButtonProps {
@@ -133,7 +139,7 @@ export function PeriodPickerButton({
 				aria-haspopup="dialog"
 				aria-expanded={periodPickerOpen ? "true" : undefined}
 				onClick={onTogglePeriodPicker}
-				className="grid size-12 place-items-center rounded-2xl bg-paper text-neutral-700 shadow-[0_3px_12px_rgba(29,27,32,0.12)] transition hover:bg-neutral-100 hover:text-mui active:scale-[0.96]"
+				className="grid size-12 place-items-center rounded-2xl bg-secondaryLight text-neutral-700 shadow-[0_3px_12px_rgba(29,27,32,0.12)] transition hover:bg-hoverLight hover:text-accentLight dark:bg-secondaryDark dark:text-white dark:hover:bg-hoverDark dark:hover:text-white active:scale-[0.96]"
 			>
 				<CalendarDays size={22} />
 			</button>
@@ -173,12 +179,12 @@ export function PeriodControls({
 	...periodPickerProps
 }: PeriodControlsProps) {
 	return (
-		<div className="sticky top-3 z-40 hidden rounded-[1.75rem] border border-neutral-900/10 bg-paper/88 p-2 shadow-[0_12px_36px_rgba(29,27,32,0.08)] backdrop-blur-xl sm:block lg:hidden">
+		<div className="sticky top-3 z-40 hidden rounded-[1.75rem] border border-neutral-900/10 bg-secondaryLight/88 p-2 shadow-[0_12px_36px_rgba(29,27,32,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-secondaryDark/88 sm:block lg:hidden">
 			<div className="flex flex-col gap-3 sm:flex-row md:items-center md:gap-6">
 				<div
 					role="tablist"
 					aria-label="Space section"
-					className="grid min-w-0 flex-1 grid-cols-5 rounded-[1.35rem] bg-bg/85 p-1"
+					className="grid min-w-0 flex-1 grid-cols-6 rounded-[1.35rem] bg-primaryLight/85 dark:bg-primaryDark/85 p-1"
 				>
 					<button
 						type="button"
@@ -189,9 +195,7 @@ export function PeriodControls({
 					>
 						<NotebookPen
 							size={18}
-							className={
-								activeSection === "notes" ? "text-mui" : "text-neutral-500"
-							}
+							className={spaceTabIconClass(activeSection === "notes")}
 						/>
 						Notes
 					</button>
@@ -204,9 +208,7 @@ export function PeriodControls({
 					>
 						<CircleDollarSign
 							size={18}
-							className={
-								activeSection === "finances" ? "text-mui" : "text-neutral-500"
-							}
+							className={spaceTabIconClass(activeSection === "finances")}
 						/>
 						Finances
 					</button>
@@ -219,9 +221,7 @@ export function PeriodControls({
 					>
 						<HeartPulse
 							size={18}
-							className={
-								activeSection === "mood" ? "text-mui" : "text-neutral-500"
-							}
+							className={spaceTabIconClass(activeSection === "mood")}
 						/>
 						Mood
 					</button>
@@ -234,9 +234,7 @@ export function PeriodControls({
 					>
 						<MapPinned
 							size={18}
-							className={
-								activeSection === "memories" ? "text-mui" : "text-neutral-500"
-							}
+							className={spaceTabIconClass(activeSection === "memories")}
 						/>
 						Memory
 					</button>
@@ -249,11 +247,22 @@ export function PeriodControls({
 					>
 						<Clapperboard
 							size={18}
-							className={
-								activeSection === "movies" ? "text-mui" : "text-neutral-500"
-							}
+							className={spaceTabIconClass(activeSection === "movies")}
 						/>
 						Movies
+					</button>
+					<button
+						type="button"
+						role="tab"
+						aria-selected={activeSection === "personal"}
+						className={spaceTabClass(activeSection === "personal")}
+						onClick={() => onSelectSection("personal")}
+					>
+						<UserRound
+							size={18}
+							className={spaceTabIconClass(activeSection === "personal")}
+						/>
+						Personal
 					</button>
 				</div>
 
@@ -296,11 +305,11 @@ export function MobileSpaceTabs({
 			aria-label="Space sections"
 			className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-[50] sm:hidden"
 		>
-			<div className="relative rounded-t-[1.8rem] border-t border-mui/10 bg-paper/92 px-2 pb-[clamp(0.5rem,env(safe-area-inset-bottom),1rem)] shadow-[0_-10px_34px_rgba(29,27,32,0.14)] backdrop-blur-xl">
+			<div className="relative rounded-t-[1.8rem] border-t border-accentLight/10 dark:border-accentDark/10 bg-secondaryLight/92 dark:bg-secondaryDark/92 px-2 pb-[clamp(0.5rem,env(safe-area-inset-bottom),1rem)] shadow-[0_-10px_34px_rgba(29,27,32,0.14)] backdrop-blur-xl">
 				<div className="relative grid grid-cols-6 py-2">
 					<div
 						aria-hidden="true"
-						className="mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-2xl bg-mui/14 shadow-[0_8px_20px_rgba(103,80,164,0.18)]"
+						className="mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-2xl bg-accentContainerLight shadow-[0_8px_20px_color-mix(in_srgb,var(--color-accent-light)_18%,transparent)] dark:bg-accentContainerDark dark:shadow-[0_8px_20px_color-mix(in_srgb,var(--color-accent-dark)_22%,transparent)]"
 						style={{
 							width: "calc(100% / 6)",
 							transform: `translateX(${selectedIndex * 100}%)`,
@@ -318,7 +327,9 @@ export function MobileSpaceTabs({
 								aria-selected={selected}
 								className={[
 									"relative z-10 flex min-h-[3rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-[10.5px] font-extrabold transition duration-200 active:scale-[0.8]",
-									selected ? "text-neutral-950" : "text-neutral-500",
+									selected
+										? "text-onAccentContainerLight dark:text-onAccentContainerDark"
+										: "text-neutral-500 dark:text-neutral-400",
 								].join(" ")}
 								onClick={() => onSelectSection(item.value)}
 							>
@@ -326,16 +337,14 @@ export function MobileSpaceTabs({
 									className={[
 										"grid size-7 place-items-center rounded-full transition duration-200",
 										selected
-											? "mobile-tab-icon-selected bg-white/16"
+											? "mobile-tab-icon-selected bg-secondaryLight/70 dark:bg-secondaryDark/70"
 											: "bg-transparent",
 									].join(" ")}
 								>
 									<Icon
 										size={19}
 										strokeWidth={selected ? 2.7 : 2.35}
-										className={
-											selected ? "text-neutral-950" : "text-neutral-500"
-										}
+										className="text-current"
 									/>
 								</span>
 								<span>{item.label}</span>

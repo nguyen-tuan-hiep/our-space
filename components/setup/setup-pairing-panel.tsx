@@ -87,7 +87,7 @@ export function SetupPairingPanel({
 	return (
 		<div className="mt-4 space-y-4">
 			{requests.length ? (
-				<div className="rounded-2xl border border-neutral-400 bg-paper p-4 sm:p-5">
+				<div className="rounded-2xl border border-neutral-400 bg-secondaryLight dark:bg-secondaryDark p-4 sm:p-5">
 					<PairingRequests
 						profileId={profileId}
 						requests={requests}
@@ -100,7 +100,7 @@ export function SetupPairingPanel({
 				</div>
 			) : null}
 
-			<div className="rounded-2xl border border-neutral-400 bg-paper p-4 sm:p-5">
+			<div className="rounded-2xl border border-neutral-400 bg-secondaryLight dark:bg-secondaryDark p-4 sm:p-5">
 				<p className="mb-4 text-sm font-medium text-neutral-700">
 					Enter your partner&apos;s pairing code
 				</p>

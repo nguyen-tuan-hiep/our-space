@@ -876,6 +876,8 @@ export function OurSpaceClient({
 			? "All memories"
 			: activeSection === "movies"
 				? "Couple watchlist"
+				: activeSection === "personal"
+					? "Personal"
 				: periodDescription;
 	const pickerPeriodDescription = pickerActivePeriod
 		? formatPeriodLabel(pickerActivePeriod, profileTimeZone, pickerRange)
@@ -992,7 +994,7 @@ export function OurSpaceClient({
 	);
 
 	return (
-		<main className="min-h-svh overflow-x-clip bg-bg mobile-native-shell lg:pl-72">
+		<main className="min-h-svh overflow-x-clip bg-primaryLight dark:bg-primaryDark mobile-native-shell lg:pl-72">
 			<SpaceSidebar
 				activeSection={activeSection}
 				anniversaryLabel={anniversaryLabel}
@@ -1006,7 +1008,7 @@ export function OurSpaceClient({
 				onSignOut={handleSignOut}
 			/>
 
-			<div className="lg:hidden">
+			<div className="lg:hidden bg-primaryLight dark:bg-primaryDark">
 				<SpaceHero
 					anniversaryLabel={anniversaryLabel}
 					heroImageUrl={heroImageUrl}
@@ -1057,7 +1059,9 @@ export function OurSpaceClient({
 												: "Personal"}
 						</h1> */}
 					</div>
-					{activeSection === "memories" || activeSection === "movies" ? null : (
+					{activeSection === "memories" ||
+					activeSection === "movies" ||
+					activeSection === "personal" ? null : (
 						<PeriodPickerButton
 							{...periodPickerProps}
 							periodLabel={periodLabel}
@@ -1076,7 +1080,9 @@ export function OurSpaceClient({
 						activeSection={activeSection}
 						{...periodPickerProps}
 						hidePeriodPicker={
-							activeSection === "memories" || activeSection === "movies"
+							activeSection === "memories" ||
+							activeSection === "movies" ||
+							activeSection === "personal"
 						}
 						periodLabel={periodLabel}
 						onSelectSection={setActiveSection}

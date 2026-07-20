@@ -53,21 +53,24 @@ const columns: Array<{
 		title: "Watching",
 		empty: "No movies are currently playing.",
 		icon: Play,
-		iconClassName: "border-sky-200 bg-sky-50 text-sky-700",
+		iconClassName:
+			"border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-300/20 dark:bg-sky-300/10 dark:text-sky-200",
 	},
 	{
 		status: "wishlist",
 		title: "Wishlist",
 		empty: "No saved movies yet.",
 		icon: Bookmark,
-		iconClassName: "border-amber-200 bg-amber-50 text-amber-700",
+		iconClassName:
+			"border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-200",
 	},
 	{
 		status: "watched",
 		title: "Watched",
 		empty: "No watched movies yet.",
 		icon: CircleCheck,
-		iconClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
+		iconClassName:
+			"border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-200",
 	},
 ];
 
@@ -105,7 +108,7 @@ function UserAvatar({ profile }: { profile: Profile }) {
 	const imageSrc = isImage ? avatar : null;
 
 	return (
-		<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-100 text-base">
+		<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-hoverLight dark:bg-hoverDark text-base">
 			{imageSrc ? (
 				<Image
 					src={imageSrc}
@@ -140,10 +143,12 @@ function UserCommentBlock({
 			<p
 				className={[
 					"min-w-0 max-h-12 flex-1 overflow-y-auto whitespace-pre-wrap break-words pr-1 text-sm leading-5",
-					comment ? "text-neutral-600" : "text-neutral-400",
+					comment
+						? "text-neutral-600 dark:text-neutral-800"
+						: "text-neutral-400 dark:text-white0",
 				].join(" ")}
 			>
-				<span className="font-bold text-neutral-800">
+				<span className="font-bold text-neutral-800 dark:text-white">
 					{profile.display_name}:
 				</span>{" "}
 				{comment || "No comment yet."}
@@ -164,11 +169,11 @@ function MovieCard({
 	onShowDetails: () => void;
 }) {
 	return (
-		<article className="app-card-interactive content-fade-in relative overflow-hidden p-0 w-full h-full rounded-2xl">
+		<article className="content-fade-in relative h-full w-full overflow-hidden rounded-2xl bg-transparent shadow-none sm:app-card sm:app-card-interactive">
 			<button
 				type="button"
 				aria-label={`View details for ${movie.title}`}
-				className="relative block aspect-[2/3] w-full h-full overflow-hidden bg-neutral-100 text-left"
+				className="relative block aspect-[2/3] h-full w-full overflow-hidden rounded-[1rem] bg-hoverLight dark:bg-hoverDark text-left"
 				onClick={onShowDetails}
 			>
 				{movie.poster_url ? (
@@ -180,7 +185,7 @@ function MovieCard({
 						className="object-cover"
 					/>
 				) : (
-					<div className="grid h-full place-items-center bg-neutral-950 p-4 text-center text-neutral-50">
+					<div className="grid h-full place-items-center bg-accentLight p-4 text-center text-onAccentLight dark:bg-accentDark dark:text-onAccentDark">
 						<Clapperboard size={42} />
 						<span className="sr-only">{movie.title}</span>
 					</div>
@@ -233,14 +238,14 @@ function MovieDetailsDialog({
 			<button
 				type="button"
 				aria-label="Close movie details"
-				className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-full bg-paper/90 text-neutral-700 shadow-[0_8px_22px_rgba(23,23,23,0.16)] backdrop-blur hover:bg-neutral-950 hover:text-white"
+				className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-full bg-secondaryLight/90 dark:bg-secondaryDark/90 text-neutral-700 shadow-[0_8px_22px_rgba(23,23,23,0.16)] backdrop-blur hover:bg-accentLight hover:text-onAccentLight dark:hover:bg-accentDark dark:hover:text-onAccentDark"
 				onClick={onClose}
 			>
 				<X size={18} />
 			</button>
 
 			<div className="grid min-h-0 sm:grid-cols-[15rem_1fr]">
-				<div className="relative overflow-visible bg-neutral-950 px-4 pb-0 pt-5 sm:overflow-hidden sm:bg-neutral-100 sm:p-0">
+				<div className="relative overflow-visible bg-accentLight px-4 pb-0 pt-5 dark:bg-accentDark sm:overflow-hidden sm:bg-hoverLight sm:dark:bg-hoverDark sm:p-0">
 					{movie.poster_url ? (
 						<>
 							<div className="absolute inset-0 overflow-hidden sm:hidden">
@@ -252,11 +257,11 @@ function MovieDetailsDialog({
 									className="scale-110 object-cover opacity-90 blur-md"
 									aria-hidden="true"
 								/>
-								<div className="absolute inset-0 bg-black/20" />
+								<div className="absolute inset-0 bg-accentLight/20" />
 							</div>
 						</>
 					) : null}
-					<div className="relative z-[1] mx-auto -mb-14 aspect-[2/3] w-[min(70vw,15rem)] overflow-hidden rounded-2xl bg-neutral-100 shadow-[0_16px_40px_rgba(0,0,0,0.28)] sm:mb-0 sm:h-full sm:w-full sm:rounded-none sm:shadow-none">
+					<div className="relative z-[1] mx-auto -mb-14 aspect-[2/3] w-[min(70vw,15rem)] overflow-hidden rounded-2xl bg-hoverLight dark:bg-hoverDark shadow-[0_16px_40px_rgba(0,0,0,0.28)] sm:mb-0 sm:h-full sm:w-full sm:rounded-none sm:shadow-none">
 						{movie.poster_url ? (
 							<Image
 								src={movie.poster_url}
@@ -266,7 +271,7 @@ function MovieDetailsDialog({
 								className="object-cover"
 							/>
 						) : (
-							<div className="grid h-full place-items-center bg-neutral-950 text-neutral-50">
+							<div className="grid h-full place-items-center bg-accentLight text-onAccentLight dark:bg-accentDark dark:text-onAccentDark">
 								<Clapperboard size={52} />
 							</div>
 						)}
@@ -287,12 +292,12 @@ function MovieDetailsDialog({
 							{categories.map((category) => (
 								<span
 									key={category}
-									className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600"
+									className="rounded-full bg-hoverLight px-3 py-1.5 text-sm font-bold text-neutral-600 dark:bg-hoverDark dark:text-neutral-800"
 								>
 									{category}
 								</span>
 							))}
-							<span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-bold text-neutral-600">
+							<span className="rounded-full bg-hoverLight px-3 py-1.5 text-sm font-bold text-neutral-600 dark:bg-hoverDark dark:text-neutral-800">
 								{movie.status === "wishlist"
 									? "Wishlist"
 									: movie.status === "watching"
@@ -302,7 +307,7 @@ function MovieDetailsDialog({
 						</div>
 						<div className="flex flex-wrap items-center gap-2">
 							{movie.rating ? (
-								<span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-800">
+								<span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-bold text-amber-800 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-200">
 									<Star
 										size={15}
 										fill="currentColor"
@@ -316,7 +321,7 @@ function MovieDetailsDialog({
 						</div>
 					</div>
 
-					<div className="grid gap-2 rounded-2xl border border-neutral-200 bg-bg/60 p-2.5">
+					<div className="grid gap-2 rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/60 p-2.5">
 						{participants.map((participant) => (
 							<UserCommentBlock
 								key={participant.id}
@@ -453,7 +458,7 @@ export function MoviesPanel({
 						key={column.status}
 						className="grid content-start gap-3 min-w-0"
 					>
-						<div className="flex items-center justify-between rounded-2xl border border-neutral-900/10 bg-paper/88 px-4 py-3 shadow-sm">
+						<div className="app-card flex items-center justify-between px-4 py-3">
 							<div className="flex min-w-0 items-center gap-3">
 								<span
 									className={`grid size-9 shrink-0 place-items-center rounded-full border ${column.iconClassName}`}
@@ -464,7 +469,7 @@ export function MoviesPanel({
 									{column.title}
 								</h3>
 							</div>
-							<span className="rounded-full border border-neutral-900/10 bg-neutral-100 px-2.5 py-1 text-xs font-bold text-neutral-700">
+							<span className="rounded-full border border-accentLight/10 bg-hoverLight px-2.5 py-1 text-xs font-bold text-neutral-700 dark:border-accentDark/14 dark:bg-hoverDark dark:text-neutral-800">
 								{column.movies.length}
 							</span>
 						</div>
@@ -486,7 +491,7 @@ export function MoviesPanel({
 										}}
 										spaceBetween={12} // Khoảng cách nhỏ lại để UI chặt chẽ hơn
 										slidesPerView="auto"
-										className="!overflow-visible [--swiper-pagination-color:#0a0a0a] [--swiper-pagination-bottom:-20px]"
+										className="!overflow-visible [--swiper-pagination-bottom:-20px] [--swiper-pagination-color:var(--color-accent-light)] dark:[--swiper-pagination-color:var(--color-accent-dark)]"
 									>
 										{column.movies.map((movie) => (
 											<SwiperSlide
@@ -498,7 +503,7 @@ export function MoviesPanel({
 														// Custom easing Apple-style, thêm shadow và trục Y 3D
 														className={`transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] h-full origin-center rounded-2xl ${
 															isActive
-																? "scale-100 opacity-100 shadow-[10px_10px_30px_-10px_rgba(0,0,0,0.5)] -translate-y-2 ring-1 ring-black/5" // Nổi lên, sáng, bóng đổ to
+																? "scale-100 opacity-100 shadow-[10px_10px_30px_-10px_rgba(0,0,0,0.5)] -translate-y-2" // Nổi lên, sáng, bóng đổ to
 																: "scale-[0.82] opacity-40 translate-y-3 pointer-events-none" // Chìm xuống, mờ, khóa click
 														}`}
 													>
@@ -540,7 +545,7 @@ export function MoviesPanel({
 								))}
 							</div>
 						) : (
-							<div className="app-card p-5 text-sm font-semibold text-neutral-500">
+							<div className="rounded-2xl border border-dashed border-accentLight/20 dark:border-accentDark/20 bg-hoverLight/55 dark:bg-hoverDark/45 p-5 text-sm font-semibold text-neutral-500">
 								{column.empty}
 							</div>
 						)}

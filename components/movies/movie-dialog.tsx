@@ -39,7 +39,7 @@ function UserFieldLabel({ profile }: { profile: Profile }) {
 
 	return (
 		<div className="mb-2 flex items-center gap-2">
-			<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-100 text-base">
+			<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-hoverLight dark:bg-hoverDark text-base">
 				{imageSrc ? (
 					<Image
 						src={imageSrc}
@@ -52,7 +52,7 @@ function UserFieldLabel({ profile }: { profile: Profile }) {
 					avatar ?? "🙂"
 				)}
 			</span>
-			<span className="min-w-0 truncate text-sm font-bold text-neutral-800">
+			<span className="min-w-0 truncate text-sm font-bold text-neutral-800 dark:text-white">
 				{profile.display_name}
 			</span>
 		</div>
@@ -241,7 +241,7 @@ export function MovieDialog({
 										aria-label="Choose reaction emoji"
 										aria-expanded={reactionPickerOpen ? "true" : undefined}
 										disabled={status === "wishlist"}
-										className={`peer flex h-12 w-full items-center justify-between rounded-2xl border border-neutral-400 bg-transparent px-3 text-left text-sm text-neutral-900 outline-none transition-all duration-200 sm:h-11 ${
+										className={`peer flex h-12 w-full items-center justify-between rounded-2xl border border-neutral-400 bg-transparent px-3 text-left text-sm text-neutral-900 outline-none transition-all duration-200 hover:border-accentLight focus:border-accentLight focus:ring-2 focus:ring-accentLight/15 dark:border-neutral-500/70 dark:bg-primaryDark/35 dark:text-white dark:hover:border-accentDark dark:focus:border-accentDark dark:focus:ring-accentDark/30 sm:h-11 ${
 											status === "wishlist"
 												? "cursor-not-allowed opacity-50"
 												: ""
@@ -253,10 +253,10 @@ export function MovieDialog({
 										</span>
 										<SmilePlus
 											size={17}
-											className="text-neutral-500"
+											className="text-neutral-500 dark:text-neutral-800"
 										/>
 									</button>
-									<label className="pointer-events-none absolute left-3 top-3 origin-[top_left] -translate-y-5 scale-75 bg-paper px-1 text-sm text-neutral-500 transition-all duration-200">
+									<label className="pointer-events-none absolute left-3 top-3 origin-[top_left] -translate-y-5 scale-75 bg-secondaryLight px-1 text-sm text-neutral-500 transition-all duration-200 dark:bg-secondaryDark dark:text-neutral-800">
 										Reaction
 									</label>
 								</div>
@@ -264,14 +264,14 @@ export function MovieDialog({
 						</div>
 					</div>
 
-					<div className="rounded-2xl border border-neutral-400 px-3 py-3">
+					<div className="rounded-2xl border border-neutral-400 px-3 py-3 dark:border-neutral-600">
 						<div className="mb-2 flex items-center justify-between gap-3">
-							<div className="text-xs font-semibold text-neutral-500">
+							<div className="text-xs font-semibold text-neutral-500 dark:text-neutral-800">
 								Categories
 							</div>
 							<button
 								type="button"
-								className="text-[11px] font-semibold text-neutral-500 transition hover:text-neutral-950 disabled:pointer-events-none disabled:text-neutral-300"
+								className="text-[11px] font-semibold text-neutral-500 transition hover:text-neutral-950 disabled:pointer-events-none disabled:text-neutral-300 dark:text-neutral-800 dark:hover:text-white dark:disabled:text-neutral-500"
 								disabled={selectedCategories.length === 0}
 								onClick={() => setSelectedCategories([])}
 							>
@@ -288,8 +288,8 @@ export function MovieDialog({
 										aria-pressed={selected}
 										className={`rounded-full border px-2.5 py-1 text-xs font-bold transition ${
 											selected
-												? "border-neutral-950 bg-neutral-950 text-white"
-												: "border-neutral-300 bg-transparent text-neutral-600 hover:border-neutral-500"
+												? "border-accentLight bg-accentLight dark:border-accentDark text-onAccentLight dark:bg-accentDark dark:text-onAccentDark"
+												: "border-neutral-300 bg-transparent text-neutral-600 hover:border-accentLight hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:border-neutral-500/70 dark:bg-primaryDark/25 dark:text-white dark:hover:border-accentDark dark:hover:bg-accentDark dark:hover:text-white"
 										}`}
 										onClick={() => toggleCategory(category)}
 									>
@@ -317,7 +317,7 @@ export function MovieDialog({
 
 					{posterUrl ? (
 						/* Thêm class 'mx-auto' vào dòng dưới đây để căn giữa */
-						<div className="mx-auto relative aspect-[2/3] w-40 overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100">
+						<div className="mx-auto relative aspect-[2/3] w-40 overflow-hidden rounded-2xl border border-accentLight/12 bg-hoverLight dark:border-accentDark/16 dark:bg-hoverDark">
 							<Image
 								src={posterUrl}
 								alt="Movie poster preview"
@@ -336,7 +336,7 @@ export function MovieDialog({
 					>
 						<label
 							// Thay 'inline-flex' bằng 'flex w-full' để label giãn hết 100% cột grid
-							className={`flex w-full min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 sm:min-h-11 ${
+							className={`flex w-full min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-accentLight px-5 text-sm font-bold text-accentLight transition hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:border-neutral-500/60 dark:bg-secondaryDark dark:text-white dark:hover:border-accentDark dark:hover:bg-accentDark dark:hover:text-white sm:min-h-11 ${
 								uploading ? "pointer-events-none opacity-50" : ""
 							}`}
 						>

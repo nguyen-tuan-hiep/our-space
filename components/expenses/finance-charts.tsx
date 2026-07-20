@@ -21,7 +21,6 @@ import {
 	formatCurrency,
 	getSupportedCurrencyCodes,
 } from "@/lib/constants";
-import { themeColors } from "@/lib/theme-colors";
 import { formatAppDate } from "@/lib/date-format";
 import {
 	buildFinanceBreakdowns,
@@ -117,7 +116,7 @@ const renderCustomizedLabel = ({
 		<text
 			x={x}
 			y={y}
-			fill="black"
+			fill="var(--theme-foreground)"
 			textAnchor="middle"
 			dominantBaseline="central"
 			className="text-[10px] font-bold"
@@ -297,7 +296,7 @@ export function FinanceCharts({
 			</div>
 
 			{needsExchangeRate && !exchangeRates ? (
-				<div className="mb-5 border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+				<div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100">
 					Live exchange rate is not available yet, so mixed-currency charts
 					cannot be converted. Refresh later or check the server network/API
 					setting.
@@ -305,7 +304,7 @@ export function FinanceCharts({
 			) : null}
 
 			<div className="grid min-w-0 gap-4 sm:gap-6">
-				<div className="min-w-0 rounded-2xl border p-4 rounded-2xl border-neutral-400 border-dashed sm:bg-transparent">
+				<div className="app-card min-w-0 p-4">
 					<div className="mb-4">
 						<p className="eyebrow">
 							{filterRange === "week" ? "Weekly ledgers" : "Monthly ledgers"}
@@ -328,7 +327,7 @@ export function FinanceCharts({
 							>
 								<AreaChart data={chartData}>
 									<CartesianGrid
-										stroke={themeColors.chartGrid}
+										stroke="var(--theme-border)"
 										strokeDasharray="4 4"
 									/>
 									<XAxis
@@ -372,7 +371,7 @@ export function FinanceCharts({
 					{perPerson.map((item) => (
 						<div
 							key={item.profile.id}
-							className="flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border border-neutral-400 border-dashed p-4"
+							className="app-card flex min-w-0 flex-col justify-between overflow-hidden p-4"
 						>
 							<div className="mb-2 flex items-center justify-between gap-3">
 								<div className="min-w-0">
@@ -416,7 +415,7 @@ export function FinanceCharts({
 														fill={
 															expenseCategoryColors[
 																entry.category as keyof typeof expenseCategoryColors
-															] ?? "#94a3b8"
+															] ?? "var(--theme-muted-foreground)"
 														}
 													/>
 												))}
@@ -428,14 +427,14 @@ export function FinanceCharts({
 
 								<div className="flex-1 w-full space-y-1.5 overflow-y-auto max-h-48 text-xs">
 									{item.categories.length === 0 ? (
-										<p className="text-neutral-400 text-center py-4">
+										<p className="text-neutral-400 dark:text-white0 text-center py-4">
 											No data available
 										</p>
 									) : (
 										(item.categories as CategoryBreakdown[]).map((cat) => (
 											<div
 												key={cat.category}
-												className="flex items-center justify-between gap-2 border-b border-neutral-100 pb-1"
+												className="flex items-center justify-between gap-2 border-b border-neutral-100 pb-1 dark:border-neutral-700"
 											>
 												<div className="flex items-center gap-2 min-w-0">
 													<span
@@ -444,14 +443,14 @@ export function FinanceCharts({
 															backgroundColor:
 																expenseCategoryColors[
 																	cat.category as keyof typeof expenseCategoryColors
-																] ?? "#94a3b8",
+																] ?? "var(--theme-muted-foreground)",
 														}}
 													/>
-													<span className="truncate font-medium text-neutral-700 capitalize">
+													<span className="truncate font-medium text-neutral-700 dark:text-neutral-800 capitalize">
 														{cat.category}
 													</span>
 												</div>
-												<span className="font-semibold text-neutral-900 shrink-0">
+												<span className="font-semibold text-neutral-900 dark:text-white shrink-0">
 													{formatCurrency(cat.value, displayCurrency)}
 												</span>
 											</div>

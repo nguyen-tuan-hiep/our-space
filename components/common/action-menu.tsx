@@ -88,12 +88,14 @@ export function ActionMenu({
 
 	const handleMobileEdit = () => {
 		setMobileOpen(false);
-		window.setTimeout(onEdit, 120);
+		setShouldRenderMobile(false);
+		window.requestAnimationFrame(onEdit);
 	};
 
 	const handleMobileDelete = () => {
 		setMobileOpen(false);
-		window.setTimeout(onDelete, 120);
+		setShouldRenderMobile(false);
+		window.requestAnimationFrame(onDelete);
 	};
 
 	const mobileSheet = shouldRenderMobile ? (
@@ -102,7 +104,7 @@ export function ActionMenu({
 				type="button"
 				aria-label="Close actions"
 				className={[
-					"fixed inset-0 z-[70] bg-bg/25 backdrop-blur-[2px] sm:hidden",
+					"fixed inset-0 z-[70] bg-primaryLight/25 dark:bg-primaryDark/25 backdrop-blur-[2px] sm:hidden",
 					mobileClosing
 						? "native-dialog-backdrop-out"
 						: "native-dialog-backdrop-in",
@@ -114,11 +116,11 @@ export function ActionMenu({
 				aria-modal="true"
 				aria-label={sheetTitle}
 				className={[
-					"mobile-sheet-motion fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] overflow-hidden rounded-3xl border border-white/80 bg-paper shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:hidden",
+					"mobile-sheet-motion fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] overflow-hidden rounded-3xl border border-secondaryLight/80 bg-secondaryLight dark:bg-secondaryDark shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:hidden",
 					mobileClosing ? "native-sheet-out" : "native-sheet-in",
 				].join(" ")}
 			>
-				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-neutral-300" />
+				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-accentLight/20" />
 				<div className="border-b border-neutral-900/10 px-5 py-4">
 					<p className="font-serif text-xl leading-tight text-neutral-950">
 						{sheetTitle}
@@ -131,7 +133,7 @@ export function ActionMenu({
 					<Button
 						type="button"
 						variant="ghost"
-						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:bg-neutral-100 hover:shadow-[0_10px_24px_rgba(23,23,23,0.08)] active:scale-[0.98]"
+						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:bg-hoverLight dark:hover:bg-hoverDark hover:shadow-[0_10px_24px_rgba(23,23,23,0.08)] active:scale-[0.98]"
 						onClick={handleMobileEdit}
 					>
 						<Edit2 size={18} />
@@ -140,7 +142,7 @@ export function ActionMenu({
 					<Button
 						type="button"
 						variant="destructive"
-						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:shadow-[0_10px_24px_rgba(220,38,38,0.14)] active:scale-[0.98]"
+						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:bg-danger-bg hover:shadow-[0_10px_24px_rgba(220,38,38,0.14)] active:scale-[0.98]"
 						onClick={handleMobileDelete}
 					>
 						<Trash2 size={18} />
@@ -174,7 +176,7 @@ export function ActionMenu({
 							aria-label={label}
 							disabled={disabled}
 							className={cn(
-								"hidden rounded-full bg-bg text-neutral-600 hover:bg-neutral-950 hover:text-neutral-50 active:scale-[0.95] sm:inline-flex",
+								"hidden rounded-full bg-primaryLight dark:bg-primaryDark text-neutral-600 hover:bg-accentLight hover:text-onAccentLight dark:hover:bg-accentDark dark:hover:text-onAccentDark active:scale-[0.95] sm:inline-flex",
 								triggerClassName,
 							)}
 						/>
@@ -186,7 +188,7 @@ export function ActionMenu({
 					align="end"
 					sideOffset={8}
 					className={cn(
-						"w-72 rounded-3xl border border-neutral-900/10 bg-paper p-2 shadow-[0_24px_70px_rgba(30,25,20,0.22)] backdrop-blur-xl",
+						"w-72 rounded-3xl border border-neutral-900/10 bg-secondaryLight dark:bg-secondaryDark p-2 shadow-[0_24px_70px_rgba(30,25,20,0.22)] backdrop-blur-xl",
 						contentClassName,
 					)}
 				>
@@ -200,9 +202,9 @@ export function ActionMenu({
 					</div>
 					<DropdownMenuItem
 						onClick={onEdit}
-						className="group gap-3 rounded-2xl px-3 py-3 hover:bg-neutral-100"
+						className="group gap-3 rounded-2xl px-3 py-3 hover:bg-hoverLight dark:hover:bg-hoverDark"
 					>
-						<span className="grid size-9 place-items-center rounded-xl bg-bg text-neutral-700 transition group-hover:bg-neutral-950 group-hover:text-neutral-50">
+						<span className="grid size-9 place-items-center rounded-xl bg-primaryLight dark:bg-primaryDark text-neutral-700 transition group-hover:bg-accentLight group-hover:text-onAccentLight dark:group-hover:bg-accentDark dark:group-hover:text-onAccentDark">
 							<Edit2 size={16} />
 						</span>
 						<span>
@@ -219,7 +221,7 @@ export function ActionMenu({
 						onClick={onDelete}
 						className="group mt-1 gap-3 rounded-2xl border border-transparent bg-transparent px-3 py-3 text-danger hover:bg-danger-bg"
 					>
-						<span className="grid size-9 place-items-center rounded-xl bg-danger-bg text-danger transition">
+						<span className="grid size-9 place-items-center rounded-xl bg-danger-bg text-danger transition group-hover:bg-danger group-hover:text-white">
 							<Trash2 size={16} />
 						</span>
 						<span>
@@ -241,7 +243,7 @@ export function ActionMenu({
 				aria-haspopup="dialog"
 				disabled={disabled}
 				className={cn(
-					"inline-flex rounded-full bg-bg text-neutral-600 shadow-[0_6px_16px_rgba(23,23,23,0.08)] hover:bg-neutral-950 hover:text-neutral-50 hover:shadow-[0_12px_28px_rgba(23,23,23,0.16)] active:scale-[0.92] sm:hidden",
+					"inline-flex rounded-full bg-primaryLight dark:bg-primaryDark text-neutral-600 shadow-[0_6px_16px_rgba(23,23,23,0.08)] hover:bg-accentLight hover:text-onAccentLight dark:hover:bg-accentDark dark:hover:text-onAccentDark hover:shadow-[0_12px_28px_rgba(23,23,23,0.16)] active:scale-[0.92] sm:hidden",
 					triggerClassName,
 				)}
 				onClick={() => {

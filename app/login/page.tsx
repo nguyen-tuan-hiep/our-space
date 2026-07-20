@@ -26,14 +26,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
 
   return (
-    <main className="min-h-svh bg-bg">
+    <main className="min-h-svh bg-primaryLight dark:bg-primaryDark">
       <section className="container-page grid min-h-svh items-center gap-10 py-10 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="max-w-3xl">
           <p className="eyebrow">Private couple hub</p>
-          <h1 className="mt-5 font-serif text-6xl leading-[0.9] sm:text-8xl lg:text-8xl">
+          <h1 className="mt-5 font-serif text-6xl leading-[0.9] text-neutral-950 dark:text-white sm:text-8xl lg:text-8xl">
             Our Space 𑣲⋆
           </h1>
-          <p className="mt-8 max-w-xl text-lg leading-8 text-neutral-600">
+          <p className="mt-8 max-w-xl text-lg leading-8 text-neutral-600 dark:text-neutral-900">
             A private place for both of us to share our thoughts, memories, and
             moments together.
           </p>

@@ -135,7 +135,7 @@ function personMoodCard({
 		<div className="app-card content-fade-in p-4">
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-w-0 items-center gap-3">
-					<div className="grid size-11 shrink-0 place-items-center rounded-full bg-black/10 dark:bg-white/10 text-xl">
+					<div className="grid size-11 shrink-0 place-items-center rounded-full bg-accentContainerLight dark:bg-accentContainerDark text-xl">
 						{avatar}
 					</div>
 					<div className="min-w-0">
@@ -155,7 +155,7 @@ function personMoodCard({
 				{option ? option.label : "No mood"}
 			</p>
 			{mood?.note ? (
-				<p className="mt-2 rounded-2xl bg-mui/10 px-3 py-2 text-sm leading-6 text-neutral-600">
+				<p className="mt-2 rounded-2xl bg-accentContainerLight dark:bg-accentContainerDark px-3 py-2 text-sm leading-6 text-neutral-600">
 					{mood.note}
 				</p>
 			) : null}
@@ -291,7 +291,7 @@ export function MoodPanel({
 						<div className="flex items-center gap-2">
 							<CalendarDays
 								size={18}
-								className="text-mui"
+								className="text-accentLight dark:text-accentDark"
 							/>
 							<p className="font-serif text-2xl leading-tight">Mood calendar</p>
 						</div>
@@ -299,7 +299,7 @@ export function MoodPanel({
 							Big icon = you · small badge = partner
 						</p>
 					</div>
-					<span className="rounded-full bg-mui/10 px-3 py-1 text-xs font-bold text-mui">
+					<span className="rounded-full bg-accentContainerLight dark:bg-accentContainerDark px-3 py-1 text-xs font-bold text-accentLight dark:text-accentDark">
 						{filterRange === "week" ? "Week" : "Month"}
 					</span>
 				</div>
@@ -346,8 +346,8 @@ export function MoodPanel({
 										className={[
 											"relative h-[4.7rem] min-w-0 overflow-hidden rounded-2xl border px-0.5 py-1.5 transition active:scale-[0.8] sm:h-auto sm:min-h-[5.1rem] sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
 											selected
-												? "border-neutral-950 bg-neutral-950 text-neutral-50 shadow-[0_12px_28px_rgba(30,25,20,0.24)]"
-												: "border-neutral-200 bg-neutral-50/70 text-neutral-800 hover:border-mui/40 hover:bg-mui/10",
+												? "border-accentLight bg-accentLight dark:border-accentDark text-onAccentLight dark:bg-accentDark dark:text-onAccentDark shadow-[0_12px_28px_rgba(30,25,20,0.24)]"
+												: "border-accentLight/15 dark:border-accentDark/15 bg-hoverLight/70 dark:bg-hoverDark/55 text-neutral-800 hover:border-accentLight dark:hover:border-accentDark hover:bg-accentContainerLight dark:hover:bg-accentContainerDark",
 											!cell.inPeriod && "pointer-events-none opacity-25",
 										]
 											.filter(Boolean)
@@ -356,7 +356,9 @@ export function MoodPanel({
 										<span
 											className={[
 												"mx-auto block text-[10px] font-extrabold sm:text-[11px] lg:text-xs",
-												selected ? "text-neutral-50/80" : "text-neutral-600",
+												selected
+													? "text-onAccentLight/80 dark:text-onAccentDark/80"
+													: "text-neutral-600",
 											].join(" ")}
 										>
 											{cell.date.getUTCDate()}
@@ -367,15 +369,15 @@ export function MoodPanel({
 												className={[
 													"grid size-10 place-items-center rounded-full text-2xl transition",
 													selected
-														? "bg-paper text-neutral-950"
-														: "bg-paper text-neutral-700",
+														? "bg-secondaryLight dark:bg-secondaryDark text-neutral-950"
+														: "bg-secondaryLight dark:bg-secondaryDark text-neutral-700",
 													!mineOption && !selected && "text-neutral-300",
 												].join(" ")}
 											>
 												{mineOption?.emoji ?? "♡"}
 											</span>
 											{partnerOption ? (
-												<span className="absolute -bottom-0.5 -right-0.5 grid size-[1.3rem] place-items-center rounded-full border-paper bg-paper text-[13px] text-neutral-950 shadow-sm sm:size-5 sm:text-[12px] sm:-bottom-0.5 sm:-right-0.5 lg:size-6 lg:text-sm">
+												<span className="absolute -bottom-0.5 -right-0.5 grid size-[1.3rem] place-items-center rounded-full border-secondaryLight dark:border-secondaryDark bg-secondaryLight dark:bg-secondaryDark text-[13px] text-neutral-950 shadow-sm sm:size-5 sm:text-[12px] sm:-bottom-0.5 sm:-right-0.5 lg:size-6 lg:text-sm">
 													{partnerOption.emoji}
 												</span>
 											) : null}
@@ -385,7 +387,7 @@ export function MoodPanel({
 											<span
 												className={[
 													"absolute left-1/2 top-1 h-1.5 w-1.5 -translate-x-1/2 rounded-full",
-													selected ? "bg-neutral-50" : "bg-mui",
+													selected ? "bg-primaryLight" : "bg-accentLight dark:bg-accentDark",
 												].join(" ")}
 											/>
 										) : null}
@@ -418,7 +420,7 @@ export function MoodPanel({
 			>
 				<div className="flex items-center justify-between gap-3">
 					<div className="flex min-w-0 items-center gap-3">
-						<div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-mui/10 text-mui">
+						<div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-accentContainerLight dark:bg-accentContainerDark text-accentLight dark:text-accentDark">
 							<HeartPulse size={24} />
 						</div>
 						<div className="min-w-0">
@@ -451,14 +453,21 @@ export function MoodPanel({
 									aria-pressed={selected}
 									onClick={() => setMood(option.value)}
 									className={[
-										"grid min-h-[4.8rem] place-items-center rounded-2xl border px-2 py-2 text-center transition active:scale-[0.8]",
+										"group grid min-h-[4.8rem] place-items-center rounded-2xl border px-2 py-2 text-center transition active:scale-[0.8]",
 										selected
-											? "border-mui bg-mui/10 shadow-inner"
-											: "border-neutral-200 bg-neutral-50/60 hover:bg-mui/10",
+											? "border-accentLight bg-accentLight text-onAccentLight dark:border-accentDark dark:bg-accentDark dark:text-onAccentDark shadow-[0_12px_28px_rgba(30,25,20,0.18)]"
+											: "border-accentLight/15 dark:border-accentDark/15 bg-hoverLight/70 dark:bg-hoverDark/55 text-neutral-800 hover:border-accentLight dark:hover:border-accentDark hover:bg-accentContainerLight dark:hover:bg-accentContainerDark hover:text-onAccentContainerLight dark:hover:text-onAccentContainerDark",
 									].join(" ")}
 								>
 									<span className="text-2xl">{option.emoji}</span>
-									<span className="text-[11px] font-bold text-neutral-700">
+									<span
+										className={[
+											"text-[11px] font-bold",
+											selected
+												? "text-onAccentLight/85 dark:text-onAccentDark/85"
+												: "text-neutral-700 group-hover:text-onAccentContainerLight/80 dark:group-hover:text-onAccentContainerDark/80",
+										].join(" ")}
+									>
 										{option.label}
 									</span>
 								</button>

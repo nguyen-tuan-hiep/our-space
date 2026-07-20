@@ -45,9 +45,9 @@ const styles: Record<
 		label: "Attention",
 	},
 	error: {
-		shell: "border-red-200 dark:border-red-900/60",
-		icon: "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-300",
-		progress: "bg-red-600",
+		shell: "border-danger/25",
+		icon: "bg-danger-bg text-danger",
+		progress: "bg-danger",
 		label: "Error",
 	},
 };
@@ -140,7 +140,7 @@ export function Toast({
 	return (
 		<div
 			role={variant === "error" ? "alert" : "status"}
-			className={`relative w-full overflow-hidden rounded-2xl border bg-paper text-neutral-900 shadow-[0_16px_44px_rgba(23,23,23,0.14)] ${style.shell} dark:bg-neutral-900 dark:text-neutral-50 ${closing ? "toast-out" : "toast-in"}`}
+			className={`relative w-full overflow-hidden rounded-2xl border bg-secondaryLight dark:bg-secondaryDark text-neutral-900 shadow-[0_16px_44px_rgba(23,23,23,0.14)] ${style.shell} dark:text-white ${closing ? "toast-out" : "toast-in"}`}
 		>
 			<div className="flex items-start gap-3 p-4 pr-11">
 				<div
@@ -155,7 +155,7 @@ export function Toast({
 					<p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
 						{style.label}
 					</p>
-					<p className="mt-1 text-sm leading-6 text-neutral-900 dark:text-neutral-50">
+					<p className="mt-1 text-sm leading-6 text-neutral-900 dark:text-white">
 						{message}
 					</p>
 				</div>
@@ -164,7 +164,7 @@ export function Toast({
 				type="button"
 				onClick={close}
 				aria-label="Close notification"
-				className="absolute right-3 top-3 p-2 text-neutral-400 transition hover:text-neutral-950 dark:text-neutral-500 dark:hover:text-neutral-50"
+				className="absolute right-3 top-3 p-2 text-neutral-400 transition hover:text-neutral-950 dark:text-white0 dark:hover:text-white"
 			>
 				<X size={16} />
 			</button>

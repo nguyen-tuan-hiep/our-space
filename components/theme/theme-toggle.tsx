@@ -18,7 +18,7 @@ export function ThemeToggle({ onSelect }: { onSelect?: () => void }) {
 	const { theme, setTheme } = useTheme();
 
 	return (
-		<div className="grid grid-cols-3 gap-1 rounded-2xl border border-neutral-900/10 bg-bg p-1">
+		<div className="grid grid-cols-3 gap-1 rounded-2xl">
 			{themeOptions.map((option) => {
 				const Icon = option.icon;
 				const selected = theme === option.value;
@@ -30,10 +30,10 @@ export function ThemeToggle({ onSelect }: { onSelect?: () => void }) {
 						variant={selected ? "default" : "ghost"}
 						size="sm"
 						className={[
-							"h-9 rounded-xl px-2 text-xs font-bold transition",
+							"h-9 rounded-xl border px-2 text-xs font-bold transition",
 							selected
-								? "bg-neutral-950 text-neutral-50 hover:bg-neutral-900"
-								: "text-neutral-600 hover:bg-paper hover:text-neutral-950",
+								? "border-accentLight bg-accentLight text-onAccentLight dark:border-accentDark dark:bg-accentDark dark:text-onAccentDark"
+								: "border-accentLight/15 text-neutral-600 hover:border-accentLight hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:border-accentDark/15 dark:hover:border-accentDark dark:hover:bg-accentContainerDark dark:hover:text-onAccentContainerDark",
 						].join(" ")}
 						aria-pressed={selected}
 						onClick={() => {

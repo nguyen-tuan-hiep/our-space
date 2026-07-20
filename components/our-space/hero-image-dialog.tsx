@@ -75,7 +75,7 @@ export function HeroImageDialog({
 				}}
 			>
 				<div className="grid gap-4">
-					<div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100">
+					<div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-neutral-200 bg-hoverLight dark:border-neutral-500/40 dark:bg-primaryDark/35">
 						<Image
 							src={heroUrl}
 							alt="Current hero"
@@ -84,7 +84,7 @@ export function HeroImageDialog({
 						/>
 					</div>
 					<label
-						className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-mui px-5 text-sm font-bold text-mui transition hover:bg-mui/10 sm:min-h-11 ${
+						className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-accentLight px-5 text-sm font-bold text-accentLight transition hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:border-neutral-500/60 dark:bg-secondaryDark dark:text-white dark:hover:border-accentDark dark:hover:bg-accentDark dark:hover:text-white sm:min-h-11 ${
 							uploading ? "pointer-events-none opacity-50" : ""
 						}`}
 					>

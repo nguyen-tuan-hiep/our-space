@@ -3,6 +3,11 @@ import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
+import {
+	accentColorPresets,
+	createThemeCssVariables,
+	defaultAccentColorPresetKey,
+} from "@/lib/theme-colors";
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -63,6 +68,13 @@ const appleStartupImages = [
   ];
 });
 
+const accentColorVariablePresets = Object.fromEntries(
+	Object.entries(accentColorPresets).map(([key, preset]) => [
+		key,
+		createThemeCssVariables(preset.value),
+	]),
+);
+
 const themeBootstrapScript = `
 (() => {
   try {
@@ -72,6 +84,14 @@ const themeBootstrapScript = `
     const resolved = theme === "system" ? (systemDark ? "dark" : "light") : theme;
     document.documentElement.classList.toggle("dark", resolved === "dark");
     document.documentElement.dataset.theme = theme;
+
+    const accentPresets = ${JSON.stringify(accentColorVariablePresets)};
+    const storedAccent = localStorage.getItem("our-space-accent-color");
+    const accent = storedAccent && accentPresets[storedAccent] ? storedAccent : ${JSON.stringify(defaultAccentColorPresetKey)};
+    Object.entries(accentPresets[accent]).forEach(([name, value]) => {
+      document.documentElement.style.setProperty(name, value);
+    });
+    document.documentElement.dataset.accentColor = accent;
   } catch {
     document.documentElement.dataset.theme = "system";
   }

@@ -71,7 +71,7 @@ function LedgerSkeleton() {
 				{Array.from({ length: 3 }).map((_, index) => (
 					<div
 						key={index}
-						className="rounded-2xl border border-neutral-900/10 bg-bg/70 p-4"
+						className="rounded-2xl border border-neutral-900/10 bg-neutral-900/5 p-4 dark:border-white/10 dark:bg-white/10"
 					>
 						<div className="flex items-start justify-between gap-3">
 							<div className="min-w-0 flex-1 space-y-2">
@@ -106,7 +106,7 @@ export function FinancePanelSkeleton() {
 					<Skeleton className="h-12 w-full rounded-2xl sm:w-56" />
 				</div>
 				<div className="grid min-w-0 gap-4 sm:gap-6">
-					<div className="rounded-2xl border border-dashed border-neutral-400 p-4">
+					<div className="rounded-2xl border border-dashed border-neutral-900/15 bg-neutral-900/5 p-4 dark:border-white/15 dark:bg-white/10">
 						<div className="mb-4 space-y-2">
 							<Skeleton className="h-3 w-28 rounded-full" />
 							<Skeleton className="h-8 w-48 rounded-2xl" />
@@ -220,7 +220,7 @@ function MemoryCardSkeleton({ withImage = true }: { withImage?: boolean }) {
 
 				<div className="flex flex-col gap-2">
 					<Skeleton className="h-4 w-32 rounded-full" />
-					<div className="grid gap-2 rounded-2xl border border-neutral-200 bg-bg/60 p-2.5">
+					<div className="grid gap-2 rounded-2xl border border-neutral-900/10 bg-neutral-900/5 p-2.5 dark:border-white/10 dark:bg-white/10">
 						{Array.from({ length: 2 }).map((_, index) => (
 							<div
 								key={index}
@@ -272,7 +272,7 @@ function MoviePosterSkeleton({
 			className={[
 				"app-card h-full overflow-hidden p-0 rounded-2xl transition-all duration-500",
 				active
-					? "-translate-y-2 scale-100 opacity-100 shadow-[10px_10px_30px_-10px_rgba(0,0,0,0.5)] ring-1 ring-black/5"
+					? "-translate-y-2 scale-100 opacity-100 shadow-[10px_10px_30px_-10px_rgba(0,0,0,0.5)] ring-1 ring-neutral-900/10 dark:ring-white/15"
 					: "translate-y-3 scale-[0.82] opacity-40",
 			].join(" ")}
 		>
@@ -284,7 +284,7 @@ function MoviePosterSkeleton({
 function MovieSectionSkeleton({ section }: { section: string }) {
 	return (
 		<section className="grid min-w-0 content-start gap-3">
-			<div className="flex items-center justify-between rounded-2xl border border-neutral-900/10 bg-paper/88 px-4 py-3 shadow-sm">
+			<div className="app-card flex items-center justify-between px-4 py-3">
 				<div className="flex min-w-0 items-center gap-3">
 					<Skeleton className="size-9 shrink-0 rounded-full" />
 					<Skeleton className="h-5 w-24 rounded-full" />
@@ -305,9 +305,9 @@ function MovieSectionSkeleton({ section }: { section: string }) {
 					</div>
 				</div>
 				<div className="mt-3 flex justify-center gap-1.5">
-					<Skeleton className="size-1.5 rounded-full bg-neutral-950/30" />
-					<Skeleton className="h-1.5 w-4 rounded-full bg-neutral-950/70" />
-					<Skeleton className="size-1.5 rounded-full bg-neutral-950/30" />
+					<Skeleton className="size-1.5 rounded-full bg-neutral-900/30 dark:bg-white/30" />
+					<Skeleton className="h-1.5 w-4 rounded-full bg-neutral-900/70 dark:bg-white/70" />
+					<Skeleton className="size-1.5 rounded-full bg-neutral-900/30 dark:bg-white/30" />
 				</div>
 			</div>
 
