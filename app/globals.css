@@ -985,11 +985,7 @@ input[type="time"]::-webkit-date-and-time-value {
 }
 
 .memory-map-pin {
-	--memory-pin-border: color-mix(
-		in srgb,
-		var(--theme-surface) 90%,
-		transparent
-	);
+	--memory-pin-border: var(--theme-primary);
 
 	align-items: center;
 	display: flex;
@@ -1006,14 +1002,16 @@ input[type="time"]::-webkit-date-and-time-value {
 
 .memory-map-pin-bubble {
 	align-items: center;
-	border: 1px solid var(--memory-pin-border);
+	background: var(--theme-primary-subtle);
 	border-radius: 999px;
-	box-shadow: 0 12px 28px rgba(30, 25, 20, 0.24);
+	box-shadow:
+		0 0 0 0px color-mix(in srgb, var(--theme-surface) 72%, transparent),
+		0 0 0 4px var(--theme-primary),
+		0 12px 28px rgba(30, 25, 20, 0.24);
 	display: grid;
 	font-size: 1.5rem;
 	height: 3rem;
 	justify-content: center;
-	outline: 4px solid color-mix(in srgb, var(--theme-surface) 72%, transparent);
 	position: relative;
 	width: 3rem;
 	z-index: 2;
@@ -1022,11 +1020,11 @@ input[type="time"]::-webkit-date-and-time-value {
 .memory-map-pin-tip {
 	background: var(--memory-pin-border);
 	clip-path: polygon(5% 0, 95% 0, 50% 100%);
-	filter: drop-shadow(0 4px 3px rgba(30, 25, 20, 0.18));
+	filter: drop-shadow(0 4px 3px rgba(30, 25, 20, 0.2));
 	height: 1rem;
-	margin-top: -0.2rem;
+	margin-top: -0.15rem;
 	position: relative;
-	width: 1.45rem;
+	width: 2rem;
 	z-index: 1;
 }
 
@@ -1052,11 +1050,6 @@ input[type="time"]::-webkit-date-and-time-value {
 		transform 180ms ease;
 	white-space: nowrap;
 	z-index: 10;
-}
-
-.memory-map-pin:hover .memory-map-pin-label {
-	opacity: 1;
-	transform: translateX(-50%) scale(1);
 }
 
 .memory-map-pin:hover .memory-map-pin-label {
