@@ -258,7 +258,7 @@ export function NativeTabs<T extends string>({
 	return (
 		<div
 			role="tablist"
-			className={cx("flex border-b border-neutral-200 dark:border-neutral-700", className)}
+			className={cx("flex border-neutral-200 dark:border-neutral-700", className)}
 		>
 			{options.map((option) => {
 				const selected = value === option.value;
@@ -271,8 +271,8 @@ export function NativeTabs<T extends string>({
 						className={cx(
 							"min-h-11 px-4 text-sm font-bold transition",
 							selected
-								? "border-b-2 border-accentLight text-accentLight dark:border-accentDark dark:text-white"
-								: "text-neutral-500 hover:text-neutral-900 dark:text-neutral-800 dark:hover:text-white",
+								? "border-b-2 border-accentLight text-accentLight dark:border-accentDark dark:text-accentDark"
+								: "text-neutral-500 hover:text-accentLight dark:text-white/70 dark:hover:text-accentDark",
 						)}
 						onClick={() => onChange(option.value)}
 					>

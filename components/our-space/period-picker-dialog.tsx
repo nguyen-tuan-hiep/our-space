@@ -92,7 +92,7 @@ export function PeriodPickerDialog({
 			<div
 				role="radiogroup"
 				aria-label="Period range"
-				className="grid grid-cols-2 border-b border-neutral-200 bg-transparent p-0 dark:border-white/10"
+				className="grid grid-cols-2 border-neutral-200 bg-transparent p-0 dark:border-white/10"
 			>
 				<button
 					type="button"

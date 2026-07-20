@@ -59,12 +59,12 @@ type MemoryPayload = {
 
 type MoviePayload = {
   title: string;
-  rating: number | null;
+  rating_by_user: Record<string, number | null>;
   poster_url: string | null;
   category: MovieCategory[] | null;
   status: MovieStatus;
   comment_by_user: Record<string, string>;
-  reaction: string | null;
+  reaction_by_user: Record<string, string | null>;
 };
 
 const moodLevels: MoodLevel[] = [
@@ -209,6 +209,8 @@ function getMoviePayload(
   const status = stringValue(formData, "status") as MovieStatus;
   const reaction = nullableStringValue(formData, "reaction");
   const commentByUser = userTextEntry(formData, "comment", userId);
+  const ratingByUser = rating === null ? {} : { [userId]: rating };
+  const reactionByUser = reaction === null ? {} : { [userId]: reaction };
 
   if (!title) return fail("Please enter a movie title.");
   if (title.length > 160) return fail("Movie title must be 160 characters or fewer.");
@@ -238,12 +240,12 @@ function getMoviePayload(
     ok: true,
     payload: {
       title,
-      rating,
+      rating_by_user: ratingByUser,
       poster_url: nullableStringValue(formData, "poster_url"),
       category: categories.length ? categories : null,
       status,
       comment_by_user: commentByUser,
-      reaction,
+      reaction_by_user: reactionByUser,
     },
   };
 }
@@ -849,10 +851,14 @@ export async function updateMovie(formData: FormData) {
   const coupleId = getCoupleId(profile, { id: profile.partner_id });
   const { data: existingMovie, error: existingMovieError } = await supabase
     .from("movies")
-    .select("comment_by_user")
+    .select("comment_by_user, rating_by_user, reaction_by_user")
     .eq("id", movieId)
     .eq("couple_id", coupleId)
-    .maybeSingle<{ comment_by_user: Record<string, string> | null }>();
+    .maybeSingle<{
+      comment_by_user: Record<string, string> | null;
+      rating_by_user: Record<string, number | null> | null;
+      reaction_by_user: Record<string, string | null> | null;
+    }>();
 
   if (existingMovieError) return fail(existingMovieError.message);
 
@@ -863,6 +869,14 @@ export async function updateMovie(formData: FormData) {
       comment_by_user: {
         ...(existingMovie?.comment_by_user ?? {}),
         ...movie.payload.comment_by_user,
+      },
+      rating_by_user: {
+        ...(existingMovie?.rating_by_user ?? {}),
+        [profile.id]: movie.payload.rating_by_user[profile.id] ?? null,
+      },
+      reaction_by_user: {
+        ...(existingMovie?.reaction_by_user ?? {}),
+        [profile.id]: movie.payload.reaction_by_user[profile.id] ?? null,
       },
       couple_id: coupleId,
     })

@@ -124,17 +124,17 @@ create table public.movies (
   id uuid primary key default gen_random_uuid(),
   couple_id text not null,
   title text not null,
-  rating numeric(3, 1),
+  rating_by_user jsonb not null default '{}'::jsonb,
   poster_url text,
   category text[],
   status public.movie_status not null default 'wishlist',
   comment_by_user jsonb not null default '{}'::jsonb,
-  reaction text,
+  reaction_by_user jsonb not null default '{}'::jsonb,
   created_by uuid not null references public.profiles(id) on delete cascade,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint movies_title_length_check check (char_length(title) between 1 and 160),
-  constraint movies_rating_check check (rating is null or (rating >= 1 and rating <= 10 and rating * 2 = floor(rating * 2))),
+  constraint movies_rating_by_user_object_check check (jsonb_typeof(rating_by_user) = 'object'),
   constraint movies_category_values_check check (
     category is null
     or category <@ array[
@@ -161,7 +161,7 @@ create table public.movies (
       'Short Film'
     ]::text[]
   ),
-  constraint movies_reaction_length_check check (reaction is null or char_length(reaction) <= 32)
+  constraint movies_reaction_by_user_object_check check (jsonb_typeof(reaction_by_user) = 'object')
 );
 
 create table public.pairing_requests (

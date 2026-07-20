@@ -104,7 +104,7 @@ export function ActionMenu({
 				type="button"
 				aria-label="Close actions"
 				className={[
-					"fixed inset-0 z-[70] bg-primaryLight/25 dark:bg-primaryDark/25 backdrop-blur-[2px] sm:hidden",
+					"fixed inset-0 z-[70] dark:bg-primaryDark/25 backdrop-blur-[2px] sm:hidden",
 					mobileClosing
 						? "native-dialog-backdrop-out"
 						: "native-dialog-backdrop-in",
@@ -116,11 +116,11 @@ export function ActionMenu({
 				aria-modal="true"
 				aria-label={sheetTitle}
 				className={[
-					"mobile-sheet-motion fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] overflow-hidden rounded-3xl border border-secondaryLight/80 bg-secondaryLight dark:bg-secondaryDark shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:hidden",
+					"mobile-sheet-motion fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] overflow-hidden rounded-3xl border border-primaryLight bg-secondaryLight dark:bg-secondaryDark shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:hidden",
 					mobileClosing ? "native-sheet-out" : "native-sheet-in",
 				].join(" ")}
 			>
-				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-accentLight/20" />
+				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-primaryLight" />
 				<div className="border-b border-neutral-900/10 px-5 py-4">
 					<p className="font-serif text-xl leading-tight text-neutral-950">
 						{sheetTitle}

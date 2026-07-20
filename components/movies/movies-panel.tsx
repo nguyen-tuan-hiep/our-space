@@ -102,19 +102,32 @@ function getMovieCategories(movie: Movie) {
 	);
 }
 
-function UserAvatar({ profile }: { profile: Profile }) {
+function UserAvatar({
+	profile,
+	className = "size-8 text-base",
+	imageSizes = "2rem",
+}: {
+	profile: Profile;
+	className?: string;
+	imageSizes?: string;
+}) {
 	const avatar = profile.avatar_url;
 	const isImage = avatar?.startsWith("http://") || avatar?.startsWith("https://");
 	const imageSrc = isImage ? avatar : null;
 
 	return (
-		<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-hoverLight dark:bg-hoverDark text-base">
+		<span
+			className={[
+				"relative grid shrink-0 place-items-center overflow-hidden rounded-full bg-hoverLight dark:bg-hoverDark",
+				className,
+			].join(" ")}
+		>
 			{imageSrc ? (
 				<Image
 					src={imageSrc}
 					alt=""
 					fill
-					sizes="2rem"
+					sizes={imageSizes}
 					className="object-cover"
 				/>
 			) : (
@@ -126,6 +139,15 @@ function UserAvatar({ profile }: { profile: Profile }) {
 
 function getUserComment(movie: Movie, userId: string) {
 	return movie.comment_by_user?.[userId] ?? null;
+}
+
+function getUserRating(movie: Movie, userId: string) {
+	const rating = movie.rating_by_user?.[userId];
+	return typeof rating === "number" ? rating : null;
+}
+
+function getUserReaction(movie: Movie, userId: string) {
+	return movie.reaction_by_user?.[userId] ?? null;
 }
 
 function UserCommentBlock({
@@ -144,8 +166,8 @@ function UserCommentBlock({
 				className={[
 					"min-w-0 max-h-12 flex-1 overflow-y-auto whitespace-pre-wrap break-words pr-1 text-sm leading-5",
 					comment
-						? "text-neutral-600 dark:text-neutral-800"
-						: "text-neutral-400 dark:text-white0",
+						? "text-neutral-600 dark:text-white/75"
+						: "text-neutral-400 dark:text-white/45",
 				].join(" ")}
 			>
 				<span className="font-bold text-neutral-800 dark:text-white">
@@ -157,19 +179,61 @@ function UserCommentBlock({
 	);
 }
 
+function MovieSignal({
+	movie,
+	profile,
+	compact = false,
+}: {
+	movie: Movie;
+	profile: Profile;
+	compact?: boolean;
+}) {
+	const rating = getUserRating(movie, profile.id);
+	const reaction = getUserReaction(movie, profile.id);
+
+	if (rating === null && !reaction) return null;
+
+	return (
+		<div
+			className={[
+				"inline-flex items-center gap-1 rounded-full border backdrop-blur-md bg-accentLight text-onAccentLight dark:bg-accentDark dark:text-onAccentDark",
+				compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm",
+			].join(" ")}
+		>
+			<UserAvatar
+				profile={profile}
+				className={compact ? "size-5 text-xs" : "size-7 text-sm"}
+				imageSizes={compact ? "1.25rem" : "1.75rem"}
+			/>
+			{rating !== null ? (
+				<span className="inline-flex items-center gap-0.5 font-bold">
+					<Star
+						size={compact ? 12 : 14}
+						fill="currentColor"
+					/>
+					{rating.toFixed(1)}
+				</span>
+			) : null}
+			{reaction ? <span className="text-base leading-none">{reaction}</span> : null}
+		</div>
+	);
+}
+
 function MovieCard({
 	movie,
+	participants,
 	onEdit,
 	onRequestDelete,
 	onShowDetails,
 }: {
 	movie: Movie;
+	participants: [Profile, Profile];
 	onEdit: () => void;
 	onRequestDelete: () => void;
 	onShowDetails: () => void;
 }) {
 	return (
-		<article className="content-fade-in relative h-full w-full overflow-hidden rounded-2xl bg-transparent shadow-none sm:app-card sm:app-card-interactive">
+		<article className="content-fade-in relative h-full w-full overflow-hidden rounded-2xl bg-transparent shadow-none sm:bg-secondaryLight sm:shadow-[0_14px_32px_rgba(23,23,23,0.08)] sm:dark:bg-secondaryDark sm:dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
 			<button
 				type="button"
 				aria-label={`View details for ${movie.title}`}
@@ -200,6 +264,16 @@ function MovieCard({
 					onDelete={onRequestDelete}
 				/>
 			</div>
+			{/* <div className="pointer-events-none absolute inset-x-2 bottom-2 flex flex-wrap gap-1.5">
+				{participants.map((participant) => (
+					<MovieSignal
+						key={participant.id}
+						movie={movie}
+						profile={participant}
+						compact
+					/>
+				))}
+			</div> */}
 		</article>
 	);
 }
@@ -281,7 +355,7 @@ function MovieDetailsDialog({
 				<div className="flex min-h-0 flex-col gap-4 p-5 pt-24 sm:p-6">
 					<div>
 						<div>
-							<h2 className="font-serif text-3xl leading-tight text-neutral-950">
+							<h2 className="font-serif text-3xl leading-tight text-neutral-950 dark:text-white">
 								{movie.title}
 							</h2>
 						</div>
@@ -292,12 +366,12 @@ function MovieDetailsDialog({
 							{categories.map((category) => (
 								<span
 									key={category}
-									className="rounded-full bg-hoverLight px-3 py-1.5 text-sm font-bold text-neutral-600 dark:bg-hoverDark dark:text-neutral-800"
+									className="rounded-full bg-hoverLight px-3 py-1.5 text-sm font-bold text-neutral-600 dark:bg-hoverDark dark:text-white/75"
 								>
 									{category}
 								</span>
 							))}
-							<span className="rounded-full bg-hoverLight px-3 py-1.5 text-sm font-bold text-neutral-600 dark:bg-hoverDark dark:text-neutral-800">
+							<span className="rounded-full bg-hoverLight px-3 py-1.5 text-sm font-bold text-neutral-600 dark:bg-hoverDark dark:text-white/75">
 								{movie.status === "wishlist"
 									? "Wishlist"
 									: movie.status === "watching"
@@ -306,22 +380,17 @@ function MovieDetailsDialog({
 							</span>
 						</div>
 						<div className="flex flex-wrap items-center gap-2">
-							{movie.rating ? (
-								<span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-bold text-amber-800 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-200">
-									<Star
-										size={15}
-										fill="currentColor"
-									/>
-									{movie.rating.toFixed(1)}
-								</span>
-							) : null}
-							{movie.reaction ? (
-								<span className="text-2xl leading-none">{movie.reaction}</span>
-							) : null}
+							{participants.map((participant) => (
+								<MovieSignal
+									key={participant.id}
+									movie={movie}
+									profile={participant}
+								/>
+							))}
 						</div>
 					</div>
 
-					<div className="grid gap-2 rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/60 p-2.5">
+					<div className="grid gap-2 rounded-2xl border border-accentLight dark:border-accentDark p-2.5">
 						{participants.map((participant) => (
 							<UserCommentBlock
 								key={participant.id}
@@ -335,7 +404,7 @@ function MovieDetailsDialog({
 						<Button
 							type="button"
 							variant="outline"
-							className="h-11 w-full rounded-2xl"
+							className="h-11 w-full rounded-2xl dark:!border-neutral-500/50 dark:!bg-secondaryDark dark:!text-white dark:hover:!border-accentDark dark:hover:!bg-accentDark dark:hover:!text-white"
 							onClick={() => onEdit(movie)}
 						>
 							<Edit2 size={16} />
@@ -345,7 +414,7 @@ function MovieDetailsDialog({
 							<Button
 								type="button"
 								variant="outline"
-								className="h-11 w-full rounded-2xl"
+								className="h-11 w-full rounded-2xl dark:!border-neutral-500/50 dark:!bg-secondaryDark dark:!text-white dark:hover:!border-accentDark dark:hover:!bg-accentDark dark:hover:!text-white"
 								disabled={busy}
 								onClick={() => onMoveStatus(movie, nextStatus.status)}
 							>
@@ -469,7 +538,7 @@ export function MoviesPanel({
 									{column.title}
 								</h3>
 							</div>
-							<span className="rounded-full border border-accentLight/10 bg-hoverLight px-2.5 py-1 text-xs font-bold text-neutral-700 dark:border-accentDark/14 dark:bg-hoverDark dark:text-neutral-800">
+							<span className="rounded-full border border-accentLight bg-hoverLight px-2.5 py-1 text-xs font-bold text-neutral-700 dark:border-accentDark/14 dark:bg-hoverDark dark:text-white/75">
 								{column.movies.length}
 							</span>
 						</div>
@@ -509,6 +578,7 @@ export function MoviesPanel({
 													>
 														<MovieCard
 															movie={movie}
+															participants={participants}
 															onEdit={() => onEditMovie(movie)}
 															onRequestDelete={() => setSelectedMovie(movie)}
 															onShowDetails={() => openMovieDetails(movie)}
@@ -521,11 +591,12 @@ export function MoviesPanel({
 								</div>
 
 								{/* --- CHẾ ĐỘ DESKTOP: GRID NHƯ CŨ --- */}
-								<div className="hidden sm:grid grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+								<div className="hidden sm:grid md:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-7 gap-4">
 									{column.movies.map((movie) => (
 										<MovieCard
 											key={movie.id}
 											movie={movie}
+											participants={participants}
 											onEdit={() => onEditMovie(movie)}
 											onRequestDelete={() => setSelectedMovie(movie)}
 											onShowDetails={() => openMovieDetails(movie)}
@@ -545,7 +616,7 @@ export function MoviesPanel({
 								))}
 							</div>
 						) : (
-							<div className="rounded-2xl border border-dashed border-accentLight/20 dark:border-accentDark/20 bg-hoverLight/55 dark:bg-hoverDark/45 p-5 text-sm font-semibold text-neutral-500">
+							<div className="rounded-2xl border border-dashed border-accentLight dark:border-accentDark bg-hoverLight/55 dark:bg-hoverDark/45 p-5 text-sm font-semibold text-neutral-500">
 								{column.empty}
 							</div>
 						)}

@@ -32,6 +32,15 @@ function getUserComment(movie: Movie | null | undefined, userId: string) {
 	return movie?.comment_by_user?.[userId] ?? "";
 }
 
+function getUserRating(movie: Movie | null | undefined, userId: string) {
+	const rating = movie?.rating_by_user?.[userId];
+	return typeof rating === "number" ? String(rating) : "";
+}
+
+function getUserReaction(movie: Movie | null | undefined, userId: string) {
+	return movie?.reaction_by_user?.[userId] ?? "";
+}
+
 function UserFieldLabel({ profile }: { profile: Profile }) {
 	const avatar = profile.avatar_url;
 	const isImage = avatar?.startsWith("http://") || avatar?.startsWith("https://");
@@ -96,11 +105,11 @@ export function MovieDialog({
 		if (!open) return;
 		setPosterUrl(movie?.poster_url ?? "");
 		setStatus(movie?.status ?? "wishlist");
-		setRating(movie?.rating ? String(movie.rating) : "");
+		setRating(getUserRating(movie, profile.id));
 		setSelectedCategories(getMovieCategories(movie));
-		setReaction(movie?.reaction ?? "");
+		setReaction(getUserReaction(movie, profile.id));
 		setReactionPickerOpen(false);
-	}, [movie, open]);
+	}, [movie, open, profile.id]);
 
 	const handleClose = () => {
 		if (document.activeElement instanceof HTMLElement) {

@@ -165,10 +165,10 @@ export interface Movie {
   id: string;
   couple_id: string;
   title: string;
-  rating: number | null;
+  rating_by_user: Record<string, number | null> | null;
   comment_by_user: Record<string, string> | null;
   poster_url: string | null;
-  reaction: string | null;
+  reaction_by_user: Record<string, string | null> | null;
   status: MovieStatus;
   category: MovieCategory[] | null;
   created_by: string;

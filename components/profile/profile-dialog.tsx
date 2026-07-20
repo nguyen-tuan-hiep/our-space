@@ -67,7 +67,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 						{ value: "profile", label: "Profile" },
 						{ value: "password", label: "Password" },
 					]}
-					className="rounded-full border-0 bg-accentContainerLight dark:bg-accentContainerDark p-1 sm:rounded-none sm:border-b sm:border-neutral-200 sm:bg-transparent sm:p-0 [&>button]:relative [&>button]:flex-1 [&>button]:rounded-full [&>button]:border-b-0 [&>button]:px-4 [&>button]:text-center [&>button]:text-neutral-900 [&>button]:hover:text-accentLight dark:[&>button]:hover:text-accentDark [&>button]:sm:rounded-none [&>button[aria-selected='true']]:bg-secondaryLight dark:[&>button[aria-selected='true']]:bg-secondaryDark [&>button[aria-selected='true']]:text-accentLight dark:[&>button[aria-selected='true']]:text-accentDark [&>button[aria-selected='true']]:shadow-sm [&>button[aria-selected='true']]:sm:bg-transparent [&>button[aria-selected='true']]:sm:shadow-none"
+					className="[&>button]:relative [&>button]:flex-1 [&>button]:px-4 [&>button]:text-center"
 				/>
 
 				{tab === "profile" ? (
