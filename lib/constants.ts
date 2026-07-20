@@ -17,7 +17,7 @@ export const expenseCategories: ExpenseCategory[] = [
   "🏥 Health",
   "🎞️ Film",
   "📱 Subscriptions",
-  "📍 Others",
+  "Others",
 ];
 
 export const expenseCategoryColors: Record<ExpenseCategory, string> =

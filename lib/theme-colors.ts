@@ -774,7 +774,7 @@ export const themeColors = {
     "🏥 Health": "#D1F2E5",
     "🎞️ Film": "#F5EBE6",
     "📱 Subscriptions": "#E0F7FA",
-    "📍 Others": "#ECEFF1",
+    "Others": "#ECEFF1",
   } satisfies Record<ExpenseCategory, string>,
 
   memoryTypes: {

@@ -13,7 +13,7 @@ export type ExpenseCategory =
   | "🏥 Health"
   | "🎞️ Film"
   | "📱 Subscriptions"
-  | "📍 Others";
+  | "Others";
 
 export interface Profile {
   id: string;
