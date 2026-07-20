@@ -8,7 +8,7 @@ import { getOneSignal, isOneSignalConfigured } from "@/lib/onesignal-web";
 import { Button } from "@/components/ui/button";
 
 const menuItemClass =
-	"flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-neutral-700 rounded-2xl bg-hoverLight/70 transition hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:bg-hoverDark/55 dark:text-neutral-900 dark:hover:bg-accentContainerDark dark:hover:text-onAccentContainerDark disabled:cursor-not-allowed disabled:opacity-50";
+	"flex w-full items-center gap-2 rounded-2xl bg-primary-subtle px-4 py-2.5 text-left text-sm text-muted-foreground transition hover:bg-primary-container-hover hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-50";
 
 interface NotificationPermissionButtonProps {
 	userId: string;

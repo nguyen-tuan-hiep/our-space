@@ -5,61 +5,353 @@
 @tailwind utilities;
 
 :root {
-	--color-primary-light: #f5f7fb;
-	--color-secondary-light: #fcfdff;
-	--color-primary-dark: #101319;
-	--color-secondary-dark: #1a1f2a;
-	--color-hover-light: #eef2f8;
-	--color-hover-dark: #232a37;
-	--color-accent-light: #2159d4;
-	--color-accent-dark: #668ef1;
-	--color-accent-hover-light: #1f51c0;
-	--color-accent-hover-dark: #7c9df3;
-	--color-accent-container-light: #e9effd;
-	--color-accent-container-dark: #143678;
-	--color-on-accent-light: #ffffff;
-	--color-on-accent-dark: #ffffff;
-	--color-on-accent-container-light: #0b1d40;
-	--color-on-accent-container-dark: #d3dffc;
-	--color-app-background: var(--color-primary-light);
-	--color-app-surface: var(--color-secondary-light);
-	--theme-danger: var(--theme-danger-light, #dc2626);
-	--theme-danger-bg: var(--theme-danger-bg-light, #fee2e2);
-	--theme-background: var(--theme-background-light, var(--color-app-background));
-	--theme-foreground: var(--theme-foreground-light, #17191c);
-	--theme-card: var(--theme-card-light, var(--color-app-surface));
-	--theme-card-foreground: var(--theme-card-foreground-light, #17191c);
-	--theme-popover: var(--theme-popover-light, #ffffff);
-	--theme-popover-foreground: var(--theme-popover-foreground-light, #17191c);
-	--theme-primary: var(--theme-primary-light, var(--color-accent-light));
-	--theme-primary-foreground: var(--theme-primary-foreground-light, var(--color-on-accent-light));
-	--theme-secondary: var(--theme-secondary-light, var(--color-app-surface));
-	--theme-secondary-foreground: var(--theme-secondary-foreground-light, #17191c);
-	--theme-muted: var(--theme-muted-light, var(--color-hover-light));
-	--theme-muted-foreground: var(--theme-muted-foreground-light, #5f6670);
-	--theme-accent: var(--theme-accent-light, var(--color-accent-container-light));
-	--theme-accent-foreground: var(--theme-accent-foreground-light, var(--color-on-accent-container-light));
-	--theme-destructive: var(--theme-destructive-light, #dc2626);
-	--theme-destructive-foreground: var(--theme-destructive-foreground-light, #ffffff);
-	--theme-border: var(--theme-border-light, #e3e6ea);
-	--theme-input: var(--theme-input-light, #b7c7ef);
-	--theme-ring: var(--theme-ring-light, var(--color-accent-light));
-	--theme-chart-1: var(--theme-chart-1-light, var(--color-accent-light));
-	--theme-chart-2: var(--theme-chart-2-light, #14b8a6);
-	--theme-chart-3: var(--theme-chart-3-light, #f59e0b);
-	--theme-chart-4: var(--theme-chart-4-light, #ef4444);
-	--theme-chart-5: var(--theme-chart-5-light, #8b5cf6);
-	--theme-sidebar: var(--theme-sidebar-light, var(--color-app-surface));
-	--theme-sidebar-foreground: var(--theme-sidebar-foreground-light, #17191c);
-	--theme-sidebar-primary: var(--theme-sidebar-primary-light, var(--color-accent-light));
-	--theme-sidebar-primary-foreground: var(--theme-sidebar-primary-foreground-light, var(--color-on-accent-light));
-	--theme-sidebar-accent: var(--theme-sidebar-accent-light, var(--color-accent-container-light));
-	--theme-sidebar-accent-foreground: var(--theme-sidebar-accent-foreground-light, var(--color-on-accent-container-light));
-	--theme-sidebar-border: var(--theme-sidebar-border-light, #e3e6ea);
-	--theme-sidebar-ring: var(--theme-sidebar-ring-light, var(--color-accent-light));
-	--color-danger: #dc2626;
-	--color-danger-bg: #fee2e2;
+	--color-primary-light: #ECF4F9;
+	--color-primary-light-rgb: 236 244 249;
+	--color-secondary-light: #F9FDFE;
+	--color-secondary-light-rgb: 249 253 254;
+	--color-primary-dark: #0F1A1F;
+	--color-primary-dark-rgb: 15 26 31;
+	--color-secondary-dark: #18262C;
+	--color-secondary-dark-rgb: 24 38 44;
+	--color-hover-light: #E9F7FC;
+	--color-hover-light-rgb: 233 247 252;
+	--color-hover-dark: #153440;
+	--color-hover-dark-rgb: 21 52 64;
+	--color-accent-light: #007DA8;
+	--color-accent-light-rgb: 0 125 168;
+	--color-accent-dark: #007EA9;
+	--color-accent-dark-rgb: 0 126 169;
+	--color-accent-hover-light: #0088B6;
+	--color-accent-hover-light-rgb: 0 136 182;
+	--color-accent-hover-dark: #00749B;
+	--color-accent-hover-dark-rgb: 0 116 155;
+	--color-accent-container-light: #D1EFF9;
+	--color-accent-container-light-rgb: 209 239 249;
+	--color-accent-container-dark: #124557;
+	--color-accent-container-dark-rgb: 18 69 87;
+	--color-on-accent-light: #FFFFFF;
+	--color-on-accent-light-rgb: 255 255 255;
+	--color-on-accent-dark: #FFFFFF;
+	--color-on-accent-dark-rgb: 255 255 255;
+	--color-on-accent-container-light: #003F54;
+	--color-on-accent-container-light-rgb: 0 63 84;
+	--color-on-accent-container-dark: #D1EFF9;
+	--color-on-accent-container-dark-rgb: 209 239 249;
+	--theme-surface-light: #F9FDFE;
+	--theme-surface-light-rgb: 249 253 254;
+	--theme-surface-dark: #18262C;
+	--theme-surface-dark-rgb: 24 38 44;
+	--theme-surface-hover-light: #E9F7FC;
+	--theme-surface-hover-light-rgb: 233 247 252;
+	--theme-surface-hover-dark: #153440;
+	--theme-surface-hover-dark-rgb: 21 52 64;
+	--theme-surface-elevated-light: #FFFFFF;
+	--theme-surface-elevated-light-rgb: 255 255 255;
+	--theme-surface-elevated-dark: #1D313B;
+	--theme-surface-elevated-dark-rgb: 29 49 59;
+	--theme-surface-selected-light: #D1EFF9;
+	--theme-surface-selected-light-rgb: 209 239 249;
+	--theme-surface-selected-dark: #124557;
+	--theme-surface-selected-dark-rgb: 18 69 87;
+	--theme-primary-hover-light: #0088B6;
+	--theme-primary-hover-light-rgb: 0 136 182;
+	--theme-primary-hover-dark: #00749B;
+	--theme-primary-hover-dark-rgb: 0 116 155;
+	--theme-primary-pressed-light: #007BA4;
+	--theme-primary-pressed-light-rgb: 0 123 164;
+	--theme-primary-pressed-dark: #006A8E;
+	--theme-primary-pressed-dark-rgb: 0 106 142;
+	--theme-primary-container-hover-light: #C5EBF7;
+	--theme-primary-container-hover-light-rgb: 197 235 247;
+	--theme-primary-container-hover-dark: #114C61;
+	--theme-primary-container-hover-dark-rgb: 17 76 97;
+	--theme-primary-border-light: #BDE8F6;
+	--theme-primary-border-light-rgb: 189 232 246;
+	--theme-primary-border-dark: #105269;
+	--theme-primary-border-dark-rgb: 16 82 105;
+	--theme-primary-subtle-light: #EAF8FC;
+	--theme-primary-subtle-light-rgb: 234 248 252;
+	--theme-primary-subtle-dark: #16333E;
+	--theme-primary-subtle-dark-rgb: 22 51 62;
+	--theme-text-primary-light: #17191C;
+	--theme-text-primary-light-rgb: 23 25 28;
+	--theme-text-primary-dark: #F4F6F8;
+	--theme-text-primary-dark-rgb: 244 246 248;
+	--theme-text-secondary-light: #5F6670;
+	--theme-text-secondary-light-rgb: 95 102 112;
+	--theme-text-secondary-dark: #D2D7DE;
+	--theme-text-secondary-dark-rgb: 210 215 222;
+	--theme-text-muted-light: #8A919B;
+	--theme-text-muted-light-rgb: 138 145 155;
+	--theme-text-muted-dark: #A6ADB8;
+	--theme-text-muted-dark-rgb: 166 173 184;
+	--theme-danger-light: #E64747;
+	--theme-danger-light-rgb: 230 71 71;
+	--theme-danger-dark: #F87171;
+	--theme-danger-dark-rgb: 248 113 113;
+	--theme-danger-bg-light: #FEE2E2;
+	--theme-danger-bg-light-rgb: 254 226 226;
+	--theme-danger-bg-dark: #450A0A;
+	--theme-danger-bg-dark-rgb: 69 10 10;
+	--theme-background-light: #ECF4F9;
+	--theme-background-light-rgb: 236 244 249;
+	--theme-background-dark: #0F1A1F;
+	--theme-background-dark-rgb: 15 26 31;
+	--theme-foreground-light: #17191C;
+	--theme-foreground-light-rgb: 23 25 28;
+	--theme-foreground-dark: #F4F6F8;
+	--theme-foreground-dark-rgb: 244 246 248;
+	--theme-card-light: #F9FDFE;
+	--theme-card-light-rgb: 249 253 254;
+	--theme-card-dark: #18262C;
+	--theme-card-dark-rgb: 24 38 44;
+	--theme-card-foreground-light: #17191C;
+	--theme-card-foreground-light-rgb: 23 25 28;
+	--theme-card-foreground-dark: #F4F6F8;
+	--theme-card-foreground-dark-rgb: 244 246 248;
+	--theme-popover-light: #FFFFFF;
+	--theme-popover-light-rgb: 255 255 255;
+	--theme-popover-dark: #1D313B;
+	--theme-popover-dark-rgb: 29 49 59;
+	--theme-popover-foreground-light: #17191C;
+	--theme-popover-foreground-light-rgb: 23 25 28;
+	--theme-popover-foreground-dark: #F4F6F8;
+	--theme-popover-foreground-dark-rgb: 244 246 248;
+	--theme-primary-light: #007DA8;
+	--theme-primary-light-rgb: 0 125 168;
+	--theme-primary-dark: #007EA9;
+	--theme-primary-dark-rgb: 0 126 169;
+	--theme-primary-foreground-light: #FFFFFF;
+	--theme-primary-foreground-light-rgb: 255 255 255;
+	--theme-primary-foreground-dark: #FFFFFF;
+	--theme-primary-foreground-dark-rgb: 255 255 255;
+	--theme-secondary-light: #F9FDFE;
+	--theme-secondary-light-rgb: 249 253 254;
+	--theme-secondary-dark: #18262C;
+	--theme-secondary-dark-rgb: 24 38 44;
+	--theme-secondary-foreground-light: #17191C;
+	--theme-secondary-foreground-light-rgb: 23 25 28;
+	--theme-secondary-foreground-dark: #F4F6F8;
+	--theme-secondary-foreground-dark-rgb: 244 246 248;
+	--theme-muted-light: #EEF9FD;
+	--theme-muted-light-rgb: 238 249 253;
+	--theme-muted-dark: #223035;
+	--theme-muted-dark-rgb: 34 48 53;
+	--theme-muted-foreground-light: #5F6670;
+	--theme-muted-foreground-light-rgb: 95 102 112;
+	--theme-muted-foreground-dark: #D2D7DE;
+	--theme-muted-foreground-dark-rgb: 210 215 222;
+	--theme-accent-light: #D1EFF9;
+	--theme-accent-light-rgb: 209 239 249;
+	--theme-accent-dark: #124557;
+	--theme-accent-dark-rgb: 18 69 87;
+	--theme-accent-foreground-light: #003F54;
+	--theme-accent-foreground-light-rgb: 0 63 84;
+	--theme-accent-foreground-dark: #D1EFF9;
+	--theme-accent-foreground-dark-rgb: 209 239 249;
+	--theme-destructive-light: #E64747;
+	--theme-destructive-light-rgb: 230 71 71;
+	--theme-destructive-dark: #F87171;
+	--theme-destructive-dark-rgb: 248 113 113;
+	--theme-destructive-foreground-light: #FFFFFF;
+	--theme-destructive-foreground-light-rgb: 255 255 255;
+	--theme-destructive-foreground-dark: #111111;
+	--theme-destructive-foreground-dark-rgb: 17 17 17;
+	--theme-border-light: #DDE4EA;
+	--theme-border-light-rgb: 221 228 234;
+	--theme-border-dark: #323E47;
+	--theme-border-dark-rgb: 50 62 71;
+	--theme-input-light: #BDE8F6;
+	--theme-input-light-rgb: 189 232 246;
+	--theme-input-dark: #105269;
+	--theme-input-dark-rgb: 16 82 105;
+	--theme-ring-light: #007DA8;
+	--theme-ring-light-rgb: 0 125 168;
+	--theme-ring-dark: #007EA9;
+	--theme-ring-dark-rgb: 0 126 169;
+	--theme-chart-1-light: #007DA8;
+	--theme-chart-1-light-rgb: 0 125 168;
+	--theme-chart-1-dark: #007EA9;
+	--theme-chart-1-dark-rgb: 0 126 169;
+	--theme-chart-2-light: #12B7AA;
+	--theme-chart-2-light-rgb: 18 183 170;
+	--theme-chart-2-dark: #28CFC2;
+	--theme-chart-2-dark-rgb: 40 207 194;
+	--theme-chart-3-light: #E99E16;
+	--theme-chart-3-light-rgb: 233 158 22;
+	--theme-chart-3-dark: #ECBE2F;
+	--theme-chart-3-dark-rgb: 236 190 47;
+	--theme-chart-4-light: #E5484A;
+	--theme-chart-4-light-rgb: 229 72 74;
+	--theme-chart-4-dark: #EC7476;
+	--theme-chart-4-dark-rgb: 236 116 118;
+	--theme-chart-5-light: #8360F5;
+	--theme-chart-5-light-rgb: 131 96 245;
+	--theme-chart-5-dark: #9B8DF8;
+	--theme-chart-5-dark-rgb: 155 141 248;
+	--theme-sidebar-light: #F9FDFE;
+	--theme-sidebar-light-rgb: 249 253 254;
+	--theme-sidebar-dark: #18262C;
+	--theme-sidebar-dark-rgb: 24 38 44;
+	--theme-sidebar-foreground-light: #17191C;
+	--theme-sidebar-foreground-light-rgb: 23 25 28;
+	--theme-sidebar-foreground-dark: #F4F6F8;
+	--theme-sidebar-foreground-dark-rgb: 244 246 248;
+	--theme-sidebar-primary-light: #007DA8;
+	--theme-sidebar-primary-light-rgb: 0 125 168;
+	--theme-sidebar-primary-dark: #007EA9;
+	--theme-sidebar-primary-dark-rgb: 0 126 169;
+	--theme-sidebar-primary-foreground-light: #FFFFFF;
+	--theme-sidebar-primary-foreground-light-rgb: 255 255 255;
+	--theme-sidebar-primary-foreground-dark: #FFFFFF;
+	--theme-sidebar-primary-foreground-dark-rgb: 255 255 255;
+	--theme-sidebar-accent-light: #D1EFF9;
+	--theme-sidebar-accent-light-rgb: 209 239 249;
+	--theme-sidebar-accent-dark: #124557;
+	--theme-sidebar-accent-dark-rgb: 18 69 87;
+	--theme-sidebar-accent-foreground-light: #003F54;
+	--theme-sidebar-accent-foreground-light-rgb: 0 63 84;
+	--theme-sidebar-accent-foreground-dark: #D1EFF9;
+	--theme-sidebar-accent-foreground-dark-rgb: 209 239 249;
+	--theme-sidebar-border-light: #DDE4EA;
+	--theme-sidebar-border-light-rgb: 221 228 234;
+	--theme-sidebar-border-dark: #323E47;
+	--theme-sidebar-border-dark-rgb: 50 62 71;
+	--theme-sidebar-ring-light: #007DA8;
+	--theme-sidebar-ring-light-rgb: 0 125 168;
+	--theme-sidebar-ring-dark: #007EA9;
+	--theme-sidebar-ring-dark-rgb: 0 126 169;
 
+	--theme-surface: var(--theme-surface-light);
+	--theme-surface-rgb: var(--theme-surface-light-rgb);
+	--theme-surface-hover: var(--theme-surface-hover-light);
+	--theme-surface-hover-rgb: var(--theme-surface-hover-light-rgb);
+	--theme-surface-elevated: var(--theme-surface-elevated-light);
+	--theme-surface-elevated-rgb: var(--theme-surface-elevated-light-rgb);
+	--theme-surface-selected: var(--theme-surface-selected-light);
+	--theme-surface-selected-rgb: var(--theme-surface-selected-light-rgb);
+	--theme-primary-hover: var(--theme-primary-hover-light);
+	--theme-primary-hover-rgb: var(--theme-primary-hover-light-rgb);
+	--theme-primary-pressed: var(--theme-primary-pressed-light);
+	--theme-primary-pressed-rgb: var(--theme-primary-pressed-light-rgb);
+	--theme-primary-container-hover: var(--theme-primary-container-hover-light);
+	--theme-primary-container-hover-rgb: var(--theme-primary-container-hover-light-rgb);
+	--theme-primary-border: var(--theme-primary-border-light);
+	--theme-primary-border-rgb: var(--theme-primary-border-light-rgb);
+	--theme-primary-subtle: var(--theme-primary-subtle-light);
+	--theme-primary-subtle-rgb: var(--theme-primary-subtle-light-rgb);
+	--theme-text-primary: var(--theme-text-primary-light);
+	--theme-text-primary-rgb: var(--theme-text-primary-light-rgb);
+	--theme-text-secondary: var(--theme-text-secondary-light);
+	--theme-text-secondary-rgb: var(--theme-text-secondary-light-rgb);
+	--theme-text-muted: var(--theme-text-muted-light);
+	--theme-text-muted-rgb: var(--theme-text-muted-light-rgb);
+	--theme-danger: var(--theme-danger-light);
+	--theme-danger-rgb: var(--theme-danger-light-rgb);
+	--theme-danger-bg: var(--theme-danger-bg-light);
+	--theme-danger-bg-rgb: var(--theme-danger-bg-light-rgb);
+	--theme-background: var(--theme-background-light);
+	--theme-background-rgb: var(--theme-background-light-rgb);
+	--theme-foreground: var(--theme-foreground-light);
+	--theme-foreground-rgb: var(--theme-foreground-light-rgb);
+	--theme-card: var(--theme-card-light);
+	--theme-card-rgb: var(--theme-card-light-rgb);
+	--theme-card-foreground: var(--theme-card-foreground-light);
+	--theme-card-foreground-rgb: var(--theme-card-foreground-light-rgb);
+	--theme-popover: var(--theme-popover-light);
+	--theme-popover-rgb: var(--theme-popover-light-rgb);
+	--theme-popover-foreground: var(--theme-popover-foreground-light);
+	--theme-popover-foreground-rgb: var(--theme-popover-foreground-light-rgb);
+	--theme-primary: var(--theme-primary-light);
+	--theme-primary-rgb: var(--theme-primary-light-rgb);
+	--theme-primary-foreground: var(--theme-primary-foreground-light);
+	--theme-primary-foreground-rgb: var(--theme-primary-foreground-light-rgb);
+	--theme-secondary: var(--theme-secondary-light);
+	--theme-secondary-rgb: var(--theme-secondary-light-rgb);
+	--theme-secondary-foreground: var(--theme-secondary-foreground-light);
+	--theme-secondary-foreground-rgb: var(--theme-secondary-foreground-light-rgb);
+	--theme-muted: var(--theme-muted-light);
+	--theme-muted-rgb: var(--theme-muted-light-rgb);
+	--theme-muted-foreground: var(--theme-muted-foreground-light);
+	--theme-muted-foreground-rgb: var(--theme-muted-foreground-light-rgb);
+	--theme-accent: var(--theme-accent-light);
+	--theme-accent-rgb: var(--theme-accent-light-rgb);
+	--theme-accent-foreground: var(--theme-accent-foreground-light);
+	--theme-accent-foreground-rgb: var(--theme-accent-foreground-light-rgb);
+	--theme-destructive: var(--theme-destructive-light);
+	--theme-destructive-rgb: var(--theme-destructive-light-rgb);
+	--theme-destructive-foreground: var(--theme-destructive-foreground-light);
+	--theme-destructive-foreground-rgb: var(--theme-destructive-foreground-light-rgb);
+	--theme-border: var(--theme-border-light);
+	--theme-border-rgb: var(--theme-border-light-rgb);
+	--theme-input: var(--theme-input-light);
+	--theme-input-rgb: var(--theme-input-light-rgb);
+	--theme-ring: var(--theme-ring-light);
+	--theme-ring-rgb: var(--theme-ring-light-rgb);
+	--theme-chart-1: var(--theme-chart-1-light);
+	--theme-chart-1-rgb: var(--theme-chart-1-light-rgb);
+	--theme-chart-2: var(--theme-chart-2-light);
+	--theme-chart-2-rgb: var(--theme-chart-2-light-rgb);
+	--theme-chart-3: var(--theme-chart-3-light);
+	--theme-chart-3-rgb: var(--theme-chart-3-light-rgb);
+	--theme-chart-4: var(--theme-chart-4-light);
+	--theme-chart-4-rgb: var(--theme-chart-4-light-rgb);
+	--theme-chart-5: var(--theme-chart-5-light);
+	--theme-chart-5-rgb: var(--theme-chart-5-light-rgb);
+	--theme-sidebar: var(--theme-sidebar-light);
+	--theme-sidebar-rgb: var(--theme-sidebar-light-rgb);
+	--theme-sidebar-foreground: var(--theme-sidebar-foreground-light);
+	--theme-sidebar-foreground-rgb: var(--theme-sidebar-foreground-light-rgb);
+	--theme-sidebar-primary: var(--theme-sidebar-primary-light);
+	--theme-sidebar-primary-rgb: var(--theme-sidebar-primary-light-rgb);
+	--theme-sidebar-primary-foreground: var(--theme-sidebar-primary-foreground-light);
+	--theme-sidebar-primary-foreground-rgb: var(--theme-sidebar-primary-foreground-light-rgb);
+	--theme-sidebar-accent: var(--theme-sidebar-accent-light);
+	--theme-sidebar-accent-rgb: var(--theme-sidebar-accent-light-rgb);
+	--theme-sidebar-accent-foreground: var(--theme-sidebar-accent-foreground-light);
+	--theme-sidebar-accent-foreground-rgb: var(--theme-sidebar-accent-foreground-light-rgb);
+	--theme-sidebar-border: var(--theme-sidebar-border-light);
+	--theme-sidebar-border-rgb: var(--theme-sidebar-border-light-rgb);
+	--theme-sidebar-ring: var(--theme-sidebar-ring-light);
+	--theme-sidebar-ring-rgb: var(--theme-sidebar-ring-light-rgb);
+	--color-app-background: var(--theme-background);
+	--color-app-surface: var(--theme-surface);
+	--color-danger: var(--theme-danger);
+	--color-danger-rgb: var(--theme-danger-rgb);
+	--color-danger-bg: var(--theme-danger-bg);
+	--color-danger-bg-rgb: var(--theme-danger-bg-rgb);
+	--background: var(--theme-background);
+	--foreground: var(--theme-foreground);
+	--card: var(--theme-card);
+	--card-foreground: var(--theme-card-foreground);
+	--popover: var(--theme-popover);
+	--popover-foreground: var(--theme-popover-foreground);
+	--primary: var(--theme-primary);
+	--primary-foreground: var(--theme-primary-foreground);
+	--secondary: var(--theme-secondary);
+	--secondary-foreground: var(--theme-secondary-foreground);
+	--muted: var(--theme-muted);
+	--muted-foreground: var(--theme-muted-foreground);
+	--accent: var(--theme-accent);
+	--accent-foreground: var(--theme-accent-foreground);
+	--destructive: var(--theme-destructive);
+	--destructive-foreground: var(--theme-destructive-foreground);
+	--border: var(--theme-border);
+	--input: var(--theme-input);
+	--ring: var(--theme-ring);
+	--chart-1: var(--theme-chart-1);
+	--chart-2: var(--theme-chart-2);
+	--chart-3: var(--theme-chart-3);
+	--chart-4: var(--theme-chart-4);
+	--chart-5: var(--theme-chart-5);
+	--sidebar: var(--theme-sidebar);
+	--sidebar-foreground: var(--theme-sidebar-foreground);
+	--sidebar-primary: var(--theme-sidebar-primary);
+	--sidebar-primary-foreground: var(--theme-sidebar-primary-foreground);
+	--sidebar-accent: var(--theme-sidebar-accent);
+	--sidebar-accent-foreground: var(--theme-sidebar-accent-foreground);
+	--sidebar-border: var(--theme-sidebar-border);
+	--sidebar-ring: var(--theme-sidebar-ring);
 	--neutral-50: 250 250 250;
 	--neutral-100: 245 245 245;
 	--neutral-200: 229 229 229;
@@ -75,44 +367,98 @@
 }
 
 .dark {
-	--color-app-background: var(--color-primary-dark);
-	--color-app-surface: var(--color-secondary-dark);
-	--theme-danger: var(--theme-danger-dark, #f87171);
-	--theme-danger-bg: var(--theme-danger-bg-dark, #450a0a);
-	--theme-background: var(--theme-background-dark, var(--color-app-background));
-	--theme-foreground: var(--theme-foreground-dark, #f4f6f8);
-	--theme-card: var(--theme-card-dark, var(--color-app-surface));
-	--theme-card-foreground: var(--theme-card-foreground-dark, #f4f6f8);
-	--theme-popover: var(--theme-popover-dark, #202429);
-	--theme-popover-foreground: var(--theme-popover-foreground-dark, #f4f6f8);
-	--theme-primary: var(--theme-primary-dark, var(--color-accent-dark));
-	--theme-primary-foreground: var(--theme-primary-foreground-dark, var(--color-on-accent-dark));
-	--theme-secondary: var(--theme-secondary-dark, var(--color-app-surface));
-	--theme-secondary-foreground: var(--theme-secondary-foreground-dark, #f4f6f8);
-	--theme-muted: var(--theme-muted-dark, var(--color-hover-dark));
-	--theme-muted-foreground: var(--theme-muted-foreground-dark, #c1c7cf);
-	--theme-accent: var(--theme-accent-dark, var(--color-accent-container-dark));
-	--theme-accent-foreground: var(--theme-accent-foreground-dark, var(--color-on-accent-container-dark));
-	--theme-destructive: var(--theme-destructive-dark, #f87171);
-	--theme-destructive-foreground: var(--theme-destructive-foreground-dark, #111111);
-	--theme-border: var(--theme-border-dark, #343a41);
-	--theme-input: var(--theme-input-dark, #475b84);
-	--theme-ring: var(--theme-ring-dark, var(--color-accent-dark));
-	--theme-chart-1: var(--theme-chart-1-dark, var(--color-accent-dark));
-	--theme-chart-2: var(--theme-chart-2-dark, #2dd4bf);
-	--theme-chart-3: var(--theme-chart-3-dark, #fbbf24);
-	--theme-chart-4: var(--theme-chart-4-dark, #f87171);
-	--theme-chart-5: var(--theme-chart-5-dark, #a78bfa);
-	--theme-sidebar: var(--theme-sidebar-dark, var(--color-app-surface));
-	--theme-sidebar-foreground: var(--theme-sidebar-foreground-dark, #f4f6f8);
-	--theme-sidebar-primary: var(--theme-sidebar-primary-dark, var(--color-accent-dark));
-	--theme-sidebar-primary-foreground: var(--theme-sidebar-primary-foreground-dark, var(--color-on-accent-dark));
-	--theme-sidebar-accent: var(--theme-sidebar-accent-dark, var(--color-accent-container-dark));
-	--theme-sidebar-accent-foreground: var(--theme-sidebar-accent-foreground-dark, var(--color-on-accent-container-dark));
-	--theme-sidebar-border: var(--theme-sidebar-border-dark, #343a41);
-	--theme-sidebar-ring: var(--theme-sidebar-ring-dark, var(--color-accent-dark));
-	--color-danger: #f87171;
-	--color-danger-bg: #3f1d1d;
+	--theme-surface: var(--theme-surface-dark);
+	--theme-surface-rgb: var(--theme-surface-dark-rgb);
+	--theme-surface-hover: var(--theme-surface-hover-dark);
+	--theme-surface-hover-rgb: var(--theme-surface-hover-dark-rgb);
+	--theme-surface-elevated: var(--theme-surface-elevated-dark);
+	--theme-surface-elevated-rgb: var(--theme-surface-elevated-dark-rgb);
+	--theme-surface-selected: var(--theme-surface-selected-dark);
+	--theme-surface-selected-rgb: var(--theme-surface-selected-dark-rgb);
+	--theme-primary-hover: var(--theme-primary-hover-dark);
+	--theme-primary-hover-rgb: var(--theme-primary-hover-dark-rgb);
+	--theme-primary-pressed: var(--theme-primary-pressed-dark);
+	--theme-primary-pressed-rgb: var(--theme-primary-pressed-dark-rgb);
+	--theme-primary-container-hover: var(--theme-primary-container-hover-dark);
+	--theme-primary-container-hover-rgb: var(--theme-primary-container-hover-dark-rgb);
+	--theme-primary-border: var(--theme-primary-border-dark);
+	--theme-primary-border-rgb: var(--theme-primary-border-dark-rgb);
+	--theme-primary-subtle: var(--theme-primary-subtle-dark);
+	--theme-primary-subtle-rgb: var(--theme-primary-subtle-dark-rgb);
+	--theme-text-primary: var(--theme-text-primary-dark);
+	--theme-text-primary-rgb: var(--theme-text-primary-dark-rgb);
+	--theme-text-secondary: var(--theme-text-secondary-dark);
+	--theme-text-secondary-rgb: var(--theme-text-secondary-dark-rgb);
+	--theme-text-muted: var(--theme-text-muted-dark);
+	--theme-text-muted-rgb: var(--theme-text-muted-dark-rgb);
+	--theme-danger: var(--theme-danger-dark);
+	--theme-danger-rgb: var(--theme-danger-dark-rgb);
+	--theme-danger-bg: var(--theme-danger-bg-dark);
+	--theme-danger-bg-rgb: var(--theme-danger-bg-dark-rgb);
+	--theme-background: var(--theme-background-dark);
+	--theme-background-rgb: var(--theme-background-dark-rgb);
+	--theme-foreground: var(--theme-foreground-dark);
+	--theme-foreground-rgb: var(--theme-foreground-dark-rgb);
+	--theme-card: var(--theme-card-dark);
+	--theme-card-rgb: var(--theme-card-dark-rgb);
+	--theme-card-foreground: var(--theme-card-foreground-dark);
+	--theme-card-foreground-rgb: var(--theme-card-foreground-dark-rgb);
+	--theme-popover: var(--theme-popover-dark);
+	--theme-popover-rgb: var(--theme-popover-dark-rgb);
+	--theme-popover-foreground: var(--theme-popover-foreground-dark);
+	--theme-popover-foreground-rgb: var(--theme-popover-foreground-dark-rgb);
+	--theme-primary: var(--theme-primary-dark);
+	--theme-primary-rgb: var(--theme-primary-dark-rgb);
+	--theme-primary-foreground: var(--theme-primary-foreground-dark);
+	--theme-primary-foreground-rgb: var(--theme-primary-foreground-dark-rgb);
+	--theme-secondary: var(--theme-secondary-dark);
+	--theme-secondary-rgb: var(--theme-secondary-dark-rgb);
+	--theme-secondary-foreground: var(--theme-secondary-foreground-dark);
+	--theme-secondary-foreground-rgb: var(--theme-secondary-foreground-dark-rgb);
+	--theme-muted: var(--theme-muted-dark);
+	--theme-muted-rgb: var(--theme-muted-dark-rgb);
+	--theme-muted-foreground: var(--theme-muted-foreground-dark);
+	--theme-muted-foreground-rgb: var(--theme-muted-foreground-dark-rgb);
+	--theme-accent: var(--theme-accent-dark);
+	--theme-accent-rgb: var(--theme-accent-dark-rgb);
+	--theme-accent-foreground: var(--theme-accent-foreground-dark);
+	--theme-accent-foreground-rgb: var(--theme-accent-foreground-dark-rgb);
+	--theme-destructive: var(--theme-destructive-dark);
+	--theme-destructive-rgb: var(--theme-destructive-dark-rgb);
+	--theme-destructive-foreground: var(--theme-destructive-foreground-dark);
+	--theme-destructive-foreground-rgb: var(--theme-destructive-foreground-dark-rgb);
+	--theme-border: var(--theme-border-dark);
+	--theme-border-rgb: var(--theme-border-dark-rgb);
+	--theme-input: var(--theme-input-dark);
+	--theme-input-rgb: var(--theme-input-dark-rgb);
+	--theme-ring: var(--theme-ring-dark);
+	--theme-ring-rgb: var(--theme-ring-dark-rgb);
+	--theme-chart-1: var(--theme-chart-1-dark);
+	--theme-chart-1-rgb: var(--theme-chart-1-dark-rgb);
+	--theme-chart-2: var(--theme-chart-2-dark);
+	--theme-chart-2-rgb: var(--theme-chart-2-dark-rgb);
+	--theme-chart-3: var(--theme-chart-3-dark);
+	--theme-chart-3-rgb: var(--theme-chart-3-dark-rgb);
+	--theme-chart-4: var(--theme-chart-4-dark);
+	--theme-chart-4-rgb: var(--theme-chart-4-dark-rgb);
+	--theme-chart-5: var(--theme-chart-5-dark);
+	--theme-chart-5-rgb: var(--theme-chart-5-dark-rgb);
+	--theme-sidebar: var(--theme-sidebar-dark);
+	--theme-sidebar-rgb: var(--theme-sidebar-dark-rgb);
+	--theme-sidebar-foreground: var(--theme-sidebar-foreground-dark);
+	--theme-sidebar-foreground-rgb: var(--theme-sidebar-foreground-dark-rgb);
+	--theme-sidebar-primary: var(--theme-sidebar-primary-dark);
+	--theme-sidebar-primary-rgb: var(--theme-sidebar-primary-dark-rgb);
+	--theme-sidebar-primary-foreground: var(--theme-sidebar-primary-foreground-dark);
+	--theme-sidebar-primary-foreground-rgb: var(--theme-sidebar-primary-foreground-dark-rgb);
+	--theme-sidebar-accent: var(--theme-sidebar-accent-dark);
+	--theme-sidebar-accent-rgb: var(--theme-sidebar-accent-dark-rgb);
+	--theme-sidebar-accent-foreground: var(--theme-sidebar-accent-foreground-dark);
+	--theme-sidebar-accent-foreground-rgb: var(--theme-sidebar-accent-foreground-dark-rgb);
+	--theme-sidebar-border: var(--theme-sidebar-border-dark);
+	--theme-sidebar-border-rgb: var(--theme-sidebar-border-dark-rgb);
+	--theme-sidebar-ring: var(--theme-sidebar-ring-dark);
+	--theme-sidebar-ring-rgb: var(--theme-sidebar-ring-dark-rgb);
 	--neutral-50: 32 33 36;
 	--neutral-100: 43 44 47;
 	--neutral-200: 58 59 63;
@@ -126,7 +472,6 @@
 	--neutral-950: 255 255 255;
 	color-scheme: dark;
 }
-
 * {
 	box-sizing: border-box;
 }
@@ -138,7 +483,7 @@ html {
 body {
 	background: var(--color-app-background);
 	font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-	color: rgb(var(--neutral-900));
+	color: var(--theme-foreground);
 }
 
 ::selection {
@@ -240,12 +585,12 @@ input[type="time"]::-webkit-date-and-time-value {
 		background:
 			radial-gradient(
 				circle at 22% -8%,
-				color-mix(in srgb, var(--color-app-surface) 90%, transparent),
+				color-mix(in srgb, var(--theme-surface) 90%, transparent),
 				transparent 26rem
 			),
 			radial-gradient(
 				circle at 100% 18%,
-				rgba(244, 244, 245, 0.86),
+				color-mix(in srgb, var(--theme-primary-subtle) 86%, transparent),
 				transparent 18rem
 			),
 			var(--color-app-background);
@@ -377,25 +722,18 @@ input[type="time"]::-webkit-date-and-time-value {
 	background:
 		linear-gradient(
 			180deg,
-			color-mix(in srgb, var(--color-app-surface) 92%, var(--color-accent-container-light) 8%),
-			var(--color-app-surface)
+			color-mix(in srgb, var(--theme-surface-elevated) 92%, var(--theme-primary-subtle) 8%),
+			var(--theme-surface)
 		);
-	border: 1px solid color-mix(in srgb, var(--color-accent-light) 16%, transparent);
+	border: 1px solid var(--theme-border);
 	border-radius: 1.25rem;
 	box-shadow:
-		0 1px 0 color-mix(in srgb, var(--color-app-surface) 85%, transparent) inset,
+		0 1px 0 color-mix(in srgb, var(--theme-surface-elevated) 85%, transparent) inset,
 		0 3px 10px rgba(23, 23, 23, 0.08),
 		0 18px 42px rgba(23, 23, 23, 0.1);
 }
 
 .dark .app-card {
-	background:
-		linear-gradient(
-			180deg,
-			color-mix(in srgb, var(--color-app-surface) 88%, var(--color-accent-container-dark) 12%),
-			var(--color-app-surface)
-		);
-	border-color: color-mix(in srgb, var(--color-accent-dark) 18%, transparent);
 	box-shadow:
 		0 1px 0 color-mix(in srgb, white 6%, transparent) inset,
 		0 8px 24px rgba(0, 0, 0, 0.2),
@@ -410,31 +748,30 @@ input[type="time"]::-webkit-date-and-time-value {
 }
 
 .app-card-interactive:hover {
-	border-color: color-mix(in srgb, var(--color-accent-light) 32%, transparent);
+	border-color: var(--theme-primary-border);
 	box-shadow:
-		0 1px 0 color-mix(in srgb, var(--color-app-surface) 90%, transparent) inset,
+		0 1px 0 color-mix(in srgb, var(--theme-surface-elevated) 90%, transparent) inset,
 		0 4px 10px rgba(23, 23, 23, 0.1),
-		0 22px 48px rgba(23, 23, 23, 0.12);
+		0 22px 48px color-mix(in srgb, var(--theme-primary) 12%, transparent);
 	transform: translateY(-3px);
 }
 
 .dark .app-card-interactive:hover {
-	border-color: color-mix(in srgb, var(--color-accent-dark) 34%, transparent);
 	box-shadow:
 		0 1px 0 color-mix(in srgb, white 8%, transparent) inset,
 		0 10px 28px rgba(0, 0, 0, 0.24),
-		0 28px 64px rgba(0, 0, 0, 0.22);
+		0 28px 64px color-mix(in srgb, var(--theme-primary) 16%, transparent);
 }
 
 .soft-panel {
 	background:
 		radial-gradient(
 			circle at 0 0,
-			color-mix(in srgb, var(--color-app-surface) 52%, transparent),
+			color-mix(in srgb, var(--theme-primary-subtle) 52%, transparent),
 			transparent 24rem
 		),
-		color-mix(in srgb, var(--color-app-surface) 94%, white 6%);
-	border: 1px solid rgba(23, 23, 23, 0.1);
+		var(--theme-surface-elevated);
+	border: 1px solid var(--theme-border);
 	border-radius: 1.5rem;
 	box-shadow:
 		0 2px 8px rgba(23, 23, 23, 0.08),
@@ -442,46 +779,30 @@ input[type="time"]::-webkit-date-and-time-value {
 }
 
 .dark .soft-panel {
-	background:
-		radial-gradient(
-			circle at 0 0,
-			color-mix(in srgb, var(--color-accent-container-dark) 24%, transparent),
-			transparent 24rem
-		),
-		color-mix(in srgb, var(--color-app-surface) 94%, black 6%);
-	border-color: color-mix(in srgb, var(--color-accent-dark) 14%, transparent);
 	box-shadow:
 		0 1px 0 color-mix(in srgb, white 5%, transparent) inset,
 		0 18px 52px rgba(0, 0, 0, 0.22);
 }
 
 .material-section {
-	background: color-mix(in srgb, var(--color-app-surface) 68%, transparent);
-	border: 1px solid rgba(23, 23, 23, 0.09);
+	background: color-mix(in srgb, var(--theme-surface) 82%, transparent);
+	border: 1px solid var(--theme-border);
 	border-radius: 2rem;
 	box-shadow:
-		0 1px 0 color-mix(in srgb, var(--color-app-surface) 72%, transparent) inset,
+		0 1px 0 color-mix(in srgb, var(--theme-surface-elevated) 72%, transparent) inset,
 		0 24px 80px rgba(23, 23, 23, 0.08);
 }
 
 .dark .material-section {
-	background: color-mix(in srgb, var(--color-app-surface) 84%, transparent);
-	border-color: color-mix(in srgb, var(--color-accent-dark) 14%, transparent);
 	box-shadow:
 		0 1px 0 color-mix(in srgb, white 5%, transparent) inset,
 		0 24px 80px rgba(0, 0, 0, 0.22);
 }
 
 .material-tonal {
-	background: var(--color-accent-container-light);
-	color: var(--color-on-accent-container-light);
-	box-shadow: 0 8px 22px color-mix(in srgb, var(--color-accent-light) 16%, transparent);
-}
-
-.dark .material-tonal {
-	background: var(--color-accent-container-dark);
-	color: var(--color-on-accent-container-dark);
-	box-shadow: 0 8px 22px color-mix(in srgb, var(--color-accent-dark) 20%, transparent);
+	background: var(--theme-surface-selected);
+	color: var(--theme-accent-foreground);
+	box-shadow: 0 8px 22px color-mix(in srgb, var(--theme-primary) 18%, transparent);
 }
 
 .interactive-lift {
@@ -505,14 +826,14 @@ input[type="time"]::-webkit-date-and-time-value {
 
 .primary-action {
 	box-shadow:
-		0 1px 0 color-mix(in srgb, var(--color-app-surface) 12%, transparent) inset,
+		0 1px 0 color-mix(in srgb, var(--theme-surface) 12%, transparent) inset,
 		0 12px 28px rgba(23, 23, 23, 0.18);
 	transform: translateY(0);
 }
 
 .primary-action:hover {
 	box-shadow:
-		0 1px 0 color-mix(in srgb, var(--color-app-surface) 18%, transparent) inset,
+		0 1px 0 color-mix(in srgb, var(--theme-surface) 18%, transparent) inset,
 		0 18px 38px rgba(23, 23, 23, 0.24);
 	transform: translateY(-2px);
 }
@@ -684,21 +1005,21 @@ input[type="time"]::-webkit-date-and-time-value {
 .memory-map-pin-bubble {
 	align-items: center;
 	background: #fffaf1;
-	border: 1px solid color-mix(in srgb, var(--color-app-surface) 90%, transparent);
+	border: 1px solid color-mix(in srgb, var(--theme-surface) 90%, transparent);
 	border-radius: 999px;
 	box-shadow: 0 12px 28px rgba(30, 25, 20, 0.24);
 	display: grid;
 	font-size: 1.5rem;
 	height: 3rem;
 	justify-content: center;
-	outline: 4px solid color-mix(in srgb, var(--color-app-surface) 72%, transparent);
+	outline: 4px solid color-mix(in srgb, var(--theme-surface) 72%, transparent);
 	width: 3rem;
 }
 
 .memory-map-pin-tip {
 	background: #fffaf1;
-	border-bottom: 1px solid color-mix(in srgb, var(--color-app-surface) 90%, transparent);
-	border-right: 1px solid color-mix(in srgb, var(--color-app-surface) 90%, transparent);
+	border-bottom: 1px solid color-mix(in srgb, var(--theme-surface) 90%, transparent);
+	border-right: 1px solid color-mix(in srgb, var(--theme-surface) 90%, transparent);
 	border-radius: 3px;
 	box-shadow: 6px 6px 12px rgba(30, 25, 20, 0.12);
 	height: 0.75rem;
@@ -781,7 +1102,7 @@ input[type="time"]::-webkit-date-and-time-value {
   :root {
 		--background: var(--color-app-background);
 		--foreground: var(--theme-foreground);
-		--card: var(--color-app-surface);
+		--card: var(--theme-surface);
 		--card-foreground: var(--theme-card-foreground);
 		--popover: var(--theme-popover);
 		--popover-foreground: var(--theme-popover-foreground);
@@ -816,7 +1137,7 @@ input[type="time"]::-webkit-date-and-time-value {
   .dark {
 		--background: var(--color-app-background);
 		--foreground: var(--theme-foreground);
-		--card: var(--color-app-surface);
+		--card: var(--theme-surface);
 		--card-foreground: var(--theme-card-foreground);
 		--popover: var(--theme-popover);
 		--popover-foreground: var(--theme-popover-foreground);

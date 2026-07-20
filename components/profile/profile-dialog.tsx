@@ -152,7 +152,7 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 									onClick={() => setAvatarPickerOpen((open) => !open)}
 								>
 									<span className="flex items-center gap-3">
-										<span className="grid size-9 place-items-center rounded-xl bg-primaryLight dark:bg-primaryDark text-2xl">
+										<span className="grid size-9 place-items-center rounded-xl bg-background text-2xl">
 											{avatar}
 										</span>
 										<span className="text-sm font-semibold text-neutral-700">

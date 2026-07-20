@@ -13,7 +13,7 @@ function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 export const style =
-	"peer appearance-none w-full px-3 h-12 sm:h-11 text-sm text-neutral-900 bg-transparent rounded-2xl border border-neutral-400 shadow-none focus:shadow-none outline-none transition-all duration-200 focus:border-accentLight focus:ring-2 focus:ring-accentLight/15 dark:border-neutral-500/70 dark:bg-primaryDark/35 dark:text-white dark:placeholder:text-neutral-700 dark:focus:border-accentDark dark:focus:ring-accentDark/30";
+	"peer h-12 w-full appearance-none rounded-2xl border border-input bg-surface/70 px-3 text-sm text-foreground shadow-none outline-none transition-all duration-200 placeholder:text-subtle-foreground focus:border-primary focus:shadow-none focus:ring-2 focus:ring-ring/20 sm:h-11";
 
 export function NativeButton({
 	variant = "contained",
@@ -29,13 +29,13 @@ export function NativeButton({
 			className={cx(
 				"inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-bold transition active:scale-[0.8] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11",
 				variant === "contained" &&
-					"bg-accentLight text-onAccentLight dark:bg-accentDark dark:text-onAccentDark hover:bg-accentHoverLight dark:hover:bg-accentHoverDark",
+					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-pressed",
 				variant === "outlined" &&
-					"border border-accentLight bg-transparent text-accentLight hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:border-neutral-500/60 dark:bg-secondaryDark dark:text-white dark:hover:border-accentDark dark:hover:bg-accentDark dark:hover:text-white",
+					"border border-primary-border bg-surface text-primary hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground",
 				variant === "text" &&
-					"bg-transparent text-accentLight hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:text-white dark:hover:bg-hoverDark dark:hover:text-white",
+					"bg-transparent text-primary hover:bg-primary-subtle",
 				variant === "danger" &&
-					"border border-transparent bg-transparent text-danger hover:bg-danger-bg dark:text-red-100 dark:hover:bg-danger/20 dark:hover:text-white",
+					"border border-transparent bg-transparent text-danger hover:bg-danger-bg",
 				className,
 			)}
 		>
@@ -72,10 +72,10 @@ export function NativeInput({
 				<label
 					className={cx(
 						// Ban đầu nhãn nằm lọt lòng giữa ô textarea giống placeholder
-						"absolute left-3 top-3 text-sm text-neutral-500 transition-all duration-200 pointer-events-none origin-[top_left] px-1 bg-secondaryLight dark:bg-secondaryDark dark:text-neutral-800",
+						"pointer-events-none absolute left-3 top-3 origin-[top_left] bg-surface px-1 text-sm text-subtle-foreground transition-all duration-200",
 
 						// Khi FOCUS: Bay lên nằm đè lên border-top, thu nhỏ scale, đổi màu theo MUI
-						"peer-focus:scale-75 peer-focus:-translate-y-5 peer-focus:text-accentLight dark:peer-focus:text-white",
+						"peer-focus:-translate-y-5 peer-focus:scale-75 peer-focus:text-primary",
 
 						// Khi ĐÃ CÓ CHỮ (không hiện placeholder): Giữ nguyên vị trí trên border-top không bị tụt xuống
 						"peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-5",
@@ -90,7 +90,7 @@ export function NativeInput({
 				<span
 					className={cx(
 						"mt-1 text-xs block leading-5",
-						error ? "text-danger" : "text-neutral-500 dark:text-neutral-800",
+						error ? "text-danger" : "text-muted-foreground",
 					)}
 				>
 					{helperText}
@@ -139,10 +139,10 @@ export function NativeTextarea({
 				<label
 					className={cx(
 						// Ban đầu nhãn nằm lọt lòng giữa ô textarea giống placeholder
-						"absolute left-3 top-3 text-sm text-neutral-500 transition-all duration-200 pointer-events-none origin-[top_left] px-1 bg-secondaryLight dark:bg-secondaryDark dark:text-neutral-800",
+						"pointer-events-none absolute left-3 top-3 origin-[top_left] bg-surface px-1 text-sm text-subtle-foreground transition-all duration-200",
 
 						// Khi FOCUS: Bay lên nằm đè lên border-top, thu nhỏ scale, đổi màu theo MUI
-						"peer-focus:scale-75 peer-focus:-translate-y-5 peer-focus:text-accentLight dark:peer-focus:text-white",
+						"peer-focus:-translate-y-5 peer-focus:scale-75 peer-focus:text-primary",
 
 						// Khi ĐÃ CÓ CHỮ (không hiện placeholder): Giữ nguyên vị trí trên border-top không bị tụt xuống
 						"peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-5",
@@ -159,7 +159,7 @@ export function NativeTextarea({
 				<span
 					className={cx(
 						"mt-1 text-xs block leading-5",
-						error ? "text-danger" : "text-neutral-500 dark:text-neutral-800",
+						error ? "text-danger" : "text-muted-foreground",
 					)}
 				>
 					{helperText}
@@ -176,7 +176,7 @@ export function NativeSelect({
 	containerClassName,
 	value,
 	defaultValue, // Đón nhận thêm prop này
-	labelBgClass = "bg-secondaryLight dark:bg-secondaryDark",
+	labelBgClass = "bg-surface",
 	...props
 }: React.SelectHTMLAttributes<HTMLSelectElement> & {
 	label: string;
@@ -207,7 +207,7 @@ export function NativeSelect({
 				</select>
 
 				{/* Icon mũi tên xuống */}
-				<div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-neutral-500 dark:text-neutral-800">
+				<div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-subtle-foreground">
 					<svg
 						className="h-4 w-4"
 						fill="none"
@@ -227,10 +227,10 @@ export function NativeSelect({
 				<label
 					className={cx(
 						// Ban đầu nhãn nằm lọt lòng giữa ô textarea giống placeholder
-						"absolute left-3 top-3 text-sm text-neutral-500 transition-all duration-200 pointer-events-none origin-[top_left] px-1 dark:text-neutral-800 " +
+						"pointer-events-none absolute left-3 top-3 origin-[top_left] px-1 text-sm text-subtle-foreground transition-all duration-200 " +
 							labelBgClass,
 						// Khi FOCUS: Bay lên nằm đè lên border-top, thu nhỏ scale, đổi màu theo MUI
-						"peer-focus:scale-75 peer-focus:-translate-y-5 peer-focus:text-accentLight dark:peer-focus:text-white",
+						"peer-focus:-translate-y-5 peer-focus:scale-75 peer-focus:text-primary",
 						// Khi ĐÃ CÓ CHỮ (không hiện placeholder): Giữ nguyên vị trí trên border-top không bị tụt xuống
 						"peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-5",
 						// Nếu có value hoặc defaultValue, nhãn sẽ cố định ở viền trên
@@ -258,7 +258,7 @@ export function NativeTabs<T extends string>({
 	return (
 		<div
 			role="tablist"
-			className={cx("flex border-neutral-200 dark:border-neutral-700", className)}
+			className={cx("flex border-border", className)}
 		>
 			{options.map((option) => {
 				const selected = value === option.value;
@@ -271,8 +271,8 @@ export function NativeTabs<T extends string>({
 						className={cx(
 							"min-h-11 px-4 text-sm font-bold transition",
 							selected
-								? "border-b-2 border-accentLight text-accentLight dark:border-accentDark dark:text-accentDark"
-								: "text-neutral-500 hover:text-accentLight dark:text-white/70 dark:hover:text-accentDark",
+								? "border-b-2 border-primary text-primary"
+								: "text-muted-foreground hover:text-primary",
 						)}
 						onClick={() => onChange(option.value)}
 					>
@@ -340,7 +340,7 @@ export function NativeDialog({
 	const dialog = (
 		<div
 			className={cx(
-				"native-dialog-backdrop fixed inset-0 z-50 flex items-end justify-center bg-accentLight/20 p-0 backdrop-blur-sm dark:bg-black/60 sm:grid sm:place-items-center sm:p-4",
+				"native-dialog-backdrop fixed inset-0 z-50 flex items-end justify-center bg-neutral-950/35 p-0 backdrop-blur-sm dark:bg-neutral-950/60 sm:grid sm:place-items-center sm:p-4",
 				closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
 			)}
 		>
@@ -354,7 +354,7 @@ export function NativeDialog({
 				role="dialog"
 				aria-modal="true"
 				className={cx(
-					"mobile-sheet-motion relative flex max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full origin-bottom flex-col overflow-hidden rounded-2xl border border-accentLight/10 bg-secondaryLight shadow-2xl will-change-transform dark:border-neutral-500/30 dark:bg-secondaryDark dark:text-white sm:max-h-[calc(100svh-2rem)] sm:origin-center",
+					"mobile-sheet-motion relative flex max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full origin-bottom flex-col overflow-hidden rounded-2xl border border-border bg-surface-elevated text-foreground shadow-2xl will-change-transform sm:max-h-[calc(100svh-2rem)] sm:origin-center",
 					closing ? "native-sheet-out" : "native-sheet-in",
 					maxWidth === "xs" && "sm:w-[min(92vw,28rem)] sm:max-w-none",
 					maxWidth === "sm" && "sm:w-[min(92vw,36rem)] sm:max-w-none",
@@ -364,7 +364,7 @@ export function NativeDialog({
 				)}
 			>
 				{showHandle ? (
-					<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-accentLight/20 sm:hidden" />
+					<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-primary/80 sm:hidden" />
 				) : null}
 				{showTitle ? (
 					<div className="px-5 pt-4 sm:px-6 sm:pt-6">

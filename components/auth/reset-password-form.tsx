@@ -12,7 +12,7 @@ export function ResetPasswordForm() {
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-secondaryLight p-6 dark:border-neutral-700 dark:bg-secondaryDark sm:p-8">
+    <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
       <p className="eyebrow">Reset password</p>
       <h1 className="mt-3 font-serif text-4xl leading-none">
         Create a new password

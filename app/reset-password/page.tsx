@@ -7,7 +7,7 @@ export default async function ResetPasswordPage() {
   if (!auth) redirect("/login");
 
   return (
-    <main className="min-h-svh bg-primaryLight dark:bg-primaryDark">
+    <main className="min-h-svh bg-background">
       <section className="container-page grid min-h-svh content-start gap-5 pb-6 pt-[calc(env(safe-area-inset-top)+1.25rem)] sm:content-center sm:py-10">
         <div className="mx-auto grid w-full max-w-xl gap-5">
           <div>

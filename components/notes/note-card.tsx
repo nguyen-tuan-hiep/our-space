@@ -81,7 +81,7 @@ export function NoteCard({
 	return (
 		<article
 			className={[
-				"app-card app-card-interactive content-fade-in relative flex flex-col overflow-visible p-4 sm:p-5",
+				"app-card app-card-interactive content-fade-in relative flex h-full flex-col overflow-visible p-4 sm:p-5",
 			].join(" ")}
 		>
 			<div className="flex justify-between items-start gap-2">
@@ -138,41 +138,42 @@ export function NoteCard({
 			) : null}
 
 			{locked ? (
-				<div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-accentLight/15 dark:border-accentDark/15 bg-hoverLight/85 dark:bg-hoverDark/85 p-4 sm:p-5">
+				<div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-primary-border bg-surface-hover/85 p-4 sm:p-5">
 					<p className="eyebrow">Unlocks in</p>
 					<p className="mt-2 font-serif text-3xl">{countdown}</p>
-					<div className="relative mt-4 min-h-0 flex-1 select-none overflow-hidden rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-secondaryLight/90 dark:bg-secondaryDark/90 blur-md">
+
+					<div className="relative mt-4 min-h-0 flex-1 select-none overflow-hidden rounded-2xl border border-primary-border bg-surface/90 blur-md">
 						<div className="h-full overflow-y-auto">
 							<p className="whitespace-pre-line text-md leading-7">
 								{note.content}
 							</p>
 						</div>
 
-						<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-secondaryLight dark:from-secondaryDark to-transparent" />
+						<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface to-transparent" />
 					</div>
 				</div>
 			) : (
-				<div className="relative min-h-0 flex-1 overflow-hidden">
-					{/* <div className="h-full overflow-y-auto">
-						<div className="m-4 whitespace-pre-line text-md leading-6 text-neutral-700">
+				<div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border border-primary-border bg-muted">
+					<div
+						className="
+							max-h-[12rem] min-h-0 flex-1 overflow-y-auto
+							[scrollbar-color:rgb(var(--theme-primary-rgb)/0.65)_transparent]
+							[scrollbar-width:thin]
+							[&::-webkit-scrollbar]:w-2
+							[&::-webkit-scrollbar-track]:bg-transparent
+							[&::-webkit-scrollbar-thumb]:rounded-full
+							[&::-webkit-scrollbar-thumb]:border-2
+							[&::-webkit-scrollbar-thumb]:border-transparent
+							[&::-webkit-scrollbar-thumb]:bg-primary/60
+							[&::-webkit-scrollbar-thumb]:bg-clip-padding
+							hover:[&::-webkit-scrollbar-thumb]:bg-primary/85
+							dark:[&::-webkit-scrollbar-thumb]:bg-primary/70
+							dark:hover:[&::-webkit-scrollbar-thumb]:bg-primary
+						"
+					>
+						<div className="whitespace-pre-wrap break-words p-4 pr-3 text-md leading-6 text-neutral-600">
 							{note.content}
 						</div>
-					</div> */}
-					<div className="relative rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/55 dark:bg-hoverDark/45 p-4">
-						<div
-							className="max-h-[12rem] overflow-y-auto pr-3 leading-6 text-neutral-600
-												whitespace-pre-wrap break-words
-												[&::-webkit-scrollbar]:w-1.5
-												[&::-webkit-scrollbar-track]:bg-transparent
-												[&::-webkit-scrollbar-thumb]:rounded-full
-												[&::-webkit-scrollbar-thumb]:bg-hoverLight
-												hover:[&::-webkit-scrollbar-thumb]:bg-accentLight/20
-												dark:[&::-webkit-scrollbar-thumb]:bg-hoverDark"
-						>
-							{note.content}
-						</div>
-						{/* <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-secondaryLight dark:from-secondaryDark to-transparent" />
-					<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-secondaryLight dark:from-secondaryDark to-transparent" /> */}
 					</div>
 				</div>
 			)}

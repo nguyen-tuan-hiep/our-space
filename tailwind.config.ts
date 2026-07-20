@@ -1,4 +1,8 @@
 import type { Config } from "tailwindcss";
+
+const cssColor = (variable: string) =>
+  `rgb(var(${variable}-rgb) / <alpha-value>)`;
+
 export default {
   darkMode: "class",
   content: [
@@ -8,24 +12,70 @@ export default {
   theme: {
     extend: {
       colors: {
-        primaryLight: "var(--color-primary-light)",
-        secondaryLight: "var(--color-secondary-light)",
-        primaryDark: "var(--color-primary-dark)",
-        secondaryDark: "var(--color-secondary-dark)",
-        hoverLight: "var(--color-hover-light)",
-        hoverDark: "var(--color-hover-dark)",
-        accentLight: "var(--color-accent-light)",
-        accentDark: "var(--color-accent-dark)",
-        accentHoverLight: "var(--color-accent-hover-light)",
-        accentHoverDark: "var(--color-accent-hover-dark)",
-        accentContainerLight: "var(--color-accent-container-light)",
-        accentContainerDark: "var(--color-accent-container-dark)",
-        onAccentLight: "var(--color-on-accent-light)",
-        onAccentDark: "var(--color-on-accent-dark)",
-        onAccentContainerLight: "var(--color-on-accent-container-light)",
-        onAccentContainerDark: "var(--color-on-accent-container-dark)",
-        danger: "var(--color-danger)",
-        "danger-bg": "var(--color-danger-bg)",
+        background: cssColor("--theme-background"),
+        foreground: cssColor("--theme-foreground"),
+        surface: cssColor("--theme-surface"),
+        "surface-hover": cssColor("--theme-surface-hover"),
+        "surface-elevated": cssColor("--theme-surface-elevated"),
+        "surface-selected": cssColor("--theme-surface-selected"),
+        card: {
+          DEFAULT: cssColor("--theme-card"),
+          foreground: cssColor("--theme-card-foreground"),
+        },
+        popover: {
+          DEFAULT: cssColor("--theme-popover"),
+          foreground: cssColor("--theme-popover-foreground"),
+        },
+        primary: {
+          DEFAULT: cssColor("--theme-primary"),
+          foreground: cssColor("--theme-primary-foreground"),
+          hover: cssColor("--theme-primary-hover"),
+          pressed: cssColor("--theme-primary-pressed"),
+          border: cssColor("--theme-primary-border"),
+          subtle: cssColor("--theme-primary-subtle"),
+          "container-hover": cssColor("--theme-primary-container-hover"),
+        },
+        secondary: {
+          DEFAULT: cssColor("--theme-secondary"),
+          foreground: cssColor("--theme-secondary-foreground"),
+        },
+        muted: {
+          DEFAULT: cssColor("--theme-muted"),
+          foreground: cssColor("--theme-muted-foreground"),
+        },
+        subtle: {
+          foreground: cssColor("--theme-text-muted"),
+        },
+        accent: {
+          DEFAULT: cssColor("--theme-accent"),
+          foreground: cssColor("--theme-accent-foreground"),
+        },
+        destructive: {
+          DEFAULT: cssColor("--theme-destructive"),
+          foreground: cssColor("--theme-destructive-foreground"),
+        },
+        danger: cssColor("--theme-danger"),
+        "danger-bg": cssColor("--theme-danger-bg"),
+        chart: {
+          1: cssColor("--theme-chart-1"),
+          2: cssColor("--theme-chart-2"),
+          3: cssColor("--theme-chart-3"),
+          4: cssColor("--theme-chart-4"),
+          5: cssColor("--theme-chart-5"),
+        },
+        sidebar: {
+          DEFAULT: cssColor("--theme-sidebar"),
+          foreground: cssColor("--theme-sidebar-foreground"),
+          primary: cssColor("--theme-sidebar-primary"),
+          "primary-foreground": cssColor("--theme-sidebar-primary-foreground"),
+          accent: cssColor("--theme-sidebar-accent"),
+          "accent-foreground": cssColor("--theme-sidebar-accent-foreground"),
+          border: cssColor("--theme-sidebar-border"),
+          ring: cssColor("--theme-sidebar-ring"),
+        },
+        border: cssColor("--theme-border"),
+        input: cssColor("--theme-input"),
+        ring: cssColor("--theme-ring"),
         neutral: {
           50: "rgb(var(--neutral-50) / <alpha-value>)",
           100: "rgb(var(--neutral-100) / <alpha-value>)",
@@ -39,56 +89,6 @@ export default {
           900: "rgb(var(--neutral-900) / <alpha-value>)",
           950: "rgb(var(--neutral-950) / <alpha-value>)",
         },
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--card-foreground)",
-        },
-        popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
-        },
-        primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
-        },
-        secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
-        },
-        muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
-        },
-        accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-foreground)",
-        },
-        destructive: {
-          DEFAULT: "var(--destructive)",
-          foreground: "var(--destructive-foreground)",
-        },
-        chart: {
-          1: "var(--chart-1)",
-          2: "var(--chart-2)",
-          3: "var(--chart-3)",
-          4: "var(--chart-4)",
-          5: "var(--chart-5)",
-        },
-        sidebar: {
-          DEFAULT: "var(--sidebar)",
-          foreground: "var(--sidebar-foreground)",
-          primary: "var(--sidebar-primary)",
-          "primary-foreground": "var(--sidebar-primary-foreground)",
-          accent: "var(--sidebar-accent)",
-          "accent-foreground": "var(--sidebar-accent-foreground)",
-          border: "var(--sidebar-border)",
-          ring: "var(--sidebar-ring)",
-        },
-        border: "var(--border)",
-        input: "var(--input)",
-        ring: "var(--ring)",
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],

@@ -33,8 +33,8 @@ function UserFieldLabel({ profile }: { profile: Profile }) {
 	const imageSrc = isImage ? avatar : null;
 
 	return (
-		<div className="mb-2 flex items-center gap-2">
-			<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-hoverLight dark:bg-hoverDark text-base">
+		<div className="mb-4 flex items-center gap-2">
+			<span className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/30 text-base">
 				{imageSrc ? (
 					<Image
 						src={imageSrc}
@@ -240,7 +240,7 @@ export function MemoryMapDialog({
 					</div>
 
 					<div className="grid gap-3">
-						{/* <div className="rounded-2xl border border-neutral-200 bg-accentContainerLight dark:bg-accentContainerDark px-4 py-3 text-sm font-semibold leading-5 text-neutral-700">
+						{/* <div className="rounded-2xl border border-neutral-200 bg-accent px-4 py-3 text-sm font-semibold leading-5 text-neutral-700">
 							{latitude && longitude
 								? "Current location added."
 								: "Use your current location to place this memory on the map."}
@@ -262,13 +262,13 @@ export function MemoryMapDialog({
 						<NativeTextarea
 							rows={4}
 							name={`description:${profile.id}`}
-							label="Your description"
+							label="Description"
 							defaultValue={getUserDescription(memory, profile.id)}
 						/>
 					</div>
 
 					{photoUrl ? (
-						<div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-hoverLight dark:border-neutral-500/40 dark:bg-primaryDark/35 aspect-[16/10]">
+						<div className="relative overflow-hidden rounded-2xl border border-primary-border bg-primary-subtle aspect-[16/10]">
 							<Image
 								src={photoUrl}
 								alt="Memory upload preview"
@@ -280,7 +280,7 @@ export function MemoryMapDialog({
 
 					<div className={photoUrl ? "grid grid-cols-2 gap-3" : "grid gap-3"}>
 						<label
-							className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-accentLight px-5 text-sm font-bold text-accentLight transition hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:border-neutral-500/60 dark:bg-secondaryDark dark:text-white dark:hover:border-accentDark dark:hover:bg-accentDark dark:hover:text-white sm:min-h-11 ${
+							className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-primary-border bg-surface px-5 text-sm font-bold text-primary transition hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground sm:min-h-11 ${
 								uploading ? "pointer-events-none opacity-50" : ""
 							}`}
 						>

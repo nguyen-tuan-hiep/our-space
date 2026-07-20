@@ -72,7 +72,7 @@ export function EmojiPickerDialog({
 				type="button"
 				aria-label="Close emoji picker"
 				className={[
-					"fixed inset-0 z-[90] bg-accentLight/20 backdrop-blur-sm",
+					"fixed inset-0 z-[90] bg-neutral-950/35 dark:bg-neutral-950/60 backdrop-blur-sm",
 					closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
 				].join(" ")}
 				onClick={onClose}
@@ -82,7 +82,7 @@ export function EmojiPickerDialog({
 				aria-modal="true"
 				aria-label={title}
 				className={[
-					"emoji-picker-dialog fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[100] overflow-hidden rounded-3xl border border-neutral-900/10 bg-secondaryLight dark:bg-secondaryDark shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[min(26rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2",
+					"emoji-picker-dialog fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[100] overflow-hidden rounded-3xl border border-neutral-900/10 bg-surface shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[min(26rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2",
 					closing ? "native-sheet-out" : "native-sheet-in",
 				].join(" ")}
 			>

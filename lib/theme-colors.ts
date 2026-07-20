@@ -179,6 +179,11 @@ function hexToRgb(hex: string): {
   };
 }
 
+function hexToRgbChannels(hex: string): string {
+  const { r, g, b } = hexToRgb(hex);
+  return `${r} ${g} ${b}`;
+}
+
 /**
  * Trộn sourceHex với targetHex.
  *
@@ -274,12 +279,10 @@ export function createAccentPalette(baseColor: string) {
   const primaryPressedLight = mixWithBlack(baseColor, 0.26);
 
   const primaryDark = ensureWhiteTextContrast(baseColor);
-  const primaryHoverDarkCandidate = mixWithWhite(primaryDark, 0.08);
-  const primaryHoverDark =
-    contrastRatio(primaryHoverDarkCandidate, "#FFFFFF") >= 4.5
-      ? primaryHoverDarkCandidate
-      : primaryDark;
-  const primaryPressedDark = mixWithBlack(primaryDark, 0.08);
+  // Darkening preserves white-text contrast and still gives hover/pressed
+  // states a visible difference for bright user-selected accent colors.
+  const primaryHoverDark = mixWithBlack(primaryDark, 0.08);
+  const primaryPressedDark = mixWithBlack(primaryDark, 0.16);
 
   /*
    * Surface thực tế của sidebar/card.
@@ -595,7 +598,8 @@ export function createThemeColorTokens(baseColor: string) {
 export function createThemeCssVariables(baseColor: string) {
   const tokens = createThemeColorTokens(baseColor);
 
-  return {
+  const colorVariables = {
+    /* Legacy aliases kept for existing CSS and gradual migration. */
     "--color-primary-light": tokens.primaryLight,
     "--color-secondary-light": tokens.secondaryLight,
     "--color-primary-dark": tokens.primaryDark,
@@ -612,6 +616,33 @@ export function createThemeCssVariables(baseColor: string) {
     "--color-on-accent-dark": tokens.onAccentDark,
     "--color-on-accent-container-light": tokens.onAccentContainerLight,
     "--color-on-accent-container-dark": tokens.onAccentContainerDark,
+
+    /* Semantic palette roles used by components. */
+    "--theme-surface-light": tokens.surfaceLight,
+    "--theme-surface-dark": tokens.surfaceDark,
+    "--theme-surface-hover-light": tokens.surfaceHoverLight,
+    "--theme-surface-hover-dark": tokens.surfaceHoverDark,
+    "--theme-surface-elevated-light": tokens.surfaceElevatedLight,
+    "--theme-surface-elevated-dark": tokens.surfaceElevatedDark,
+    "--theme-surface-selected-light": tokens.surfaceSelectedLight,
+    "--theme-surface-selected-dark": tokens.surfaceSelectedDark,
+    "--theme-primary-hover-light": tokens.primaryHoverLight,
+    "--theme-primary-hover-dark": tokens.primaryHoverDark,
+    "--theme-primary-pressed-light": tokens.primaryPressedLight,
+    "--theme-primary-pressed-dark": tokens.primaryPressedDark,
+    "--theme-primary-container-hover-light": tokens.primaryContainerHoverLight,
+    "--theme-primary-container-hover-dark": tokens.primaryContainerHoverDark,
+    "--theme-primary-border-light": tokens.primaryBorderLight,
+    "--theme-primary-border-dark": tokens.primaryBorderDark,
+    "--theme-primary-subtle-light": tokens.primarySubtleLight,
+    "--theme-primary-subtle-dark": tokens.primarySubtleDark,
+    "--theme-text-primary-light": tokens.textPrimaryLight,
+    "--theme-text-primary-dark": tokens.textPrimaryDark,
+    "--theme-text-secondary-light": tokens.textSecondaryLight,
+    "--theme-text-secondary-dark": tokens.textSecondaryDark,
+    "--theme-text-muted-light": tokens.textMutedLight,
+    "--theme-text-muted-dark": tokens.textMutedDark,
+
     "--theme-danger-light": semanticColors.dangerLight,
     "--theme-danger-dark": semanticColors.dangerDark,
     "--theme-danger-bg-light": semanticColors.dangerBackgroundLight,
@@ -680,8 +711,22 @@ export function createThemeCssVariables(baseColor: string) {
     "--theme-sidebar-border-dark": tokens.sidebarBorderDark,
     "--theme-sidebar-ring-light": tokens.sidebarRing,
     "--theme-sidebar-ring-dark": tokens.sidebarRingDark,
+  } as const;
+
+  const rgbVariables = Object.fromEntries(
+    Object.entries(colorVariables).map(([name, value]) => [
+      `${name}-rgb`,
+      hexToRgbChannels(value),
+    ]),
+  );
+
+  return {
+    ...colorVariables,
+    ...rgbVariables,
     "--color-danger": "var(--theme-danger)",
+    "--color-danger-rgb": "var(--theme-danger-rgb)",
     "--color-danger-bg": "var(--theme-danger-bg)",
+    "--color-danger-bg-rgb": "var(--theme-danger-bg-rgb)",
     "--background": "var(--theme-background)",
     "--foreground": "var(--theme-foreground)",
     "--card": "var(--theme-card)",
@@ -716,7 +761,6 @@ export function createThemeCssVariables(baseColor: string) {
     "--sidebar-ring": "var(--theme-sidebar-ring)",
   } as const;
 }
-
 export const themeColors = {
   ...createThemeColorTokens(baseColor),
 

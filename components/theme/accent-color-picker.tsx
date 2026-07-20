@@ -36,10 +36,10 @@ export function AccentColorPicker() {
 							aria-pressed={selected}
 							title={preset.label}
 							className={[
-								"relative grid aspect-square min-h-9 place-items-center rounded-xl border p-1 transition active:scale-[0.94] sm:min-h-10 sm:rounded-2xl",
+								"relative grid aspect-square min-h-9 place-items-center rounded-xl border p-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-[0.94] sm:min-h-10 sm:rounded-2xl",
 								selected
-									? "border-accentLight dark:border-accentDark bg-accentContainerLight dark:bg-accentContainerDark shadow-[0_10px_24px_rgba(23,23,23,0.12)]"
-									: "border-accentLight/15 dark:border-accentDark/15 bg-hoverLight/70 dark:bg-hoverDark/55 hover:border-accentLight dark:hover:border-accentDark hover:bg-accentContainerLight dark:hover:bg-accentContainerDark",
+									? "border-primary bg-surface-selected shadow-[0_10px_24px_rgba(23,23,23,0.12)]"
+									: "border-primary-border bg-primary-subtle hover:border-primary hover:bg-primary-container-hover",
 							].join(" ")}
 							onClick={() => setAccentColor(key as AccentColorPresetKey)}
 						>

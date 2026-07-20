@@ -32,8 +32,8 @@ export function ThemeToggle({ onSelect }: { onSelect?: () => void }) {
 						className={[
 							"h-9 rounded-xl border px-2 text-xs font-bold transition",
 							selected
-								? "border-accentLight bg-accentLight text-onAccentLight dark:border-accentDark dark:bg-accentDark dark:text-onAccentDark"
-								: "border-accentLight/15 text-neutral-600 hover:border-accentLight hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:border-accentDark/15 dark:hover:border-accentDark dark:hover:bg-accentContainerDark dark:hover:text-onAccentContainerDark",
+								? "border-primary bg-primary text-primary-foreground"
+								: "border-primary-border bg-surface text-muted-foreground hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground",
 						].join(" ")}
 						aria-pressed={selected}
 						onClick={() => {

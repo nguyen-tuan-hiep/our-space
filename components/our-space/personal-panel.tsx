@@ -22,9 +22,9 @@ const NotificationPermissionButton = dynamic(
 );
 
 const fullWidthPersonalActionButtonClass =
-	"h-11 w-full rounded-2xl border-accentLight/15 bg-hoverLight/70 px-5 font-bold text-neutral-900 hover:border-accentLight hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:border-neutral-500/40 dark:bg-secondaryDark dark:text-white dark:hover:border-accentDark dark:hover:bg-accentDark dark:hover:text-white dark:[&_svg]:text-current";
+	"h-11 w-full rounded-2xl border-primary-border bg-surface px-5 font-bold text-foreground hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground";
 const preferenceActionButtonClass =
-	"h-11 w-full rounded-2xl border-accentLight/15 bg-hoverLight/70 px-5 font-bold text-neutral-900 hover:border-accentLight hover:bg-accentContainerLight hover:text-onAccentContainerLight dark:border-neutral-500/40 dark:bg-secondaryDark dark:text-white dark:hover:border-accentDark dark:hover:bg-accentDark dark:hover:text-white dark:[&_svg]:text-current";
+	"h-11 w-full rounded-2xl border-primary-border bg-surface px-5 font-bold text-foreground hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground";
 const personalActionIconClass = "size-[17px]";
 
 interface PersonalPanelProps {
@@ -62,14 +62,14 @@ export function PersonalPanel({
 		<div className="grid gap-4 sm:gap-5">
 			<div className="flex items-center justify-between gap-4">
 				<div>
-					<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500 sm:hidden">
+					<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-subtle-foreground sm:hidden">
 						Your space
 					</p>
 					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
 						Personal
 					</h2>
 				</div>
-				<div className="grid size-11 place-items-center rounded-full bg-accentContainerLight dark:bg-accentContainerDark text-accentLight dark:text-accentDark shadow-md sm:hidden">
+				<div className="grid size-11 place-items-center rounded-full bg-primary-subtle text-primary shadow-md sm:hidden">
 					<UserRound size={22} />
 				</div>
 			</div>
@@ -77,33 +77,39 @@ export function PersonalPanel({
 			<div className="grid gap-4 md:grid-cols-2 lg:items-stretch">
 				<div className="app-card app-card-interactive content-fade-in p-4 sm:p-5 lg:min-h-[18rem] lg:p-7">
 					<div className="flex items-center gap-3 lg:items-start lg:gap-5">
-						<div className="grid size-14 place-items-center rounded-full bg-accentContainerLight dark:bg-accentContainerDark text-2xl lg:size-24 lg:text-5xl">
+						<div className="grid size-14 place-items-center rounded-full bg-primary/30 text-primary-foreground shadow-sm lg:size-24 lg:text-5xl">
 							{profileAvatar}
 						</div>
 						<div className="min-w-0">
-							<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+							<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-subtle-foreground">
 								Me
 							</p>
-							<p className="truncate font-serif text-2xl leading-tight text-neutral-950 lg:text-5xl">
+							<p className="truncate font-serif text-2xl leading-tight text-foreground lg:text-5xl">
 								{profile.display_name}
 							</p>
-							<p className="truncate text-xs text-neutral-500 lg:mt-2 lg:text-sm">
+							<p className="truncate text-xs text-subtle-foreground lg:mt-2 lg:text-sm">
 								{profile.country_code} · {profile.currency} ·{" "}
 								{profile.time_zone}
 							</p>
 						</div>
 					</div>
 					<div className="mt-6 hidden grid-cols-3 gap-3 lg:grid">
-						<div className="rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/55 p-4">
-							<p className="text-xs font-bold text-neutral-500">Country</p>
+						<div className="rounded-2xl border border-primary-border bg-primary-subtle p-4">
+							<p className="text-xs font-bold text-subtle-foreground">
+								Country
+							</p>
 							<p className="mt-1 font-serif text-2xl">{profile.country_code}</p>
 						</div>
-						<div className="rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/55 p-4">
-							<p className="text-xs font-bold text-neutral-500">Currency</p>
+						<div className="rounded-2xl border border-primary-border bg-primary-subtle p-4">
+							<p className="text-xs font-bold text-subtle-foreground">
+								Currency
+							</p>
 							<p className="mt-1 font-serif text-2xl">{profile.currency}</p>
 						</div>
-						<div className="rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/55 p-4">
-							<p className="text-xs font-bold text-neutral-500">Timezone</p>
+						<div className="rounded-2xl border border-primary-border bg-primary-subtle p-4">
+							<p className="text-xs font-bold text-subtle-foreground">
+								Timezone
+							</p>
 							<p className="mt-1 truncate font-semibold">{profile.time_zone}</p>
 						</div>
 					</div>
@@ -121,40 +127,46 @@ export function PersonalPanel({
 
 				<div className="app-card app-card-interactive content-fade-in p-4 sm:p-5 lg:min-h-[18rem] lg:p-7">
 					<div className="flex items-center gap-3 lg:items-start lg:gap-5">
-						<div className="grid size-14 place-items-center rounded-full bg-accentContainerLight dark:bg-accentContainerDark text-2xl lg:size-24 lg:text-5xl">
+						<div className="grid size-14 place-items-center rounded-full bg-primary/30 text-primary-foreground shadow-sm lg:size-24 lg:text-5xl">
 							{partnerAvatar}
 						</div>
 						<div className="min-w-0">
-							<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+							<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-subtle-foreground">
 								Partner
 							</p>
-							<p className="truncate font-serif text-2xl leading-tight text-neutral-950 lg:text-4xl">
+							<p className="truncate font-serif text-2xl leading-tight text-foreground lg:text-4xl">
 								{partner.display_name}
 							</p>
-							<p className="truncate text-xs text-neutral-500">
+							<p className="truncate text-xs text-subtle-foreground">
 								{partner.country_code} · {partner.currency} ·{" "}
 								{partner.time_zone}
 							</p>
 						</div>
 					</div>
 					<div className="mt-6 hidden grid-cols-3 gap-3 lg:grid">
-						<div className="rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/55 p-4">
-							<p className="text-xs font-bold text-neutral-500">Country</p>
+						<div className="rounded-2xl border border-primary-border bg-primary-subtle p-4">
+							<p className="text-xs font-bold text-subtle-foreground">
+								Country
+							</p>
 							<p className="mt-1 font-serif text-2xl">{partner.country_code}</p>
 						</div>
-						<div className="rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/55 p-4">
-							<p className="text-xs font-bold text-neutral-500">Currency</p>
+						<div className="rounded-2xl border border-primary-border bg-primary-subtle p-4">
+							<p className="text-xs font-bold text-subtle-foreground">
+								Currency
+							</p>
 							<p className="mt-1 font-serif text-2xl">{partner.currency}</p>
 						</div>
-						<div className="rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/55 p-4">
-							<p className="text-xs font-bold text-neutral-500">Timezone</p>
+						<div className="rounded-2xl border border-primary-border bg-primary-subtle p-4">
+							<p className="text-xs font-bold text-subtle-foreground">
+								Timezone
+							</p>
 							<p className="mt-1 truncate font-semibold">{partner.time_zone}</p>
 						</div>
 					</div>
-					<div className="mt-4 rounded-2xl border border-accentLight/10 bg-hoverLight/70 px-4 py-3 text-sm font-semibold text-neutral-600 dark:border-neutral-500/30 dark:bg-secondaryDark dark:text-white lg:mt-6">
+					<div className="mt-4 rounded-2xl border border-primary-border bg-primary-subtle px-4 py-3 text-sm font-semibold text-muted-foreground lg:mt-6">
 						<Heart
 							size={16}
-							className="mr-2 inline text-accentLight dark:text-accentDark"
+							className="mr-2 inline text-primary"
 						/>
 						Connected in Our Space
 					</div>
@@ -165,51 +177,51 @@ export function PersonalPanel({
 				<div className="app-card content-fade-in p-4 sm:p-5 lg:p-7">
 					<div className="flex items-start justify-between gap-4">
 						<div>
-							<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+							<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-subtle-foreground">
 								Relationship
 							</p>
-							<p className="mt-1 font-serif text-2xl leading-tight text-neutral-950 lg:text-5xl">
+							<p className="mt-1 font-serif text-2xl leading-tight text-foreground lg:text-5xl">
 								{relationshipStats.daysTogether} days together
 							</p>
-							{/* <p className="mt-2 text-sm text-neutral-500">
+							{/* <p className="mt-2 text-sm text-subtle-foreground">
 								Since {anniversaryLabel}
 							</p> */}
 						</div>
-						<div className="grid size-11 shrink-0 place-items-center rounded-full bg-accentContainerLight dark:bg-accentContainerDark text-accentLight dark:text-accentDark">
+						<div className="grid size-11 shrink-0 place-items-center rounded-full bg-primary-subtle text-primary">
 							<Sparkles size={20} />
 						</div>
 					</div>
 					<div className="mt-5 grid gap-3 grid-cols-2">
-						<div className="rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/55 p-4">
-							<p className="text-xs font-bold text-neutral-500">Next</p>
+						<div className="rounded-2xl border border-primary-border bg-primary-subtle p-4">
+							<p className="text-xs font-bold text-subtle-foreground">Next</p>
 							<p className="mt-1 truncate font-semibold">
 								{relationshipStats.countdown}
 							</p>
 						</div>
-						<div className="rounded-2xl border border-accentLight/10 dark:border-accentDark/10 bg-hoverLight/70 dark:bg-hoverDark/55 p-4">
-							<p className="text-xs font-bold text-neutral-500">Since</p>
-							<p className="mt-1 truncate font-semibold">
-								{anniversaryLabel}
-							</p>
+						<div className="rounded-2xl border border-primary-border bg-primary-subtle p-4">
+							<p className="text-xs font-bold text-subtle-foreground">Since</p>
+							<p className="mt-1 truncate font-semibold">{anniversaryLabel}</p>
 						</div>
 					</div>
 				</div>
 
 				<div className="app-card content-fade-in grid gap-4 p-4 sm:p-5 lg:p-7">
 					<div>
-						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500 dark:text-neutral-800">
+						<p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-subtle-foreground">
 							App actions
 						</p>
-						<p className="mt-1 font-serif text-2xl leading-tight text-neutral-950 dark:text-white">
+						<p className="mt-1 font-serif text-2xl leading-tight text-foreground">
 							Preferences
 						</p>
 					</div>
 					<div className="grid gap-2">
-						<p className="text-xs font-bold text-neutral-500">Theme</p>
+						<p className="text-xs font-bold text-subtle-foreground">Theme</p>
 						<ThemeToggle />
 					</div>
 					<div className="grid gap-2">
-						<p className="text-xs font-bold text-neutral-500">Accent color</p>
+						<p className="text-xs font-bold text-subtle-foreground">
+							Accent color
+						</p>
 						<AccentColorPicker />
 					</div>
 					<div className="grid grid-cols-2 gap-3">
@@ -243,7 +255,7 @@ export function PersonalPanel({
 						disabled={pending}
 						variant="destructive"
 						size="lg"
-						className="h-11 w-full rounded-2xl bg-danger-bg px-5 font-bold text-danger hover:bg-danger hover:text-white dark:border-danger/40 dark:bg-danger/20 dark:text-white dark:hover:bg-danger dark:hover:text-white"
+						className="h-11 w-full rounded-2xl border border-danger/30 bg-danger-bg px-5 font-bold text-danger hover:bg-danger hover:text-white"
 						onClick={onSignOut}
 					>
 						<LogOut size={16} />
@@ -251,7 +263,6 @@ export function PersonalPanel({
 					</Button>
 				</div>
 			</div>
-
 		</div>
 	);
 }

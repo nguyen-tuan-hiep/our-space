@@ -28,7 +28,7 @@ export function LoginForm({ message }: LoginFormProps) {
   const isForgot = mode === "forgot";
 
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-secondaryLight p-6 dark:border-neutral-700 dark:bg-secondaryDark sm:p-8">
+    <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
       {message ? (
         <p className="mb-4 rounded-lg border border-danger/25 bg-danger-bg px-4 py-3 text-sm font-semibold text-danger">
           {message}
@@ -42,7 +42,7 @@ export function LoginForm({ message }: LoginFormProps) {
             { value: "signin", label: "Sign in" },
             { value: "signup", label: "Sign up" },
           ]}
-          className="border-b border-neutral-200 dark:border-neutral-700"
+          className="border-b border-border"
         />
       )}
       <p className="eyebrow mt-4 sm:mt-6">
@@ -114,7 +114,7 @@ export function LoginForm({ message }: LoginFormProps) {
         {mode === "signin" ? (
           <button
             type="button"
-            className="justify-self-center px-3 py-2 text-sm font-bold text-neutral-500 transition hover:text-neutral-950 dark:text-neutral-800 dark:hover:text-white"
+            className="justify-self-center px-3 py-2 text-sm font-bold text-muted-foreground transition hover:text-foreground"
             onClick={() => setMode("forgot")}
           >
             Forgot password?
@@ -123,7 +123,7 @@ export function LoginForm({ message }: LoginFormProps) {
         {isForgot ? (
           <button
             type="button"
-            className="justify-self-center px-3 py-2 text-sm font-bold text-neutral-500 transition hover:text-neutral-950 dark:text-neutral-800 dark:hover:text-white"
+            className="justify-self-center px-3 py-2 text-sm font-bold text-muted-foreground transition hover:text-foreground"
             onClick={() => setMode("signin")}
           >
             Back to sign in

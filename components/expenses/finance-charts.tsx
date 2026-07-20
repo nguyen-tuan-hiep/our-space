@@ -116,7 +116,7 @@ const renderCustomizedLabel = ({
 		<text
 			x={x}
 			y={y}
-			fill="var(--theme-foreground)"
+			fill="#000000"
 			textAnchor="middle"
 			dominantBaseline="central"
 			className="text-[10px] font-bold"
@@ -446,11 +446,11 @@ export function FinanceCharts({
 																] ?? "var(--theme-muted-foreground)",
 														}}
 													/>
-													<span className="truncate font-medium text-neutral-700 dark:text-neutral-800 capitalize">
+													<span className="truncate font-medium text-muted-foreground capitalize">
 														{cat.category}
 													</span>
 												</div>
-												<span className="font-semibold text-neutral-900 dark:text-white shrink-0">
+												<span className="font-semibold text-foreground shrink-0">
 													{formatCurrency(cat.value, displayCurrency)}
 												</span>
 											</div>

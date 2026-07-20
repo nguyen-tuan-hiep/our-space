@@ -142,7 +142,7 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 				<button
 					type="button"
 					aria-label="Zoom in"
-					className="grid size-10 place-items-center rounded-full bg-secondaryLight/90 text-neutral-800 shadow-md backdrop-blur transition dark:bg-secondaryDark/95 dark:text-white"
+					className="grid size-10 place-items-center rounded-full border border-primary-border bg-surface/90 text-foreground shadow-md backdrop-blur transition hover:bg-surface-hover"
 					onClick={() => map.zoomIn()}
 				>
 					<Plus size={18} />
@@ -150,7 +150,7 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 				<button
 					type="button"
 					aria-label="Zoom out"
-					className="grid size-10 place-items-center rounded-full bg-secondaryLight/90 text-neutral-800 shadow-md backdrop-blur transition dark:bg-secondaryDark/95 dark:text-white"
+					className="grid size-10 place-items-center rounded-full border border-primary-border bg-surface/90 text-foreground shadow-md backdrop-blur transition hover:bg-surface-hover"
 					onClick={() => map.zoomOut()}
 				>
 					<Minus size={18} />
@@ -158,7 +158,7 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 				<button
 					type="button"
 					aria-label="Fit all memories"
-					className="grid size-10 place-items-center rounded-full bg-secondaryLight/90 text-neutral-800 shadow-md backdrop-blur transition dark:bg-secondaryDark/95 dark:text-white"
+					className="grid size-10 place-items-center rounded-full border border-primary-border bg-surface/90 text-foreground shadow-md backdrop-blur transition hover:bg-surface-hover"
 					onClick={fitToMemories}
 				>
 					<Compass size={18} />
@@ -167,7 +167,7 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 					type="button"
 					aria-label="Use current location"
 					disabled={locating}
-					className="grid size-10 place-items-center rounded-full bg-secondaryLight/90 text-neutral-800 shadow-md backdrop-blur transition dark:bg-secondaryDark/95 dark:text-white disabled:opacity-60"
+					className="grid size-10 place-items-center rounded-full border border-primary-border bg-surface/90 text-foreground shadow-md backdrop-blur transition hover:bg-surface-hover disabled:opacity-60"
 					onClick={locateCurrentPosition}
 				>
 					<LocateFixed size={18} />
@@ -196,7 +196,7 @@ export function LeafletMemoryMap({
 	onNewMemory,
 }: LeafletMemoryMapProps) {
 	return (
-		// <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-secondaryLight dark:bg-secondaryDark p-2 shadow-md sm:p-4">
+		// <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-surface p-2 shadow-md sm:p-4">
 			<div className="relative min-h-[22rem] overflow-hidden rounded-2xl sm:min-h-[31rem] shadow-[0_0_15px_rgba(0,0,0,0.2)]">
 				<MapContainer
 					center={defaultCenter}
@@ -232,14 +232,14 @@ export function LeafletMemoryMap({
 
 				{!memories.length ? (
 					<div className="absolute inset-0 z-[40] grid place-items-center px-5 text-center">
-						<div className="max-w-sm rounded-2xl border border-secondaryLight/70 bg-secondaryLight/85 dark:bg-secondaryDark/85 p-5 shadow-lg backdrop-blur">
-							<div className="mx-auto grid size-12 place-items-center rounded-full bg-accentContainerLight dark:bg-accentContainerDark text-accentLight dark:text-accentDark">
+						<div className="max-w-sm rounded-2xl border border-white/70 bg-surface/85 p-5 shadow-lg backdrop-blur">
+							<div className="mx-auto grid size-12 place-items-center rounded-full bg-primary-subtle text-primary">
 								<Compass size={22} />
 							</div>
-							<p className="mt-3 font-serif text-2xl text-neutral-950">
+							<p className="mt-3 font-serif text-2xl text-foreground">
 								No places yet
 							</p>
-							<p className="mt-2 text-sm leading-6 text-neutral-600">
+							<p className="mt-2 text-sm leading-6 text-muted-foreground">
 								Add the first place you spent together
 							</p>
 							<button

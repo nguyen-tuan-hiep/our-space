@@ -104,7 +104,7 @@ export function ActionMenu({
 				type="button"
 				aria-label="Close actions"
 				className={[
-					"fixed inset-0 z-[70] dark:bg-primaryDark/25 backdrop-blur-[2px] sm:hidden",
+					"fixed inset-0 z-[70] bg-neutral-950/20 backdrop-blur-[2px] dark:bg-neutral-950/45 sm:hidden",
 					mobileClosing
 						? "native-dialog-backdrop-out"
 						: "native-dialog-backdrop-in",
@@ -116,16 +116,16 @@ export function ActionMenu({
 				aria-modal="true"
 				aria-label={sheetTitle}
 				className={[
-					"mobile-sheet-motion fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] overflow-hidden rounded-3xl border border-primaryLight bg-secondaryLight dark:bg-secondaryDark shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:hidden",
+					"mobile-sheet-motion fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] overflow-hidden rounded-3xl border border-border bg-surface-elevated shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:hidden",
 					mobileClosing ? "native-sheet-out" : "native-sheet-in",
 				].join(" ")}
 			>
-				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-primaryLight" />
-				<div className="border-b border-neutral-900/10 px-5 py-4">
-					<p className="font-serif text-xl leading-tight text-neutral-950">
+				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-primary-subtle" />
+				<div className="border-b border-border px-5 py-4">
+					<p className="font-serif text-xl leading-tight text-foreground">
 						{sheetTitle}
 					</p>
-					<p className="mt-1 line-clamp-2 text-sm text-neutral-500">
+					<p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
 						{sheetDescription}
 					</p>
 				</div>
@@ -133,7 +133,7 @@ export function ActionMenu({
 					<Button
 						type="button"
 						variant="ghost"
-						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:bg-hoverLight dark:hover:bg-hoverDark hover:shadow-[0_10px_24px_rgba(23,23,23,0.08)] active:scale-[0.98]"
+						className="h-12 justify-start rounded-2xl px-4 text-base font-semibold shadow-none transition hover:bg-surface-hover hover:shadow-[0_10px_24px_rgba(23,23,23,0.08)] active:scale-[0.98]"
 						onClick={handleMobileEdit}
 					>
 						<Edit2 size={18} />
@@ -176,7 +176,7 @@ export function ActionMenu({
 							aria-label={label}
 							disabled={disabled}
 							className={cn(
-								"hidden rounded-full bg-primaryLight dark:bg-primaryDark text-neutral-600 hover:bg-accentLight hover:text-onAccentLight dark:hover:bg-accentDark dark:hover:text-onAccentDark active:scale-[0.95] sm:inline-flex",
+								"hidden rounded-full bg-surface text-muted-foreground hover:bg-primary-hover hover:text-primary-foreground active:scale-[0.95] sm:inline-flex",
 								triggerClassName,
 							)}
 						/>
@@ -188,30 +188,30 @@ export function ActionMenu({
 					align="end"
 					sideOffset={8}
 					className={cn(
-						"w-72 rounded-3xl border border-neutral-900/10 bg-secondaryLight dark:bg-secondaryDark p-2 shadow-[0_24px_70px_rgba(30,25,20,0.22)] backdrop-blur-xl",
+						"w-72 rounded-3xl border border-border bg-surface-elevated p-2 shadow-[0_24px_70px_rgba(30,25,20,0.22)] backdrop-blur-xl",
 						contentClassName,
 					)}
 				>
 					<div className="px-3 pb-2 pt-2">
-						<p className="font-serif text-lg leading-tight text-neutral-950">
+						<p className="font-serif text-lg leading-tight text-foreground">
 							{sheetTitle}
 						</p>
-						<p className="mt-1 line-clamp-2 text-xs leading-5 text-neutral-500">
+						<p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
 							{sheetDescription}
 						</p>
 					</div>
 					<DropdownMenuItem
 						onClick={onEdit}
-						className="group gap-3 rounded-2xl px-3 py-3 hover:bg-hoverLight dark:hover:bg-hoverDark"
+						className="group gap-3 rounded-2xl px-3 py-3 hover:bg-surface-hover"
 					>
-						<span className="grid size-9 place-items-center rounded-xl bg-primaryLight dark:bg-primaryDark text-neutral-700 transition group-hover:bg-accentLight group-hover:text-onAccentLight dark:group-hover:bg-accentDark dark:group-hover:text-onAccentDark">
+						<span className="grid size-9 place-items-center rounded-xl bg-primary-subtle text-primary transition group-hover:bg-primary-hover group-hover:text-primary-foreground">
 							<Edit2 size={16} />
 						</span>
 						<span>
-							<span className="block font-bold text-neutral-900">
+							<span className="block font-bold text-foreground">
 								{editLabel}
 							</span>
-							<span className="block text-xs text-neutral-500">
+							<span className="block text-xs text-muted-foreground">
 								Update details
 							</span>
 						</span>
@@ -243,7 +243,7 @@ export function ActionMenu({
 				aria-haspopup="dialog"
 				disabled={disabled}
 				className={cn(
-					"inline-flex rounded-full bg-primaryLight dark:bg-primaryDark text-neutral-600 shadow-[0_6px_16px_rgba(23,23,23,0.08)] hover:bg-accentLight hover:text-onAccentLight dark:hover:bg-accentDark dark:hover:text-onAccentDark hover:shadow-[0_12px_28px_rgba(23,23,23,0.16)] active:scale-[0.92] sm:hidden",
+					"inline-flex rounded-full bg-surface text-muted-foreground shadow-[0_6px_16px_rgba(23,23,23,0.08)] hover:bg-primary-hover hover:text-primary-foreground hover:shadow-[0_12px_28px_rgba(23,23,23,0.16)] active:scale-[0.92] sm:hidden",
 					triggerClassName,
 				)}
 				onClick={() => {

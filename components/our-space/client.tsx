@@ -994,7 +994,7 @@ export function OurSpaceClient({
 	);
 
 	return (
-		<main className="min-h-svh overflow-x-clip bg-primaryLight dark:bg-primaryDark mobile-native-shell lg:pl-72">
+		<main className="min-h-svh overflow-x-clip bg-background mobile-native-shell lg:pl-72">
 			<SpaceSidebar
 				activeSection={activeSection}
 				anniversaryLabel={anniversaryLabel}
@@ -1008,7 +1008,7 @@ export function OurSpaceClient({
 				onSignOut={handleSignOut}
 			/>
 
-			<div className="lg:hidden bg-primaryLight dark:bg-primaryDark">
+			<div className="lg:hidden bg-background">
 				<SpaceHero
 					anniversaryLabel={anniversaryLabel}
 					heroImageUrl={heroImageUrl}

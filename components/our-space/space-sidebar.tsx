@@ -87,15 +87,11 @@ export function SpaceSidebar({
 		<aside
 			className="
         fixed inset-y-0 left-0 z-40 hidden w-72 overflow-y-auto
-        border-r border-neutral-900/10
-        bg-secondaryLight/95 p-4
-        text-neutral-900
+        border-r border-sidebar-border
+        bg-sidebar/95 p-4
+        text-sidebar-foreground
         shadow-[8px_0_40px_rgba(23,23,23,0.08)]
         backdrop-blur-xl
-
-        dark:border-white/10
-        dark:bg-secondaryDark/95
-        dark:text-white
 
         lg:flex lg:flex-col
       "
@@ -104,8 +100,8 @@ export function SpaceSidebar({
 			<div
 				className="
           flex items-center gap-3 rounded-3xl
-          bg-primaryLight/85 p-3
-          dark:bg-primaryDark dark:text-white
+          bg-surface-selected p-3
+          text-foreground
         "
 			>
 				<Image
@@ -118,15 +114,14 @@ export function SpaceSidebar({
 				/>
 
 				<div className="min-w-0">
-					<p className="font-serif text-xl leading-tight text-neutral-950 dark:text-white">
-						Our Space
+					<p className="font-serif text-xl leading-tight text-foreground">
+						Our Space 𑣲⋆
 					</p>
 
 					<p
 						className="
               truncate text-xs font-semibold
-              text-neutral-500
-              dark:text-neutral-800
+              text-muted-foreground
             "
 					>
 						Since {anniversaryLabel}
@@ -139,8 +134,7 @@ export function SpaceSidebar({
 				<p
 					className="
             text-[10px] font-bold uppercase tracking-[0.22em]
-            text-neutral-500
-            dark:text-neutral-400
+            text-subtle-foreground
           "
 				>
 					Workspace
@@ -150,8 +144,7 @@ export function SpaceSidebar({
 					aria-hidden="true"
 					className="
             ml-3 h-px flex-1
-            bg-accentLight/25
-            dark:bg-accentDark/25
+            bg-primary-border
           "
 				/>
 			</div>
@@ -180,37 +173,25 @@ export function SpaceSidebar({
                   duration-200
                   focus-visible:outline-none
                   focus-visible:ring-2
-                  focus-visible:ring-accentLight/60
+                  focus-visible:ring-ring/60
                   focus-visible:ring-offset-2
-                  focus-visible:ring-offset-secondaryLight
-
-                  dark:focus-visible:ring-accentDark/60
-                  dark:focus-visible:ring-offset-secondaryDark
+                  focus-visible:ring-offset-surface
                 `,
 								selected
 									? `
-                      border-accentLight/25
-                      bg-accentContainerLight
-                      text-onAccentContainerLight
+                      border-primary
+                      bg-surface-selected
+                      text-accent-foreground
                       shadow-[0_10px_24px_rgba(23,23,23,0.1)]
-
-                      dark:border-accentDark/25
-                      dark:bg-accentContainerDark
-                      dark:text-onAccentContainerDark
                     `
 									: `
                       border-transparent
-                      text-neutral-600
+                      text-muted-foreground
 
-                      hover:border-accentLight/25
-                      hover:bg-accentContainerLight
-                      hover:text-onAccentContainerLight
+                      hover:border-primary-border
+                      hover:bg-surface-hover
+                      hover:text-foreground
                       hover:shadow-[0_10px_24px_rgba(23,23,23,0.08)]
-
-                      dark:text-neutral-800
-                      dark:hover:border-accentDark/25
-                      dark:hover:bg-accentContainerDark
-                      dark:hover:text-onAccentContainerDark
                     `,
 							].join(" ")}
 						>
@@ -226,23 +207,15 @@ export function SpaceSidebar({
                   `,
 									selected
 										? `
-                        bg-accentLight
-                        text-onAccentLight
-
-                        dark:bg-accentDark
-                        dark:text-onAccentDark
+                        bg-primary
+                        text-primary-foreground
                       `
 										: `
-                        bg-primaryLight/80
-                        text-neutral-500
+                        bg-primary-subtle
+                        text-primary
 
-                        group-hover:bg-accentLight
-                        group-hover:text-onAccentLight
-
-                        dark:bg-primaryDark/80
-                        dark:text-neutral-400
-                        dark:group-hover:bg-accentDark
-                        dark:group-hover:text-onAccentDark
+                        group-hover:bg-primary-hover
+                        group-hover:text-primary-foreground
                       `,
 								].join(" ")}
 							>
@@ -261,15 +234,11 @@ export function SpaceSidebar({
 										"mt-0.5 block truncate text-xs transition-colors",
 										selected
 											? `
-                          text-onAccentContainerLight/70
-                          dark:text-onAccentContainerDark/70
+                          text-accent-foreground/70
                         `
 											: `
-                          text-neutral-400
-                          group-hover:text-onAccentContainerLight/70
-
-                          dark:text-white0
-                          dark:group-hover:text-onAccentContainerDark/70
+                          text-subtle-foreground
+                          group-hover:text-muted-foreground
                         `,
 									].join(" ")}
 								>
@@ -285,14 +254,10 @@ export function SpaceSidebar({
 			<section
 				className="
           mt-5 grid gap-3 rounded-3xl
-          border border-accentLight/15
-          bg-accentContainerLight p-4
-          text-onAccentContainerLight
+          border border-primary-border
+          bg-surface-selected p-4
+          text-accent-foreground
           shadow-[0_18px_44px_rgba(23,23,23,0.12)]
-
-          dark:border-accentDark/15
-          dark:bg-accentContainerDark
-          dark:text-onAccentContainerDark
           dark:shadow-[0_18px_44px_rgba(0,0,0,0.24)]
         "
 				aria-label="Relationship statistics"
@@ -316,20 +281,16 @@ export function SpaceSidebar({
 					<div
 						className="
       rounded-xl
-      border border-accentLight/15
-      bg-secondaryLight p-3
-      text-neutral-900
-
-      dark:border-white/10
-      dark:bg-secondaryDark
-      dark:text-white
+      border border-border
+      bg-surface/80 p-3
+      text-foreground
     "
 					>
-						<p className="font-semibold text-neutral-900 dark:text-white">
+						<p className="font-semibold text-foreground">
 							Next
 						</p>
 
-						<p className="mt-1 text-neutral-600 dark:text-white/75">
+						<p className="mt-1 text-muted-foreground">
 							{relationshipStats.countdown}
 						</p>
 					</div>
@@ -337,20 +298,16 @@ export function SpaceSidebar({
 					<div
 						className="
       rounded-xl
-      border border-accentLight/15
-      bg-secondaryLight p-3
-      text-neutral-900
-
-      dark:border-white/10
-      dark:bg-secondaryDark
-      dark:text-white
+      border border-border
+      bg-surface/80 p-3
+      text-foreground
     "
 					>
-						<p className="font-semibold text-neutral-900 dark:text-white">
+						<p className="font-semibold text-foreground">
 							Since
 						</p>
 
-						<p className="mt-1 truncate text-neutral-600 dark:text-white/75">
+						<p className="mt-1 truncate text-muted-foreground">
 							{relationshipStats.nextMonthlyLabel}
 						</p>
 					</div>
@@ -363,8 +320,7 @@ export function SpaceSidebar({
 					<p
 						className="
               text-[10px] font-bold uppercase tracking-[0.22em]
-              text-neutral-500
-              dark:text-neutral-400
+              text-subtle-foreground
             "
 					>
 						Actions
@@ -374,17 +330,13 @@ export function SpaceSidebar({
 						aria-hidden="true"
 						className="
               ml-3 h-px flex-1
-              bg-accentLight/25
-              dark:bg-accentDark/25
+              bg-primary-border
             "
 					/>
 				</div>
 
 				<div
-					className="
-            grid gap-1 rounded-2xl
-            dark:border-white/10
-          "
+					className="grid gap-1 rounded-2xl"
 				>
 					<Button
 						type="button"
@@ -396,11 +348,6 @@ export function SpaceSidebar({
               text-danger
               hover:bg-danger
               hover:text-white
-              dark:border-danger/40
-              dark:bg-danger/20
-              dark:text-white
-              dark:hover:bg-danger
-              dark:hover:text-white
             "
 					>
 						<LogOut
