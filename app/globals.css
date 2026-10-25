@@ -1669,3 +1669,44 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 @media (prefers-reduced-motion: reduce) {
 	.envelope, .envelope-flap, .envelope-letter { transition: none; }
 }
+
+/* Home-screen app on iOS: with viewport-fit=cover the page scrolls under the
+ * status bar. A frosted strip as tall as the top safe area keeps the clock
+ * legible; it fades in once scrolled so the hero photo still reaches the top.
+ * env() is 0 without a notch, so other devices are unaffected. */
+body::before {
+	content: "";
+	position: fixed;
+	inset: 0 0 auto;
+	z-index: 60;
+	height: env(safe-area-inset-top);
+	background: var(--glass-navigation);
+	-webkit-backdrop-filter: blur(20px) saturate(160%);
+	backdrop-filter: blur(20px) saturate(160%);
+	box-shadow: 0 1px 0 var(--glass-hairline);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 200ms ease;
+}
+html[data-scrolled] body::before { opacity: 1; }
+
+/* iOS WebKit misplaces position:fixed layers (bottom tabs, FAB, status strip)
+ * when the document itself scrolls, rubber-bands or momentum-scrolls, which
+ * strands them mid-screen until the next repaint. Below desktop the space page
+ * therefore never scrolls the document: html/body are locked and <main> is the
+ * scroll container, so the viewport fixed elements attach to never moves. */
+@media (max-width: 1023px) {
+	html:has(.space-shell),
+	html:has(.space-shell) body {
+		height: 100%;
+		overflow: hidden;
+	}
+	.space-shell {
+		height: 100dvh;
+		min-height: 0;
+		overflow-y: auto;
+		overscroll-behavior-y: contain;
+		-webkit-overflow-scrolling: touch;
+	}
+}
+

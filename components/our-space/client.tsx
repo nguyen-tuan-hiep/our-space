@@ -522,6 +522,26 @@ export function OurSpaceClient({
 		}
 	}
 
+	// Flag scrolled pages so the status-bar strip (globals.css) frosts in only
+	// once content would slide under the iOS clock, not over the hero photo.
+	// Below desktop <main> is the scroll container (see .space-shell in globals.css),
+	// on desktop the window scrolls; listen to both and use whichever moved.
+	useEffect(() => {
+		const root = document.documentElement;
+		const shell = document.querySelector<HTMLElement>(".space-shell");
+		const update = () => {
+			root.toggleAttribute("data-scrolled", Math.max(window.scrollY, shell?.scrollTop ?? 0) > 8);
+		};
+		update();
+		window.addEventListener("scroll", update, { passive: true });
+		shell?.addEventListener("scroll", update, { passive: true });
+		return () => {
+			window.removeEventListener("scroll", update);
+			shell?.removeEventListener("scroll", update);
+			root.removeAttribute("data-scrolled");
+		};
+	}, []);
+
 	useEffect(() => {
 		// Silent refresh: the skeleton is already up (initial state) unless the
 		// cache filled in, and state only changes once the request settles.

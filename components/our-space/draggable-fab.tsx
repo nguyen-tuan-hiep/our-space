@@ -17,107 +17,48 @@ interface DraggableFabProps {
   onClick: () => void;
 }
 
-type FabPosition = {
-  x: number;
-  y: number;
+/**
+ * The FAB is anchored to the bottom edge and one side, never to a `top` in
+ * pixels. On iOS the visual viewport resizes and reports transient offsets
+ * while the toolbars collapse or the page rubber-bands; a top-based position
+ * recomputed from those values could strand the button mid-screen. A bottom
+ * anchor stays put no matter how the viewport height changes.
+ */
+type FabAnchor = {
+  side: "left" | "right";
+  /** Distance from the layout viewport's bottom edge, in px. */
+  bottom: number;
 };
 
-function getViewportSize() {
-  if (typeof window === "undefined") {
-    return {
-      width: 0,
-      height: 0,
-      offsetTop: 0,
-      offsetLeft: 0,
-    };
-  }
-
-  const visualViewport = window.visualViewport;
-
-  // Đảm bảo offsetTop không bị âm khi overscroll/pull-to-refresh
-  const offsetTop = Math.max(0, visualViewport?.offsetTop ?? 0);
-
-  return {
-    width: visualViewport?.width ?? window.innerWidth,
-    height: visualViewport?.height ?? window.innerHeight,
-    offsetTop,
-    offsetLeft: visualViewport?.offsetLeft ?? 0,
-  };
-}
-
-function readSafeAreaBottom() {
+function readSafeArea(side: "top" | "bottom") {
   if (typeof window === "undefined") return 0;
 
   const probe = document.createElement("div");
   probe.style.position = "fixed";
-  probe.style.left = "0";
-  probe.style.bottom = "0";
   probe.style.visibility = "hidden";
   probe.style.pointerEvents = "none";
-  probe.style.paddingBottom = "env(safe-area-inset-bottom)";
-
+  probe.style.paddingBottom = `env(safe-area-inset-${side})`;
   document.body.appendChild(probe);
-
   const value = Number.parseFloat(getComputedStyle(probe).paddingBottom) || 0;
-
   probe.remove();
 
   return value;
 }
 
-function getNormalizedSafeBottom() {
-  const rawSafeBottom = readSafeAreaBottom();
-
-  return Math.min(Math.max(rawSafeBottom, 8), 48);
-}
-
 function getBottomClearance() {
-  return BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP + getNormalizedSafeBottom();
+  const safeBottom = Math.min(Math.max(readSafeArea("bottom"), 8), 48);
+  return BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP + safeBottom;
 }
 
-function getInitialPosition() {
-  const viewport = getViewportSize();
-
-  return clampPosition({
-    x: viewport.offsetLeft + viewport.width - FAB_SIZE - EDGE_MARGIN,
-    y: viewport.offsetTop + viewport.height - FAB_SIZE - getBottomClearance(),
-  });
+/** Height of the layout viewport that `position: fixed` is measured against. */
+function getLayoutHeight() {
+  return document.documentElement.clientHeight || window.innerHeight;
 }
 
-function clampPosition(position: FabPosition) {
-  if (typeof window === "undefined") return position;
-
-  const viewport = getViewportSize();
-
-  const minX = viewport.offsetLeft + EDGE_MARGIN;
-  const maxX = viewport.offsetLeft + viewport.width - FAB_SIZE - EDGE_MARGIN;
-  const minY = viewport.offsetTop + TOP_MARGIN;
-  const maxY = Math.max(
-    minY,
-    viewport.offsetTop + viewport.height - FAB_SIZE - getBottomClearance(),
-  );
-
-  return {
-    x: Math.min(Math.max(minX, position.x), maxX),
-    y: Math.min(Math.max(minY, position.y), maxY),
-  };
-}
-
-function snapToHorizontalEdge(position: FabPosition) {
-  if (typeof window === "undefined") return position;
-
-  const clamped = clampPosition(position);
-  const viewport = getViewportSize();
-  const viewportCenter = viewport.offsetLeft + viewport.width / 2;
-  const fabCenter = clamped.x + FAB_SIZE / 2;
-
-  return {
-    x:
-      fabCenter < viewportCenter
-        ? viewport.offsetLeft + EDGE_MARGIN
-        : viewport.offsetLeft + viewport.width - FAB_SIZE - EDGE_MARGIN,
-    y: clamped.y,
-  };
+function clampBottom(bottom: number) {
+  const min = getBottomClearance();
+  const max = Math.max(min, getLayoutHeight() - FAB_SIZE - TOP_MARGIN - readSafeArea("top"));
+  return Math.min(Math.max(min, bottom), max);
 }
 
 export function DraggableFab({
@@ -125,8 +66,10 @@ export function DraggableFab({
   children,
   onClick,
 }: DraggableFabProps) {
-  const [position, setPosition] = useState<FabPosition | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  // null = resting at the default CSS spot (no measuring needed for SSR/hydration).
+  const [anchor, setAnchor] = useState<FabAnchor | null>(null);
+  // Free horizontal position while dragging; snapped to a side on release.
+  const [dragX, setDragX] = useState<number | null>(null);
 
   const dragState = useRef<{
     pointerId: number;
@@ -137,46 +80,21 @@ export function DraggableFab({
     dragged: boolean;
   } | null>(null);
 
-  const latestPosition = useRef<FabPosition | null>(null);
+  const latest = useRef<{ x: number; bottom: number } | null>(null);
   const suppressClickUntil = useRef(0);
 
+  // Only a real layout change (rotation, window resize) can push the button
+  // out of range; re-clamp then. Toolbar collapse no longer matters.
   useEffect(() => {
-    const handleViewportChange = () => {
-      // Bỏ qua nếu người dùng đang kéo quá đà (overscroll)
-      const isOverscrollingTop = window.scrollY < 0;
-      const isOverscrollingBottom =
-        window.scrollY >
-        document.documentElement.scrollHeight - window.innerHeight;
-
-      if (isOverscrollingTop || isOverscrollingBottom) {
-        return;
-      }
-
-      setPosition((current) => {
-        const next = snapToHorizontalEdge(current ?? getInitialPosition());
-
-        latestPosition.current = next;
-
-        return next;
-      });
+    const handleResize = () => {
+      setAnchor((current) => (current ? { ...current, bottom: clampBottom(current.bottom) } : current));
     };
 
-    window.addEventListener("resize", handleViewportChange);
-    window.addEventListener("orientationchange", handleViewportChange);
-    window.visualViewport?.addEventListener("resize", handleViewportChange);
-    window.visualViewport?.addEventListener("scroll", handleViewportChange);
-
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
     return () => {
-      window.removeEventListener("resize", handleViewportChange);
-      window.removeEventListener("orientationchange", handleViewportChange);
-      window.visualViewport?.removeEventListener(
-        "resize",
-        handleViewportChange,
-      );
-      window.visualViewport?.removeEventListener(
-        "scroll",
-        handleViewportChange,
-      );
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
     };
   }, []);
 
@@ -195,7 +113,6 @@ export function DraggableFab({
         dragged: false,
       };
 
-      setIsDragging(false);
       event.currentTarget.setPointerCapture(event.pointerId);
     },
     [],
@@ -213,19 +130,16 @@ export function DraggableFab({
       );
 
       if (!currentDrag.dragged && movedDistance < DRAG_THRESHOLD) return;
+      currentDrag.dragged = true;
 
-      if (!currentDrag.dragged) {
-        currentDrag.dragged = true;
-        setIsDragging(true);
-      }
+      const maxX = window.innerWidth - FAB_SIZE - EDGE_MARGIN;
+      const x = Math.min(Math.max(EDGE_MARGIN, event.clientX - currentDrag.offsetX), maxX);
+      const top = event.clientY - currentDrag.offsetY;
+      const bottom = clampBottom(getLayoutHeight() - top - FAB_SIZE);
 
-      const nextPosition = clampPosition({
-        x: event.clientX - currentDrag.offsetX,
-        y: event.clientY - currentDrag.offsetY,
-      });
-
-      latestPosition.current = nextPosition;
-      setPosition(nextPosition);
+      latest.current = { x, bottom };
+      setDragX(x);
+      setAnchor((current) => ({ side: current?.side ?? "right", bottom }));
     },
     [],
   );
@@ -236,20 +150,16 @@ export function DraggableFab({
         event.currentTarget.releasePointerCapture(event.pointerId);
       }
 
-      const wasDragged = dragState.current?.dragged;
-
-      if (wasDragged && latestPosition.current) {
-        const snappedPosition = snapToHorizontalEdge(latestPosition.current);
-
-        latestPosition.current = snappedPosition;
-        setPosition(snappedPosition);
-
-        suppressClickUntil.current =
-          window.performance.now() + CLICK_SUPPRESS_MS;
+      if (dragState.current?.dragged && latest.current) {
+        const { x, bottom } = latest.current;
+        const side = x + FAB_SIZE / 2 < window.innerWidth / 2 ? "left" : "right";
+        setAnchor({ side, bottom });
+        suppressClickUntil.current = window.performance.now() + CLICK_SUPPRESS_MS;
       }
 
       dragState.current = null;
-      setIsDragging(false);
+      latest.current = null;
+      setDragX(null);
     },
     [],
   );
@@ -267,6 +177,21 @@ export function DraggableFab({
     [onClick],
   );
 
+  const dragging = dragX !== null;
+  const style: React.CSSProperties = anchor
+    ? {
+        bottom: anchor.bottom,
+        ...(dragging
+          ? { left: dragX }
+          : anchor.side === "left"
+            ? { left: EDGE_MARGIN }
+            : { right: EDGE_MARGIN }),
+      }
+    : {
+        right: EDGE_MARGIN,
+        bottom: `calc(${BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP}px + clamp(8px, env(safe-area-inset-bottom), 48px))`,
+      };
+
   return (
     <button
       type="button"
@@ -278,23 +203,11 @@ export function DraggableFab({
       onPointerCancel={handlePointerEnd}
       className={[
         "mobile-fab-in primary-action fixed z-40 grid size-14 touch-none select-none place-items-center rounded-full bg-primary text-primary-foreground transition hover:scale-[1.03] active:scale-[0.92] sm:hidden",
-        isDragging
+        dragging
           ? "transition-none"
-          : "transition-[left,top,transform,box-shadow] duration-300 ease-out",
+          : "transition-[bottom,transform,box-shadow] duration-300 ease-out",
       ].join(" ")}
-      style={
-        position
-          ? {
-              left: position.x,
-              top: position.y,
-            }
-          : {
-              // Resting spot before the first drag or viewport change; mirrors
-              // getInitialPosition() in CSS so SSR and hydration need no measuring.
-              right: EDGE_MARGIN,
-              bottom: `calc(${BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP}px + clamp(8px, env(safe-area-inset-bottom), 48px))`,
-            }
-      }
+      style={style}
     >
       {children}
     </button>
