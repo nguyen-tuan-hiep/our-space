@@ -278,9 +278,14 @@ export function MobileSpaceTabs({
   );
 
   return (
+    <>
+    {/* Blurs content scrolling beneath the floating bar, including the gap below it.
+        A sibling, not a child: the nav's entrance transform would make a fixed child
+        position against the nav instead of the screen. */}
+    <div aria-hidden="true" className="bottom-nav-backdrop sm:hidden" />
     <nav
       aria-label="Space sections"
-      className="native-bottom-nav-in fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-[45] sm:hidden"
+      className="native-bottom-nav-in fixed inset-x-2 bottom-[var(--bottom-nav-offset)] z-[45] sm:hidden"
     >
       <div className="glass-navigation relative rounded-[1.75rem] px-2 pb-2">
         <div className="relative grid grid-cols-6 py-2">
@@ -327,5 +332,6 @@ export function MobileSpaceTabs({
         </div>
       </div>
     </nav>
+    </>
   );
 }

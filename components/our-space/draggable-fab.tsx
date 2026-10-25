@@ -45,9 +45,13 @@ function readSafeArea(side: "top" | "bottom") {
   return value;
 }
 
+/** Mirrors --bottom-nav-offset in globals.css: max(8px, safe-area-bottom - 20px). */
+function getBottomNavOffset() {
+  return Math.max(8, readSafeArea("bottom") - 20);
+}
+
 function getBottomClearance() {
-  const safeBottom = Math.min(Math.max(readSafeArea("bottom"), 8), 48);
-  return BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP + safeBottom;
+  return BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP + getBottomNavOffset();
 }
 
 /** Height of the layout viewport that `position: fixed` is measured against. */
@@ -189,7 +193,7 @@ export function DraggableFab({
       }
     : {
         right: EDGE_MARGIN,
-        bottom: `calc(${BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP}px + clamp(8px, env(safe-area-inset-bottom), 48px))`,
+        bottom: `calc(${BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP}px + var(--bottom-nav-offset))`,
       };
 
   return (
