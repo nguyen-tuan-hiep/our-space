@@ -1,7 +1,8 @@
 "use client";
 
+import { PanelHeader } from "@/components/common/panel-header";
 import type { FormEvent, ReactNode } from "react";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { CalendarDays, HeartPulse, Pencil, Trash2 } from "lucide-react";
 import { deleteMood, upsertMood } from "@/app/actions";
 import { useToast } from "@/components/feedback/toast";
@@ -135,7 +136,7 @@ function personMoodCard({
 		<div className="app-card content-fade-in p-4">
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-w-0 items-center gap-3">
-					<div className="grid size-12 place-items-center rounded-full bg-primary/30 text-primary-foreground shadow-sm">
+					<div className="grid size-12 place-items-center rounded-full bg-primary-subtle text-accent-foreground shadow-sm">
 						{avatar}
 					</div>
 					<div className="min-w-0">
@@ -219,9 +220,12 @@ export function MoodPanel({
 	const [note, setNote] = useState("");
 	const [pending, startTransition] = useTransition();
 
-	useEffect(() => {
+	// Follow the period's default day whenever the visible period changes.
+	const [syncedDefaultDate, setSyncedDefaultDate] = useState(defaultSelectedDate);
+	if (defaultSelectedDate !== syncedDefaultDate) {
+		setSyncedDefaultDate(defaultSelectedDate);
 		setSelectedDate(defaultSelectedDate);
-	}, [defaultSelectedDate]);
+	}
 
 	const moodsByOwnerDate = useMemo(() => {
 		const map = new Map<string, DailyMood>();
@@ -241,10 +245,14 @@ export function MoodPanel({
 		[moodsByOwnerDate, partner.id, selectedDate],
 	);
 
-	useEffect(() => {
+	// Load the saved entry into the form whenever the selected day's mood changes.
+	// `null` (never a map result) makes the first render load the entry too.
+	const [syncedMood, setSyncedMood] = useState<DailyMood | undefined | null>(null);
+	if (selectedMood !== syncedMood) {
+		setSyncedMood(selectedMood);
 		setMood(selectedMood?.mood ?? "great");
 		setNote(selectedMood?.note ?? "");
-	}, [selectedMood]);
+	}
 
 	if (showInitialSkeleton) {
 		return <MoodPanelSkeleton />;
@@ -273,17 +281,9 @@ export function MoodPanel({
 
 	return (
 		<div className="grid gap-4 sm:gap-5">
-			<div className="flex items-center justify-between gap-4 sm:items-end">
-				<div className="min-w-0">
-					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
-						Mood tracker
-					</h2>
-					<p className="mt-1 text-sm text-muted-foreground">
-						A gentle daily check-in for both of you.
-					</p>
-				</div>
+			<PanelHeader title="Mood tracker" description="A gentle daily check-in for both of you.">
 				<div className="sm:hidden">{periodControl}</div>
-			</div>
+			</PanelHeader>
 
 			<div className="app-card content-fade-in p-3 sm:p-5">
 				<div className="flex items-start justify-between gap-4">
@@ -291,7 +291,7 @@ export function MoodPanel({
 						<div className="flex items-center gap-2">
 							<CalendarDays
 								size={18}
-								className="text-primary"
+								className="text-primary-ink"
 							/>
 							<p className="font-serif text-2xl leading-tight">Mood calendar</p>
 						</div>
@@ -420,7 +420,7 @@ export function MoodPanel({
 			>
 				<div className="flex items-center justify-between gap-3">
 					<div className="flex min-w-0 items-center gap-3">
-						<div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/30 text-primary">
+						<div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/30 text-primary-ink">
 							<HeartPulse size={24} />
 						</div>
 						<div className="min-w-0">

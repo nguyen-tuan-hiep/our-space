@@ -12,7 +12,9 @@ import {
 } from "react";
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/feedback/toast";
-import { loadFinanceDashboardData, signOut } from "@/app/actions";
+import { loadFinanceDashboardData, markNoteRead, signOut } from "@/app/actions";
+import { isUnreadLetter } from "@/components/notes/note-meta";
+import { useHydrated } from "@/components/common/use-hydrated";
 import type {
 	DailyMood,
 	IndividualExpense,
@@ -53,6 +55,11 @@ import {
 	MoviesPanelSkeleton,
 	PersonalPanelSkeleton,
 } from "@/components/our-space/tab-skeletons";
+
+const NoteReader = dynamic(
+	() => import("@/components/notes/note-reader").then((mod) => mod.NoteReader),
+	{ ssr: false },
+);
 
 const PersonalPanel = dynamic(
 	() =>
@@ -156,6 +163,25 @@ function isSpacePayload(value: unknown): value is SpacePayload {
 	);
 }
 
+async function fetchSpacePayload(signal?: AbortSignal) {
+	const response = await fetch("/api/dashboard", { cache: "no-store", signal });
+	if (!response.ok) {
+		throw new Error("Space data could not be loaded.");
+	}
+
+	const payload = (await response.json()) as unknown;
+	if (!isSpacePayload(payload)) {
+		throw new Error("Space data was malformed.");
+	}
+
+	return payload;
+}
+
+function warnSpaceDataError(error: unknown) {
+	if (error instanceof DOMException && error.name === "AbortError") return;
+	console.warn("Space data refresh failed", error);
+}
+
 function readCachedSpacePayload(profileId: string) {
 	try {
 		const cached = window.localStorage.getItem(getSpaceCacheKey(profileId));
@@ -220,6 +246,9 @@ export function OurSpaceClient({
 	const router = useRouter();
 	const toast = useToast();
 	const [noteOpen, setNoteOpen] = useState(false);
+	const [noteReaderReady, setNoteReaderReady] = useState(false);
+	const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+	const noteTriggerRef = useRef<HTMLElement | null>(null);
 	const [expenseOpen, setExpenseOpen] = useState(false);
 	const [memoryOpen, setMemoryOpen] = useState(false);
 	const [movieOpen, setMovieOpen] = useState(false);
@@ -244,6 +273,9 @@ export function OurSpaceClient({
 	);
 	const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
 	const [notes, setNotes] = useState<SharedNote[]>([]);
+	const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null;
+	// Drop the selection once its note disappears (deleted, or filtered out).
+	if (selectedNoteId && !selectedNote) setSelectedNoteId(null);
 	const [moods, setMoods] = useState<DailyMood[]>([]);
 	const [memories, setMemories] = useState<MemoryMapEntry[]>([]);
 	const [movies, setMovies] = useState<Movie[]>([]);
@@ -467,27 +499,9 @@ export function OurSpaceClient({
 			if (!options?.silent) setSpaceDataLoading(true);
 
 			try {
-				const response = await fetch("/api/dashboard", {
-					cache: "no-store",
-					signal: options?.signal,
-				});
-
-				if (!response.ok) {
-					throw new Error("Space data could not be loaded.");
-				}
-
-				const payload = (await response.json()) as unknown;
-				if (!isSpacePayload(payload)) {
-					throw new Error("Space data was malformed.");
-				}
-
-				applySpacePayload(payload);
+				applySpacePayload(await fetchSpacePayload(options?.signal));
 			} catch (error) {
-				if (error instanceof DOMException && error.name === "AbortError") {
-					return;
-				}
-
-				console.warn("Space data refresh failed", error);
+				warnSpaceDataError(error);
 			} finally {
 				setSpaceDataLoading(false);
 			}
@@ -495,21 +509,30 @@ export function OurSpaceClient({
 		[applySpacePayload],
 	);
 
-	useEffect(() => {
+	// Show the last cached payload right after hydration (never during it, so the
+	// server markup still matches), then refresh from the network below.
+	const hydrated = useHydrated();
+	const [cacheAppliedFor, setCacheAppliedFor] = useState<string | null>(null);
+	if (hydrated && cacheAppliedFor !== profile.id) {
+		setCacheAppliedFor(profile.id);
 		const cached = readCachedSpacePayload(profile.id);
 		if (cached) {
 			applySpacePayload(cached, { cache: false });
 			setSpaceDataLoading(false);
 		}
+	}
 
+	useEffect(() => {
+		// Silent refresh: the skeleton is already up (initial state) unless the
+		// cache filled in, and state only changes once the request settles.
 		const controller = new AbortController();
-		void loadSpaceData({
-			signal: controller.signal,
-			silent: Boolean(cached),
-		});
+		fetchSpacePayload(controller.signal)
+			.then((payload) => applySpacePayload(payload))
+			.catch(warnSpaceDataError)
+			.finally(() => setSpaceDataLoading(false));
 
 		return () => controller.abort();
-	}, [applySpacePayload, loadSpaceData, profile.id]);
+	}, [applySpacePayload, profile.id]);
 
 	const loadFinanceData = useCallback(
 		async (options?: { silent?: boolean }) => {
@@ -549,11 +572,13 @@ export function OurSpaceClient({
 		[],
 	);
 
-	useEffect(() => {
-		if (activeSection === "finances" && !financeLoaded && !financeLoading) {
+	// Finance data loads the first time its tab is opened (retry is manual).
+	const selectSection = (section: SpaceSection) => {
+		setActiveSection(section);
+		if (section === "finances" && !financeLoaded && !financeLoading) {
 			void loadFinanceData();
 		}
-	}, [activeSection, financeLoaded, financeLoading, loadFinanceData]);
+	};
 
 	const upsertLocalNote = (savedNote: SharedNote) => {
 		ignoredRealtimeNoteIds.current.add(savedNote.id);
@@ -573,6 +598,26 @@ export function OurSpaceClient({
 					new Date(second.created_at).getTime() -
 					new Date(first.created_at).getTime(),
 			);
+		});
+	};
+
+	/** Optimistically mark a received letter as opened, rolling back if the RPC fails. */
+	const markLocalNoteRead = (noteId: string) => {
+		const setReadAt = (readAt: string | null) =>
+			setNotes((currentNotes) =>
+				currentNotes.map((note) => (note.id === noteId ? { ...note, read_at: readAt } : note)),
+			);
+
+		ignoredRealtimeNoteIds.current.add(noteId);
+		window.setTimeout(() => {
+			ignoredRealtimeNoteIds.current.delete(noteId);
+		}, 10000);
+		setReadAt(new Date().toISOString());
+
+		void markNoteRead(noteId).then((result) => {
+			if (result.ok) return;
+			setReadAt(null);
+			toast(result.message, { variant: "error" });
 		});
 	};
 
@@ -953,6 +998,7 @@ export function OurSpaceClient({
 		});
 	};
 	const hasOpenDialog =
+		Boolean(selectedNote) ||
 		noteOpen ||
 		expenseOpen ||
 		memoryOpen ||
@@ -994,7 +1040,7 @@ export function OurSpaceClient({
 	);
 
 	return (
-		<main className="min-h-svh overflow-x-clip bg-background mobile-native-shell lg:pl-72">
+		<main className="min-h-svh overflow-x-clip glass-canvas mobile-native-shell space-shell lg:pl-72">
 			<SpaceSidebar
 				activeSection={activeSection}
 				anniversaryLabel={anniversaryLabel}
@@ -1004,11 +1050,11 @@ export function OurSpaceClient({
 				onEditAnniversary={() => setAnniversaryOpen(true)}
 				onEditHeroImage={() => setHeroOpen(true)}
 				onOpenProfile={() => setProfileOpen(true)}
-				onSelectSection={setActiveSection}
+				onSelectSection={selectSection}
 				onSignOut={handleSignOut}
 			/>
 
-			<div className="lg:hidden bg-background">
+			<div className="lg:hidden">
 				<SpaceHero
 					anniversaryLabel={anniversaryLabel}
 					heroImageUrl={heroImageUrl}
@@ -1039,25 +1085,12 @@ export function OurSpaceClient({
 				/>
 			</div>
 
-			<section className="container-page pb-[calc(env(safe-area-inset-bottom)+8.5rem)] pt-4 sm:py-8 lg:max-w-none lg:px-8 lg:py-8 xl:px-10">
+			<section className="container-page pb-[calc(env(safe-area-inset-bottom)+8.5rem)] pt-5 sm:py-8 lg:max-w-[1600px] lg:px-8 lg:py-9 xl:px-10">
 				<div className="hidden items-start justify-between gap-6 lg:flex">
-					<div>
-						<p className="text-sm font-semibold text-neutral-500">
-							{pagePeriodDescription}
-						</p>
-						{/* <h1 className="mt-1 font-serif text-4xl leading-none text-neutral-950 xl:text-5xl">
-							{activeSection === "notes"
-								? "Shared notes"
-								: activeSection === "finances"
-									? "Finance overview"
-							: activeSection === "mood"
-										? "Mood tracker"
-										: activeSection === "memories"
-											? "Memory map"
-											: activeSection === "movies"
-												? "Movies"
-												: "Personal"}
-						</h1> */}
+					<div className="min-w-0">
+						{/* <p className="text-sm font-semibold text-primary-ink">{profile.display_name} &amp; {partner.display_name}</p> */}
+						<p className="mt-3 text-sm text-muted-foreground">{pagePeriodDescription}</p>
+						<h1 className="mt-2 font-serif text-3xl leading-tight tracking-tight text-foreground xl:text-4xl">Our everyday, together.</h1>
 					</div>
 					{activeSection === "memories" ||
 					activeSection === "movies" ||
@@ -1075,7 +1108,7 @@ export function OurSpaceClient({
 					<LoveQuotePanel quote={dailyLoveQuote} />
 				</div>
 
-				<div className="mt-4 sm:mt-6 lg:mt-8">
+				<div className="space-panel mt-5 sm:mt-7 lg:mt-9">
 					<PeriodControls
 						activeSection={activeSection}
 						{...periodPickerProps}
@@ -1085,7 +1118,7 @@ export function OurSpaceClient({
 							activeSection === "personal"
 						}
 						periodLabel={periodLabel}
-						onSelectSection={setActiveSection}
+						onSelectSection={selectSection}
 						periodPickerRef={tabletPeriodPickerRef}
 						periodPickerViewport="tablet"
 					/>
@@ -1093,7 +1126,7 @@ export function OurSpaceClient({
 
 				<div
 					key={activeSection}
-					className="mobile-tab-panel-in mt-4 sm:material-section sm:mt-5 sm:p-5 lg:mt-6 lg:p-6"
+					className="mobile-tab-panel-in min-w-0 mt-6 sm:mt-7 lg:mt-8"
 				>
 					{activeSection === "notes" ? (
 						<NotesPanel
@@ -1104,6 +1137,12 @@ export function OurSpaceClient({
 							notes={displayNotes}
 							timeZone={profileTimeZone}
 							periodControl={mobilePeriodControl}
+							onOpenNote={(note) => {
+								noteTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+								setNoteReaderReady(true);
+								setSelectedNoteId(note.id);
+								if (isUnreadLetter(note, profile.id)) markLocalNoteRead(note.id);
+							}}
 							onEditNote={(selectedNote) => {
 								setEditingNote(selectedNote);
 								setNoteOpen(true);
@@ -1205,7 +1244,7 @@ export function OurSpaceClient({
 
 			<MobileSpaceTabs
 				activeSection={activeSection}
-				onSelectSection={setActiveSection}
+				onSelectSection={selectSection}
 			/>
 
 			{!hasOpenDialog &&
@@ -1237,6 +1276,16 @@ export function OurSpaceClient({
 				</DraggableFab>
 			) : null}
 
+			{noteReaderReady && (
+				<NoteReader
+					note={selectedNote}
+					currentUserId={profile.id}
+					timeZone={profileTimeZone}
+					initialNowMs={initialClock.getTime()}
+					returnFocus={noteTriggerRef}
+					onClose={() => setSelectedNoteId(null)}
+				/>
+			)}
 			<SpaceDialogs
 				anniversaryDate={anniversaryDate}
 				editingExpense={editingExpense}

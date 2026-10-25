@@ -7,8 +7,8 @@ function periodTabClass(active: boolean) {
   return [
     "relative inline-flex min-h-11 flex-1 items-center justify-center px-4 text-sm font-bold transition",
     active
-      ? "text-primary after:absolute after:inset-x-4 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary"
-      : "text-muted-foreground hover:bg-transparent hover:text-primary",
+      ? "text-primary-ink after:absolute after:inset-x-4 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary"
+      : "text-muted-foreground hover:bg-transparent hover:text-primary-ink",
   ].join(" ");
 }
 
@@ -75,7 +75,7 @@ export function PeriodPickerDialog({
         type="button"
         aria-label="Close period picker"
         className={[
-          "fixed inset-0 z-[55] bg-neutral-950/35 backdrop-blur-sm dark:bg-neutral-950/60",
+          "glass-scrim fixed inset-0 z-[55] bg-black/35 backdrop-blur-sm dark:bg-black/60",
           closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
         ].join(" ")}
         onClick={onClose}
@@ -85,7 +85,7 @@ export function PeriodPickerDialog({
         aria-modal="true"
         aria-label="Choose period"
         className={[
-          "mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-[60] max-h-[calc(100svh-7rem)] overflow-y-auto rounded-2xl border border-border bg-surface-elevated p-4 text-foreground shadow-2xl backdrop-blur will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-14 sm:w-[min(23rem,calc(100vw-2rem))]",
+          "glass-surface mobile-sheet-motion fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-[60] max-h-[calc(100svh-7rem)] overflow-y-auto rounded-2xl border border-border bg-surface-elevated p-4 text-foreground shadow-2xl backdrop-blur will-change-transform sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-14 sm:w-[min(23rem,calc(100vw-2rem))]",
           closing ? "native-sheet-out" : "native-sheet-in",
         ].join(" ")}
       >

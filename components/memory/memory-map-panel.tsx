@@ -1,5 +1,6 @@
 "use client";
 
+import { PanelHeader } from "@/components/common/panel-header";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState, useTransition } from "react";
@@ -154,7 +155,7 @@ function MemoryCard({
 				<div className="flex items-start justify-between gap-3">
 					<div className="min-w-0">
 						<p
-							className="inline-flex max-w-full items-center rounded-full border border-primary-border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-400"
+							className="inline-flex max-w-full items-center rounded-full border border-primary-border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-subtle-foreground"
 							style={{ backgroundColor: memoryTypeColor }}
 						>
 							{memory.memory_type}
@@ -162,6 +163,7 @@ function MemoryCard({
 						<h3 className="mt-2 break-words font-serif text-2xl leading-tight text-foreground">
 							{memory.title}
 						</h3>
+						<p className="mt-2 text-xs text-muted-foreground">{getMemoryDateLabel(memory.visited_at, timeZone)}</p>
 					</div>
 
 					<div className="relative shrink-0">
@@ -209,7 +211,7 @@ function MemoryCard({
 					href={mapsUrl}
 					target="_blank"
 					rel="noreferrer"
-					className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-primary-border bg-surface px-4 text-sm font-bold text-muted-foreground transition hover:border-primary hover:bg-surface-hover hover:text-primary"
+					className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-primary-border bg-surface px-4 text-sm font-bold text-muted-foreground transition hover:border-primary hover:bg-surface-hover hover:text-primary-ink"
 				>
 					<MapPin size={16} />
 					Open location
@@ -243,15 +245,7 @@ export function MemoryMapPanel({
 
 	return (
 		<div className="grid gap-4 sm:gap-5">
-			<div className="flex items-center justify-between gap-4 sm:items-end">
-				<div className="min-w-0">
-					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
-						Memory map
-					</h2>
-					<p className="mt-1 text-sm text-muted-foreground">
-						Pin the places where your story happened.
-					</p>
-				</div>
+			<PanelHeader title="Memory map" description="Pin the places where your story happened.">
 				<Button
 					type="button"
 					size="lg"
@@ -261,7 +255,7 @@ export function MemoryMapPanel({
 					<Plus size={17} />
 					Add memory
 				</Button>
-			</div>
+			</PanelHeader>
 
 			<div className="relative">
 				{loading ? (
@@ -280,7 +274,7 @@ export function MemoryMapPanel({
 			</div>
 
 			{memories.length ? (
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+				<div className="notes-grid">
 					{memories.map((memory) => (
 						<MemoryCard
 							key={memory.id}
@@ -293,7 +287,13 @@ export function MemoryMapPanel({
 						/>
 					))}
 				</div>
-			) : null}
+			) : (
+				<div className="empty-state">
+					<h3 className="font-serif text-2xl text-foreground">Every place has a story</h3>
+					<p>Save your first place together, then add a photo or a little memory.</p>
+					<Button onClick={onNewMemory} className="mt-2 h-11 px-5"><Plus size={16} />Add a memory</Button>
+				</div>
+			)}
 
 			<ConfirmDialog
 				open={Boolean(memoryToDelete)}

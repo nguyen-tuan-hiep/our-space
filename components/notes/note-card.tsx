@@ -1,11 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
+import { ArrowRight, LockKeyhole, MailOpen } from "lucide-react";
+import { useNoteLock } from "@/components/notes/use-note-lock";
+import { formatReadingTime, isUnreadLetter } from "@/components/notes/note-meta";
+import { NoteEnvelope } from "@/components/notes/note-envelope";
 import { ActionMenu } from "@/components/common/action-menu";
 import { useToast } from "@/components/feedback/toast";
 import { deleteNote } from "@/app/actions";
-import { formatAppDateTime } from "@/lib/date-format";
+import { formatAppDate, formatAppDateTime } from "@/lib/date-format";
 import type { SharedNote } from "@/lib/types";
 
 const ConfirmDialog = dynamic(
@@ -16,25 +20,12 @@ const ConfirmDialog = dynamic(
 	{ ssr: false },
 );
 
-function getCountdown(unlockAt: string | null, nowMs: number) {
-	if (!unlockAt) return "";
-	const diff = new Date(unlockAt).getTime() - nowMs;
-	if (diff <= 0) return "";
-	const totalSeconds = Math.floor(diff / 1000);
-	const days = Math.floor(totalSeconds / 86400);
-	const hours = Math.floor((totalSeconds % 86400) / 3600);
-	const minutes = Math.floor((totalSeconds % 3600) / 60);
-	const seconds = totalSeconds % 60;
-	if (days > 0) return `${days}d ${hours}h ${minutes}m`;
-	if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
-	return `${minutes}m ${seconds}s`;
-}
-
 interface NoteCardProps {
 	note: SharedNote;
 	currentUserId: string;
 	initialNowMs: number;
 	timeZone: string;
+	onOpen: (note: SharedNote) => void;
 	onEdit: (note: SharedNote) => void;
 	onDeleted: (noteId: string) => void;
 }
@@ -44,31 +35,23 @@ export function NoteCard({
 	currentUserId,
 	initialNowMs,
 	timeZone,
+	onOpen,
 	onEdit,
 	onDeleted,
 }: NoteCardProps) {
 	const toast = useToast();
-	const [now, setNow] = useState(() =>
-		typeof window === "undefined" ? initialNowMs : Date.now(),
-	);
+	const { locked, countdown } = useNoteLock(note.unlock_at, initialNowMs);
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const [pending, startTransition] = useTransition();
-
-	const locked = Boolean(
-		note.unlock_at && now < new Date(note.unlock_at).getTime(),
-	);
-	const countdown = useMemo(
-		() => getCountdown(note.unlock_at, now),
-		[note.unlock_at, now],
-	);
 	const canEdit = note.author_id === currentUserId;
-
-	useEffect(() => {
-		if (!note.unlock_at) return;
-		setNow(Date.now());
-		const timer = window.setInterval(() => setNow(Date.now()), 1000);
-		return () => window.clearInterval(timer);
-	}, [note.id, note.unlock_at]);
+	const unread = isUnreadLetter(note, currentUserId);
+	// The author can always reread their own letter; the recipient waits for the unlock.
+	const sealedForViewer = locked && !canEdit;
+	// Recipient-opened letters (or notes from before read tracking) show the envelope opened.
+	const opened = note.read_at !== null && !locked;
+	const hideTitle = !canEdit && (unread || locked);
+	const sender = note.author?.display_name ?? "Partner";
+	const avatar = note.author?.avatar_url ?? "🙂";
 
 	const handleEditClick = () => {
 		onEdit(note);
@@ -79,40 +62,82 @@ export function NoteCard({
 	};
 
 	return (
-		<article
-			className={[
-				"app-card app-card-interactive content-fade-in relative flex h-full flex-col overflow-visible p-4 sm:p-5",
-			].join(" ")}
-		>
-			<div className="flex justify-between items-start gap-2">
-				<div className="flex-1 min-w-0">
-					<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] uppercase tracking-[0.1em] text-neutral-600">
-						<span>From</span>
-						<span className="font-semibold">
-							{note.author?.display_name ?? "Partner"}{" "}
-							{note.author?.avatar_url ?? "🙂"}
-						</span>
-					</div>
-					<div className="text-[12px] text-neutral-400">
-						{formatAppDateTime(note.created_at, timeZone)}
-					</div>
-					<h3 className="my-3 font-serif text-2xl leading-none sm:my-4 sm:mt-3">
-						{note.title}
-					</h3>
-				</div>
-
-				{canEdit && (
-					<div className="relative shrink-0">
-						<ActionMenu
-							label={`Open actions for ${note.title}`}
-							sheetTitle="Note actions"
-							sheetDescription={note.title}
-							onEdit={handleEditClick}
-							onDelete={handleDeleteClick}
-						/>
-					</div>
+		<article className="app-card note-card relative flex h-full min-w-0 flex-col p-5">
+			{/* Every state shares one layout (status, envelope stage, title, sender) so the grid stays even. */}
+			<div className={`flex h-8 min-w-0 items-center gap-1.5 text-xs ${canEdit ? "pr-9" : ""}`}>
+				{locked ? (
+					<span className="inline-flex min-w-0 items-center gap-1.5 font-semibold text-foreground tabular-nums" title={`Opens in ${countdown}`}>
+						<LockKeyhole size={13} className="shrink-0" aria-hidden="true" />
+						<span className="sr-only">Opens in </span>
+						<span className="truncate">{countdown}</span>
+					</span>
+				) : unread ? (
+					<span className="inline-flex items-center gap-1.5 font-semibold text-foreground">
+						<span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-[#c08f2c]" />
+						New letter
+					</span>
+				) : canEdit && note.read_at === null ? (
+					<span className="truncate text-muted-foreground">Not opened yet</span>
+				) : (
+					<span className="truncate text-muted-foreground">{formatReadingTime(note.content)}</span>
 				)}
 			</div>
+			{canEdit && (
+				<div className="absolute right-3.5 top-5">
+					<ActionMenu
+						label={`Open actions for ${note.title}`}
+						sheetTitle="Note actions"
+						sheetDescription={note.title}
+						onEdit={handleEditClick}
+						onDelete={handleDeleteClick}
+					/>
+				</div>
+			)}
+			<button
+				type="button"
+				className="note-preview note-envelope-trigger flex min-w-0 flex-1 flex-col text-left"
+				disabled={sealedForViewer}
+				aria-label={
+					sealedForViewer
+						? `Sealed letter from ${sender}, opens in ${countdown}`
+						: unread ? `Open new letter from ${sender}` : `Read note: ${note.title}`
+				}
+				aria-haspopup={sealedForViewer ? undefined : "dialog"}
+				onClick={() => onOpen(note)}
+			>
+				<span className="note-envelope-stage relative mt-1 flex h-[8.25rem] items-center justify-center">
+					<NoteEnvelope
+						className="h-20"
+						open={opened}
+						letter={
+							<span className="block space-y-1.5 px-2.5 py-2">
+								<span className="block h-1 w-3/5 rounded-full bg-black/25" />
+								<span className="block h-1 w-4/5 rounded-full bg-black/10" />
+							</span>
+						}
+					/>
+				</span>
+				<h3 className={`mt-3 h-6 truncate text-base leading-6 tracking-tight ${hideTitle ? "text-muted-foreground" : "font-semibold text-foreground"}`}>
+					{hideTitle ? "A letter for you" : note.title}
+				</h3>
+				<span className="mt-auto flex w-full items-center gap-2.5 border-t border-foreground/8 pt-4">
+					<span aria-hidden="true" className="glass-chip grid size-8 shrink-0 place-items-center rounded-full text-base">
+						{avatar}
+					</span>
+					<span className="min-w-0 flex-1">
+						<span className="flex min-w-0 items-center gap-1.5 text-xs leading-4">
+							<span className="truncate font-semibold text-foreground">{sender}</span>
+							{canEdit ? <span className="glass-chip shrink-0 rounded-full px-1.5 text-[10px] font-medium leading-[14px] text-muted-foreground">You</span> : null}
+						</span>
+						<time dateTime={note.created_at} title={formatAppDateTime(note.created_at, timeZone)} className="block truncate text-[11px] leading-4 text-muted-foreground">
+							{formatAppDate(note.created_at, timeZone)}
+						</time>
+					</span>
+					<span aria-hidden="true" className={`grid size-8 shrink-0 place-items-center rounded-full ${sealedForViewer ? "text-muted-foreground" : "note-open-chip glass-chip text-foreground"}`}>
+						{sealedForViewer ? <LockKeyhole size={14} /> : unread ? <MailOpen size={15} /> : <ArrowRight size={15} />}
+					</span>
+				</span>
+			</button>
 
 			{confirmOpen ? (
 				<ConfirmDialog
@@ -137,46 +162,6 @@ export function NoteCard({
 				/>
 			) : null}
 
-			{locked ? (
-				<div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-primary-border bg-surface-hover/85 p-4 sm:p-5">
-					<p className="eyebrow">Unlocks in</p>
-					<p className="mt-2 font-serif text-3xl">{countdown}</p>
-
-					<div className="relative mt-4 min-h-0 flex-1 select-none overflow-hidden rounded-2xl border border-primary-border bg-surface/90 blur-md">
-						<div className="h-full overflow-y-auto">
-							<p className="whitespace-pre-line text-md leading-7">
-								{note.content}
-							</p>
-						</div>
-
-						<div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface to-transparent" />
-					</div>
-				</div>
-			) : (
-				<div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border border-primary-border bg-muted">
-					<div
-						className="
-							max-h-[12rem] min-h-0 flex-1 overflow-y-auto
-							[scrollbar-color:rgb(var(--theme-primary-rgb)/0.65)_transparent]
-							[scrollbar-width:thin]
-							[&::-webkit-scrollbar]:w-2
-							[&::-webkit-scrollbar-track]:bg-transparent
-							[&::-webkit-scrollbar-thumb]:rounded-full
-							[&::-webkit-scrollbar-thumb]:border-2
-							[&::-webkit-scrollbar-thumb]:border-transparent
-							[&::-webkit-scrollbar-thumb]:bg-primary/60
-							[&::-webkit-scrollbar-thumb]:bg-clip-padding
-							hover:[&::-webkit-scrollbar-thumb]:bg-primary/85
-							dark:[&::-webkit-scrollbar-thumb]:bg-primary/70
-							dark:hover:[&::-webkit-scrollbar-thumb]:bg-primary
-						"
-					>
-						<div className="whitespace-pre-wrap break-words p-4 pr-3 text-md leading-6 text-neutral-600">
-							{note.content}
-						</div>
-					</div>
-				</div>
-			)}
 		</article>
 	);
 }

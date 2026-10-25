@@ -65,11 +65,14 @@ create table public.notes (
   title text not null,
   content text not null,
   unlock_at timestamptz,
+  unlock_time_zone text,
+  read_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint notes_title_length_check check (char_length(title) between 1 and 120),
   constraint notes_content_length_check check (char_length(content) between 1 and 10000),
-  constraint notes_not_self_check check (author_id <> recipient_id)
+  constraint notes_not_self_check check (author_id <> recipient_id),
+  constraint notes_unlock_time_zone_length_check check (unlock_time_zone is null or char_length(unlock_time_zone) between 1 and 80)
 );
 
 create table public.individual_expenses (
@@ -126,6 +129,7 @@ create table public.movies (
   title text not null,
   rating_by_user jsonb not null default '{}'::jsonb,
   poster_url text,
+  poster_public_id text,
   category text[],
   status public.movie_status not null default 'wishlist',
   comment_by_user jsonb not null default '{}'::jsonb,
@@ -288,6 +292,28 @@ drop trigger if exists on_auth_user_created_create_profile on auth.users;
 create trigger on_auth_user_created_create_profile
 after insert on auth.users
 for each row execute function public.handle_new_user_profile();
+
+-- Recipients cannot UPDATE notes (only authors can), so marking as read goes through this function.
+create or replace function public.mark_note_read(p_note_id uuid)
+returns timestamptz
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_read_at timestamptz;
+begin
+  update public.notes
+  set read_at = now()
+  where id = p_note_id
+    and recipient_id = auth.uid()
+    and read_at is null
+    and (unlock_at is null or unlock_at <= now())
+  returning read_at into v_read_at;
+
+  return v_read_at;
+end;
+$$;
 
 create or replace function public.profile_is_partner(profile_id uuid)
 returns boolean
@@ -628,12 +654,16 @@ grant insert on public.profiles to authenticated;
 grant update on public.profiles to authenticated;
 grant select, update on public.profiles to service_role;
 grant select, insert, update, delete on public.notes to authenticated;
+revoke all on function public.mark_note_read(uuid) from public;
+grant execute on function public.mark_note_read(uuid) to authenticated;
 grant select, insert, update, delete on public.individual_expenses to authenticated;
 grant select, insert, update, delete on public.daily_moods to authenticated;
 grant select, insert, update, delete on public.memory_map_entries to authenticated;
 grant select, insert, update, delete on public.movies to authenticated;
 grant select, insert on public.pairing_requests to authenticated;
 grant select, insert, update on public.couple to authenticated;
+grant select on public.memory_map_entries to service_role;
+grant select on public.movies to service_role;
 grant select, insert, update on public.couple to service_role;
 grant execute on function public.profile_is_partner(uuid) to authenticated;
 grant execute on function public.profile_in_couple(text) to authenticated;

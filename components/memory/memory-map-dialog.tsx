@@ -1,9 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useOpenSync } from "@/components/common/use-open-sync";
 import { ImageUp, LocateFixed } from "lucide-react";
-import { createMemory, updateMemory } from "@/app/actions";
+import {
+	createMemory,
+	deleteUnsavedCloudinaryImage,
+	updateMemory,
+} from "@/app/actions";
 import { useToast } from "@/components/feedback/toast";
 import {
 	NativeButton,
@@ -96,19 +101,38 @@ export function MemoryMapDialog({
 	const [longitude, setLongitude] = useState("");
 	const [photoUrl, setPhotoUrl] = useState("");
 	const [photoPublicId, setPhotoPublicId] = useState("");
+	const unsavedPhotoPublicIds = useRef<Set<string>>(new Set());
 
-	useEffect(() => {
-		if (!open) return;
+	if (useOpenSync(open, [memory])) {
 		setLatitude(memory ? String(memory.latitude) : "");
 		setLongitude(memory ? String(memory.longitude) : "");
 		setPhotoUrl(memory?.photo_url ?? "");
 		setPhotoPublicId(memory?.photo_public_id ?? "");
+	}
+
+	useEffect(() => {
+		if (open) unsavedPhotoPublicIds.current.clear();
 	}, [memory, open]);
+
+	async function cleanupUnsavedPhoto(publicId: string) {
+		if (!unsavedPhotoPublicIds.current.has(publicId)) return;
+		unsavedPhotoPublicIds.current.delete(publicId);
+		await deleteUnsavedCloudinaryImage(publicId).catch(() => null);
+	}
+
+	const cleanupUnsavedPhotos = () => {
+		const publicIds = Array.from(unsavedPhotoPublicIds.current);
+		unsavedPhotoPublicIds.current.clear();
+		publicIds.forEach((publicId) => {
+			void deleteUnsavedCloudinaryImage(publicId).catch(() => null);
+		});
+	};
 
 	const handleClose = () => {
 		if (document.activeElement instanceof HTMLElement) {
 			document.activeElement.blur();
 		}
+		cleanupUnsavedPhotos();
 		onClose();
 	};
 
@@ -125,6 +149,8 @@ export function MemoryMapDialog({
 			});
 			const result = await response.json();
 			if (!response.ok) throw new Error(result.error ?? "Upload failed");
+			if (photoPublicId) void cleanupUnsavedPhoto(photoPublicId);
+			unsavedPhotoPublicIds.current.add(result.public_id);
 			setPhotoUrl(result.secure_url);
 			setPhotoPublicId(result.public_id);
 		} catch (error) {
@@ -196,6 +222,7 @@ export function MemoryMapDialog({
 							variant: result.ok ? "success" : "error",
 						});
 						if (result.ok) {
+							unsavedPhotoPublicIds.current.clear();
 							onSaved?.(result.memory);
 							handleClose();
 						}
@@ -280,7 +307,7 @@ export function MemoryMapDialog({
 
 					<div className={photoUrl ? "grid grid-cols-2 gap-3" : "grid gap-3"}>
 						<label
-							className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-primary-border bg-surface px-5 text-sm font-bold text-primary transition hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground sm:min-h-11 ${
+							className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-primary-border bg-surface px-5 text-sm font-bold text-primary-ink transition hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground sm:min-h-11 ${
 								uploading ? "pointer-events-none opacity-50" : ""
 							}`}
 						>
@@ -307,6 +334,7 @@ export function MemoryMapDialog({
 								variant="outlined"
 								className="!border-transparent !text-danger hover:!bg-danger-bg"
 								onClick={() => {
+									void cleanupUnsavedPhoto(photoPublicId);
 									setPhotoUrl("");
 									setPhotoPublicId("");
 								}}

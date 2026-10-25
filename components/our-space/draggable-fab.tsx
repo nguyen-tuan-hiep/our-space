@@ -6,8 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const FAB_SIZE = 56;
 const EDGE_MARGIN = 16;
 const TOP_MARGIN = 16;
-const BOTTOM_NAV_HEIGHT = 64;
-const BOTTOM_NAV_GAP = 16;
+const BOTTOM_NAV_HEIGHT = 80;
+const BOTTOM_NAV_GAP = 20;
 const DRAG_THRESHOLD = 6;
 const CLICK_SUPPRESS_MS = 250;
 
@@ -68,7 +68,7 @@ function readSafeAreaBottom() {
 function getNormalizedSafeBottom() {
   const rawSafeBottom = readSafeAreaBottom();
 
-  return Math.min(Math.max(rawSafeBottom, 8), 16);
+  return Math.min(Math.max(rawSafeBottom, 8), 48);
 }
 
 function getBottomClearance() {
@@ -139,13 +139,6 @@ export function DraggableFab({
 
   const latestPosition = useRef<FabPosition | null>(null);
   const suppressClickUntil = useRef(0);
-
-  useEffect(() => {
-    const initialPosition = getInitialPosition();
-
-    latestPosition.current = initialPosition;
-    setPosition(initialPosition);
-  }, []);
 
   useEffect(() => {
     const handleViewportChange = () => {
@@ -296,8 +289,10 @@ export function DraggableFab({
               top: position.y,
             }
           : {
+              // Resting spot before the first drag or viewport change; mirrors
+              // getInitialPosition() in CSS so SSR and hydration need no measuring.
               right: EDGE_MARGIN,
-              bottom: BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP + 8,
+              bottom: `calc(${BOTTOM_NAV_HEIGHT + BOTTOM_NAV_GAP}px + clamp(8px, env(safe-area-inset-bottom), 48px))`,
             }
       }
     >

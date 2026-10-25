@@ -1,42 +1,69 @@
+import type { ReactNode } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function NoteCardSkeleton() {
+/*
+ * Every skeleton mirrors its real panel: same containers, padding and gaps,
+ * and each text line is a box with the real line-height holding a thinner bar.
+ * That keeps block heights identical, so nothing shifts when data arrives.
+ */
+
+function Line({ box, bar }: { box: string; bar: string }) {
 	return (
-		<div className="app-card content-fade-in grid h-[20rem] gap-4 p-5">
-			<div className="space-y-3">
-				<Skeleton className="h-3 w-28 rounded-full" />
-				<Skeleton className="h-7 w-3/4 rounded-xl" />
-			</div>
-			<Skeleton className="min-h-0 flex-1 rounded-2xl" />
+		<div className={`flex items-center ${box}`}>
+			<Skeleton className={`rounded-full ${bar}`} />
 		</div>
 	);
 }
 
-function PanelHeaderSkeleton({
-	action = false,
-	actionMobile = true,
-	description = false,
-}: {
-	action?: boolean;
-	actionMobile?: boolean;
-	description?: boolean;
+/** Mirrors PanelHeader; `actions` mirrors whatever the panel puts on the right. */
+function PanelHeaderSkeleton({ actions, wrapDescription = false }: {
+	actions?: ReactNode;
+	/** The description runs to two lines on phones for the longer panel copy. */
+	wrapDescription?: boolean;
 }) {
 	return (
-		<div className="flex items-center justify-between gap-4 sm:items-end">
-			<div className="min-w-0 space-y-2">
-				<Skeleton className="h-9 w-52 rounded-2xl sm:h-12 sm:w-72" />
-				{description ? (
-					<Skeleton className="h-4 w-64 max-w-full rounded-full" />
-				) : null}
+		<div aria-hidden="true" className="panel-header flex flex-wrap items-end justify-between gap-x-5 gap-y-4">
+			<div className="min-w-0 flex-1 basis-48">
+				<Line box="h-[2.375rem] sm:h-[2.8125rem]" bar="h-7 w-52 sm:h-9 sm:w-64" />
+				{wrapDescription ? (
+					<div className="mt-2">
+						<Line box="h-6" bar="h-3.5 w-72 max-w-full" />
+						<Line box="h-6 sm:hidden" bar="h-3.5 w-40" />
+					</div>
+				) : (
+					<Line box="mt-2 h-6" bar="h-3.5 w-72 max-w-full" />
+				)}
 			</div>
-			{action ? (
-				<Skeleton
-					className={[
-						"rounded-2xl sm:h-11 sm:w-36",
-						actionMobile ? "size-12" : "hidden sm:block",
-					].join(" ")}
-				/>
-			) : null}
+			{actions ? <div className="flex shrink-0 items-center gap-3">{actions}</div> : null}
+		</div>
+	);
+}
+
+/** Mobile-only period picker button that several panels show in their header. */
+const periodActionSkeleton = <Skeleton key="period" className="size-12 rounded-2xl sm:hidden" />;
+
+function primaryActionSkeleton(width: string) {
+	return <Skeleton key="primary" className={`hidden h-11 rounded-2xl sm:block ${width}`} />;
+}
+
+/* ------------------------------------------------------------------ Notes */
+
+function NoteCardSkeleton() {
+	return (
+		<div aria-hidden="true" className="app-card flex h-full flex-col p-5">
+			<Line box="h-8" bar="h-3 w-28" />
+			<div className="mt-1 flex h-[8.25rem] items-center justify-center">
+				<Skeleton className="h-20 w-[7.5rem] rounded-xl" />
+			</div>
+			<Line box="mt-3 h-6" bar="h-4 w-3/5" />
+			<div className="mt-auto flex items-center gap-2.5 border-t border-foreground/8 pt-4">
+				<Skeleton className="size-8 shrink-0 rounded-full" />
+				<div className="min-w-0 flex-1">
+					<Line box="h-4" bar="h-3 w-20" />
+					<Line box="h-4" bar="h-2.5 w-14" />
+				</div>
+				<Skeleton className="size-8 shrink-0 rounded-full" />
+			</div>
 		</div>
 	);
 }
@@ -45,13 +72,41 @@ export function NotesPanelSkeleton() {
 	return (
 		<div className="grid gap-4 sm:gap-5">
 			<PanelHeaderSkeleton
-				description
-				action
+				wrapDescription
+				actions={[
+					periodActionSkeleton,
+					<Skeleton key="count" className="hidden h-11 w-24 rounded-full sm:block" />,
+					<Skeleton key="new" className="hidden h-11 w-32 rounded-full sm:block" />,
+				]}
 			/>
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-				{Array.from({ length: 6 }).map((_, index) => (
+			<div className="notes-grid notes-grid--four">
+				{Array.from({ length: 8 }).map((_, index) => (
 					<NoteCardSkeleton key={index} />
 				))}
+			</div>
+		</div>
+	);
+}
+
+/* ---------------------------------------------------------------- Finance */
+
+function PieCardSkeleton() {
+	return (
+		<div className="app-card flex min-w-0 flex-col justify-between overflow-hidden p-4">
+			<div className="mb-2 flex items-center justify-between gap-3">
+				<div className="min-w-0">
+					<Line box="h-5" bar="h-3.5 w-28" />
+					<Line box="h-5" bar="h-3.5 w-24" />
+				</div>
+				<Line box="h-4" bar="h-3 w-10" />
+			</div>
+			<div className="flex w-full min-w-0 flex-col items-center justify-center gap-4 sm:flex-row">
+				<Skeleton className="size-44 shrink-0 rounded-full sm:size-48" />
+				<div className="w-full flex-1 space-y-1.5">
+					{["w-3/4", "w-2/3"].map((width) => (
+						<Line key={width} box="h-5" bar={`h-3 ${width}`} />
+					))}
+				</div>
 			</div>
 		</div>
 	);
@@ -60,31 +115,14 @@ export function NotesPanelSkeleton() {
 function LedgerSkeleton() {
 	return (
 		<div className="app-card p-4 sm:p-5">
-			<div className="mb-5 space-y-3">
-				<Skeleton className="h-3 w-24 rounded-full" />
-				<div className="flex items-center gap-3">
-					<Skeleton className="h-8 w-44 rounded-2xl" />
-					<Skeleton className="ml-auto size-10 rounded-full sm:size-9" />
+			<div className="mb-5">
+				<Line box="h-4" bar="h-3 w-16" />
+				<div className="mt-2 flex items-center gap-3">
+					<Line box="h-6" bar="h-5 w-36" />
+					<Skeleton className="ml-auto size-10 shrink-0 rounded-full" />
 				</div>
 			</div>
-			<div className="grid gap-3 sm:gap-5">
-				{Array.from({ length: 3 }).map((_, index) => (
-					<div
-						key={index}
-						className="rounded-2xl border border-neutral-900/10 bg-neutral-900/5 p-4 dark:border-white/10 dark:bg-white/10"
-					>
-						<div className="flex items-start justify-between gap-3">
-							<div className="min-w-0 flex-1 space-y-2">
-								<Skeleton className="h-5 w-4/5 rounded-full" />
-								<Skeleton className="h-4 w-36 rounded-full" />
-							</div>
-							<Skeleton className="h-5 w-20 rounded-full" />
-						</div>
-						<Skeleton className="mt-3 h-7 w-24 rounded-full" />
-						<Skeleton className="mt-3 h-4 w-3/5 rounded-full" />
-					</div>
-				))}
-			</div>
+			<Skeleton className="h-[8.0625rem] rounded-2xl" />
 		</div>
 	);
 }
@@ -92,30 +130,36 @@ function LedgerSkeleton() {
 export function FinancePanelSkeleton() {
 	return (
 		<div className="grid gap-4 sm:gap-5">
-			<PanelHeaderSkeleton
-				description
-				action
-			/>
+			<PanelHeaderSkeleton actions={[periodActionSkeleton, primaryActionSkeleton("w-[9.25rem]")]} />
 			<div className="app-card w-full min-w-0 p-4 sm:p-5">
 				<div className="mb-5 flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:flex-wrap sm:items-end">
-					<div className="min-w-0 space-y-2">
-						<Skeleton className="h-3 w-32 rounded-full" />
-						<Skeleton className="h-9 w-56 rounded-2xl sm:h-10 sm:w-72" />
-						<Skeleton className="h-4 w-64 max-w-full rounded-full" />
+					<div className="min-w-0">
+						<Line box="h-4" bar="h-3 w-28" />
+						<Line box="mt-1 h-[1.875rem] sm:mt-2 sm:h-[2.8125rem]" bar="h-6 w-48 sm:h-8 sm:w-64" />
+						{/* Exchange-rate line wraps to two lines on phones. */}
+						<div className="mt-2">
+							<Line box="h-5" bar="h-3.5 w-72 max-w-full" />
+							<Line box="h-5 sm:hidden" bar="h-3.5 w-32" />
+						</div>
 					</div>
-					<Skeleton className="h-12 w-full rounded-2xl sm:w-56" />
+					<div className="grid min-w-0 gap-2 sm:w-[10rem]">
+						<Line box="h-5" bar="h-3.5 w-16" />
+						<Skeleton className="h-12 w-full rounded-xl sm:h-11" />
+					</div>
 				</div>
 				<div className="grid min-w-0 gap-4 sm:gap-6">
-					<div className="rounded-2xl border border-dashed border-neutral-900/15 bg-neutral-900/5 p-4 dark:border-white/15 dark:bg-white/10">
-						<div className="mb-4 space-y-2">
-							<Skeleton className="h-3 w-28 rounded-full" />
-							<Skeleton className="h-8 w-48 rounded-2xl" />
+					<div className="app-card min-w-0 p-4">
+						<div className="mb-4">
+							<Line box="h-4" bar="h-3 w-28" />
+							<Line box="mt-1 h-[1.875rem] sm:mt-2 sm:h-[2.34375rem]" bar="h-6 w-56 sm:h-7" />
 						</div>
-						<Skeleton className="h-72 rounded-2xl" />
+						<div className="pb-2">
+							<Skeleton className="h-72 rounded-2xl" />
+						</div>
 					</div>
-					<div className="grid gap-4 md:grid-cols-2">
-						<Skeleton className="h-64 rounded-2xl" />
-						<Skeleton className="h-64 rounded-2xl" />
+					<div className="grid min-w-0 gap-4 sm:gap-6 md:grid-cols-2">
+						<PieCardSkeleton />
+						<PieCardSkeleton />
 					</div>
 				</div>
 			</div>
@@ -127,21 +171,22 @@ export function FinancePanelSkeleton() {
 	);
 }
 
+/* ------------------------------------------------------------------- Mood */
+
 function MoodCardSkeleton() {
 	return (
 		<div className="app-card p-4">
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-w-0 items-center gap-3">
-					<Skeleton className="size-11 shrink-0 rounded-full" />
-					<div className="min-w-0 space-y-2">
-						<Skeleton className="h-4 w-32 rounded-full" />
-						<Skeleton className="h-3 w-28 rounded-full" />
+					<Skeleton className="size-12 shrink-0 rounded-full" />
+					<div className="min-w-0">
+						<Line box="h-5" bar="h-3.5 w-28" />
+						<Line box="h-4" bar="h-3 w-20" />
 					</div>
 				</div>
-				<Skeleton className="size-10 rounded-full" />
+				<Skeleton className="size-9 rounded-full" />
 			</div>
-			<Skeleton className="mt-4 h-4 w-24 rounded-full" />
-			<Skeleton className="mt-3 h-16 rounded-2xl" />
+			<Line box="mt-3 h-5" bar="h-3.5 w-40" />
 		</div>
 	);
 }
@@ -149,21 +194,20 @@ function MoodCardSkeleton() {
 export function MoodPanelSkeleton() {
 	return (
 		<div className="grid gap-4 sm:gap-5">
-			<PanelHeaderSkeleton description />
+			<PanelHeaderSkeleton actions={[periodActionSkeleton]} />
 			<div className="app-card p-3 sm:p-5">
 				<div className="flex items-start justify-between gap-4">
-					<div className="space-y-2">
-						<Skeleton className="h-8 w-44 rounded-2xl" />
-						<Skeleton className="h-3 w-52 rounded-full" />
+					<div>
+						<Line box="h-[1.875rem]" bar="h-6 w-44" />
+						<Line box="mt-1 h-4" bar="h-3 w-52" />
 					</div>
-					<Skeleton className="h-7 w-20 rounded-full" />
+					<Skeleton className="h-6 w-14 rounded-full" />
 				</div>
 				<div className="mt-4 grid grid-cols-7 gap-1 sm:gap-1.5 lg:gap-2.5">
 					{Array.from({ length: 7 }).map((_, index) => (
-						<Skeleton
-							key={`weekday-${index}`}
-							className="mx-auto h-3 w-7 rounded-full"
-						/>
+						<div key={`weekday-${index}`} className="flex h-[1.4375rem] items-center justify-center">
+							<Skeleton className="h-2.5 w-7 rounded-full" />
+						</div>
 					))}
 					{Array.from({ length: 7 }).map((_, index) => (
 						<Skeleton
@@ -180,60 +224,50 @@ export function MoodPanelSkeleton() {
 			<div className="app-card p-3 sm:p-5">
 				<div className="flex items-center gap-3">
 					<Skeleton className="size-12 shrink-0 rounded-2xl" />
-					<div className="min-w-0 space-y-2">
-						<Skeleton className="h-8 w-56 max-w-full rounded-2xl" />
-						<Skeleton className="h-4 w-36 rounded-full" />
+					<div className="min-w-0">
+						<Line box="h-[1.875rem]" bar="h-6 w-52 max-w-full" />
+						<Line box="h-5" bar="h-3.5 w-32" />
 					</div>
 				</div>
-				<div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-8">
-					{Array.from({ length: 8 }).map((_, index) => (
-						<Skeleton
-							key={index}
-							className="min-h-[4.8rem] rounded-2xl"
-						/>
-					))}
-				</div>
-				<Skeleton className="mt-4 h-28 rounded-2xl" />
-				<div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
-					<Skeleton className="h-11 rounded-2xl sm:w-36" />
-					<Skeleton className="h-11 rounded-2xl sm:w-32" />
+				<div className="mt-4 grid gap-4">
+					<div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+						{Array.from({ length: 8 }).map((_, index) => (
+							<Skeleton key={index} className="h-[4.8rem] rounded-2xl" />
+						))}
+					</div>
+					<div className="grid gap-2">
+						<Line box="h-5" bar="h-3.5 w-40" />
+						<Skeleton className="h-[6.875rem] rounded-xl sm:h-24" />
+					</div>
+					<div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+						<Skeleton className="h-12 rounded-xl sm:h-11 sm:w-[8.5rem]" />
+					</div>
 				</div>
 			</div>
 		</div>
 	);
 }
 
-function MemoryCardSkeleton({ withImage = true }: { withImage?: boolean }) {
+/* ----------------------------------------------------------------- Memory */
+
+function MemoryCardSkeleton() {
 	return (
-		<article className="app-card app-card-interactive flex h-full flex-col overflow-visible">
-			{withImage ? (
-				<Skeleton className="aspect-[16/9] shrink-0 rounded-t-2xl sm:rounded-t-lg" />
-			) : null}
+		<article className="app-card flex h-full flex-col overflow-visible">
+			<Skeleton className="aspect-[16/9] shrink-0 rounded-none rounded-t-2xl sm:rounded-t-lg" />
 			<div className="flex flex-1 flex-col gap-3 p-4">
 				<div className="flex items-start justify-between gap-3">
 					<div className="min-w-0 flex-1">
-						<Skeleton className="h-6 w-24 rounded-full" />
-						<Skeleton className="mt-2 h-8 w-3/4 rounded-2xl" />
+						{/* The real chip is inline-flex, so its line box adds ~2px below it. */}
+						<div className="h-[1.6875rem]">
+							<Skeleton className="h-[1.5625rem] w-20 rounded-full" />
+						</div>
+						<Line box="mt-2 h-[1.875rem]" bar="h-6 w-3/4" />
+						<Line box="mt-2 h-4" bar="h-3 w-24" />
 					</div>
-					<Skeleton className="size-10 rounded-full" />
+					<Skeleton className="size-9 shrink-0 rounded-full" />
 				</div>
-
-				<div className="flex flex-col gap-2">
-					<Skeleton className="h-4 w-32 rounded-full" />
-					<div className="grid gap-2 rounded-2xl border border-neutral-900/10 bg-neutral-900/5 p-2.5 dark:border-white/10 dark:bg-white/10">
-						{Array.from({ length: 2 }).map((_, index) => (
-							<div
-								key={index}
-								className="flex items-center gap-2"
-							>
-								<Skeleton className="size-8 shrink-0 rounded-full" />
-								<Skeleton className="h-4 min-w-0 flex-1 rounded-full" />
-							</div>
-						))}
-					</div>
-				</div>
-
-				<Skeleton className="mt-auto h-10 w-full rounded-2xl" />
+				<Skeleton className="mt-auto h-[7.125rem] rounded-2xl" />
+				<Skeleton className="h-10 rounded-2xl" />
 			</div>
 		</article>
 	);
@@ -242,41 +276,32 @@ function MemoryCardSkeleton({ withImage = true }: { withImage?: boolean }) {
 export function MemoryPanelSkeleton() {
 	return (
 		<div className="grid gap-4 sm:gap-5">
-			<PanelHeaderSkeleton
-				description
-				action
-				actionMobile={false}
-			/>
-			<div className="relative overflow-hidden rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+			<PanelHeaderSkeleton actions={[primaryActionSkeleton("w-[9.375rem]")]} />
+			<div className="relative">
 				<Skeleton className="min-h-[22rem] rounded-2xl sm:min-h-[31rem]" />
 			</div>
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-				<MemoryCardSkeleton />
-				<MemoryCardSkeleton />
-				<MemoryCardSkeleton />
-				<MemoryCardSkeleton />
+			<div className="notes-grid">
+				{Array.from({ length: 4 }).map((_, index) => (
+					<MemoryCardSkeleton key={index} />
+				))}
 			</div>
 		</div>
 	);
 }
 
+/* ----------------------------------------------------------------- Movies */
+
 const movieSkeletonSections = ["Watching", "Wishlist", "Watched"];
 
-function MoviePosterSkeleton({
-	active = false,
-}: {
-	active?: boolean;
-}) {
+function MoviePosterSkeleton({ active = false }: { active?: boolean }) {
 	return (
 		<div
 			className={[
-				"app-card h-full overflow-hidden p-0 rounded-2xl transition-all duration-500",
-				active
-					? "-translate-y-2 scale-100 opacity-100 shadow-[10px_10px_30px_-10px_rgba(0,0,0,0.5)] ring-1 ring-neutral-900/10 dark:ring-white/15"
-					: "translate-y-3 scale-[0.82] opacity-40",
+				"h-full overflow-hidden rounded-2xl transition-all duration-500",
+				active ? "-translate-y-2 scale-100 opacity-100" : "translate-y-3 scale-[0.82] opacity-40",
 			].join(" ")}
 		>
-			<Skeleton className="aspect-[2/3] rounded-none" />
+			<Skeleton className="aspect-[2/3] rounded-2xl" />
 		</div>
 	);
 }
@@ -287,38 +312,26 @@ function MovieSectionSkeleton({ section }: { section: string }) {
 			<div className="app-card flex items-center justify-between px-4 py-3">
 				<div className="flex min-w-0 items-center gap-3">
 					<Skeleton className="size-9 shrink-0 rounded-full" />
-					<Skeleton className="h-5 w-24 rounded-full" />
+					<Line box="h-6" bar="h-4 w-20" />
 				</div>
-				<Skeleton className="h-6 w-9 rounded-full" />
+				<Skeleton className="size-7 shrink-0 rounded-full" />
 			</div>
 
-			<div className="block overflow-hidden p-6 sm:hidden -mx-4">
+			{/* Mobile carousel: centred poster with its neighbours peeking in. */}
+			<div className="-mx-4 block overflow-hidden p-6 sm:hidden">
 				<div className="flex items-stretch justify-center gap-3">
-					<div className="w-[175px] shrink-0">
-						<MoviePosterSkeleton />
-					</div>
-					<div className="w-[175px] shrink-0">
-						<MoviePosterSkeleton active />
-					</div>
-					<div className="w-[175px] shrink-0">
-						<MoviePosterSkeleton />
-					</div>
-				</div>
-				<div className="mt-3 flex justify-center gap-1.5">
-					<Skeleton className="size-1.5 rounded-full bg-neutral-900/30 dark:bg-white/30" />
-					<Skeleton className="h-1.5 w-4 rounded-full bg-neutral-900/70 dark:bg-white/70" />
-					<Skeleton className="size-1.5 rounded-full bg-neutral-900/30 dark:bg-white/30" />
+					<div className="w-[175px] shrink-0"><MoviePosterSkeleton /></div>
+					<div className="w-[175px] shrink-0"><MoviePosterSkeleton active /></div>
+					<div className="w-[175px] shrink-0"><MoviePosterSkeleton /></div>
 				</div>
 			</div>
 
-			<div className="hidden grid-cols-3 gap-4 sm:grid lg:grid-cols-4 2xl:grid-cols-5">
+			<div className="hidden gap-4 sm:grid md:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-7">
 				{Array.from({ length: 5 }).map((_, index) => (
-					<div
+					<Skeleton
 						key={`${section}-${index}`}
-						className="app-card overflow-hidden rounded-2xl p-0"
-					>
-						<Skeleton className="aspect-[2/3] rounded-none" />
-					</div>
+						className={`aspect-[2/3] rounded-2xl ${index > 0 ? "hidden md:block" : ""} ${index > 2 ? "md:hidden lg:block" : ""}`}
+					/>
 				))}
 			</div>
 		</section>
@@ -328,54 +341,66 @@ function MovieSectionSkeleton({ section }: { section: string }) {
 export function MoviesPanelSkeleton() {
 	return (
 		<div className="grid gap-4 sm:gap-5">
-			<PanelHeaderSkeleton
-				description
-				action
-				actionMobile={false}
-			/>
+			<PanelHeaderSkeleton actions={[primaryActionSkeleton("w-[8.5625rem]")]} />
 			<div className="grid gap-6">
 				{movieSkeletonSections.map((section) => (
-					<MovieSectionSkeleton
-						key={section}
-						section={section}
-					/>
+					<MovieSectionSkeleton key={section} section={section} />
 				))}
 			</div>
 		</div>
 	);
 }
 
-function ProfileCardSkeleton({ large = false }: { large?: boolean }) {
+/* --------------------------------------------------------------- Personal */
+
+function ProfileStatBoxesSkeleton() {
 	return (
-		<div
-			className={[
-				"app-card p-4 sm:p-5 lg:p-7",
-				large ? "lg:col-span-7 lg:min-h-[18rem]" : "lg:col-span-5",
-			].join(" ")}
-		>
+		<div className="mt-6 hidden grid-cols-3 gap-3 lg:grid">
+			{["w-14", "w-16", "w-16"].map((width, index) => (
+				<div key={index} className="rounded-2xl border border-foreground/8 p-4">
+					<Line box="h-4" bar={`h-3 ${width}`} />
+					<Line box="mt-1 h-8" bar="h-5 w-12" />
+				</div>
+			))}
+		</div>
+	);
+}
+
+function ProfileCardSkeleton({ partner = false }: { partner?: boolean }) {
+	return (
+		<div className="app-card p-4 sm:p-5 lg:min-h-[18rem] lg:p-7">
 			<div className="flex items-center gap-3 lg:items-start lg:gap-5">
-				<Skeleton
-					className={[
-						"size-14 rounded-full",
-						large ? "lg:size-24" : "lg:size-20",
-					].join(" ")}
-				/>
-				<div className="min-w-0 flex-1 space-y-2">
-					<Skeleton className="h-3 w-20 rounded-full" />
-					<Skeleton className="h-8 w-4/5 rounded-2xl lg:h-12" />
-					<Skeleton className="h-4 w-2/3 rounded-full" />
+				<Skeleton className="size-14 shrink-0 rounded-full lg:size-24" />
+				<div className="min-w-0 flex-1">
+					<Line box="h-[0.9375rem]" bar="h-2 w-12" />
+					<Line
+						box={partner ? "h-[1.875rem] lg:h-[2.8125rem]" : "h-[1.875rem] lg:h-[3.75rem]"}
+						bar={partner ? "h-6 w-40 lg:h-8 lg:w-48" : "h-6 w-40 lg:h-10 lg:w-56"}
+					/>
+					<Line box={partner ? "h-4" : "h-4 lg:mt-2 lg:h-5"} bar="h-3 w-40 max-w-full" />
 				</div>
 			</div>
-			{large ? (
-				<div className="mt-6 hidden grid-cols-3 gap-3 lg:grid">
-					<Skeleton className="h-24 rounded-2xl" />
-					<Skeleton className="h-24 rounded-2xl" />
-					<Skeleton className="h-24 rounded-2xl" />
-				</div>
+			<ProfileStatBoxesSkeleton />
+			{partner ? (
+				<Skeleton className="mt-4 h-[2.875rem] rounded-2xl lg:mt-6" />
 			) : (
-				<Skeleton className="mt-4 h-16 rounded-2xl lg:mt-8" />
+				<Skeleton className="mt-4 h-11 rounded-2xl lg:mt-6" />
 			)}
-			{large ? <Skeleton className="mt-4 h-11 rounded-2xl sm:w-36 lg:mt-6" /> : null}
+		</div>
+	);
+}
+
+function PreferenceRowSkeleton({ control }: { control: string }) {
+	return (
+		<div className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+			<div className="flex min-w-0 items-center gap-3">
+				<Skeleton className="size-10 shrink-0 rounded-full" />
+				<div className="min-w-0">
+					<Line box="h-5" bar="h-3.5 w-24" />
+					<Line box="mt-0.5 h-5" bar="h-3 w-48 max-w-full" />
+				</div>
+			</div>
+			<Skeleton className={`shrink-0 rounded-full ${control}`} />
 		</div>
 	);
 }
@@ -383,35 +408,39 @@ function ProfileCardSkeleton({ large = false }: { large?: boolean }) {
 export function PersonalPanelSkeleton() {
 	return (
 		<div className="grid gap-4 sm:gap-5">
-			<PanelHeaderSkeleton
-				description
-				action={false}
-			/>
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12 lg:items-stretch">
-				<ProfileCardSkeleton large />
+			<PanelHeaderSkeleton wrapDescription />
+			<div className="grid gap-4 md:grid-cols-2 lg:items-stretch">
 				<ProfileCardSkeleton />
+				<ProfileCardSkeleton partner />
 			</div>
-			<div className="app-card p-4 sm:p-5 lg:p-7">
-				<div className="flex items-start justify-between gap-4 lg:items-center">
-					<div className="space-y-2">
-						<Skeleton className="h-3 w-28 rounded-full" />
-						<Skeleton className="h-9 w-64 rounded-2xl lg:h-12 lg:w-80" />
-						<Skeleton className="h-4 w-44 rounded-full" />
-						<Skeleton className="h-4 w-36 rounded-full" />
+			<div className="grid gap-4">
+				<div className="app-card p-4 sm:p-5 lg:p-7">
+					<div className="flex items-start justify-between gap-4">
+						<div className="min-w-0 flex-1">
+							<Line box="h-[0.9375rem]" bar="h-2 w-20" />
+							<Line box="mt-1 h-[1.875rem] lg:h-[3.75rem]" bar="h-6 w-56 max-w-full lg:h-10 lg:w-96" />
+						</div>
+						<Skeleton className="size-11 shrink-0 rounded-full" />
 					</div>
-					<Skeleton className="size-11 rounded-full" />
+					<div className="mt-5 grid grid-cols-2 gap-3">
+						{["w-10", "w-12"].map((width) => (
+							<div key={width} className="rounded-2xl border border-foreground/8 p-4">
+								<Line box="h-4" bar={`h-3 ${width}`} />
+								<Line box="mt-1 h-6" bar="h-4 w-24 max-w-full" />
+							</div>
+						))}
+					</div>
 				</div>
-				<div className="mt-4 grid grid-cols-2 gap-3 lg:max-w-md">
-					<Skeleton className="h-11 rounded-2xl" />
-					<Skeleton className="h-11 rounded-2xl" />
-				</div>
-			</div>
-			<div className="app-card grid gap-3 p-4 sm:p-5 lg:grid-cols-[1fr_auto] lg:items-center lg:p-7">
-				<Skeleton className="h-3 w-24 rounded-full" />
-				<div className="grid gap-3 sm:flex sm:flex-wrap">
-					<Skeleton className="h-12 rounded-2xl sm:w-72" />
-					<Skeleton className="h-12 rounded-2xl sm:w-48" />
-					<Skeleton className="h-12 rounded-2xl sm:w-32" />
+				<div className="app-card p-4 sm:p-5 lg:p-7">
+					<Line box="h-[0.9375rem]" bar="h-2 w-24" />
+					<Line box="mt-1 h-[1.875rem]" bar="h-6 w-40" />
+					<div className="mt-5 divide-y divide-foreground/8">
+						<PreferenceRowSkeleton control="h-[2.875rem] w-full sm:w-[19rem]" />
+						<PreferenceRowSkeleton control="h-10 w-full sm:w-32" />
+						<PreferenceRowSkeleton control="h-10 w-full sm:w-32" />
+						<PreferenceRowSkeleton control="h-10 w-full sm:w-52" />
+						<PreferenceRowSkeleton control="h-10 w-full sm:w-32" />
+					</div>
 				</div>
 			</div>
 		</div>

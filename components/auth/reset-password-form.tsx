@@ -12,13 +12,13 @@ export function ResetPasswordForm() {
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+    <div className="app-card p-6 sm:p-8">
       <p className="eyebrow">Reset password</p>
-      <h1 className="mt-3 font-serif text-4xl leading-none">
+      <h1 className="mt-3 font-serif text-3xl leading-tight sm:text-4xl">
         Create a new password
       </h1>
       <form
-        className="mt-8 grid gap-3"
+        aria-busy={pending} className="mt-7 grid gap-4"
         action={(formData) => {
           startTransition(async () => {
             const result = await updatePassword(formData);

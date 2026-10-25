@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useOpenSync } from "@/components/common/use-open-sync";
 import { useRouter } from "next/navigation";
 import { SmilePlus } from "lucide-react";
 import { EmojiPickerDialog } from "@/components/common/emoji-picker-dialog";
@@ -46,11 +47,10 @@ export function ProfileDialog({ open, onClose, profile }: ProfileDialogProps) {
 		onClose();
 	};
 
-	useEffect(() => {
-		if (!open) return;
+	if (useOpenSync(open, [profile.avatar_url])) {
 		setAvatar(profile.avatar_url || "💖");
 		setAvatarPickerOpen(false);
-	}, [open, profile.avatar_url]);
+	}
 
 	return (
 		<NativeDialog

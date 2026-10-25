@@ -1,5 +1,6 @@
 import { useEffect, useState, type RefObject } from "react";
 import dynamic from "next/dynamic";
+import { useMediaQuery } from "@/components/common/use-hydrated";
 import {
   CalendarDays,
   CircleDollarSign,
@@ -25,15 +26,15 @@ const PeriodPickerDialog = dynamic(
 
 function spaceTabClass(active: boolean) {
   return [
-    "relative inline-flex min-h-10 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-bold transition duration-200 sm:px-6 active:scale-[0.96]",
+    "relative inline-flex min-h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-2xl px-2 text-sm font-semibold transition duration-200 sm:px-3 active:scale-[0.96]",
     active
-      ? "material-tonal"
+      ? "glass-selected"
       : "text-muted-foreground hover:bg-surface-hover hover:text-foreground",
   ].join(" ");
 }
 
 function spaceTabIconClass(active: boolean) {
-  return active ? "text-current" : "text-subtle-foreground";
+  return `hidden min-[900px]:block shrink-0 ${active ? "text-current" : "text-subtle-foreground"}`;
 }
 
 interface PeriodPickerButtonProps {
@@ -81,40 +82,30 @@ export function PeriodPickerButton({
   onSelectWeekFromDate,
   onTogglePeriodPicker,
 }: PeriodPickerButtonProps) {
-  const [viewportMatches, setViewportMatches] = useState(false);
+  const viewportMatches = useMediaQuery(
+    periodPickerViewport === "mobile"
+      ? "(max-width: 639px)"
+      : periodPickerViewport === "tablet"
+        ? "(min-width: 640px) and (max-width: 1023px)"
+        : "(min-width: 1024px)",
+  );
   const [shouldRenderPicker, setShouldRenderPicker] =
     useState(periodPickerOpen);
   const closing = shouldRenderPicker && !periodPickerOpen;
 
-  useEffect(() => {
-    const query =
-      periodPickerViewport === "mobile"
-        ? "(max-width: 639px)"
-        : periodPickerViewport === "tablet"
-          ? "(min-width: 640px) and (max-width: 1023px)"
-          : "(min-width: 1024px)";
-    const mediaQuery = window.matchMedia(query);
-    const updateMatch = () => setViewportMatches(mediaQuery.matches);
-
-    updateMatch();
-    mediaQuery.addEventListener("change", updateMatch);
-    return () => mediaQuery.removeEventListener("change", updateMatch);
-  }, [periodPickerViewport]);
+  // Mount the picker as soon as it opens; unmount only after its exit transition.
+  const pickerVisible = periodPickerOpen && viewportMatches;
+  if (pickerVisible && !shouldRenderPicker) setShouldRenderPicker(true);
 
   useEffect(() => {
-    if (periodPickerOpen && viewportMatches) {
-      setShouldRenderPicker(true);
-      return;
-    }
-
-    if (!shouldRenderPicker) return;
+    if (pickerVisible || !shouldRenderPicker) return;
 
     const timeoutId = window.setTimeout(() => {
       setShouldRenderPicker(false);
     }, 300);
 
     return () => window.clearTimeout(timeoutId);
-  }, [periodPickerOpen, shouldRenderPicker, viewportMatches]);
+  }, [pickerVisible, shouldRenderPicker]);
 
   const handleClosePicker = () => {
     if (periodPickerOpen) onTogglePeriodPicker();
@@ -132,7 +123,7 @@ export function PeriodPickerButton({
         aria-haspopup="dialog"
         aria-expanded={periodPickerOpen ? "true" : undefined}
         onClick={onTogglePeriodPicker}
-        className="grid size-12 place-items-center rounded-2xl border border-primary-border bg-surface text-muted-foreground shadow-[0_3px_12px_rgba(29,27,32,0.12)] transition hover:border-primary hover:bg-surface-hover hover:text-primary active:scale-[0.96]"
+        className="glass-surface grid size-12 place-items-center rounded-2xl text-muted-foreground transition hover:text-foreground active:scale-[0.96]"
       >
         <CalendarDays size={22} />
       </button>
@@ -172,17 +163,15 @@ export function PeriodControls({
   ...periodPickerProps
 }: PeriodControlsProps) {
   return (
-    <div className="sticky top-3 z-40 hidden rounded-[1.75rem] border border-border bg-surface/88 p-2 shadow-[0_12px_36px_rgba(29,27,32,0.08)] backdrop-blur-xl sm:block lg:hidden">
+    <div className="glass-navigation sticky top-3 z-40 hidden rounded-[1.75rem] p-2 sm:block lg:hidden">
       <div className="flex flex-col gap-3 sm:flex-row md:items-center md:gap-6">
         <div
-          role="tablist"
-          aria-label="Space section"
-          className="grid min-w-0 flex-1 grid-cols-6 rounded-[1.35rem] bg-background/85 p-1"
+          aria-label="Space sections"
+          className="glass-chip grid min-w-0 flex-1 grid-cols-6 rounded-[1.35rem] p-1"
         >
           <button
             type="button"
-            role="tab"
-            aria-selected={activeSection === "notes"}
+            aria-current={activeSection === "notes" ? "page" : undefined}
             className={spaceTabClass(activeSection === "notes")}
             onClick={() => onSelectSection("notes")}
           >
@@ -194,8 +183,7 @@ export function PeriodControls({
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={activeSection === "finances"}
+            aria-current={activeSection === "finances" ? "page" : undefined}
             className={spaceTabClass(activeSection === "finances")}
             onClick={() => onSelectSection("finances")}
           >
@@ -207,8 +195,7 @@ export function PeriodControls({
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={activeSection === "mood"}
+            aria-current={activeSection === "mood" ? "page" : undefined}
             className={spaceTabClass(activeSection === "mood")}
             onClick={() => onSelectSection("mood")}
           >
@@ -220,8 +207,7 @@ export function PeriodControls({
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={activeSection === "memories"}
+            aria-current={activeSection === "memories" ? "page" : undefined}
             className={spaceTabClass(activeSection === "memories")}
             onClick={() => onSelectSection("memories")}
           >
@@ -233,8 +219,7 @@ export function PeriodControls({
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={activeSection === "movies"}
+            aria-current={activeSection === "movies" ? "page" : undefined}
             className={spaceTabClass(activeSection === "movies")}
             onClick={() => onSelectSection("movies")}
           >
@@ -246,8 +231,7 @@ export function PeriodControls({
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={activeSection === "personal"}
+            aria-current={activeSection === "personal" ? "page" : undefined}
             className={spaceTabClass(activeSection === "personal")}
             onClick={() => onSelectSection("personal")}
           >
@@ -296,13 +280,13 @@ export function MobileSpaceTabs({
   return (
     <nav
       aria-label="Space sections"
-      className="native-bottom-nav-in fixed inset-x-0 bottom-0 z-[50] sm:hidden"
+      className="native-bottom-nav-in fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-[45] sm:hidden"
     >
-      <div className="relative rounded-t-[1.8rem] border-t border-border bg-surface/92 px-2 pb-[clamp(0.5rem,env(safe-area-inset-bottom),1rem)] shadow-[0_-10px_34px_rgba(29,27,32,0.14)] backdrop-blur-xl">
+      <div className="glass-navigation relative rounded-[1.75rem] px-2 pb-2">
         <div className="relative grid grid-cols-6 py-2">
           <div
             aria-hidden="true"
-            className="mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-2xl bg-surface-selected shadow-[0_8px_20px_color-mix(in_srgb,var(--theme-primary)_20%,transparent)]"
+            className="glass-selected mobile-bottom-tab-indicator absolute inset-y-1.5 left-0 rounded-2xl border"
             style={{
               width: "calc(100% / 6)",
               transform: `translateX(${selectedIndex * 100}%)`,
@@ -316,12 +300,11 @@ export function MobileSpaceTabs({
               <button
                 key={item.value}
                 type="button"
-                role="tab"
-                aria-selected={selected}
+                aria-current={selected ? "page" : undefined}
                 className={[
-                  "relative z-10 flex min-h-[3rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-[10.5px] font-extrabold transition duration-200 active:scale-[0.8]",
+                  "relative z-10 flex min-h-[3rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-[10.5px] font-extrabold transition duration-200 active:scale-[0.97]",
                   selected
-                    ? "text-accent-foreground"
+                    ? "text-foreground"
                     : "text-subtle-foreground",
                 ].join(" ")}
                 onClick={() => onSelectSection(item.value)}

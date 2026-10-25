@@ -1,15 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { Dialog } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EmojiStyle, type EmojiClickData } from "emoji-picker-react";
+import { useTheme } from "@/components/theme/theme-provider";
+import { EmojiStyle, Theme, type EmojiClickData } from "emoji-picker-react";
 
-const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
-	ssr: false,
-});
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
 interface EmojiPickerDialogProps {
 	open: boolean;
@@ -20,113 +18,31 @@ interface EmojiPickerDialogProps {
 	onSelect: (emoji: string) => void;
 }
 
-export function EmojiPickerDialog({
-	open,
-	title,
-	clearLabel = "Clear",
-	onClose,
-	onClear,
-	onSelect,
-}: EmojiPickerDialogProps) {
-	const [shouldRender, setShouldRender] = useState(open);
-	const [mounted, setMounted] = useState(false);
-	const closing = shouldRender && !open;
-
-	useEffect(() => {
-		setMounted(true);
-	}, []);
-
-	useEffect(() => {
-		if (open) {
-			setShouldRender(true);
-			return;
-		}
-
-		if (!shouldRender) return;
-		const timeoutId = window.setTimeout(() => setShouldRender(false), 240);
-		return () => window.clearTimeout(timeoutId);
-	}, [open, shouldRender]);
-
-	useEffect(() => {
-		if (!open) return;
-
-		const originalOverflow = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
-
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key === "Escape") onClose();
-		};
-
-		document.addEventListener("keydown", handleKeyDown);
-		return () => {
-			document.body.style.overflow = originalOverflow;
-			document.removeEventListener("keydown", handleKeyDown);
-		};
-	}, [onClose, open]);
-
-	if (!mounted || !shouldRender) return null;
-
-	return createPortal(
-		<>
-			<button
-				type="button"
-				aria-label="Close emoji picker"
-				className={[
-					"fixed inset-0 z-[90] bg-neutral-950/35 dark:bg-neutral-950/60 backdrop-blur-sm",
-					closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
-				].join(" ")}
-				onClick={onClose}
-			/>
-			<div
-				role="dialog"
-				aria-modal="true"
-				aria-label={title}
-				className={[
-					"emoji-picker-dialog fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[100] overflow-hidden rounded-3xl border border-neutral-900/10 bg-surface shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[min(26rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2",
-					closing ? "native-sheet-out" : "native-sheet-in",
-				].join(" ")}
-			>
-				<div className="flex items-center justify-between border-b border-neutral-900/10 px-4 py-3">
-					<p className="font-serif text-2xl leading-tight text-neutral-950">
-						{title}
-					</p>
-					<Button
-						type="button"
-						variant="ghost"
-						size="icon-lg"
-						className="rounded-full"
-						onClick={onClose}
-					>
-						<X size={18} />
-					</Button>
-				</div>
-				<div className="p-2">
-					<EmojiPicker
-						width="100%"
-						height={600}
-						emojiStyle={EmojiStyle.NATIVE}
-						previewConfig={{ showPreview: false }}
-						onEmojiClick={(emojiData: EmojiClickData) => {
-							onSelect(emojiData.emoji);
-							onClose();
-						}}
-					/>
-					{onClear ? (
-						<Button
-							type="button"
-							variant="ghost"
-							className="mt-2 h-10 w-full rounded-2xl font-bold"
-							onClick={() => {
-								onClear();
-								onClose();
-							}}
-						>
-							{clearLabel}
-						</Button>
-					) : null}
-				</div>
-			</div>
-		</>,
-		document.body,
+/** Shares the dialog tree with its editor so Escape closes only the picker. */
+export function EmojiPickerDialog({ open, title, clearLabel = "Clear", onClose, onClear, onSelect }: EmojiPickerDialogProps) {
+	const { theme } = useTheme();
+	return (
+		<Dialog.Root open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
+			<Dialog.Portal>
+				<Dialog.Backdrop className="glass-scrim app-dialog-overlay fixed inset-0 z-[90] bg-black/35 backdrop-blur-sm dark:bg-black/60" />
+				<Dialog.Popup className="glass-dialog app-dialog emoji-picker-dialog fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[100] flex max-h-[calc(100svh-env(safe-area-inset-top)-2rem)] flex-col overflow-hidden rounded-3xl border border-border bg-surface-elevated text-foreground shadow-2xl outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(26rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+					<div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
+						<Dialog.Title className="font-serif text-2xl leading-tight">{title}</Dialog.Title>
+						<Dialog.Close render={<Button variant="ghost" className="size-11 shrink-0 rounded-full" />} aria-label="Close emoji picker"><X size={18} aria-hidden="true" /></Dialog.Close>
+					</div>
+					<div className="min-h-0 overflow-y-auto overscroll-contain p-2">
+						<EmojiPicker
+							width="100%"
+							height={440}
+							theme={theme === "dark" ? Theme.DARK : theme === "light" ? Theme.LIGHT : Theme.AUTO}
+							emojiStyle={EmojiStyle.NATIVE}
+							previewConfig={{ showPreview: false }}
+							onEmojiClick={(data: EmojiClickData) => { onSelect(data.emoji); onClose(); }}
+						/>
+						{onClear ? <Button type="button" variant="ghost" className="mt-2 h-11 w-full rounded-2xl" onClick={() => { onClear(); onClose(); }}>{clearLabel}</Button> : null}
+					</div>
+				</Dialog.Popup>
+			</Dialog.Portal>
+		</Dialog.Root>
 	);
 }

@@ -1,9 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useOpenSync } from "@/components/common/use-open-sync";
 import { ImageUp, SmilePlus } from "lucide-react";
-import { createMovie, updateMovie } from "@/app/actions";
+import {
+	createMovie,
+	deleteUnsavedCloudinaryImage,
+	updateMovie,
+} from "@/app/actions";
 import { EmojiPickerDialog } from "@/components/common/emoji-picker-dialog";
 import { useToast } from "@/components/feedback/toast";
 import {
@@ -12,6 +17,7 @@ import {
 	NativeInput,
 	NativeSelect,
 	NativeTextarea,
+	style as fieldClass,
 } from "@/components/ui/native-controls";
 import { movieCategories, movieStatuses } from "@/lib/constants";
 import type { Movie, MovieStatus, Profile } from "@/lib/types";
@@ -95,26 +101,47 @@ export function MovieDialog({
 	const [pending, startTransition] = useTransition();
 	const [uploading, setUploading] = useState(false);
 	const [posterUrl, setPosterUrl] = useState("");
+	const [posterPublicId, setPosterPublicId] = useState("");
 	const [status, setStatus] = useState<MovieStatus>("wishlist");
 	const [rating, setRating] = useState("");
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [reaction, setReaction] = useState("");
 	const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
+	const unsavedPosterPublicIds = useRef<Set<string>>(new Set());
 
-	useEffect(() => {
-		if (!open) return;
+	if (useOpenSync(open, [movie, profile.id])) {
 		setPosterUrl(movie?.poster_url ?? "");
+		setPosterPublicId(movie?.poster_public_id ?? "");
 		setStatus(movie?.status ?? "wishlist");
 		setRating(getUserRating(movie, profile.id));
 		setSelectedCategories(getMovieCategories(movie));
 		setReaction(getUserReaction(movie, profile.id));
 		setReactionPickerOpen(false);
-	}, [movie, open, profile.id]);
+	}
+
+	useEffect(() => {
+		if (open) unsavedPosterPublicIds.current.clear();
+	}, [movie, open]);
+
+	async function cleanupUnsavedPoster(publicId: string) {
+		if (!unsavedPosterPublicIds.current.has(publicId)) return;
+		unsavedPosterPublicIds.current.delete(publicId);
+		await deleteUnsavedCloudinaryImage(publicId).catch(() => null);
+	}
+
+	const cleanupUnsavedPosters = () => {
+		const publicIds = Array.from(unsavedPosterPublicIds.current);
+		unsavedPosterPublicIds.current.clear();
+		publicIds.forEach((publicId) => {
+			void deleteUnsavedCloudinaryImage(publicId).catch(() => null);
+		});
+	};
 
 	const handleClose = () => {
 		if (document.activeElement instanceof HTMLElement) {
 			document.activeElement.blur();
 		}
+		cleanupUnsavedPosters();
 		onClose();
 	};
 
@@ -140,7 +167,10 @@ export function MovieDialog({
 			});
 			const result = await response.json();
 			if (!response.ok) throw new Error(result.error ?? "Upload failed");
+			if (posterPublicId) void cleanupUnsavedPoster(posterPublicId);
+			unsavedPosterPublicIds.current.add(result.public_id);
 			setPosterUrl(result.secure_url);
+			setPosterPublicId(result.public_id);
 		} catch (error) {
 			toast(error instanceof Error ? error.message : "Upload failed", {
 				variant: "error",
@@ -160,6 +190,7 @@ export function MovieDialog({
 			<form
 				action={(formData) => {
 					formData.set("poster_url", posterUrl);
+					formData.set("poster_public_id", posterPublicId);
 					formData.set("status", status);
 					formData.set("reaction", status === "wishlist" ? "" : reaction);
 					formData.set("rating", status === "wishlist" ? "" : rating);
@@ -177,6 +208,7 @@ export function MovieDialog({
 							variant: result.ok ? "success" : "error",
 						});
 						if (result.ok) {
+							unsavedPosterPublicIds.current.clear();
 							onSaved?.(result.movie);
 							handleClose();
 						}
@@ -238,56 +270,54 @@ export function MovieDialog({
 									</option>
 								))}
 							</NativeSelect>
-							<div className="relative">
+							{/* Same label-above layout and field height as the selects beside it. */}
+							<div className="grid min-w-0 gap-2">
 								<input
 									type="hidden"
 									name="reaction"
 									value={status === "wishlist" ? "" : reaction}
 								/>
-								<div className="relative">
-									<button
-										type="button"
-										aria-label="Choose reaction emoji"
-										aria-expanded={reactionPickerOpen ? "true" : undefined}
-										disabled={status === "wishlist"}
-										className={`peer flex h-12 w-full items-center justify-between rounded-2xl border border-input bg-surface/70 px-3 text-left text-sm text-foreground outline-none transition-all duration-200 hover:border-primary focus:border-primary focus:ring-2 focus:ring-ring/20 sm:h-11 ${
-											status === "wishlist"
-												? "cursor-not-allowed opacity-50"
-												: ""
-										}`}
-										onClick={() => setReactionPickerOpen((open) => !open)}
-									>
-										<span className="text-2xl leading-none">
-											{reaction || "🙂"}
-										</span>
-										<SmilePlus
-											size={17}
-											className="text-subtle-foreground"
-										/>
-									</button>
-									<label className="pointer-events-none absolute left-3 top-3 origin-[top_left] -translate-y-5 scale-75 bg-surface px-1 text-sm text-subtle-foreground transition-all duration-200">
-										Reaction
-									</label>
-								</div>
+								<span id="movie-reaction-label" className="text-sm font-semibold text-foreground">
+									Reaction
+								</span>
+								<button
+									type="button"
+									aria-labelledby="movie-reaction-label"
+									aria-expanded={reactionPickerOpen ? "true" : undefined}
+									disabled={status === "wishlist"}
+									className={`${fieldClass} flex items-center justify-between text-left ${
+										status === "wishlist" ? "cursor-not-allowed opacity-50" : "hover:border-foreground/40"
+									}`}
+									onClick={() => setReactionPickerOpen((open) => !open)}
+								>
+									<span className={`text-2xl leading-none ${reaction ? "" : "opacity-40 grayscale"}`}>
+										{reaction || "🙂"}
+									</span>
+									<SmilePlus
+										size={18}
+										className="text-muted-foreground"
+										aria-hidden="true"
+									/>
+								</button>
 							</div>
 						</div>
 					</div>
 
-					<div className="rounded-2xl border border-input bg-surface/40 px-3 py-3">
-						<div className="mb-2 flex items-center justify-between gap-3">
-							<div className="text-xs font-semibold text-subtle-foreground">
+					<div className="grid gap-2">
+						<div className="flex items-center justify-between gap-3">
+							<div className="text-sm font-semibold text-foreground">
 								Categories
 							</div>
 							<button
 								type="button"
-								className="text-[11px] font-semibold text-muted-foreground transition hover:text-foreground disabled:pointer-events-none disabled:text-subtle-foreground/50"
+								className="text-xs font-semibold text-muted-foreground transition hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
 								disabled={selectedCategories.length === 0}
 								onClick={() => setSelectedCategories([])}
 							>
 								Clear
 							</button>
 						</div>
-						<div className="flex flex-wrap gap-1.5">
+						<div className="glass-chip flex flex-wrap gap-1.5 rounded-2xl p-3">
 							{movieCategories.map((category) => {
 								const selected = selectedCategories.includes(category);
 								return (
@@ -295,10 +325,10 @@ export function MovieDialog({
 										key={category}
 										type="button"
 										aria-pressed={selected}
-										className={`rounded-full border px-2.5 py-1 text-xs font-bold transition ${
+										className={`min-h-8 rounded-full border px-3 text-xs font-semibold transition ${
 											selected
 												? "border-primary bg-primary text-primary-foreground"
-												: "border-primary-border bg-surface text-muted-foreground hover:border-primary hover:bg-surface-hover hover:text-foreground"
+												: "border-foreground/10 bg-surface-elevated/70 text-muted-foreground hover:border-foreground/25 hover:text-foreground dark:bg-white/5"
 										}`}
 										onClick={() => toggleCategory(category)}
 									>
@@ -317,15 +347,7 @@ export function MovieDialog({
 						))}
 					</div>
 
-					<NativeInput
-						type="url"
-						label="Poster URL"
-						value={posterUrl}
-						onChange={(event) => setPosterUrl(event.target.value)}
-					/>
-
 					{posterUrl ? (
-						/* Thêm class 'mx-auto' vào dòng dưới đây để căn giữa */
 						<div className="mx-auto relative aspect-[2/3] w-40 overflow-hidden rounded-2xl border border-primary-border bg-primary-subtle">
 							<Image
 								src={posterUrl}
@@ -336,16 +358,11 @@ export function MovieDialog({
 						</div>
 					) : null}
 
-					{/* Sử dụng dynamic class để:
-    - Nếu có poster (2 nút): chia 2 cột (grid-cols-2)
-    - Nếu chưa có poster (1 nút): chiếm full 1 cột (grid-cols-1)
-*/}
 					<div
 						className={`grid gap-3 w-full ${posterUrl ? "grid-cols-2" : "grid-cols-1"}`}
 					>
 						<label
-							// Thay 'inline-flex' bằng 'flex w-full' để label giãn hết 100% cột grid
-							className={`flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-primary-border bg-surface px-5 text-sm font-bold text-primary transition hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground sm:min-h-11 ${
+							className={`flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-primary-border bg-surface px-5 text-sm font-bold text-primary-ink transition hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground sm:min-h-11 ${
 								uploading ? "pointer-events-none opacity-50" : ""
 							}`}
 						>
@@ -373,7 +390,11 @@ export function MovieDialog({
 									type="button"
 									variant="outlined"
 									className="w-full !border-transparent !text-danger hover:!bg-danger-bg"
-									onClick={() => setPosterUrl("")}
+									onClick={() => {
+										void cleanupUnsavedPoster(posterPublicId);
+										setPosterUrl("");
+										setPosterPublicId("");
+									}}
 								>
 									Remove poster
 								</NativeButton>

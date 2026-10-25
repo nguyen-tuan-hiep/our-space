@@ -1,19 +1,20 @@
 "use client";
 
 import {
-	useEffect,
-	useState,
+	useId,
 	type ButtonHTMLAttributes,
 	type ReactNode,
 } from "react";
-import { createPortal } from "react-dom";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { X } from "lucide-react";
+import { useHydrated } from "@/components/common/use-hydrated";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
 }
 
 export const style =
-	"peer h-12 w-full appearance-none rounded-2xl border border-input bg-surface/70 px-3 text-sm text-foreground shadow-none outline-none transition-all duration-200 placeholder:text-subtle-foreground focus:border-primary focus:shadow-none focus:ring-2 focus:ring-ring/20 sm:h-11";
+	"glass-input h-12 w-full min-w-0 appearance-none rounded-xl border border-input px-3.5 text-base text-foreground outline-none transition-all duration-200 placeholder:text-subtle-foreground sm:h-11";
 
 export function NativeButton({
 	variant = "contained",
@@ -27,13 +28,13 @@ export function NativeButton({
 		<button
 			{...props}
 			className={cx(
-				"inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-bold transition active:scale-[0.9] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11",
+				"glass-button inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11",
 				variant === "contained" &&
 					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-pressed",
 				variant === "outlined" &&
-					"border border-primary-border bg-surface text-primary hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground",
+					"glass-chip text-foreground hover:bg-surface-hover",
 				variant === "text" &&
-					"bg-transparent text-primary hover:bg-primary-subtle",
+					"bg-transparent text-foreground hover:bg-surface-hover",
 				variant === "danger" &&
 					"border border-transparent bg-transparent text-danger hover:bg-danger-bg",
 				className,
@@ -44,201 +45,45 @@ export function NativeButton({
 	);
 }
 
-export function NativeInput({
-	label,
-	helperText,
-	error,
-	className,
-	...props
-}: React.InputHTMLAttributes<HTMLInputElement> & {
-	label: string;
-	helperText?: string;
-	error?: boolean;
+export function NativeInput({ label, id, helperText, error, className, ...props }: React.InputHTMLAttributes<HTMLInputElement> & {
+	label: string; helperText?: string; error?: boolean;
 }) {
+	const generatedId = useId();
+	const controlId = id ?? generatedId;
 	return (
-		<div className="w-full">
-			<div className="relative">
-				<input
-					{...props}
-					placeholder=" "
-					className={cx(
-						style,
-						error && "border-danger focus:border-danger focus:ring-danger/20",
-						className,
-					)}
-				/>
-
-				{/* Label phong cách MUI Outlined */}
-				<label
-					className={cx(
-						// Ban đầu nhãn nằm lọt lòng giữa ô textarea giống placeholder
-						"pointer-events-none absolute left-3 top-3 origin-[top_left] bg-surface px-1 text-sm text-subtle-foreground transition-all duration-200",
-
-						// Khi FOCUS: Bay lên nằm đè lên border-top, thu nhỏ scale, đổi màu theo MUI
-						"peer-focus:-translate-y-5 peer-focus:scale-75 peer-focus:text-primary",
-
-						// Khi ĐÃ CÓ CHỮ (không hiện placeholder): Giữ nguyên vị trí trên border-top không bị tụt xuống
-						"peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-5",
-						error && "text-danger peer-focus:text-danger",
-					)}
-				>
-					{label}
-				</label>
-			</div>
-
-			{helperText ? (
-				<span
-					className={cx(
-						"mt-1 text-xs block leading-5",
-						error ? "text-danger" : "text-muted-foreground",
-					)}
-				>
-					{helperText}
-				</span>
-			) : null}
+		<div className="grid min-w-0 gap-2">
+			<label htmlFor={controlId} className="text-sm font-semibold text-foreground">{label}{props.required ? <span className="ml-1 text-muted-foreground" aria-hidden="true">*</span> : null}</label>
+			<input {...props} id={controlId} aria-invalid={error || undefined} aria-describedby={props["aria-describedby"] ?? (helperText ? `${controlId}-help` : undefined)} className={cx(style, error && "border-danger focus:border-danger focus:ring-danger/20", className)} />
+			{helperText ? <p id={`${controlId}-help`} className={cx("text-xs leading-5", error ? "text-danger" : "text-muted-foreground")}>{helperText}</p> : null}
 		</div>
 	);
 }
 
-export function NativeTextarea({
-	label,
-	helperText,
-	error,
-	className,
-	rows = 8,
-	style: inlineStyle,
-	...props
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
-	label: string;
-	helperText?: string;
-	error?: boolean;
+export function NativeTextarea({ label, id, helperText, error, className, rows = 8, style: inlineStyle, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+	label: string; helperText?: string; error?: boolean;
 }) {
-	const textareaMinHeight = `${Math.max(rows, 3) * 1.5 + 1.5}rem`;
-
+	const generatedId = useId();
+	const controlId = id ?? generatedId;
 	return (
-		<div className="w-full">
-			{/* Container chính cần relative */}
-			<div className="relative">
-				<textarea
-					{...props}
-					rows={rows}
-					placeholder=" "
-					style={{
-						minHeight: textareaMinHeight,
-						...inlineStyle,
-					}}
-					className={cx(
-						style,
-						"h-auto py-3",
-						error && "border-danger focus:border-danger focus:ring-danger/20",
-						className,
-					)}
-				/>
-
-				{/* Label phong cách MUI Outlined */}
-				<label
-					className={cx(
-						// Ban đầu nhãn nằm lọt lòng giữa ô textarea giống placeholder
-						"pointer-events-none absolute left-3 top-3 origin-[top_left] bg-surface px-1 text-sm text-subtle-foreground transition-all duration-200",
-
-						// Khi FOCUS: Bay lên nằm đè lên border-top, thu nhỏ scale, đổi màu theo MUI
-						"peer-focus:-translate-y-5 peer-focus:scale-75 peer-focus:text-primary",
-
-						// Khi ĐÃ CÓ CHỮ (không hiện placeholder): Giữ nguyên vị trí trên border-top không bị tụt xuống
-						"peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-5",
-
-						// Xử lý màu sắc khi có lỗi (error)
-						error && "text-danger peer-focus:text-danger",
-					)}
-				>
-					{label}
-				</label>
-			</div>
-
-			{helperText ? (
-				<span
-					className={cx(
-						"mt-1 text-xs block leading-5",
-						error ? "text-danger" : "text-muted-foreground",
-					)}
-				>
-					{helperText}
-				</span>
-			) : null}
+		<div className="grid min-w-0 gap-2">
+			<label htmlFor={controlId} className="text-sm font-semibold text-foreground">{label}{props.required ? <span className="ml-1 text-muted-foreground" aria-hidden="true">*</span> : null}</label>
+			<textarea {...props} id={controlId} rows={rows} aria-invalid={error || undefined} aria-describedby={props["aria-describedby"] ?? (helperText ? `${controlId}-help` : undefined)} style={{ minHeight: `${Math.max(rows, 3) * 1.5 + 1.5}rem`, ...inlineStyle }} className={cx(style, "h-auto resize-y py-3 leading-7", error && "border-danger focus:border-danger focus:ring-danger/20", className)} />
+			{helperText ? <p id={`${controlId}-help`} className={cx("text-xs leading-5", error ? "text-danger" : "text-muted-foreground")}>{helperText}</p> : null}
 		</div>
 	);
 }
 
-export function NativeSelect({
-	label,
-	children,
-	className,
-	containerClassName,
-	value,
-	defaultValue, // Đón nhận thêm prop này
-	labelBgClass = "bg-surface",
-	...props
-}: React.SelectHTMLAttributes<HTMLSelectElement> & {
-	label: string;
-	labelBgClass?: string;
-	containerClassName?: string;
-	children: ReactNode;
+export function NativeSelect({ label, id, children, className, containerClassName, hideLabel = false, ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & {
+	label: string; containerClassName?: string; hideLabel?: boolean; children: ReactNode;
 }) {
-	const hasValue =
-		(value !== undefined && value !== null && value !== "") ||
-		(defaultValue !== undefined &&
-			defaultValue !== null &&
-			defaultValue !== "");
-
+	const generatedId = useId();
+	const controlId = id ?? generatedId;
 	return (
-		<div className={cx("w-full", containerClassName)}>
-			<div className="relative">
-				<select
-					{...props}
-					value={value}
-					defaultValue={defaultValue} // Truyền vào thẻ select native
-					className={cx(
-						style,
-
-						className,
-					)}
-				>
-					{children}
-				</select>
-
-				{/* Icon mũi tên xuống */}
-				<div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-subtle-foreground">
-					<svg
-						className="h-4 w-4"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-						strokeWidth="2"
-					>
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							d="M19 9l-7 7-7-7"
-						/>
-					</svg>
-				</div>
-
-				{/* Label phong cách MUI Outlined */}
-				<label
-					className={cx(
-						// Ban đầu nhãn nằm lọt lòng giữa ô textarea giống placeholder
-						"pointer-events-none absolute left-3 top-3 origin-[top_left] px-1 text-sm text-subtle-foreground transition-all duration-200 " +
-							labelBgClass,
-						// Khi FOCUS: Bay lên nằm đè lên border-top, thu nhỏ scale, đổi màu theo MUI
-						"peer-focus:-translate-y-5 peer-focus:scale-75 peer-focus:text-primary",
-						// Khi ĐÃ CÓ CHỮ (không hiện placeholder): Giữ nguyên vị trí trên border-top không bị tụt xuống
-						"peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-5",
-						// Nếu có value hoặc defaultValue, nhãn sẽ cố định ở viền trên
-						hasValue && "scale-75 -translate-y-5",
-					)}
-				>
-					{label}
-				</label>
+		<div className={cx("grid min-w-0 gap-2", containerClassName)}>
+			<label htmlFor={controlId} className={hideLabel ? "sr-only" : "text-sm font-semibold text-foreground"}>{label}</label>
+			<div className="relative min-w-0">
+				<select {...props} id={controlId} className={cx(style, "pr-10", className)}>{children}</select>
+				<svg aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" /></svg>
 			</div>
 		</div>
 	);
@@ -258,7 +103,7 @@ export function NativeTabs<T extends string>({
 	return (
 		<div
 			role="tablist"
-			className={cx("flex border-border", className)}
+			className={cx("glass-chip inline-flex gap-1 rounded-full p-1", className)}
 		>
 			{options.map((option) => {
 				const selected = value === option.value;
@@ -268,11 +113,21 @@ export function NativeTabs<T extends string>({
 						type="button"
 						role="tab"
 						aria-selected={selected}
+						tabIndex={selected ? 0 : -1}
+						onKeyDown={(event) => {
+							const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
+							if (!keys.includes(event.key)) return;
+							event.preventDefault();
+							const index = options.findIndex((item) => item.value === value);
+							const next = event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + options.length) % options.length;
+							onChange(options[next].value);
+							(event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next])?.focus();
+						}}
 						className={cx(
-							"min-h-11 px-4 text-sm font-bold transition",
+							"min-h-10 rounded-full px-4 text-sm font-semibold transition",
 							selected
-								? "border-b-2 border-primary text-primary"
-								: "text-muted-foreground hover:text-primary",
+								? "bg-surface-elevated text-foreground shadow-[0_1px_3px_rgb(0_0_0/0.12)] dark:bg-primary-container-hover"
+								: "text-muted-foreground hover:text-foreground",
 						)}
 						onClick={() => onChange(option.value)}
 					>
@@ -292,6 +147,7 @@ export function NativeDialog({
 	actions,
 	showHandle = true,
 	showTitle = true,
+	closeLabel = "Close dialog",
 	contentClassName,
 	maxWidth = "sm",
 }: {
@@ -302,91 +158,36 @@ export function NativeDialog({
 	actions?: ReactNode;
 	showHandle?: boolean;
 	showTitle?: boolean;
+	closeLabel?: string;
 	contentClassName?: string;
 	maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
 }) {
-	const canUsePortal = typeof document !== "undefined";
-	const [shouldRender, setShouldRender] = useState(open);
-	const closing = shouldRender && !open;
-
-	useEffect(() => {
-		if (open) {
-			setShouldRender(true);
-			return;
-		}
-
-		if (!shouldRender) return;
-
-		const timeoutId = window.setTimeout(() => {
-			setShouldRender(false);
-		}, 300);
-
-		return () => window.clearTimeout(timeoutId);
-	}, [open, shouldRender]);
-
-	useEffect(() => {
-		if (!open) return;
-
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key === "Escape") onClose();
-		};
-
-		document.addEventListener("keydown", handleKeyDown);
-		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [onClose, open]);
-
-	if (!shouldRender) return null;
-
-	const dialog = (
-		<div
-			className={cx(
-				"native-dialog-backdrop fixed inset-0 z-50 flex items-end justify-center bg-neutral-950/35 p-0 backdrop-blur-sm dark:bg-neutral-950/60 sm:grid sm:place-items-center sm:p-4",
-				closing ? "native-dialog-backdrop-out" : "native-dialog-backdrop-in",
-			)}
-		>
-			<button
-				type="button"
-				aria-label="Close dialog"
-				className="absolute inset-0 cursor-default"
-				onClick={onClose}
-			/>
-			<div
-				role="dialog"
-				aria-modal="true"
-				className={cx(
-					"mobile-sheet-motion relative flex max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full origin-bottom flex-col overflow-hidden rounded-2xl border border-border bg-surface-elevated text-foreground shadow-2xl will-change-transform sm:max-h-[calc(100svh-2rem)] sm:origin-center",
-					closing ? "native-sheet-out" : "native-sheet-in",
-					maxWidth === "xs" && "sm:w-[min(92vw,28rem)] sm:max-w-none",
-					maxWidth === "sm" && "sm:w-[min(92vw,36rem)] sm:max-w-none",
-					maxWidth === "md" && "sm:w-[min(92vw,48rem)] sm:max-w-none",
-					maxWidth === "lg" && "sm:w-[min(92vw,56rem)] sm:max-w-none",
-					maxWidth === "xl" && "sm:w-[min(92vw,64rem)] sm:max-w-none",
-				)}
-			>
-				{showHandle ? (
-					<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-primary/80 sm:hidden" />
-				) : null}
-				{showTitle ? (
-					<div className="px-5 pt-4 sm:px-6 sm:pt-6">
-						<div className="font-serif text-2xl leading-tight text-neutral-900 dark:text-white sm:text-3xl">
-							{title}
-						</div>
-					</div>
-				) : null}
-				<div
+	const hydrated = useHydrated();
+	return (
+		<DialogPrimitive.Root open={hydrated && open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
+			<DialogPrimitive.Portal>
+				<DialogPrimitive.Backdrop className="glass-scrim app-dialog-overlay fixed inset-0 z-50" />
+				<DialogPrimitive.Popup
 					className={cx(
-						"min-h-0 overflow-y-auto p-5 overscroll-contain sm:p-6",
-						contentClassName,
+						"glass-dialog app-dialog fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full flex-col overflow-hidden rounded-t-3xl border text-foreground outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-h-[calc(100svh-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl",
+						maxWidth === "xs" && "sm:w-[min(92vw,28rem)]",
+						maxWidth === "sm" && "sm:w-[min(92vw,36rem)]",
+						maxWidth === "md" && "sm:w-[min(92vw,48rem)]",
+						maxWidth === "lg" && "sm:w-[min(92vw,56rem)]",
+						maxWidth === "xl" && "sm:w-[min(92vw,64rem)]",
 					)}
 				>
-					{children}
-				</div>
-				{actions ? (
-					<div className="shrink-0 flex justify-end gap-3 p-6">{actions}</div>
-				) : null}
-			</div>
-		</div>
+					{showHandle ? <div aria-hidden="true" className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-foreground/15 sm:hidden" /> : null}
+					<div className={showTitle ? "flex shrink-0 items-start justify-between gap-3 border-b border-foreground/8 px-5 py-4 sm:px-6" : "absolute right-3 top-3 z-10"}>
+						<DialogPrimitive.Title className={showTitle ? "min-w-0 pt-1 font-serif text-2xl leading-tight [overflow-wrap:anywhere] sm:text-3xl" : "sr-only"}>{title}</DialogPrimitive.Title>
+						<DialogPrimitive.Close aria-label={closeLabel} className="glass-chip ml-auto grid size-11 shrink-0 place-items-center rounded-full text-foreground transition hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-ring"><X size={20} aria-hidden="true" /></DialogPrimitive.Close>
+					</div>
+					<div className={cx("min-h-0 overflow-y-auto overscroll-contain px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-5 sm:p-6", contentClassName)}>
+						{children}
+					</div>
+					{actions ? <div className="flex shrink-0 justify-end gap-3 border-t border-foreground/8 p-5 sm:p-6">{actions}</div> : null}
+				</DialogPrimitive.Popup>
+			</DialogPrimitive.Portal>
+		</DialogPrimitive.Root>
 	);
-
-	return canUsePortal ? createPortal(dialog, document.body) : dialog;
 }

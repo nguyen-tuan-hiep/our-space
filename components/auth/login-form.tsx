@@ -28,7 +28,7 @@ export function LoginForm({ message }: LoginFormProps) {
   const isForgot = mode === "forgot";
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+    <div className="app-card p-6 sm:p-8">
       {message ? (
         <p className="mb-4 rounded-lg border border-danger/25 bg-danger-bg px-4 py-3 text-sm font-semibold text-danger">
           {message}
@@ -48,7 +48,7 @@ export function LoginForm({ message }: LoginFormProps) {
       <p className="eyebrow mt-4 sm:mt-6">
         {isForgot ? "Reset password" : mode === "signin" ? "Sign in" : "Sign up"}
       </p>
-      <h2 className="mt-3 font-serif text-4xl leading-none">
+      <h2 className="mt-3 font-serif text-3xl leading-tight sm:text-4xl">
         {isForgot
           ? "Get a reset link"
           : mode === "signin"
@@ -56,7 +56,7 @@ export function LoginForm({ message }: LoginFormProps) {
             : "Create your space"}
       </h2>
       <form
-        className="mt-8 grid gap-3"
+        aria-busy={pending} className="mt-7 grid gap-4"
         action={(formData) => {
           startTransition(async () => {
             const result = isForgot

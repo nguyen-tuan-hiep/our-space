@@ -42,6 +42,8 @@ export function ActionMenu({
 	const [desktopOpen, setDesktopOpen] = useState(false);
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [shouldRenderMobile, setShouldRenderMobile] = useState(false);
+	// Mount the sheet as soon as it opens; unmount only after its exit transition.
+	if (mobileOpen && !shouldRenderMobile) setShouldRenderMobile(true);
 	const mobileClosing = shouldRenderMobile && !mobileOpen;
 
 	useEffect(() => {
@@ -58,7 +60,6 @@ export function ActionMenu({
 
 	useEffect(() => {
 		if (mobileOpen) {
-			setShouldRenderMobile(true);
 			window.dispatchEvent(
 				new CustomEvent("action-menu-open", { detail: menuId }),
 			);
@@ -104,7 +105,7 @@ export function ActionMenu({
 				type="button"
 				aria-label="Close actions"
 				className={[
-					"fixed inset-0 z-[70] bg-neutral-950/20 backdrop-blur-[2px] dark:bg-neutral-950/45 sm:hidden",
+					"glass-scrim fixed inset-0 z-[70] bg-black/20 backdrop-blur-[2px] dark:bg-black/45 sm:hidden",
 					mobileClosing
 						? "native-dialog-backdrop-out"
 						: "native-dialog-backdrop-in",
@@ -116,11 +117,11 @@ export function ActionMenu({
 				aria-modal="true"
 				aria-label={sheetTitle}
 				className={[
-					"mobile-sheet-motion fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] overflow-hidden rounded-3xl border border-border bg-surface-elevated shadow-[0_24px_70px_rgba(30,25,20,0.28)] sm:hidden",
+					"glass-dialog mobile-sheet-motion fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[80] overflow-hidden rounded-3xl border sm:hidden",
 					mobileClosing ? "native-sheet-out" : "native-sheet-in",
 				].join(" ")}
 			>
-				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-primary-subtle" />
+				<div className="mx-auto mt-2.5 h-1.5 w-11 rounded-full bg-foreground/15" />
 				<div className="border-b border-border px-5 py-4">
 					<p className="font-serif text-xl leading-tight text-foreground">
 						{sheetTitle}
@@ -188,7 +189,7 @@ export function ActionMenu({
 					align="end"
 					sideOffset={8}
 					className={cn(
-						"w-72 rounded-3xl border border-border bg-surface-elevated p-2 shadow-[0_24px_70px_rgba(30,25,20,0.22)] backdrop-blur-xl",
+						"w-72 rounded-3xl p-2",
 						contentClassName,
 					)}
 				>
@@ -204,7 +205,7 @@ export function ActionMenu({
 						onClick={onEdit}
 						className="group gap-3 rounded-2xl px-3 py-3 hover:bg-surface-hover"
 					>
-						<span className="grid size-9 place-items-center rounded-xl bg-primary-subtle text-primary transition group-hover:bg-primary-hover group-hover:text-primary-foreground">
+						<span className="grid size-9 place-items-center rounded-xl bg-primary-subtle text-primary-ink transition group-hover:bg-primary-hover group-hover:text-primary-foreground">
 							<Edit2 size={16} />
 						</span>
 						<span>

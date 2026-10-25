@@ -1,149 +1,11 @@
 import type { ExpenseCategory, MemoryType } from "@/lib/types";
 
 
-export const accentColorPresets = {
-  red: {
-    label: "Red",
-    value: "#E2726B",
-  },
-  scarlet: {
-    label: "Scarlet",
-    value: "#E07655",
-  },
-  coral: {
-    label: "Coral",
-    value: "#DB7C3F",
-  },
-  orange: {
-    label: "Orange",
-    value: "#D38328",
-  },
-  amber: {
-    label: "Amber",
-    value: "#C88B0D",
-  },
-  yellow: {
-    label: "Yellow",
-    value: "#BB9300",
-  },
-  lime: {
-    label: "Lime",
-    value: "#AA9A0D",
-  },
-  chartreuse: {
-    label: "Chartreuse",
-    value: "#96A228",
-  },
-  green: {
-    label: "Green",
-    value: "#7FA840",
-  },
-  forest: {
-    label: "Forest",
-    value: "#65AD58",
-  },
-  emerald: {
-    label: "Emerald",
-    value: "#44B16F",
-  },
-  mint: {
-    label: "Mint",
-    value: "#02B385",
-  },
-  teal: {
-    label: "Teal",
-    value: "#00B39A",
-  },
-  cyan: {
-    label: "Cyan",
-    value: "#00B2AF",
-  },
-  sky: {
-    label: "Sky",
-    value: "#00B0C1",
-  },
-  azure: {
-    label: "Azure",
-    value: "#00ACD1",
-  },
-  blue: {
-    label: "Blue",
-    value: "#00A6DE",
-  },
-  cobalt: {
-    label: "Cobalt",
-    value: "#3BA0E7",
-  },
-  indigo: {
-    label: "Indigo",
-    value: "#5C99ED",
-  },
-  violet: {
-    label: "Violet",
-    value: "#7692EE",
-  },
-  purple: {
-    label: "Purple",
-    value: "#8C8CEC",
-  },
-  fuchsia: {
-    label: "Fuchsia",
-    value: "#9F85E5",
-  },
-  magenta: {
-    label: "Magenta",
-    value: "#B07FDA",
-  },
-  pink: {
-    label: "Pink",
-    value: "#BF79CD",
-  },
-  rose: {
-    label: "Rose",
-    value: "#CB75BC",
-  },
-  ruby: {
-    label: "Ruby",
-    value: "#D572AA",
-  },
-  crimson: {
-    label: "Crimson",
-    value: "#DC7096",
-  },
-  berry: {
-    label: "Berry",
-    value: "#E07081",
-  },
-  stone: {
-    label: "Stone",
-    value: "#7A756D",
-  },
-  gray: {
-    label: "Gray",
-    value: "#737982",
-  },
-  slate: {
-    label: "Slate",
-    value: "#677284",
-  },
-  graphite: {
-    label: "Graphite",
-    value: "#55565B",
-  },
-} as const;
-
-export type AccentColorPresetKey = keyof typeof accentColorPresets;
-
-export const defaultAccentColorPresetKey = "blue" satisfies AccentColorPresetKey;
-
-export function isAccentColorPresetKey(
-  value: string | null | undefined,
-): value is AccentColorPresetKey {
-  return Boolean(
-    value &&
-      Object.prototype.hasOwnProperty.call(accentColorPresets, value),
-  );
-}
+/**
+ * Monochrome palette: the "accent" is ink — near-black in light mode and
+ * near-white in dark mode — so glass surfaces carry the hierarchy, not hue.
+ */
+export const brandAccentColor = "#1D1D1F";
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);
@@ -189,10 +51,6 @@ function hexToRgbChannels(hex: string): string {
  *
  * amount = 0: giữ nguyên sourceHex.
  * amount = 1: chuyển hoàn toàn thành targetHex.
- *
- * Ví dụ:
- * mixColors("#2563EB", "#000000", 0.2)
- * nghĩa là pha thêm 20% màu đen.
  */
 function mixColors(
   sourceHex: string,
@@ -224,14 +82,6 @@ function mixColors(
   )}`.toUpperCase();
 }
 
-function mixWithBlack(hex: string, amount: number): string {
-  return mixColors(hex, "#000000", amount);
-}
-
-function mixWithWhite(hex: string, amount: number): string {
-  return mixColors(hex, "#FFFFFF", amount);
-}
-
 function relativeLuminance(hex: string): number {
   const { r, g, b } = hexToRgb(hex);
   const toLinear = (channel: number): number => {
@@ -257,229 +107,106 @@ function contrastRatio(sourceHex: string, targetHex: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-function ensureWhiteTextContrast(hex: string): string {
-  if (contrastRatio(hex, "#FFFFFF") >= 4.5) return hex;
-
-  for (let amount = 0.14; amount <= 0.36; amount += 0.02) {
-    const candidate = mixWithBlack(hex, amount);
-    if (contrastRatio(candidate, "#FFFFFF") >= 4.5) {
-      return candidate;
-    }
+/** Keep text and control outlines readable across every surface they appear on. */
+function ensureForegroundContrast(color: string, backgrounds: string[], target: string, minimum = 4.5): string {
+  if (backgrounds.every((background) => contrastRatio(color, background) >= minimum)) return color;
+  for (let step = 1; step <= 100; step += 1) {
+    const candidate = mixColors(color, target, step / 100);
+    if (backgrounds.every((background) => contrastRatio(candidate, background) >= minimum)) return candidate;
   }
+  return target;
+}
 
-  return mixWithBlack(hex, 0.38);
+/** Neutral canvases and frosted controls in the single light/dark design. */
+export function getSurfaceContrastSamples(mode: "Light" | "Dark") {
+  const dark = mode === "Dark";
+  // Canvas includes the brightest/darkest point of the ambient gradient.
+  const canvas = dark ? ["#000000", "#0B0B0C", "#1A1A1C"] : ["#EDEDF0", "#F4F4F6", "#FFFFFF"];
+  // Cards are translucent (--glass-surface) over the canvas, not opaque —
+  // sample the real composite so contrast checks see the worst-case backdrop.
+  const cards = canvas.map((background) =>
+    mixColors(background, dark ? "#2A2A2E" : "#FFFFFF", dark ? 0.5 : 0.55),
+  );
+  const fields = cards.map((background) => mixColors(background, dark ? "#141416" : "#FFFFFF", dark ? 0.5 : 0.7));
+  return { canvas, cards, fields };
 }
 
 export function createAccentPalette(baseColor: string) {
-  /*
-   * Accent chính
-   */
-  const primaryLight = ensureWhiteTextContrast(mixWithBlack(baseColor, 0.1));
-  const primaryHoverLight = mixWithBlack(baseColor, 0.18);
-  const primaryPressedLight = mixWithBlack(baseColor, 0.26);
+  // Ink fills: dark ink on light canvas, light ink on dark canvas.
+  const primaryLight = baseColor;
+  const primaryHoverLight = mixColors(primaryLight, "#FFFFFF", 0.1);
+  const primaryPressedLight = mixColors(primaryLight, "#FFFFFF", 0.18);
 
-  const primaryDark = ensureWhiteTextContrast(baseColor);
-  // Darkening preserves white-text contrast and still gives hover/pressed
-  // states a visible difference for bright user-selected accent colors.
-  const primaryHoverDark = mixWithBlack(primaryDark, 0.08);
-  const primaryPressedDark = mixWithBlack(primaryDark, 0.16);
+  const primaryDark = "#F5F5F7";
+  const primaryHoverDark = "#E5E5EA";
+  const primaryPressedDark = "#D1D1D6";
 
-  /*
-   * Surface thực tế của sidebar/card.
-   * Selected nên được pha từ surface này thay vì pha trực tiếp
-   * màu base với trắng hoặc đen.
-   */
-  const surfaceLight = mixColors(
-    "#FFFFFF",
-    baseColor,
-    0.022,
-  );
+  const surfaceLight = "#FAFAFB";
+  const surfaceDark = "#161618";
 
-  const surfaceDark = mixColors(
-    "#1A1D20",
-    baseColor,
-    0.065,
-  );
+  const surfaceHoverLight = "#EEEEF0";
+  const surfaceHoverDark = "#2A2A2D";
 
-  /*
-   * Hover trung tính.
-   */
-  const surfaceHoverLight = mixColors(
-    surfaceLight,
-    baseColor,
-    0.065,
-  );
+  // Selected/tonal states are neutral greys rather than tinted containers.
+  const primaryContainerLight = "#E8E8EB";
+  const primaryContainerHoverLight = "#DFDFE3";
+  const primaryContainerDark = "#2C2C2F";
+  const primaryContainerHoverDark = "#38383B";
 
-  const surfaceHoverDark = mixColors(
-    surfaceDark,
-    baseColor,
-    0.11,
-  );
-
-  /*
-   * Selected rõ hơn sidebar:
-   *
-   * Light mode: pha 16% accent vào surface.
-   * Dark mode: pha 24% accent vào surface.
-   */
-  const primaryContainerLight = mixColors(
-    surfaceLight,
-    baseColor,
-    0.16,
-  );
-
-  const primaryContainerHoverLight = mixColors(
-    surfaceLight,
-    baseColor,
-    0.21,
-  );
-
-  const primaryContainerDark = mixColors(
-    surfaceDark,
-    baseColor,
-    0.24,
-  );
-
-  const primaryContainerHoverDark = mixColors(
-    surfaceDark,
-    baseColor,
-    0.3,
-  );
+  const glassLight = getSurfaceContrastSamples("Light");
+  const lightSurfaces = [surfaceLight, "#FFFFFF", surfaceHoverLight, primaryContainerLight, primaryContainerHoverLight, ...glassLight.canvas, ...glassLight.cards, ...glassLight.fields];
+  const glassDark = getSurfaceContrastSamples("Dark");
+  const darkSurfaces = [surfaceDark, "#1C1C1E", surfaceHoverDark, primaryContainerDark, primaryContainerHoverDark, ...glassDark.canvas, ...glassDark.cards, ...glassDark.fields];
 
   return {
-    /*
-     * LIGHT MODE — background và surface
-     */
-
-    backgroundLight: mixColors(
-      "#F7F8FA",
-      baseColor,
-      0.045,
-    ),
-
+    backgroundLight: "#F2F2F4",
     surfaceLight,
-
     surfaceHoverLight,
-
     surfaceElevatedLight: "#FFFFFF",
-
     surfaceSelectedLight: primaryContainerLight,
 
-    /*
-     * LIGHT MODE — accent
-     */
-
     primaryLight,
-
+    primaryInkLight: ensureForegroundContrast(baseColor, lightSurfaces, "#000000"),
     onPrimaryLight: "#FFFFFF",
-
     primaryHoverLight,
     primaryPressedLight,
-
     primaryContainerLight,
-
-    onPrimaryContainerLight: mixWithBlack(
-      baseColor,
-      0.62,
-    ),
-
+    onPrimaryContainerLight: "#1D1D1F",
     primaryContainerHoverLight,
+    primaryBorderLight: "#C7C7CC",
+    primarySubtleLight: "#F0F0F2",
 
-    primaryBorderLight: mixColors(
-      surfaceLight,
-      baseColor,
-      0.24,
-    ),
-
-    primarySubtleLight: mixColors(
-      surfaceLight,
-      baseColor,
-      0.06,
-    ),
-
-    /*
-     * DARK MODE — background và surface
-     */
-
-    backgroundDark: mixColors(
-      "#101214",
-      baseColor,
-      0.055,
-    ),
-
+    backgroundDark: "#000000",
     surfaceDark,
-
     surfaceHoverDark,
-
-    surfaceElevatedDark: mixColors(
-      "#202429",
-      baseColor,
-      0.1,
-    ),
-
+    surfaceElevatedDark: "#1C1C1E",
     surfaceSelectedDark: primaryContainerDark,
 
-    /*
-     * DARK MODE — accent
-     */
-
     primaryDark,
-
-    onPrimaryDark: "#FFFFFF",
-
+    primaryInkDark: ensureForegroundContrast(primaryDark, darkSurfaces, "#FFFFFF"),
+    onPrimaryDark: "#1D1D1F",
     primaryHoverDark,
     primaryPressedDark,
-
     primaryContainerDark,
-
-    onPrimaryContainerDark: mixWithWhite(
-      baseColor,
-      0.82,
-    ),
-
+    onPrimaryContainerDark: "#F5F5F7",
     primaryContainerHoverDark,
+    primaryBorderDark: "#4A4A4E",
+    primarySubtleDark: "#1F1F22",
 
-    primaryBorderDark: mixColors(
-      surfaceDark,
-      baseColor,
-      0.34,
-    ),
+    textPrimaryLight: "#1D1D1F",
+    textSecondaryLight: ensureForegroundContrast("#515154", lightSurfaces, "#000000"),
+    textMutedLight: ensureForegroundContrast("#626266", lightSurfaces, "#000000"),
+    borderLight: "#D2D2D7",
 
-    primarySubtleDark: mixColors(
-      surfaceDark,
-      baseColor,
-      0.1,
-    ),
-
-    /*
-     * TEXT VÀ BORDER TRUNG TÍNH
-     */
-
-    textPrimaryLight: "#17191C",
-    textSecondaryLight: "#5F6670",
-    textMutedLight: "#8A919B",
-
-    borderLight: mixColors(
-      "#E3E6EA",
-      baseColor,
-      0.025,
-    ),
-
-    textPrimaryDark: "#F4F6F8",
-    textSecondaryDark: "#D2D7DE",
-    textMutedDark: "#A6ADB8",
-
-    borderDark: mixColors(
-      "#343A41",
-      baseColor,
-      0.04,
-    ),
-
+    textPrimaryDark: "#F5F5F7",
+    textSecondaryDark: ensureForegroundContrast("#C7C7CC", darkSurfaces, "#FFFFFF"),
+    textMutedDark: ensureForegroundContrast("#AEAEB2", darkSurfaces, "#FFFFFF"),
+    borderDark: "#3A3A3D",
   };
 }
 
 const semanticColors = {
-  dangerLight: "#e64747",
+  dangerLight: "#BE3038",
   // dangerLight: "#DC2626",
   onDangerLight: "#FFFFFF",
   dangerBackgroundLight: "#FEE2E2",
@@ -489,16 +216,11 @@ const semanticColors = {
   dangerBackgroundDark: "#450A0A",
 } as const;
 
-/*
- * Màu mặc định.
- * Khi user chọn màu khác, truyền màu đó vào
- * createAccentPalette(userSelectedColor).
- */
-const baseColor = accentColorPresets[defaultAccentColorPresetKey].value;
+const baseColor = brandAccentColor;
 
 export function createThemeColorTokens(baseColor: string) {
   const palette = createAccentPalette(baseColor);
-  const mutedLight = mixColors(palette.surfaceLight, baseColor, 0.045);
+  const mutedLight = mixColors(palette.surfaceLight, "#000000", 0.035);
   const mutedDark = mixColors(palette.surfaceDark, "#FFFFFF", 0.045);
 
   return {
@@ -508,7 +230,7 @@ export function createThemeColorTokens(baseColor: string) {
     /*
      * Aliases used by the existing Tailwind class names.
      * primary/secondary here mean app background/surface, while accent*
-     * carries the user-selected color.
+     * carries the fixed brand color.
      */
     primaryLight: palette.backgroundLight,
     secondaryLight: palette.surfaceLight,
@@ -544,13 +266,13 @@ export function createThemeColorTokens(baseColor: string) {
     destructive: semanticColors.dangerLight,
     destructiveForeground: semanticColors.onDangerLight,
     border: palette.borderLight,
-    input: palette.primaryBorderLight,
+    input: ensureForegroundContrast("#86868B", [palette.surfaceLight, palette.surfaceElevatedLight, ...getSurfaceContrastSamples( "Light").fields], "#000000", 3),
     ring: palette.primaryLight,
     chart1: palette.primaryLight,
-    chart2: mixColors("#14B8A6", baseColor, 0.08),
-    chart3: mixColors("#F59E0B", baseColor, 0.05),
-    chart4: mixColors("#EF4444", baseColor, 0.04),
-    chart5: mixColors("#8B5CF6", baseColor, 0.06),
+    chart2: "#8E8E93",
+    chart3: "#C2A878",
+    chart4: "#D08A8A",
+    chart5: "#A79EC2",
     sidebar: palette.surfaceLight,
     sidebarForeground: palette.textPrimaryLight,
     sidebarPrimary: palette.primaryLight,
@@ -577,13 +299,13 @@ export function createThemeColorTokens(baseColor: string) {
     destructiveDark: semanticColors.dangerDark,
     destructiveForegroundDark: semanticColors.onDangerDark,
     borderSemanticDark: palette.borderDark,
-    inputDark: palette.primaryBorderDark,
+    inputDark: ensureForegroundContrast("#8E8E93", [palette.surfaceDark, palette.surfaceElevatedDark, ...getSurfaceContrastSamples( "Dark").fields], "#FFFFFF", 3),
     ringDark: palette.primaryDark,
     chart1Dark: palette.primaryDark,
-    chart2Dark: mixColors("#2DD4BF", baseColor, 0.1),
-    chart3Dark: mixColors("#FBBF24", baseColor, 0.06),
-    chart4Dark: mixColors("#F87171", baseColor, 0.05),
-    chart5Dark: mixColors("#A78BFA", baseColor, 0.07),
+    chart2Dark: "#8E8E93",
+    chart3Dark: "#D4BC8E",
+    chart4Dark: "#E0A0A0",
+    chart5Dark: "#BDB5D6",
     sidebarDark: palette.surfaceDark,
     sidebarForegroundDark: palette.textPrimaryDark,
     sidebarPrimaryDark: palette.primaryDark,
@@ -618,6 +340,8 @@ export function createThemeCssVariables(baseColor: string) {
     "--color-on-accent-container-dark": tokens.onAccentContainerDark,
 
     /* Semantic palette roles used by components. */
+    "--theme-primary-ink-light": tokens.primaryInkLight,
+    "--theme-primary-ink-dark": tokens.primaryInkDark,
     "--theme-surface-light": tokens.surfaceLight,
     "--theme-surface-dark": tokens.surfaceDark,
     "--theme-surface-hover-light": tokens.surfaceHoverLight,
@@ -789,5 +513,5 @@ export const themeColors = {
     "📍 Others": "#E5E7EB",
   } satisfies Record<MemoryType, string>,
 
-  ledgerSeries: ["#5DC1FF", "#FF7474"],
+  ledgerSeries: ["#8E8E93", "#D08A8A"],
 } as const;

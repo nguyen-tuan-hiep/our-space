@@ -61,11 +61,57 @@ type MoviePayload = {
   title: string;
   rating_by_user: Record<string, number | null>;
   poster_url: string | null;
+  poster_public_id: string | null;
   category: MovieCategory[] | null;
   status: MovieStatus;
   comment_by_user: Record<string, string>;
   reaction_by_user: Record<string, string | null>;
 };
+
+function hasCloudinaryCredentials() {
+  return Boolean(
+    process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET &&
+      process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  );
+}
+
+async function destroyCloudinaryImage(publicId: string | null | undefined) {
+  if (!publicId || !hasCloudinaryCredentials()) return;
+
+  cloudinary.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
+  await cloudinary.uploader.destroy(publicId, {
+    resource_type: "image",
+    invalidate: true,
+  });
+}
+
+function isManagedCloudinaryPublicId(publicId: string) {
+  return (
+    /^our-space\/(hero|memories|movies)\/[A-Za-z0-9/_-]+$/.test(publicId) &&
+    !publicId.includes("..")
+  );
+}
+
+export async function deleteUnsavedCloudinaryImage(publicId: string) {
+  await requireUser();
+
+  if (!isManagedCloudinaryPublicId(publicId)) {
+    return fail("Invalid image id.");
+  }
+
+  try {
+    await destroyCloudinaryImage(publicId);
+    return ok("Image deleted.");
+  } catch (error) {
+    return fail(error instanceof Error ? error.message : "Could not delete image.");
+  }
+}
 
 const moodLevels: MoodLevel[] = [
   "great",
@@ -242,6 +288,7 @@ function getMoviePayload(
       title,
       rating_by_user: ratingByUser,
       poster_url: nullableStringValue(formData, "poster_url"),
+      poster_public_id: nullableStringValue(formData, "poster_public_id"),
       category: categories.length ? categories : null,
       status,
       comment_by_user: commentByUser,
@@ -483,23 +530,8 @@ export async function updateHeroImage(formData: FormData) {
 
   const currentHeroPublicId = currentSettings?.hero_image_public_id ?? null;
 
-  if (
-    currentHeroPublicId &&
-    currentHeroPublicId !== heroImagePublicId &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET &&
-    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-  ) {
-    cloudinary.config({
-      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
-
-    await cloudinary.uploader.destroy(currentHeroPublicId, {
-      resource_type: "image",
-      invalidate: true,
-    });
+  if (currentHeroPublicId && currentHeroPublicId !== heroImagePublicId) {
+    await destroyCloudinaryImage(currentHeroPublicId);
   }
 
   const { error } = await supabase.from("couple").upsert({
@@ -545,24 +577,52 @@ export async function updateAnniversary(formData: FormData) {
   return ok("Anniversary updated successfully!");
 }
 
+const NOTE_SELECT =
+  "*, author:profiles!notes_author_id_fkey(id, display_name, avatar_url, currency), recipient:profiles!notes_recipient_id_fkey(id, display_name, avatar_url, currency)";
+
+function getNoteUnlockPayload(formData: FormData) {
+  const unlockAt = nullableStringValue(formData, "unlock_at");
+  return {
+    unlock_at: unlockAt ? new Date(unlockAt).toISOString() : null,
+    unlock_time_zone: unlockAt ? nullableStringValue(formData, "unlock_time_zone") : null,
+  };
+}
+
+/**
+ * Write a note, retrying without `unlock_time_zone` when the column isn't there
+ * yet (PostgREST PGRST204), so saving keeps working before the migration runs.
+ */
+async function withoutMissingNoteTimeZone<T extends { unlock_time_zone: string | null }, R extends { error: { code?: string; message: string } | null }>(
+  values: T,
+  write: (values: Partial<T>) => PromiseLike<R>,
+) {
+  const result = await write(values);
+  if (result.error?.code !== "PGRST204" || !result.error.message.includes("unlock_time_zone")) {
+    return result;
+  }
+  const withoutTimeZone: Partial<T> = { ...values };
+  delete withoutTimeZone.unlock_time_zone;
+  return write(withoutTimeZone);
+}
+
 export async function createNote(formData: FormData) {
   const { supabase, user } = await requireUser();
   const recipientId = stringValue(formData, "recipient_id");
-  const unlockAt = nullableStringValue(formData, "unlock_at");
+  const payload = {
+    author_id: user.id,
+    recipient_id: recipientId,
+    title: stringValue(formData, "title"),
+    content: stringValue(formData, "content"),
+    ...getNoteUnlockPayload(formData),
+  };
 
-  const { data, error } = await supabase
-    .from("notes")
-    .insert({
-      author_id: user.id,
-      recipient_id: recipientId,
-      title: stringValue(formData, "title"),
-      content: stringValue(formData, "content"),
-      unlock_at: unlockAt ? new Date(unlockAt).toISOString() : null,
-    })
-    .select(
-      "*, author:profiles!notes_author_id_fkey(id, display_name, avatar_url, currency), recipient:profiles!notes_recipient_id_fkey(id, display_name, avatar_url, currency)",
-    )
-    .single<SharedNote>();
+  const { data, error } = await withoutMissingNoteTimeZone(payload, (values) =>
+    supabase
+      .from("notes")
+      .insert(values)
+      .select(NOTE_SELECT)
+      .single<SharedNote>(),
+  );
 
   if (error) return fail(error.message);
   revalidatePath("/");
@@ -572,20 +632,20 @@ export async function createNote(formData: FormData) {
 export async function updateNote(formData: FormData) {
   const { supabase } = await requireUser();
   const noteId = stringValue(formData, "id");
-  const unlockAt = nullableStringValue(formData, "unlock_at");
+  const payload = {
+    title: stringValue(formData, "title"),
+    content: stringValue(formData, "content"),
+    ...getNoteUnlockPayload(formData),
+  };
 
-  const { data, error } = await supabase
-    .from("notes")
-    .update({
-      title: stringValue(formData, "title"),
-      content: stringValue(formData, "content"),
-      unlock_at: unlockAt ? new Date(unlockAt).toISOString() : null,
-    })
-    .eq("id", noteId)
-    .select(
-      "*, author:profiles!notes_author_id_fkey(id, display_name, avatar_url, currency), recipient:profiles!notes_recipient_id_fkey(id, display_name, avatar_url, currency)",
-    )
-    .single<SharedNote>();
+  const { data, error } = await withoutMissingNoteTimeZone(payload, (values) =>
+    supabase
+      .from("notes")
+      .update(values)
+      .eq("id", noteId)
+      .select(NOTE_SELECT)
+      .single<SharedNote>(),
+  );
 
   if (error) return fail(error.message);
   revalidatePath("/");
@@ -599,6 +659,15 @@ export async function deleteNote(noteId: string) {
   if (error) return fail(error.message);
   revalidatePath("/");
   return ok("Note deleted!");
+}
+
+/** Recipient opened a note; the RPC ignores authors, locked notes and repeat calls. */
+export async function markNoteRead(noteId: string) {
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase.rpc("mark_note_read", { p_note_id: noteId });
+
+  if (error) return fail(error.message);
+  return { ...ok("Note opened."), readAt: (data as string | null) ?? null };
 }
 
 export async function createExpense(formData: FormData) {
@@ -755,10 +824,13 @@ export async function updateMemory(formData: FormData) {
   const coupleId = getCoupleId(profile, { id: profile.partner_id });
   const { data: existingMemory, error: existingMemoryError } = await supabase
     .from("memory_map_entries")
-    .select("description_by_user")
+    .select("description_by_user, photo_public_id")
     .eq("id", memoryId)
     .eq("couple_id", coupleId)
-    .maybeSingle<{ description_by_user: Record<string, string> | null }>();
+    .maybeSingle<{
+      description_by_user: Record<string, string> | null;
+      photo_public_id: string | null;
+    }>();
 
   if (existingMemoryError) return fail(existingMemoryError.message);
 
@@ -779,18 +851,37 @@ export async function updateMemory(formData: FormData) {
     .single<MemoryMapEntry>();
 
   if (error) return fail(error.message);
+
+  if (
+    existingMemory?.photo_public_id &&
+    existingMemory.photo_public_id !== memory.payload.photo_public_id
+  ) {
+    await destroyCloudinaryImage(existingMemory.photo_public_id);
+  }
+
   revalidatePath("/");
   return { ...ok("Memory updated."), memory: data };
 }
 
 export async function deleteMemory(memoryId: string) {
   const { supabase } = await requireUser();
+  const { data: memory, error: memoryError } = await supabase
+    .from("memory_map_entries")
+    .select("photo_public_id")
+    .eq("id", memoryId)
+    .maybeSingle<{ photo_public_id: string | null }>();
+
+  if (memoryError) return fail(memoryError.message);
+
   const { error } = await supabase
     .from("memory_map_entries")
     .delete()
     .eq("id", memoryId);
 
   if (error) return fail(error.message);
+
+  await destroyCloudinaryImage(memory?.photo_public_id);
+
   revalidatePath("/");
   return ok("Memory deleted.");
 }
@@ -851,13 +942,14 @@ export async function updateMovie(formData: FormData) {
   const coupleId = getCoupleId(profile, { id: profile.partner_id });
   const { data: existingMovie, error: existingMovieError } = await supabase
     .from("movies")
-    .select("comment_by_user, rating_by_user, reaction_by_user")
+    .select("comment_by_user, rating_by_user, reaction_by_user, poster_public_id")
     .eq("id", movieId)
     .eq("couple_id", coupleId)
     .maybeSingle<{
       comment_by_user: Record<string, string> | null;
       rating_by_user: Record<string, number | null> | null;
       reaction_by_user: Record<string, string | null> | null;
+      poster_public_id: string | null;
     }>();
 
   if (existingMovieError) return fail(existingMovieError.message);
@@ -887,6 +979,14 @@ export async function updateMovie(formData: FormData) {
     .single<Movie>();
 
   if (error) return fail(error.message);
+
+  if (
+    existingMovie?.poster_public_id &&
+    existingMovie.poster_public_id !== movie.payload.poster_public_id
+  ) {
+    await destroyCloudinaryImage(existingMovie.poster_public_id);
+  }
+
   revalidatePath("/");
   return { ...ok("Movie updated."), movie: data };
 }
@@ -914,9 +1014,20 @@ export async function updateMovieStatus(movieId: string, status: MovieStatus) {
 
 export async function deleteMovie(movieId: string) {
   const { supabase } = await requireUser();
+  const { data: movie, error: movieError } = await supabase
+    .from("movies")
+    .select("poster_public_id")
+    .eq("id", movieId)
+    .maybeSingle<{ poster_public_id: string | null }>();
+
+  if (movieError) return fail(movieError.message);
+
   const { error } = await supabase.from("movies").delete().eq("id", movieId);
 
   if (error) return fail(error.message);
+
+  await destroyCloudinaryImage(movie?.poster_public_id);
+
   revalidatePath("/");
   return ok("Movie deleted.");
 }

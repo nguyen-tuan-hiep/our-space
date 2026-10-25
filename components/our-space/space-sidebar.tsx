@@ -86,12 +86,9 @@ export function SpaceSidebar({
 	return (
 		<aside
 			className="
-        fixed inset-y-0 left-0 z-40 hidden w-72 overflow-y-auto
-        border-r border-sidebar-border
-        bg-sidebar/95 p-4
+        glass-navigation fixed inset-y-4 left-4 z-40 hidden w-64 overflow-y-auto rounded-[1.75rem]
+        p-3.5
         text-sidebar-foreground
-        shadow-[8px_0_40px_rgba(23,23,23,0.08)]
-        backdrop-blur-xl
 
         lg:flex lg:flex-col
       "
@@ -99,8 +96,8 @@ export function SpaceSidebar({
 			{/* Brand */}
 			<div
 				className="
-          flex items-center gap-3 rounded-3xl
-          bg-surface-selected p-3
+          flex items-center gap-3 rounded-2xl
+          bg-transparent px-2 py-3
           text-foreground
         "
 			>
@@ -129,29 +126,29 @@ export function SpaceSidebar({
 				</div>
 			</div>
 
-			{/* Workspace heading */}
+			{/* Our everyday heading */}
 			<div className="mt-5 flex items-center justify-between px-2">
 				<p
 					className="
-            text-[10px] font-bold uppercase tracking-[0.22em]
+            text-xs font-semibold
             text-subtle-foreground
           "
 				>
-					Workspace
+					Our everyday
 				</p>
 
 				<div
 					aria-hidden="true"
 					className="
             ml-3 h-px flex-1
-            bg-primary-border
+            bg-foreground/10
           "
 				/>
 			</div>
 
 			{/* Navigation */}
 			<nav
-				className="mt-2 grid gap-1"
+				className="mt-2 grid gap-1.5"
 				aria-label="Space sections"
 			>
 				{navItems.map((item) => {
@@ -179,19 +176,15 @@ export function SpaceSidebar({
                 `,
 								selected
 									? `
-                      border-primary
-                      bg-surface-selected
-                      text-accent-foreground
-                      shadow-[0_10px_24px_rgba(23,23,23,0.1)]
+                      glass-selected
                     `
 									: `
                       border-transparent
                       text-muted-foreground
 
-                      hover:border-primary-border
-                      hover:bg-surface-hover
+                      hover:bg-foreground/5
                       hover:text-foreground
-                      hover:shadow-[0_10px_24px_rgba(23,23,23,0.08)]
+                      hover:shadow-none
                     `,
 							].join(" ")}
 						>
@@ -203,7 +196,7 @@ export function SpaceSidebar({
                     rounded-xl
                     transition-[background-color,color,transform]
                     duration-200
-                    group-hover:scale-[1.03]
+
                   `,
 									selected
 										? `
@@ -211,11 +204,10 @@ export function SpaceSidebar({
                         text-primary-foreground
                       `
 										: `
-                        bg-primary-subtle
-                        text-primary
+                        bg-transparent
+                        text-muted-foreground
 
-                        group-hover:bg-primary-hover
-                        group-hover:text-primary-foreground
+                        group-hover:text-foreground
                       `,
 								].join(" ")}
 							>
@@ -234,7 +226,7 @@ export function SpaceSidebar({
 										"mt-0.5 block truncate text-xs transition-colors",
 										selected
 											? `
-                          text-accent-foreground/70
+                          text-muted-foreground
                         `
 											: `
                           text-subtle-foreground
@@ -253,20 +245,17 @@ export function SpaceSidebar({
 			{/* Relationship statistics */}
 			<section
 				className="
-          mt-5 grid gap-3 rounded-3xl
-          border border-primary-border
-          bg-surface-selected p-4
-          text-accent-foreground
-          shadow-[0_18px_44px_rgba(23,23,23,0.12)]
-          dark:shadow-[0_18px_44px_rgba(0,0,0,0.24)]
+          glass-chip mt-5 grid gap-3 rounded-2xl
+          p-4
+          text-foreground
+
         "
 				aria-label="Relationship statistics"
 			>
 				<div>
 					<p
 						className="
-              text-[10px] font-semibold uppercase
-              tracking-[0.2em] opacity-70
+              text-xs font-semibold text-muted-foreground
             "
 					>
 						Days together
@@ -277,40 +266,13 @@ export function SpaceSidebar({
 					</p>
 				</div>
 
-				<div className="grid grid-cols-2 gap-2 text-xs">
-					<div
-						className="
-      rounded-xl
-      border border-border
-      bg-surface/80 p-3
-      text-foreground
-    "
-					>
-						<p className="font-semibold text-foreground">
-							Next
-						</p>
-
-						<p className="mt-1 text-muted-foreground">
-							{relationshipStats.countdown}
-						</p>
-					</div>
-
-					<div
-						className="
-      rounded-xl
-      border border-border
-      bg-surface/80 p-3
-      text-foreground
-    "
-					>
-						<p className="font-semibold text-foreground">
-							Since
-						</p>
-
-						<p className="mt-1 text-muted-foreground">
-							{relationshipStats.nextMonthlyLabel}
-						</p>
-					</div>
+				{/* Stacked rather than two narrow columns so long dates never wrap. */}
+				<div className="rounded-xl bg-surface-elevated/70 px-3 py-2.5 dark:bg-white/5">
+					<p className="text-xs font-semibold text-muted-foreground">Next anniversary</p>
+					<p className="mt-1 whitespace-nowrap text-base font-semibold tabular-nums text-foreground">
+						{relationshipStats.countdown}
+					</p>
+					<p className="truncate text-xs text-muted-foreground">{relationshipStats.nextMonthlyLabel}</p>
 				</div>
 			</section>
 
@@ -319,7 +281,7 @@ export function SpaceSidebar({
 				<div className="mb-2 flex items-center justify-between px-2">
 					<p
 						className="
-              text-[10px] font-bold uppercase tracking-[0.22em]
+              text-xs font-semibold
               text-subtle-foreground
             "
 					>
@@ -330,7 +292,7 @@ export function SpaceSidebar({
 						aria-hidden="true"
 						className="
               ml-3 h-px flex-1
-              bg-primary-border
+              bg-foreground/10
             "
 					/>
 				</div>
@@ -344,10 +306,10 @@ export function SpaceSidebar({
 						disabled={pending}
 						onClick={onSignOut}
 						className="
-              h-10 justify-start rounded-2xl bg-danger-bg
+              h-11 justify-start rounded-xl bg-transparent
               text-danger
-              hover:bg-danger
-              hover:text-white
+              hover:bg-danger-bg
+              hover:text-danger
             "
 					>
 						<LogOut

@@ -33,9 +33,9 @@ const styles: Record<
 		label: "Success",
 	},
 	info: {
-		shell: "border-sky-200 dark:border-sky-900/60",
-		icon: "bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300",
-		progress: "bg-sky-600",
+		shell: "border-foreground/10",
+		icon: "bg-foreground/6 text-foreground",
+		progress: "bg-foreground/60",
 		label: "Info",
 	},
 	warning: {
@@ -140,7 +140,7 @@ export function Toast({
 	return (
 		<div
 			role={variant === "error" ? "alert" : "status"}
-			className={`relative w-full overflow-hidden rounded-2xl border bg-surface text-neutral-900 shadow-[0_16px_44px_rgba(23,23,23,0.14)] ${style.shell} dark:text-white ${closing ? "toast-out" : "toast-in"}`}
+			className={`relative w-full overflow-hidden glass-surface glass-surface-strong rounded-2xl border text-foreground ${style.shell} dark:text-white ${closing ? "toast-out" : "toast-in"}`}
 		>
 			<div className="flex items-start gap-3 p-4 pr-11">
 				<div
@@ -152,7 +152,7 @@ export function Toast({
 					/>
 				</div>
 				<div className="pt-0.5">
-					<p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
+					<p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-subtle-foreground">
 						{style.label}
 					</p>
 					<p className="mt-1 text-sm leading-6 text-neutral-900 dark:text-white">
@@ -164,7 +164,7 @@ export function Toast({
 				type="button"
 				onClick={close}
 				aria-label="Close notification"
-				className="absolute right-3 top-3 p-2 text-neutral-400 transition hover:text-neutral-950 dark:text-white0 dark:hover:text-white"
+				className="absolute right-3 top-3 p-2 text-subtle-foreground transition hover:text-neutral-950 dark:hover:text-white"
 			>
 				<X size={16} />
 			</button>

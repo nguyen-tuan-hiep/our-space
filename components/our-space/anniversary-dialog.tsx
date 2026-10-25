@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
+import { useOpenSync } from "@/components/common/use-open-sync";
 import dayjs from "dayjs";
 import { useToast } from "@/components/feedback/toast";
 import {
@@ -27,10 +28,9 @@ export function AnniversaryDialog({
     dayjs(currentDate),
   );
 
-  useEffect(() => {
-    if (!open) return;
+  if (useOpenSync(open, [currentDate])) {
     setAnniversaryDate(dayjs(currentDate));
-  }, [currentDate, open]);
+  }
 
   const handleClose = () => {
     if (document.activeElement instanceof HTMLElement) {

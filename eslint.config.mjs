@@ -1,18 +1,12 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-	baseDirectory: __dirname,
-});
-
+// eslint-config-next 16 ships native flat configs, so no FlatCompat bridge is needed.
 const eslintConfig = [
 	{
 		ignores: [
 			".next/**",
+			".claude/**",
 			"node_modules/**",
 			"next-env.d.ts",
 			"public/**",
@@ -20,7 +14,8 @@ const eslintConfig = [
 			"supabase/migrations/**",
 		],
 	},
-	...compat.extends("next/core-web-vitals", "next/typescript"),
+	...nextCoreWebVitals,
+	...nextTypescript,
 ];
 
 export default eslintConfig;

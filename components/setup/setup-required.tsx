@@ -18,9 +18,9 @@ export function SetupRequired({
 	details = [],
 }: SetupRequiredProps) {
 	return (
-		<main className="min-h-svh bg-background">
+		<main className="min-h-svh glass-canvas">
 			<section className="container-page grid min-h-svh items-center py-8 sm:py-12">
-				<div className="mx-auto w-full max-w-3xl rounded-2xl border border-primary-border bg-surface p-5 shadow-[0_18px_52px_rgba(23,23,23,0.08)] dark:shadow-[0_18px_52px_rgba(0,0,0,0.22)] sm:p-8">
+				<div className="app-card mx-auto w-full max-w-3xl p-5 sm:p-8">
 					{profile ? <SetupRealtimeRefresh profileId={profile.id} /> : null}
 
 					<div>

@@ -67,7 +67,9 @@ export function SpaceHero({
   onToggleMenu,
 }: SpaceHeroProps) {
   return (
-    <section className="relative min-h-[36svh] overflow-hidden rounded-b-[2rem] bg-primary text-primary-foreground shadow-[0_18px_44px_rgba(29,27,32,0.24)] sm:min-h-[50svh] sm:rounded-b-[2.5rem] lg:min-h-[56svh]">
+    <section className="relative min-h-[36svh] rounded-b-[2rem] bg-neutral-900 text-white shadow-[0_12px_32px_rgb(0_0_0/0.12)] sm:min-h-[50svh] sm:rounded-b-[2.5rem] lg:min-h-[56svh]">
+      {/* Only the photo is clipped to the rounded edge, so the profile menu can extend past it. */}
+      <div className="absolute inset-0 overflow-hidden rounded-b-[2rem] sm:rounded-b-[2.5rem]">
       <Image
         src={heroImageUrl}
         alt="Our Space hero"
@@ -78,55 +80,41 @@ export function SpaceHero({
         sizes="100vw"
         className="mobile-hero-media-in object-cover opacity-82"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-black/60" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/20" />
+      <div className="absolute inset-0 bg-black/40" />
+      </div>
       <div className="container-page relative flex min-h-[36svh] flex-col pb-3 pt-[calc(env(safe-area-inset-top)+1rem)] sm:min-h-[50svh] sm:py-6 lg:min-h-[56svh]">
-        <header className="items-center justify-between gap-3 rounded-2xl bg-black/28 px-3 py-2 text-white sm:flex sm:gap-4 sm:px-4">
-          <div className="flex min-w-0 items-start gap-4">
-            <div className="hidden items-center gap-2 sm:flex">
-              <Image
-                src="/icon.svg"
-                alt=""
-                aria-hidden="true"
-                width={28}
-                height={28}
-                className="size-7 shrink-0"
-              />
-              <p className="font-serif text-xl tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:text-2xl">
-                Our Space 𑣲⋆
+        {/* Compact profile cluster over the photo (desktop uses the sidebar instead).
+            z-30 keeps the menu above the frosted stat cards painted after it. */}
+        <header className="relative z-30 flex justify-end text-white">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid size-11 shrink-0 place-items-center rounded-full bg-white/22 text-xl shadow-sm backdrop-blur-md">
+              {profileAvatar}
+            </div>
+            <div className="min-w-0 leading-tight drop-shadow-[0_1px_6px_rgba(0,0,0,0.45)]">
+              <p className="truncate text-sm font-semibold">
+                {profile.display_name}
+              </p>
+              <p className="text-xs text-white/80">
+                {profile.country_code} · {profile.currency}
               </p>
             </div>
-          </div>
-          <div className="hidden min-w-0 items-center justify-end gap-2 sm:flex sm:gap-3">
-            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-              <div className="grid size-9 shrink-0 place-items-center rounded-full bg-white/22 text-lg shadow-sm backdrop-blur-md sm:size-10 sm:text-xl">
-                {profileAvatar}
-              </div>
-              <div className="hidden min-w-0 text-right leading-tight sm:block sm:text-left">
-                <p className="font-serif text-sm font-semibold">
-                  {profile.display_name}
-                </p>
-                <p className="text-xs text-white/75">
-                  {profile.country_code} · {profile.currency}
-                </p>
-              </div>
-              <div className="relative hidden sm:block" ref={mobileMenuRef}>
-                {/* <button
+            <div className="relative" ref={mobileMenuRef}>
+                <button
                   type="button"
                   aria-label="Open profile menu"
                   aria-controls={mobileMenuOpen ? "mobile-nav-menu" : undefined}
                   aria-expanded={mobileMenuOpen ? "true" : undefined}
                   aria-haspopup="menu"
                   onClick={onToggleMenu}
-                  className="grid size-10 shrink-0 place-items-center rounded-full border border-white/35 bg-white/12 p-0 transition hover:bg-white/20 active:scale-[0.92] sm:size-9"
+                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/35 bg-white/12 p-0 backdrop-blur-md transition hover:bg-white/20 active:scale-[0.92]"
                 >
                   <MenuIcon size={18} />
-                </button> */}
+                </button>
                 {mobileMenuOpen ? (
                   <div
                     id="mobile-nav-menu"
                     role="menu"
-                    className="mobile-menu-popover-in absolute right-0 top-12 z-30 w-64 overflow-hidden rounded-2xl border border-primary-border bg-surface-elevated py-1 text-foreground shadow-[0_20px_50px_rgba(29,27,32,0.22)] sm:top-11"
+                    className="glass-surface mobile-menu-popover-in absolute right-0 top-[3.25rem] z-30 w-64 overflow-hidden rounded-2xl glass-surface-strong py-1 text-foreground"
                   >
                     <div className="px-2 py-2">
                       <ThemeToggle onSelect={onCloseMenu} />
@@ -167,7 +155,7 @@ export function SpaceHero({
                       type="button"
                       role="menuitem"
                       disabled={pending}
-                      className={`${menuItemClass} border border-danger/30 bg-danger-bg text-danger hover:bg-danger hover:text-white`}
+                      className={`${menuItemClass} text-danger hover:bg-danger-bg hover:text-danger`}
                       onClick={onSignOut}
                     >
                       <LogOut size={16} />
@@ -175,16 +163,12 @@ export function SpaceHero({
                     </button>
                   </div>
                 ) : null}
-              </div>
             </div>
           </div>
         </header>
 
         <div className="flex flex-1 flex-col justify-between pt-5 sm:pt-6">
           <div>
-            <p className="eyebrow hidden !text-white/75 sm:block">
-              Love in every line.
-            </p>
           </div>
 
           <div>
@@ -192,7 +176,7 @@ export function SpaceHero({
               A private place for us.
             </h1>
             <div className="grid max-w-3xl grid-cols-2 gap-3 sm:gap-4">
-              <div className="mobile-hero-card-in rounded-3xl bg-black/55 p-3 text-white shadow-[0_12px_34px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-4">
+              <div className="glass-photo-surface rounded-3xl p-3 text-white sm:p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/80 drop-shadow-sm">
                   Days together
                 </p>
@@ -203,7 +187,7 @@ export function SpaceHero({
                   Since {anniversaryLabel}
                 </p>
               </div>
-              <div className="mobile-hero-card-in rounded-3xl bg-black/55 p-3 text-white shadow-[0_12px_34px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-4">
+              <div className="glass-photo-surface rounded-3xl p-3 text-white sm:p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/80 drop-shadow-sm">
                   Next anniversary
                 </p>

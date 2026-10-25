@@ -427,7 +427,7 @@ export function FinanceCharts({
 
 								<div className="flex-1 w-full space-y-1.5 overflow-y-auto max-h-48 text-xs">
 									{item.categories.length === 0 ? (
-										<p className="text-neutral-400 dark:text-white0 text-center py-4">
+										<p className="text-subtle-foreground dark:text-white0 text-center py-4">
 											No data available
 										</p>
 									) : (

@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useOpenSync } from "@/components/common/use-open-sync";
 import Image from "next/image";
 import { ImageUp } from "lucide-react";
 import { useToast } from "@/components/feedback/toast";
 import { NativeButton, NativeDialog } from "@/components/ui/native-controls";
-import { updateHeroImage } from "@/app/actions";
+import {
+	deleteUnsavedCloudinaryImage,
+	updateHeroImage,
+} from "@/app/actions";
 
 interface HeroImageDialogProps {
 	open: boolean;
@@ -23,10 +27,36 @@ export function HeroImageDialog({
 	const [uploading, setUploading] = useState(false);
 	const [heroUrl, setHeroUrl] = useState(currentUrl);
 	const [publicId, setPublicId] = useState("");
+	const unsavedHeroPublicIds = useRef<Set<string>>(new Set());
+
+	if (useOpenSync(open, [currentUrl])) {
+		setHeroUrl(currentUrl);
+		setPublicId("");
+	}
+
+	useEffect(() => {
+		if (open) unsavedHeroPublicIds.current.clear();
+	}, [currentUrl, open]);
+
+	async function cleanupUnsavedHero(publicId: string) {
+		if (!unsavedHeroPublicIds.current.has(publicId)) return;
+		unsavedHeroPublicIds.current.delete(publicId);
+		await deleteUnsavedCloudinaryImage(publicId).catch(() => null);
+	}
+
+	const cleanupUnsavedHeroes = () => {
+		const publicIds = Array.from(unsavedHeroPublicIds.current);
+		unsavedHeroPublicIds.current.clear();
+		publicIds.forEach((publicId) => {
+			void deleteUnsavedCloudinaryImage(publicId).catch(() => null);
+		});
+	};
+
 	const handleClose = () => {
 		if (document.activeElement instanceof HTMLElement) {
 			document.activeElement.blur();
 		}
+		cleanupUnsavedHeroes();
 		onClose();
 	};
 
@@ -43,6 +73,8 @@ export function HeroImageDialog({
 			});
 			const result = await response.json();
 			if (!response.ok) throw new Error(result.error ?? "Upload failed");
+			if (publicId) void cleanupUnsavedHero(publicId);
+			unsavedHeroPublicIds.current.add(result.public_id);
 			setHeroUrl(result.secure_url);
 			setPublicId(result.public_id);
 		} catch (error) {
@@ -70,7 +102,10 @@ export function HeroImageDialog({
 						toast(result.message, {
 							variant: result.ok ? "success" : "error",
 						});
-						if (result.ok) handleClose();
+						if (result.ok) {
+							unsavedHeroPublicIds.current.clear();
+							handleClose();
+						}
 					});
 				}}
 			>
@@ -84,7 +119,7 @@ export function HeroImageDialog({
 						/>
 					</div>
 					<label
-						className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-primary-border bg-surface px-5 text-sm font-bold text-primary transition hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground sm:min-h-11 ${
+						className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-primary-border bg-surface px-5 text-sm font-bold text-primary-ink transition hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground sm:min-h-11 ${
 							uploading ? "pointer-events-none opacity-50" : ""
 						}`}
 					>

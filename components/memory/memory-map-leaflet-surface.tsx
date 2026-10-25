@@ -189,7 +189,7 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 					pathOptions={{
 						className: "memory-map-current-location",
 						color: "#fafafa",
-						fillColor: "#3b82f6",
+						fillColor: "#1d1d1f",
 						fillOpacity: 1,
 						weight: 2,
 					}}
@@ -237,12 +237,10 @@ export function LeafletMemoryMap({
 				))}
 			</MapContainer>
 
-			<div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.16),transparent_28%,rgba(255,255,255,0.14))]" />
-
 			{!memories.length ? (
 				<div className="absolute inset-0 z-[40] grid place-items-center px-5 text-center">
 					<div className="max-w-sm rounded-2xl border border-white/70 bg-surface/85 p-5 shadow-lg backdrop-blur">
-						<div className="mx-auto grid size-12 place-items-center rounded-full bg-primary-subtle text-primary">
+						<div className="mx-auto grid size-12 place-items-center rounded-full bg-primary-subtle text-primary-ink">
 							<Compass size={22} />
 						</div>
 						<p className="mt-3 font-serif text-2xl text-foreground">

@@ -1,28 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
 import {
-	accentColorPresets,
+	brandAccentColor,
 	createThemeCssVariables,
-	defaultAccentColorPresetKey,
 } from "@/lib/theme-colors";
-
-const beVietnamPro = Be_Vietnam_Pro({
-  subsets: ["latin", "vietnamese"],
-  weight: ["400", "600"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
-const merriweather = Merriweather({
-  subsets: ["latin", "vietnamese"],
-  weight: ["400", "700"],
-  variable: "--font-serif",
-  display: "swap",
-  preload: false,
-});
 
 const appleStartupImages = [
   { size: "320x568", ratio: 2, portrait: "640-1136" },
@@ -68,33 +51,19 @@ const appleStartupImages = [
   ];
 });
 
-const accentColorVariablePresets = Object.fromEntries(
-	Object.entries(accentColorPresets).map(([key, preset]) => [
-		key,
-		createThemeCssVariables(preset.value),
-	]),
-);
+const brandThemeVariables = createThemeCssVariables(brandAccentColor);
 
+// Brand colors are server-rendered; only light/dark appearance is a preference.
 const themeBootstrapScript = `
 (() => {
+  let theme = "system";
   try {
     const stored = localStorage.getItem("our-space-theme");
-    const theme = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
-    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const resolved = theme === "system" ? (systemDark ? "dark" : "light") : theme;
-    document.documentElement.classList.toggle("dark", resolved === "dark");
-    document.documentElement.dataset.theme = theme;
-
-    const accentPresets = ${JSON.stringify(accentColorVariablePresets)};
-    const storedAccent = localStorage.getItem("our-space-accent-color");
-    const accent = storedAccent && accentPresets[storedAccent] ? storedAccent : ${JSON.stringify(defaultAccentColorPresetKey)};
-    Object.entries(accentPresets[accent]).forEach(([name, value]) => {
-      document.documentElement.style.setProperty(name, value);
-    });
-    document.documentElement.dataset.accentColor = accent;
-  } catch {
-    document.documentElement.dataset.theme = "system";
-  }
+    if (stored === "light" || stored === "dark" || stored === "system") theme = stored;
+  } catch {}
+  const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.classList.toggle("dark", theme === "dark" || (theme === "system" && systemDark));
+  document.documentElement.dataset.theme = theme;
 })();
 `;
 
@@ -123,8 +92,6 @@ export const viewport: Viewport = {
   themeColor: "black",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -135,7 +102,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${beVietnamPro.variable} ${merriweather.variable}`}
+      style={brandThemeVariables as React.CSSProperties}
       suppressHydrationWarning
     >
       <head>

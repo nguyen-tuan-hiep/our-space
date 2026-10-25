@@ -1,14 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useState,
+	useSyncExternalStore,
+	type ReactNode,
+} from "react";
 import { Bell, BellOff } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/feedback/toast";
 import { getOneSignal, isOneSignalConfigured } from "@/lib/onesignal-web";
 import { Button } from "@/components/ui/button";
-
-const menuItemClass =
-	"flex w-full items-center gap-2 rounded-2xl bg-primary-subtle px-4 py-2.5 text-left text-sm text-muted-foreground transition hover:bg-primary-container-hover hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-50";
+import { menuItemClass } from "@/components/our-space/shared-classes";
 
 interface NotificationPermissionButtonProps {
 	userId: string;
@@ -16,6 +20,8 @@ interface NotificationPermissionButtonProps {
 	className?: string;
 	iconClassName?: string;
 	loadingClassName?: string;
+	/** Shown instead of nothing when push is unavailable (button variant only). */
+	unsupportedFallback?: ReactNode;
 	onDone?: () => void;
 }
 
@@ -34,26 +40,31 @@ async function waitForSubscriptionId(
 	return null;
 }
 
+const subscribeNoop = () => () => {};
+
 export function NotificationPermissionButton({
 	userId,
 	variant = "button",
 	className,
 	iconClassName,
 	loadingClassName,
+	unsupportedFallback = null,
 	onDone,
 }: NotificationPermissionButtonProps) {
 	const toast = useToast();
 	const [enabled, setEnabled] = useState(false);
-	const [supported, setSupported] = useState(true);
-	const [checking, setChecking] = useState(true);
+	// Environment support is known synchronously on the client; assume support
+	// during SSR/hydration so the markup matches, then settle on the client.
+	const environmentSupported = useSyncExternalStore(
+		subscribeNoop,
+		() => isOneSignalConfigured() && "serviceWorker" in navigator,
+		() => true,
+	);
+	const [pushSupported, setSupported] = useState(true);
+	const [subscriptionChecking, setChecking] = useState(true);
 	const [pending, setPending] = useState(false);
-
-	useEffect(() => {
-		if (!isOneSignalConfigured() || !("serviceWorker" in navigator)) {
-			setSupported(false);
-			setChecking(false);
-		}
-	}, []);
+	const supported = environmentSupported && pushSupported;
+	const checking = environmentSupported && subscriptionChecking;
 
 	useEffect(() => {
 		if (!supported) return;
@@ -205,10 +216,10 @@ export function NotificationPermissionButton({
 		const Icon = enabled ? BellOff : Bell;
 
 		return (
-			<Button
+			// A plain row styled like the other profile-menu items.
+			<button
 				type="button"
 				role="menuitem"
-				variant="secondary"
 				disabled={pending || checking}
 				onClick={handleToggleNotifications}
 				className={menuItemClass}
@@ -218,11 +229,11 @@ export function NotificationPermissionButton({
 					className={iconClassName}
 				/>
 				{enabled ? "Turn off notifications" : "Enable notifications"}
-			</Button>
+			</button>
 		);
 	}
 
-	if (!supported) return null;
+	if (!supported) return <>{unsupportedFallback}</>;
 
 	return (
 		<Button

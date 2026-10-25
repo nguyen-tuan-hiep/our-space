@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useOpenSync } from "@/components/common/use-open-sync";
 import dayjs from "dayjs";
 import { useToast } from "@/components/feedback/toast";
 import {
@@ -77,9 +78,7 @@ export function ExpenseDialog({
       .toISOString();
   }
 
-  useEffect(() => {
-    if (!open) return;
-
+  if (useOpenSync(open, [expense, profile.currency])) {
     const nextCurrency = expense?.currency ?? profile.currency;
 
     const current = expense ? dayjs(expense.transaction_date) : dayjs();
@@ -92,7 +91,7 @@ export function ExpenseDialog({
         ? formatStoredAmountForInput(expense.amount, nextCurrency)
         : "",
     );
-  }, [expense, open, profile.currency]);
+  }
 
   return (
     <NativeDialog

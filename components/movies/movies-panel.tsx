@@ -1,5 +1,7 @@
 "use client";
 
+import { useDialogPresence } from "@/components/common/use-dialog-presence";
+import { PanelHeader } from "@/components/common/panel-header";
 import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import {
@@ -11,7 +13,6 @@ import {
 	Play,
 	Plus,
 	Star,
-	X,
 } from "lucide-react";
 
 // --- Import Swiper React components, Modules và Styles ---
@@ -54,7 +55,7 @@ const columns: Array<{
 		empty: "No movies are currently playing.",
 		icon: Play,
 		iconClassName:
-			"border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-300/20 dark:bg-sky-300/10 dark:text-sky-200",
+			"border-foreground/10 bg-foreground/6 text-foreground",
 	},
 	{
 		status: "wishlist",
@@ -175,7 +176,7 @@ function UserCommentBlock({
 					<MovieSignal
 						movie={movie}
 						profile={profile}
-						inline
+
 						showAvatar={false}
 					/>
 				</div>
@@ -196,12 +197,10 @@ function UserCommentBlock({
 function MovieSignal({
 	movie,
 	profile,
-	inline = false,
 	showAvatar = true,
 }: {
 	movie: Movie;
 	profile: Profile;
-	inline?: boolean;
 	showAvatar?: boolean;
 }) {
 	const rating = getUserRating(movie, profile.id);
@@ -212,7 +211,7 @@ function MovieSignal({
 	return (
 		<div
 			className={[
-				"inline-flex shrink-0 items-center gap-1 rounded-full text-primary backdrop-blur-md h-5 px-2 leading-none",
+				"inline-flex shrink-0 items-center gap-1 rounded-full text-primary-ink backdrop-blur-md h-5 px-2 leading-none",
 			].join(" ")}
 		>
 			{showAvatar ? <UserAvatar profile={profile} /> : null}
@@ -290,7 +289,7 @@ function MovieCard({
 }
 
 function MovieDetailsDialog({
-	movie,
+	movie: selectedDetail,
 	busy,
 	participants,
 	onClose,
@@ -304,6 +303,7 @@ function MovieDetailsDialog({
 	onEdit: (movie: Movie) => void;
 	onMoveStatus: (movie: Movie, status: MovieStatus) => void;
 }) {
+	const { content: movie, open } = useDialogPresence(selectedDetail);
 	if (!movie) return null;
 
 	const nextStatus = getNextStatus(movie);
@@ -312,22 +312,15 @@ function MovieDetailsDialog({
 
 	return (
 		<NativeDialog
-			open={Boolean(movie)}
+			open={open}
 			onClose={onClose}
 			title={movie.title}
 			maxWidth="md"
 			showHandle={false}
 			showTitle={false}
+			closeLabel="Close movie details"
 			contentClassName="!p-0"
 		>
-			<button
-				type="button"
-				aria-label="Close movie details"
-				className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-full bg-surface/90 text-muted-foreground shadow-[0_8px_22px_rgba(23,23,23,0.16)] backdrop-blur hover:bg-surface-hover hover:text-foreground"
-				onClick={onClose}
-			>
-				<X size={18} />
-			</button>
 
 			<div className="grid min-h-0 sm:grid-cols-[15rem_1fr]">
 				<div className="relative overflow-visible bg-primary px-4 pb-0 pt-5 sm:overflow-hidden sm:bg-primary-subtle sm:p-0">
@@ -366,7 +359,7 @@ function MovieDetailsDialog({
 				<div className="flex min-h-0 flex-col gap-3 p-5 pt-24 sm:p-6">
 					<div>
 						<div>
-							<h2 className="font-serif text-3xl leading-tight text-foreground">
+							<h2 className="font-serif text-3xl leading-tight text-foreground pr-10 [overflow-wrap:anywhere]">
 								{movie.title}
 							</h2>
 						</div>
@@ -531,15 +524,7 @@ export function MoviesPanel({
 
 	return (
 		<div className="grid gap-4 sm:gap-5">
-			<div className="flex items-center justify-between gap-4 sm:items-end">
-				<div className="min-w-0">
-					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
-						Movies
-					</h2>
-					<p className="mt-1 text-sm text-muted-foreground">
-						Keeping track of your favorite movies.
-					</p>
-				</div>
+			<PanelHeader title="Movies" description="Keeping track of your favorite movies.">
 				<Button
 					type="button"
 					size="lg"
@@ -549,7 +534,7 @@ export function MoviesPanel({
 					<Plus size={17} />
 					New movie
 				</Button>
-			</div>
+			</PanelHeader>
 
 			<div className="grid gap-6">
 				{moviesByStatus.map((column) => (
@@ -644,8 +629,9 @@ export function MoviesPanel({
 								))}
 							</div>
 						) : (
-							<div className="rounded-2xl border border-dashed border-primary-border bg-muted p-5 text-sm font-semibold text-muted-foreground">
-								{column.empty}
+							<div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-border bg-surface/50 p-5 text-sm text-muted-foreground">
+								<p>{column.empty} Add a film for your next night together.</p>
+								<Button variant="outline" onClick={onNewMovie} className="h-11 px-4"><Plus size={16} />Add movie</Button>
 							</div>
 						)}
 					</section>

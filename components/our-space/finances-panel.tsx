@@ -1,3 +1,4 @@
+import { PanelHeader } from "@/components/common/panel-header";
 import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { ExpenseFeed } from "@/components/expenses/expense-feed";
@@ -64,15 +65,7 @@ export function FinancesPanel({
 
 	return (
 		<div className="grid gap-4 sm:gap-5">
-			<div className="flex items-center justify-between gap-4 sm:items-end">
-				<div className="min-w-0">
-					<h2 className="font-serif text-3xl leading-tight sm:mt-2 sm:text-5xl">
-						Finance overview
-					</h2>
-					<p className="mt-1 text-sm text-neutral-500">
-						Manage your shared expenses side by side.
-					</p>
-				</div>
+			<PanelHeader title="Finance overview" description="Manage your shared expenses side by side.">
 				<div className="sm:hidden">{periodControl}</div>
 				<Button
 					type="button"
@@ -84,9 +77,9 @@ export function FinancesPanel({
 					<Plus size={17} />
 					Log expense
 				</Button>
-			</div>
+			</PanelHeader>
 			{financeError ? (
-				<div className="soft-panel content-fade-in grid gap-4 p-6 text-neutral-600">
+				<div role="alert" className="soft-panel grid gap-4 p-6 text-muted-foreground">
 					<p>{financeError}</p>
 					<Button
 						type="button"

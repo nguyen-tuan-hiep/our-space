@@ -61,6 +61,10 @@ export interface SharedNote {
   title: string;
   content: string;
   unlock_at: string | null;
+  /** Time zone the author picked for `unlock_at`; undefined until the unlock_time_zone migration is applied. */
+  unlock_time_zone?: string | null;
+  /** When the recipient first opened it; undefined until the read_at migration is applied. */
+  read_at?: string | null;
   created_at: string;
   updated_at: string;
   author?: Pick<Profile, "id" | "display_name" | "avatar_url" | "currency">;
@@ -168,6 +172,7 @@ export interface Movie {
   rating_by_user: Record<string, number | null> | null;
   comment_by_user: Record<string, string> | null;
   poster_url: string | null;
+  poster_public_id: string | null;
   reaction_by_user: Record<string, string | null> | null;
   status: MovieStatus;
   category: MovieCategory[] | null;

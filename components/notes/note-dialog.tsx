@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useOpenSync } from "@/components/common/use-open-sync";
 import dayjs from "dayjs";
 import { useToast } from "@/components/feedback/toast";
 import {
@@ -48,15 +49,19 @@ export function NoteDialog({
 		onClose();
 	};
 
-	useEffect(() => {
-		if (!open) return;
-		const current = note?.unlock_at ? dayjs(note.unlock_at) : dayjs();
+	if (useOpenSync(open, [note, recipient.time_zone, senderTimeZone])) {
+		// Editing shows the unlock moment as wall time in the zone it was written
+		// for (older notes without a stored zone fall back to the recipient's).
+		const timeZone = normalizeTimeZoneValue(
+			note ? note.unlock_time_zone ?? recipient.time_zone : senderTimeZone,
+		);
+		const current = note?.unlock_at
+			? utcIsoToZonedTime(note.unlock_at, timeZone)
+			: dayjs();
 		setUnlockDate(current);
 		setUnlockTime(current);
-		setUnlockTimeZone(
-			normalizeTimeZoneValue(note ? recipient.time_zone : senderTimeZone),
-		);
-	}, [note, open, recipient.time_zone, senderTimeZone, timeZoneOptions]);
+		setUnlockTimeZone(timeZone);
+	}
 
 	function getUnlockIso() {
 		const dateBase = unlockDate ?? dayjs();
@@ -91,6 +96,7 @@ export function NoteDialog({
 				action={(formData) => {
 					formData.set("recipient_id", recipient.id);
 					formData.set("unlock_at", getUnlockIso());
+					formData.set("unlock_time_zone", unlockTimeZone);
 					if (note) formData.set("id", note.id);
 
 					startTransition(async () => {
@@ -178,6 +184,24 @@ export function NoteDialog({
 				</div>
 			</form>
 		</NativeDialog>
+	);
+}
+
+/** The wall-clock time of `iso` in `timeZone`, as a local dayjs for the inputs. */
+function utcIsoToZonedTime(iso: string, timeZone: string) {
+	const parts = new Intl.DateTimeFormat("en-CA", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+		hourCycle: "h23",
+		timeZone,
+	}).formatToParts(new Date(iso));
+	const getPart = (type: string) =>
+		parts.find((part) => part.type === type)?.value ?? "00";
+	return dayjs(
+		`${getPart("year")}-${getPart("month")}-${getPart("day")}T${getPart("hour")}:${getPart("minute")}`,
 	);
 }
 

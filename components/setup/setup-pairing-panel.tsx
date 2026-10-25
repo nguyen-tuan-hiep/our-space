@@ -39,9 +39,12 @@ export function SetupPairingPanel({
 		setRequests(data ?? []);
 	}, [profileId]);
 
-	useEffect(() => {
+	// Take fresh server data whenever the page re-renders with new requests.
+	const [syncedInitialRequests, setSyncedInitialRequests] = useState(initialRequests);
+	if (initialRequests !== syncedInitialRequests) {
+		setSyncedInitialRequests(initialRequests);
 		setRequests(initialRequests);
-	}, [initialRequests]);
+	}
 
 	useEffect(() => {
 		const supabase = createClient();

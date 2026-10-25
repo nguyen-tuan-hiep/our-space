@@ -112,13 +112,14 @@ export function ExpenseFeed({
 							className={`grid size-10 place-items-center rounded-full transition ${
 								categoryFilter === "all"
 									? "text-muted-foreground"
-									: "bg-primary-subtle text-primary"
+									: "bg-primary-subtle text-primary-ink"
 							}`}
 						>
 							<ListFilter size={17} />
 						</div>
 
 						<NativeSelect
+							hideLabel
 							label="Category"
 							aria-label="Filter category"
 							value={categoryFilter}
@@ -207,7 +208,7 @@ export function ExpenseFeed({
 
 									<div className="my-2 flex flex-wrap items-center gap-2">
 										<span
-											className="rounded-full px-2.5 py-1 text-xs font-bold text-neutral-300"
+											className="rounded-full px-2.5 py-1 text-xs font-bold text-[#1d1d1f]"
 											style={{
 												backgroundColor:
 													expenseCategoryColors[expense.category],
@@ -228,22 +229,22 @@ export function ExpenseFeed({
 					) : (
 						<p className="rounded-2xl border border-dashed border-primary-border bg-muted py-10 text-center text-muted-foreground">
 							{expenses.length
-								? "No transactions in this category."
-								: "No transactions yet."}
+								? "No transactions in this category. Choose another category to see more."
+								: "No transactions yet. Log an expense or choose another period."}
 						</p>
 					)}
 				</div>
 
 				<div
 					aria-hidden="true"
-					className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-10 rounded-t-2xl bg-gradient-to-b from-surface to-transparent transition-opacity duration-200 ${
+					className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-px border-t border-border transition-opacity duration-200 ${
 						scrollGradient.top ? "opacity-100" : "opacity-0"
 					}`}
 				/>
 
 				<div
 					aria-hidden="true"
-					className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 rounded-b-2xl bg-gradient-to-t from-surface to-transparent transition-opacity duration-200 ${
+					className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-px border-b border-border transition-opacity duration-200 ${
 						scrollGradient.bottom ? "opacity-100" : "opacity-0"
 					}`}
 				/>
