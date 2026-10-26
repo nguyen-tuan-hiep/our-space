@@ -435,7 +435,7 @@ export function MobileSpaceTabs({
     <nav
       aria-label="Space sections"
       data-minimized={minimized ? "" : undefined}
-      className="mobile-tab-dock native-bottom-nav-in fixed inset-x-2 bottom-[var(--bottom-nav-offset)] z-[45] flex items-end justify-between sm:hidden"
+      className="mobile-tab-dock native-bottom-nav-in fixed inset-x-[var(--dock-inset-x)] bottom-[var(--bottom-nav-offset)] z-[45] flex items-end justify-between sm:hidden"
     >
       {/* One glass pill with even padding. Collapsed, it shrinks to a circle the size
           of the (+) button showing only the current tab's icon; the full track stays

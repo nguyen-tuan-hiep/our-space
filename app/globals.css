@@ -1699,12 +1699,18 @@ html[data-scrolled] body::before { opacity: 1; }
  * scroll container, so the viewport fixed elements attach to never moves. */
 /* Gap between the floating bottom tabs and the screen edge: tucked into the
  * home-indicator area on notched iPhones instead of sitting above all of it. */
-:root { --bottom-nav-offset: max(0.5rem, calc(env(safe-area-inset-bottom) - 1.25rem)); }
+:root {
+	--bottom-nav-offset: max(0.5rem, calc(env(safe-area-inset-bottom) - 1rem));
+	/* Side gap. On home-indicator iPhones (PWA: the page reaches the rounded
+	 * screen corners) it grows to about 14px so the 44px circles of the collapsed
+	 * dock clear the ~55pt corner radius; elsewhere it stays 8px. */
+	--dock-inset-x: max(0.5rem, calc(env(safe-area-inset-bottom) - 1.25rem));
+}
 /* Mobile tab dock: a full-width glass pill that collapses, while scrolling
  * down, into a circle the size of the round (+) action beside it (both 44px,
  * matching the hero's menu button). The track keeps its expanded width under
  * the shrinking pill and fades out, so tabs never reflow mid-animation. */
-.mobile-tab-dock { --dock-size: 2.75rem; --bar-w: calc(100vw - 1rem); }
+.mobile-tab-dock { --dock-size: 2.75rem; --bar-w: calc(100vw - 2 * var(--dock-inset-x)); }
 .mobile-tab-bar {
 	width: var(--bar-w);
 	height: 3.625rem;
