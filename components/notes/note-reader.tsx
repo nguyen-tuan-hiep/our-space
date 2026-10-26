@@ -61,7 +61,7 @@ export function NoteReader({ note: selectedNote, currentUserId, timeZone, initia
 				<DialogOverlay />
 				<DialogPrimitive.Popup
 					finalFocus={returnFocus}
-					className="glass-dialog note-reader fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[calc(100svh-env(safe-area-inset-top)-1rem)] min-h-[28rem] w-full flex-col overflow-hidden rounded-t-3xl border text-foreground outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-h-[85svh] sm:w-[min(42rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[2rem]"
+					className="glass-dialog note-reader mobile-sheet fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[calc(100svh-env(safe-area-inset-top)-1rem)] min-h-[28rem] w-full flex-col overflow-hidden rounded-t-3xl border text-foreground outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-h-[85svh] sm:w-[min(42rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[2rem]"
 				>
 					<header className="relative z-30 flex shrink-0 items-center justify-end px-4 pt-3 sm:px-5 sm:pt-4">
 						<div aria-hidden="true" className="absolute left-1/2 top-3 h-1 w-10 -translate-x-1/2 rounded-full bg-foreground/15 sm:hidden" />

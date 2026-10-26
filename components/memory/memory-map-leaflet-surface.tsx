@@ -11,14 +11,12 @@ import {
 } from "react-leaflet";
 import { Compass, LocateFixed, Minus, Plus } from "lucide-react";
 import { useToast } from "@/components/feedback/toast";
-import { primaryButtonClass } from "@/components/our-space/shared-classes";
 import { getMemoryTypeColor, getMemoryTypeEmoji } from "@/lib/constants";
 import type { MemoryMapEntry } from "@/lib/types";
 
 interface LeafletMemoryMapProps {
 	memories: MemoryMapEntry[];
 	onEditMemory: (memory: MemoryMapEntry) => void;
-	onNewMemory: () => void;
 }
 
 const defaultCenter: LatLngExpression = [8.4, 103.8];
@@ -202,7 +200,6 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 export function LeafletMemoryMap({
 	memories,
 	onEditMemory,
-	onNewMemory,
 }: LeafletMemoryMapProps) {
 	return (
 		// <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-surface p-2 shadow-md sm:p-4">
@@ -249,13 +246,6 @@ export function LeafletMemoryMap({
 						<p className="mt-2 text-sm leading-6 text-muted-foreground">
 							Add the first place you spent together
 						</p>
-						<button
-							type="button"
-							className={`${primaryButtonClass} primary-action mt-4 w-full justify-center`}
-							onClick={onNewMemory}
-						>
-							Add memory
-						</button>
 					</div>
 				</div>
 			) : null}

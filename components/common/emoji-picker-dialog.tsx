@@ -25,7 +25,7 @@ export function EmojiPickerDialog({ open, title, clearLabel = "Clear", onClose, 
 		<Dialog.Root open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
 			<Dialog.Portal>
 				<Dialog.Backdrop className="glass-scrim app-dialog-overlay fixed inset-0 z-[90] bg-black/35 backdrop-blur-sm dark:bg-black/60" />
-				<Dialog.Popup className="glass-dialog app-dialog emoji-picker-dialog fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[100] flex max-h-[calc(100svh-env(safe-area-inset-top)-2rem)] flex-col overflow-hidden rounded-3xl border border-border bg-surface-elevated text-foreground shadow-2xl outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(26rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+				<Dialog.Popup className="glass-dialog app-dialog mobile-sheet emoji-picker-dialog fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[100] flex max-h-[calc(100svh-env(safe-area-inset-top)-2rem)] flex-col overflow-hidden rounded-3xl border border-border bg-surface-elevated text-foreground shadow-2xl outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(26rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2">
 					<div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
 						<Dialog.Title className="font-serif text-2xl leading-tight">{title}</Dialog.Title>
 						<Dialog.Close render={<Button variant="ghost" className="size-11 shrink-0 rounded-full" />} aria-label="Close emoji picker"><X size={18} aria-hidden="true" /></Dialog.Close>

@@ -77,8 +77,7 @@ export function NotesPanel({
 							<NotebookPen size={24} aria-hidden="true" />
 						</span>
 						<h3 className="mt-5 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">A little space for your words</h3>
-						<p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">No notes for this {filterRange}. Write a thought for your partner, or choose another period.</p>
-						<Button onClick={onNewNote} className="primary-action mt-6 h-11 rounded-full px-5 font-semibold"><Plus size={16} />Write a note</Button>
+						<p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">No notes for this {filterRange} yet. Write a thought for your partner, or choose another period.</p>
 					</div>
 				)}
 			</div>

@@ -10,7 +10,6 @@ import {
 	useState,
 	useTransition,
 } from "react";
-import { Plus } from "lucide-react";
 import { useToast } from "@/components/feedback/toast";
 import { loadFinanceDashboardData, markNoteRead, signOut } from "@/app/actions";
 import { isUnreadLetter } from "@/components/notes/note-meta";
@@ -45,7 +44,6 @@ import {
 	getUtcDateKey,
 	getUtcMonthStart,
 } from "@/components/our-space/period-utils";
-import { DraggableFab } from "@/components/our-space/draggable-fab";
 import { SpaceSidebar } from "@/components/our-space/space-sidebar";
 import { SpaceHero } from "@/components/our-space/space-hero";
 import {
@@ -1017,15 +1015,6 @@ export function OurSpaceClient({
 			await signOut();
 		});
 	};
-	const hasOpenDialog =
-		Boolean(selectedNote) ||
-		noteOpen ||
-		expenseOpen ||
-		memoryOpen ||
-		movieOpen ||
-		profileOpen ||
-		heroOpen ||
-		anniversaryOpen;
 	const periodPickerProps = {
 		activePeriod: pickerActivePeriod,
 		calendarDays,
@@ -1264,37 +1253,20 @@ export function OurSpaceClient({
 
 			<MobileSpaceTabs
 				activeSection={activeSection}
+				action={
+					activeSection === "notes"
+						? { label: "Create new note", onClick: () => setNoteOpen(true) }
+						: activeSection === "finances"
+							? { label: "Log new expense", onClick: () => setExpenseOpen(true) }
+							: activeSection === "memories"
+								? { label: "Add memory", onClick: () => setMemoryOpen(true) }
+								: activeSection === "movies"
+									? { label: "Add movie", onClick: () => setMovieOpen(true) }
+									: undefined
+				}
 				onSelectSection={selectSection}
 			/>
 
-			{!hasOpenDialog &&
-			(activeSection === "notes" ||
-				activeSection === "finances" ||
-				activeSection === "memories" ||
-				activeSection === "movies") ? (
-				<DraggableFab
-					ariaLabel={
-						activeSection === "notes"
-							? "Create new note"
-							: activeSection === "finances"
-								? "Log new expense"
-								: activeSection === "memories"
-									? "Add memory"
-									: "Add movie"
-					}
-					onClick={
-						activeSection === "notes"
-							? () => setNoteOpen(true)
-							: activeSection === "finances"
-								? () => setExpenseOpen(true)
-								: activeSection === "memories"
-									? () => setMemoryOpen(true)
-									: () => setMovieOpen(true)
-					}
-				>
-					<Plus size={24} />
-				</DraggableFab>
-			) : null}
 
 			{noteReaderReady && (
 				<NoteReader

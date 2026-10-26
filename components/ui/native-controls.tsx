@@ -169,7 +169,7 @@ export function NativeDialog({
 				<DialogPrimitive.Backdrop className="glass-scrim app-dialog-overlay fixed inset-0 z-50" />
 				<DialogPrimitive.Popup
 					className={cx(
-						"glass-dialog app-dialog fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full flex-col overflow-hidden rounded-t-3xl border text-foreground outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-h-[calc(100svh-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl",
+						"glass-dialog app-dialog mobile-sheet fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[calc(100svh-env(safe-area-inset-top)-0.75rem)] w-full flex-col overflow-hidden rounded-t-3xl border text-foreground outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-h-[calc(100svh-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl",
 						maxWidth === "xs" && "sm:w-[min(92vw,28rem)]",
 						maxWidth === "sm" && "sm:w-[min(92vw,36rem)]",
 						maxWidth === "md" && "sm:w-[min(92vw,48rem)]",

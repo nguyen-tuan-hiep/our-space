@@ -741,17 +741,6 @@ input[type="time"]::-webkit-date-and-time-value {
 	}
 }
 
-@keyframes mobile-fab-in {
-	from {
-		opacity: 0;
-		transform: translate3d(0, 14px, 0) scale(0.88);
-	}
-	to {
-		opacity: 1;
-		transform: translate3d(0, 0, 0) scale(1);
-	}
-}
-
 @media (max-width: 639px) {
 	.mobile-hero-media-in {
 		animation: mobile-hero-media-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -774,9 +763,6 @@ input[type="time"]::-webkit-date-and-time-value {
 		animation: content-fade-in 360ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 	}
 
-	.mobile-fab-in {
-		animation: mobile-fab-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-	}
 }
 
 .app-card {
@@ -900,7 +886,14 @@ input[type="time"]::-webkit-date-and-time-value {
 .primary-action:active { transform: scale(0.98); box-shadow: none; }
 
 .mobile-bottom-tab-indicator {
-	transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+	transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), scale 200ms var(--motion-ease, ease), box-shadow 200ms ease;
+}
+/* While a finger drags across the tab bar the selection becomes a lens: it
+ * tracks the finger 1:1 (no transform easing) and swells slightly. */
+.mobile-bottom-tab-indicator[data-dragging] {
+	transition: scale 200ms var(--motion-ease, ease), box-shadow 200ms ease;
+	scale: 1.06 1.1;
+	box-shadow: 0 4px 14px rgb(0 0 0 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -911,8 +904,7 @@ input[type="time"]::-webkit-date-and-time-value {
 	.mobile-hero-media-in,
 	.mobile-hero-card-in,
 	.mobile-menu-popover-in,
-	.mobile-quote-in,
-	.mobile-fab-in {
+	.mobile-quote-in {
 		animation: none;
 		transition: none;
 	}
@@ -1425,6 +1417,16 @@ input[type="time"]::-webkit-date-and-time-value {
 	.glass-canvas { background-attachment: scroll; }
 	.app-dialog[data-starting-style], .note-reader[data-starting-style] { translate: var(--tw-translate-x, 0px) calc(var(--tw-translate-y, 0px) + 56px); scale: 0.985; }
 	.app-dialog[data-ending-style], .note-reader[data-ending-style] { translate: var(--tw-translate-x, 0px) calc(var(--tw-translate-y, 0px) + 32px); scale: 1; }
+	/* Bottom sheets (forms, details, the reader) slide up from below the screen
+	 * edge like the action menu and period picker, instead of fading in place. */
+	.mobile-sheet[data-starting-style],
+	.mobile-sheet[data-ending-style] {
+		opacity: 1;
+		translate: 0 100%;
+		scale: 1;
+	}
+	.mobile-sheet { transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+	.mobile-sheet[data-ending-style] { transition-timing-function: cubic-bezier(0.4, 0, 1, 1); }
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 	.app-card, .soft-panel, .material-section, .glass-surface, .glass-navigation, .glass-dialog, .glass-photo-surface {
@@ -1698,6 +1700,42 @@ html[data-scrolled] body::before { opacity: 1; }
 /* Gap between the floating bottom tabs and the screen edge: tucked into the
  * home-indicator area on notched iPhones instead of sitting above all of it. */
 :root { --bottom-nav-offset: max(0.5rem, calc(env(safe-area-inset-bottom) - 1.25rem)); }
+/* Mobile tab dock: a full-width glass pill that collapses, while scrolling
+ * down, into a circle the size of the round (+) action beside it (both 44px,
+ * matching the hero's menu button). The track keeps its expanded width under
+ * the shrinking pill and fades out, so tabs never reflow mid-animation. */
+.mobile-tab-dock { --dock-size: 2.75rem; --bar-w: calc(100vw - 1rem); }
+.mobile-tab-bar {
+	width: var(--bar-w);
+	height: 3.625rem;
+	transition: width 380ms var(--motion-ease), height 380ms var(--motion-ease);
+}
+.mobile-tab-track {
+	width: calc(var(--bar-w) - 0.5rem);
+	transition: opacity 180ms ease;
+}
+.mobile-tab-collapsed {
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 180ms ease;
+}
+.mobile-tab-dock[data-minimized] .mobile-tab-bar { width: var(--dock-size); height: var(--dock-size); }
+.mobile-tab-dock[data-minimized] .mobile-tab-track { opacity: 0; pointer-events: none; }
+.mobile-tab-dock[data-minimized] .mobile-tab-collapsed {
+	opacity: 1;
+	pointer-events: auto;
+	transition-delay: 140ms;
+}
+.mobile-tab-action {
+	width: var(--dock-size);
+	height: var(--dock-size);
+	animation: mobile-tab-action-in 260ms var(--motion-ease) backwards;
+}
+@keyframes mobile-tab-action-in {
+	from { opacity: 0; transform: scale(0.6); }
+	to { opacity: 1; transform: scale(1); }
+}
+
 /* Progressive blur under the bottom tabs: the mask fades the frosted strip in
  * from its top edge, so content softens gradually instead of being cut off. */
 .bottom-nav-backdrop {

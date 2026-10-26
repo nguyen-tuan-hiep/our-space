@@ -269,7 +269,6 @@ export function MemoryMapPanel({
 				<LeafletMemoryMap
 					memories={memories}
 					onEditMemory={onEditMemory}
-					onNewMemory={onNewMemory}
 				/>
 			</div>
 
@@ -291,7 +290,6 @@ export function MemoryMapPanel({
 				<div className="empty-state">
 					<h3 className="font-serif text-2xl text-foreground">Every place has a story</h3>
 					<p>Save your first place together, then add a photo or a little memory.</p>
-					<Button onClick={onNewMemory} className="mt-2 h-11 px-5"><Plus size={16} />Add a memory</Button>
 				</div>
 			)}
 

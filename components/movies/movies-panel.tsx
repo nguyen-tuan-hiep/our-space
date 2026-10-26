@@ -536,6 +536,16 @@ export function MoviesPanel({
 				</Button>
 			</PanelHeader>
 
+			{/* With nothing in any list, one empty state replaces the three empty sections. */}
+			{!loading && movies.length === 0 ? (
+				<div className="app-card flex flex-col items-center px-6 py-14 text-center sm:py-20">
+					<span className="glass-chip grid size-14 place-items-center rounded-full text-foreground">
+						<Clapperboard size={24} aria-hidden="true" />
+					</span>
+					<h3 className="mt-5 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">Your movie list is empty</h3>
+					<p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">Save films to watch together, then keep track of what you have seen and loved.</p>
+				</div>
+			) : (
 			<div className="grid gap-6">
 				{moviesByStatus.map((column) => (
 					<section
@@ -629,14 +639,12 @@ export function MoviesPanel({
 								))}
 							</div>
 						) : (
-							<div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-border bg-surface/50 p-5 text-sm text-muted-foreground">
-								<p>{column.empty} Add a film for your next night together.</p>
-								<Button variant="outline" onClick={onNewMovie} className="h-11 px-4"><Plus size={16} />Add movie</Button>
-							</div>
+							<p className="px-4 text-sm text-muted-foreground">{column.empty}</p>
 						)}
 					</section>
 				))}
 			</div>
+			)}
 
 			<ConfirmDialog
 				open={Boolean(selectedMovie)}
