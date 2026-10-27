@@ -490,7 +490,7 @@ export function MobileSpaceTabs({
           className="mobile-tab-collapsed absolute inset-0 grid place-items-center text-foreground"
           onClick={() => setMinimized(false)}
         >
-          <ActiveIcon size={20} strokeWidth={2.4} aria-hidden="true" />
+          <ActiveIcon size={23} strokeWidth={2.3} aria-hidden="true" />
         </button>
       </div>
       {/* Only while collapsed: the expanded bar keeps the full width for its tabs. */}
@@ -502,7 +502,7 @@ export function MobileSpaceTabs({
           onClick={action.onClick}
           className="mobile-tab-action glass-navigation grid shrink-0 place-items-center rounded-full text-foreground transition active:scale-[0.92]"
         >
-          <Plus size={22} strokeWidth={2.2} aria-hidden="true" />
+          <Plus size={25} strokeWidth={2.2} aria-hidden="true" />
         </button>
       ) : null}
     </nav>

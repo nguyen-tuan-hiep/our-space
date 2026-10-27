@@ -1847,20 +1847,21 @@ html[data-scrolled] body::before { opacity: 1; }
  * strands them mid-screen until the next repaint. Below desktop the space page
  * therefore never scrolls the document: html/body are locked and <main> is the
  * scroll container, so the viewport fixed elements attach to never moves. */
-/* Gap between the floating bottom tabs and the screen edge: tucked into the
- * home-indicator area on notched iPhones instead of sitting above all of it. */
+/* Gap between the floating bottom tabs and the screen edge: on home-indicator
+ * iPhones it nearly fills the indicator area, keeping the dock off the corners. */
 :root {
-	--bottom-nav-offset: max(0.5rem, calc(env(safe-area-inset-bottom) - 1rem));
+	--bottom-nav-offset: max(0.875rem, calc(env(safe-area-inset-bottom) - 0.125rem));
 	/* Side gap. On home-indicator iPhones (PWA: the page reaches the rounded
-	 * screen corners) it grows to about 14px so the 44px circles of the collapsed
-	 * dock clear the ~55pt corner radius; elsewhere it stays 8px. */
-	--dock-inset-x: max(0.5rem, calc(env(safe-area-inset-bottom) - 1.25rem));
+	 * screen corners) it matches the bottom gap (~32px), so the 52px circles of
+	 * the collapsed dock sit concentric with the ~55pt corner curve instead of
+	 * crowding it diagonally; elsewhere both stay 14px. */
+	--dock-inset-x: var(--bottom-nav-offset);
 }
 /* Mobile tab dock: a full-width glass pill that collapses, while scrolling
- * down, into a circle the size of the round (+) action beside it (both 44px,
- * matching the hero's menu button). The track keeps its expanded width under
+ * down, into a circle the size of the round (+) action beside it (both 52px,
+ * an easy thumb target). The track keeps its expanded width under
  * the shrinking pill and fades out, so tabs never reflow mid-animation. */
-.mobile-tab-dock { --dock-size: 2.75rem; --bar-w: calc(100vw - 2 * var(--dock-inset-x)); }
+.mobile-tab-dock { --dock-size: 3.25rem; --bar-w: calc(100vw - 2 * var(--dock-inset-x)); }
 .mobile-tab-bar {
 	width: var(--bar-w);
 	height: 3.625rem;
@@ -2310,8 +2311,8 @@ html[data-view-transition="root"]::view-transition-new(root) {
 	rotate: 5deg;
 }
 
-/* Memory details: the stage leaves room above the print for the camera
- * while it plays, then closes the gap. */
+/* Memory details: the camera sits at the top of the stage with the print
+ * hanging just below its slot. */
 .pola-stage {
 	position: relative;
 	display: flex;
@@ -2321,10 +2322,9 @@ html[data-view-transition="root"]::view-transition-new(root) {
 	align-items: center;
 	overflow-y: auto;
 	overscroll-behavior: contain;
-	padding: 1rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
-	transition: padding-top 480ms var(--motion-ease);
+	padding: 7.75rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
 }
-.pola-stage--intro { padding-top: 7.75rem; overflow: hidden; }
+.pola-stage--intro { overflow: hidden; }
 @media (min-width: 640px) { .pola-stage { padding-bottom: 1rem; } }
 .pola-close {
 	position: absolute;
@@ -2428,7 +2428,7 @@ html[data-view-transition="root"]::view-transition-new(root) {
 	top: 0.5rem;
 	left: 50%;
 	z-index: 3;
-	width: min(18.5rem, 92%);
+	width: min(18.5rem, 76%);
 	height: 8.25rem;
 	border-radius: 30px 30px 20px 20px;
 	background:
@@ -2439,10 +2439,11 @@ html[data-view-transition="root"]::view-transition-new(root) {
 		inset 0 2px 0 rgb(255 255 255 / 0.9),
 		0 14px 28px rgb(60 30 45 / 0.25);
 	translate: -50% 0;
+}
+.pola-stage--intro .pola-camera {
 	animation:
 		pola-camera-in 460ms cubic-bezier(0.3, 1.4, 0.5, 1) both,
-		pola-camera-shutter 220ms ease-in-out 620ms,
-		pola-camera-out 480ms ease-in 2150ms forwards;
+		pola-camera-shutter 220ms ease-in-out 620ms;
 }
 .pola-cam-button {
 	position: absolute;
@@ -2453,8 +2454,8 @@ html[data-view-transition="root"]::view-transition-new(root) {
 	border-radius: 999px 999px 3px 3px;
 	background: #e2768f;
 	box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.12);
-	animation: pola-cam-press 220ms ease-in-out 600ms;
 }
+.pola-stage--intro .pola-cam-button { animation: pola-cam-press 220ms ease-in-out 600ms; }
 .pola-cam-viewfinder {
 	position: absolute;
 	top: 0.9rem;
@@ -2474,8 +2475,8 @@ html[data-view-transition="root"]::view-transition-new(root) {
 	border-radius: 6px;
 	background: repeating-linear-gradient(90deg, #fff 0 3px, #eef3f8 3px 6px);
 	box-shadow: 0 0 0 3px #4a3a3f;
-	animation: pola-bulb 420ms ease-out 640ms;
 }
+.pola-stage--intro .pola-cam-bulb { animation: pola-bulb 420ms ease-out 640ms; }
 .pola-cam-stripe {
 	position: absolute;
 	top: 0;
@@ -2523,7 +2524,7 @@ html[data-view-transition="root"]::view-transition-new(root) {
 }
 /* The print slides out of the slot (moving down while its top stays hidden
  * under the camera), then the photo develops out of a pale wash. Everything
- * finishes by the time the camera has lifted away (~2.6s), when the intro ends. */
+ * finishes by the time the notes have risen in (~2.6s), when the intro ends. */
 .pola-stage--intro .pola-print { animation: pola-eject 1100ms cubic-bezier(0.25, 0.6, 0.3, 1) 900ms both; }
 .pola-stage--intro .pola-develop { animation: pola-develop 1250ms ease-out 1350ms both; }
 .pola-stage--intro .pola-wash { animation: pola-wash 1150ms ease-out 1350ms both; }
@@ -2545,9 +2546,6 @@ html[data-view-transition="root"]::view-transition-new(root) {
 	0% { opacity: 0; }
 	15% { opacity: 1; }
 	100% { opacity: 0; }
-}
-@keyframes pola-camera-out {
-	to { opacity: 0; transform: translateY(-40px) scale(0.92) rotate(4deg); }
 }
 @keyframes pola-eject {
 	from { transform: translateY(-100%); clip-path: inset(100% -40px -40px -40px); rotate: 0deg; }

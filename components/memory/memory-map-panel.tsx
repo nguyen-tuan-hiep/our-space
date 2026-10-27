@@ -166,7 +166,7 @@ function MemoryPolaroid({
 /**
  * Memory details. Opening plays a little Polaroid camera: it pops in, flashes,
  * the print slides out of its slot and develops from a pale wash into colour,
- * then the camera lifts away and the notes appear under the photo. Tapping
+ * then the notes appear under the photo; the camera stays on top. Tapping
  * skips it; reduced motion shows the print straight away.
  */
 function MemoryDetailsDialog({ memory: selected, participants, timeZone, onClose, onEdit }: {
@@ -206,24 +206,17 @@ function MemoryDetailsDialog({ memory: selected, participants, timeZone, onClose
 						className={`pola-stage outline-none ${playIntro ? "pola-stage--intro cursor-pointer" : ""}`}
 						onClick={playIntro ? () => setIntroDone(true) : undefined}
 					>
-						{playIntro ? (
-							<>
-								<div
-									aria-hidden="true"
-									className="pola-camera"
-									onAnimationEnd={(event) => { if (event.animationName === "pola-camera-out") setIntroDone(true); }}
-								>
-									<span className="pola-cam-button" />
-									<span className="pola-cam-viewfinder" />
-									<span className="pola-cam-bulb" />
-									<span className="pola-cam-stripe" />
-									<span className="pola-cam-lens" />
-									<span className="pola-cam-heart">♥</span>
-									<span className="pola-cam-slot" />
-								</div>
-								<span aria-hidden="true" className="pola-flash" />
-							</>
-						) : null}
+						{/* The camera stays above the print after the shot, as if it just came out. */}
+						<div aria-hidden="true" className="pola-camera">
+							<span className="pola-cam-button" />
+							<span className="pola-cam-viewfinder" />
+							<span className="pola-cam-bulb" />
+							<span className="pola-cam-stripe" />
+							<span className="pola-cam-lens" />
+							<span className="pola-cam-heart">♥</span>
+							<span className="pola-cam-slot" />
+						</div>
+						{playIntro ? <span aria-hidden="true" className="pola-flash" /> : null}
 						<DialogPrimitive.Close className={`pola-close ${playIntro ? "invisible" : ""}`}>
 							<X size={18} aria-hidden="true" /><span className="sr-only">Close memory</span>
 						</DialogPrimitive.Close>
@@ -246,7 +239,10 @@ function MemoryDetailsDialog({ memory: selected, participants, timeZone, onClose
 						</figure>
 						<DialogDescription className="sr-only">Photo, date and both of your notes about this place</DialogDescription>
 
-						<div className="pola-details">
+						<div
+							className="pola-details"
+							onAnimationEnd={(event) => { if (event.animationName === "pola-rise") setIntroDone(true); }}
+						>
 							<p className="flex justify-center">
 								<span className="pola-type" style={{ backgroundColor: getMemoryTypeColor(memory.memory_type) }}>
 									{memory.memory_type}
