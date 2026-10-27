@@ -4,7 +4,7 @@ import { useId, type ReactNode } from "react";
  * Gold wax seal: an uneven pressed blob, a raised rim around a recessed disc,
  * and a looped hand-drawn heart embossed in the middle.
  */
-function WaxSeal() {
+export function WaxSeal() {
 	// Per-instance ids so gradients still resolve when another seal is hidden.
 	const id = useId().replace(/:/g, "");
 	const wax = `wax-${id}`;

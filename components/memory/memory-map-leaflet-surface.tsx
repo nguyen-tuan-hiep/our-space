@@ -16,7 +16,7 @@ import type { MemoryMapEntry } from "@/lib/types";
 
 interface LeafletMemoryMapProps {
 	memories: MemoryMapEntry[];
-	onEditMemory: (memory: MemoryMapEntry) => void;
+	onOpenMemory: (memory: MemoryMapEntry) => void;
 }
 
 const defaultCenter: LatLngExpression = [8.4, 103.8];
@@ -31,7 +31,7 @@ function getMemoryBounds(memories: MemoryMapEntry[]) {
 	]) as LatLngBoundsExpression;
 }
 
-function createEmojiIcon(memory: MemoryMapEntry) {
+function createEmojiIcon(memory: MemoryMapEntry, order: number) {
 	const emoji = getMemoryTypeEmoji(memory.memory_type);
 	const color = getMemoryTypeColor(memory.memory_type);
 	const escapedTitle = memory.title
@@ -43,7 +43,7 @@ function createEmojiIcon(memory: MemoryMapEntry) {
 	return L.divIcon({
 		className: "memory-map-pin-wrapper",
 		html: `
-			<div class="memory-map-pin" aria-label="${escapedTitle}">
+			<div class="memory-map-pin" style="--pin-delay:${Math.min(order, 12) * 70}ms" aria-label="${escapedTitle}">
 				<div
 					class="memory-map-pin-bubble"
 					style="background:${color}"
@@ -121,9 +121,8 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 				];
 
 				setCurrentLocation(nextLocation);
-				map.setView(nextLocation, Math.max(map.getZoom(), 15), {
-					animate: true,
-				});
+				// Glide (zoom out, pan, zoom in) rather than jump to the user's spot.
+				map.flyTo(nextLocation, Math.max(map.getZoom(), 15), { duration: 0.9 });
 				setLocating(false);
 			},
 			(error) => {
@@ -199,8 +198,15 @@ function MapControls({ memories }: { memories: MemoryMapEntry[] }) {
 
 export function LeafletMemoryMap({
 	memories,
-	onEditMemory,
+	onOpenMemory,
 }: LeafletMemoryMapProps) {
+	// Built once per data change: a new icon object would rebuild the pin's DOM
+	// (and replay its drop-in) on every render.
+	const pinIcons = useMemo(
+		() => new Map(memories.map((memory, order) => [memory.id, createEmojiIcon(memory, order)])),
+		[memories],
+	);
+
 	return (
 		// <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-surface p-2 shadow-md sm:p-4">
 		<div className="relative min-h-[22rem] overflow-hidden rounded-2xl sm:min-h-[31rem] shadow-[0_0_15px_rgba(0,0,0,0.2)]">
@@ -226,9 +232,9 @@ export function LeafletMemoryMap({
 					<Marker
 						key={memory.id}
 						position={[memory.latitude, memory.longitude]}
-						icon={createEmojiIcon(memory)}
+						icon={pinIcons.get(memory.id)}
 						eventHandlers={{
-							click: () => onEditMemory(memory),
+							click: () => onOpenMemory(memory),
 						}}
 					/>
 				))}

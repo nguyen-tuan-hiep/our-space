@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Dancing_Script } from "next/font/google";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
@@ -53,6 +54,14 @@ const appleStartupImages = [
 
 const brandThemeVariables = createThemeCssVariables(brandAccentColor);
 
+// Handwriting for love-letter greetings and signatures (self-hosted at build).
+const scriptFont = Dancing_Script({
+  subsets: ["latin", "vietnamese"],
+  weight: ["500", "600", "700"],
+  variable: "--font-script",
+  display: "swap",
+});
+
 // Brand colors are server-rendered; only light/dark appearance is a preference.
 const themeBootstrapScript = `
 (() => {
@@ -102,6 +111,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      className={scriptFont.variable}
       style={brandThemeVariables as React.CSSProperties}
       suppressHydrationWarning
     >

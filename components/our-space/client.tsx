@@ -13,6 +13,7 @@ import {
 import { useToast } from "@/components/feedback/toast";
 import { loadFinanceDashboardData, markNoteRead, signOut } from "@/app/actions";
 import { isUnreadLetter } from "@/components/notes/note-meta";
+import { runListTransition } from "@/components/common/view-transition";
 import { useHydrated } from "@/components/common/use-hydrated";
 import type {
 	DailyMood,
@@ -233,6 +234,9 @@ function getRealtimeRecordId(
 	return typeof record?.id === "string" ? record.id : null;
 }
 
+
+/** Left-to-right order of the sections, used to pick a slide direction. */
+const SPACE_SECTION_ORDER: SpaceSection[] = ["notes", "finances", "mood", "memories", "movies", "personal"];
 export function OurSpaceClient({
 	profile,
 	partner,
@@ -341,6 +345,20 @@ export function OurSpaceClient({
 	);
 	const activePeriod =
 		filterRange === "week" ? selectedWeekPeriod : selectedMonthPeriod;
+
+	// Directional panel entrance: the new tab or period slides in from the side
+	// it sits on (tab order, or earlier/later in time). Period-filtered tabs also
+	// remount on a period change so that slide plays there too.
+	const periodScoped = activeSection === "notes" || activeSection === "finances" || activeSection === "mood";
+	const panelKey = periodScoped ? `${activeSection}:${activePeriod}` : activeSection;
+	const [panelMotion, setPanelMotion] = useState({ key: panelKey, section: activeSection, period: activePeriod, x: 0 });
+	if (panelMotion.key !== panelKey) {
+		const order = SPACE_SECTION_ORDER;
+		const sectionStep = order.indexOf(activeSection) - order.indexOf(panelMotion.section);
+		const periodStep = activePeriod === panelMotion.period ? 0 : activePeriod > panelMotion.period ? 1 : -1;
+		const direction = sectionStep !== 0 ? Math.sign(sectionStep) : periodStep;
+		setPanelMotion({ key: panelKey, section: activeSection, period: activePeriod, x: direction * 24 });
+	}
 	const pickerActivePeriod =
 		pickerRange === "week" ? selectedWeekPeriod : selectedMonthPeriod;
 
@@ -604,18 +622,20 @@ export function OurSpaceClient({
 			ignoredRealtimeNoteIds.current.delete(savedNote.id);
 		}, 10000);
 
-		setNotes((currentNotes) => {
-			const nextNotes = currentNotes.some((note) => note.id === savedNote.id)
-				? currentNotes.map((note) =>
-						note.id === savedNote.id ? savedNote : note,
-					)
-				: [savedNote, ...currentNotes];
+		runListTransition(() => {
+			setNotes((currentNotes) => {
+				const nextNotes = currentNotes.some((note) => note.id === savedNote.id)
+					? currentNotes.map((note) =>
+							note.id === savedNote.id ? savedNote : note,
+						)
+					: [savedNote, ...currentNotes];
 
-			return nextNotes.sort(
-				(first, second) =>
-					new Date(second.created_at).getTime() -
-					new Date(first.created_at).getTime(),
-			);
+				return nextNotes.sort(
+					(first, second) =>
+						new Date(second.created_at).getTime() -
+						new Date(first.created_at).getTime(),
+				);
+			});
 		});
 	};
 
@@ -645,9 +665,11 @@ export function OurSpaceClient({
 			ignoredRealtimeNoteIds.current.delete(noteId);
 		}, 10000);
 
-		setNotes((currentNotes) =>
-			currentNotes.filter((note) => note.id !== noteId),
-		);
+		runListTransition(() => {
+			setNotes((currentNotes) =>
+				currentNotes.filter((note) => note.id !== noteId),
+			);
+		});
 	};
 
 	const upsertLocalExpense = (savedExpense: IndividualExpense) => {
@@ -656,19 +678,34 @@ export function OurSpaceClient({
 			ignoredRealtimeExpenseIds.current.delete(savedExpense.id);
 		}, 10000);
 
-		setExpenses((currentExpenses) => {
-			const nextExpenses = currentExpenses.some(
-				(expense) => expense.id === savedExpense.id,
-			)
-				? currentExpenses.map((expense) =>
-						expense.id === savedExpense.id ? savedExpense : expense,
-					)
-				: [savedExpense, ...currentExpenses];
+		runListTransition(() => {
+			setExpenses((currentExpenses) => {
+				const nextExpenses = currentExpenses.some(
+					(expense) => expense.id === savedExpense.id,
+				)
+					? currentExpenses.map((expense) =>
+							expense.id === savedExpense.id ? savedExpense : expense,
+						)
+					: [savedExpense, ...currentExpenses];
 
-			return nextExpenses.sort(
-				(first, second) =>
-					new Date(second.transaction_date).getTime() -
-					new Date(first.transaction_date).getTime(),
+				return nextExpenses.sort(
+					(first, second) =>
+						new Date(second.transaction_date).getTime() -
+						new Date(first.transaction_date).getTime(),
+				);
+			});
+		});
+	};
+
+	const removeLocalExpense = (expenseId: string) => {
+		ignoredRealtimeExpenseIds.current.add(expenseId);
+		window.setTimeout(() => {
+			ignoredRealtimeExpenseIds.current.delete(expenseId);
+		}, 10000);
+
+		runListTransition(() => {
+			setExpenses((currentExpenses) =>
+				currentExpenses.filter((expense) => expense.id !== expenseId),
 			);
 		});
 	};
@@ -709,20 +746,22 @@ export function OurSpaceClient({
 			ignoredRealtimeMemoryIds.current.delete(savedMemory.id);
 		}, 10000);
 
-		setMemories((currentMemories) => {
-			const nextMemories = currentMemories.some(
-				(memory) => memory.id === savedMemory.id,
-			)
-				? currentMemories.map((memory) =>
-						memory.id === savedMemory.id ? savedMemory : memory,
-					)
-				: [savedMemory, ...currentMemories];
+		runListTransition(() => {
+			setMemories((currentMemories) => {
+				const nextMemories = currentMemories.some(
+					(memory) => memory.id === savedMemory.id,
+				)
+					? currentMemories.map((memory) =>
+							memory.id === savedMemory.id ? savedMemory : memory,
+						)
+					: [savedMemory, ...currentMemories];
 
-			return nextMemories.sort(
-				(first, second) =>
-					new Date(second.visited_at).getTime() -
-					new Date(first.visited_at).getTime(),
-			);
+				return nextMemories.sort(
+					(first, second) =>
+						new Date(second.visited_at).getTime() -
+						new Date(first.visited_at).getTime(),
+				);
+			});
 		});
 	};
 
@@ -732,9 +771,11 @@ export function OurSpaceClient({
 			ignoredRealtimeMemoryIds.current.delete(memoryId);
 		}, 10000);
 
-		setMemories((currentMemories) =>
-			currentMemories.filter((memory) => memory.id !== memoryId),
-		);
+		runListTransition(() => {
+			setMemories((currentMemories) =>
+				currentMemories.filter((memory) => memory.id !== memoryId),
+			);
+		});
 	};
 
 	const upsertLocalMovie = (savedMovie: Movie) => {
@@ -743,18 +784,20 @@ export function OurSpaceClient({
 			ignoredRealtimeMovieIds.current.delete(savedMovie.id);
 		}, 10000);
 
-		setMovies((currentMovies) => {
-			const nextMovies = currentMovies.some((movie) => movie.id === savedMovie.id)
-				? currentMovies.map((movie) =>
-						movie.id === savedMovie.id ? savedMovie : movie,
-					)
-				: [savedMovie, ...currentMovies];
+		runListTransition(() => {
+			setMovies((currentMovies) => {
+				const nextMovies = currentMovies.some((movie) => movie.id === savedMovie.id)
+					? currentMovies.map((movie) =>
+							movie.id === savedMovie.id ? savedMovie : movie,
+						)
+					: [savedMovie, ...currentMovies];
 
-			return nextMovies.sort(
-				(first, second) =>
-					new Date(second.updated_at).getTime() -
-					new Date(first.updated_at).getTime(),
-			);
+				return nextMovies.sort(
+					(first, second) =>
+						new Date(second.updated_at).getTime() -
+						new Date(first.updated_at).getTime(),
+				);
+			});
 		});
 	};
 
@@ -764,9 +807,11 @@ export function OurSpaceClient({
 			ignoredRealtimeMovieIds.current.delete(movieId);
 		}, 10000);
 
-		setMovies((currentMovies) =>
-			currentMovies.filter((movie) => movie.id !== movieId),
-		);
+		runListTransition(() => {
+			setMovies((currentMovies) =>
+				currentMovies.filter((movie) => movie.id !== movieId),
+			);
+		});
 	};
 
 	useEffect(() => {
@@ -1134,8 +1179,13 @@ export function OurSpaceClient({
 				</div>
 
 				<div
-					key={activeSection}
+					key={panelKey}
 					className="mobile-tab-panel-in min-w-0 mt-6 sm:mt-7 lg:mt-8"
+					style={
+						panelMotion.x
+							? ({ "--panel-from-x": `${panelMotion.x}px`, "--panel-from-y": "0px" } as React.CSSProperties)
+							: undefined
+					}
 				>
 					{activeSection === "notes" ? (
 						<NotesPanel
@@ -1181,6 +1231,7 @@ export function OurSpaceClient({
 							partnerAvatar={partnerAvatar}
 							timeZone={profileTimeZone}
 							periodControl={mobilePeriodControl}
+							onExpenseDeleted={removeLocalExpense}
 							onEditExpense={(expense) => {
 								setEditingExpense(expense);
 								setExpenseOpen(true);

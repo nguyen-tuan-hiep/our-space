@@ -13,6 +13,7 @@ import {
 import type { ReactNode } from "react";
 import type { Profile } from "@/lib/types";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { AnimatedNumber } from "@/components/common/animated-number";
 import { Button } from "@/components/ui/button";
 
 const NotificationPermissionButton = dynamic(
@@ -193,7 +194,7 @@ export function PersonalPanel({
 								Relationship
 							</p>
 							<p className="mt-1 font-serif text-2xl leading-tight text-foreground lg:text-5xl">
-								{relationshipStats.daysTogether} days together
+								<AnimatedNumber fromZero value={relationshipStats.daysTogether} /> days together
 							</p>
 							{/* <p className="mt-2 text-sm text-subtle-foreground">
 								Since {anniversaryLabel}

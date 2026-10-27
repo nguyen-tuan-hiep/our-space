@@ -3,7 +3,7 @@
 import { useDialogPresence } from "@/components/common/use-dialog-presence";
 import { PanelHeader } from "@/components/common/panel-header";
 import Image from "next/image";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition, type CSSProperties } from "react";
 import {
 	Bookmark,
 	Check,
@@ -13,7 +13,9 @@ import {
 	Play,
 	Plus,
 	Star,
+	X,
 } from "lucide-react";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 
 // --- Import Swiper React components, Modules và Styles ---
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -27,7 +29,8 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { useToast } from "@/components/feedback/toast";
 import { MoviesPanelSkeleton } from "@/components/our-space/tab-skeletons";
 import { Button } from "@/components/ui/button";
-import { NativeDialog } from "@/components/ui/native-controls";
+import { Dialog, DialogDescription, DialogOverlay, DialogPortal, DialogTitle } from "@/components/ui/dialog";
+import { useMediaQuery } from "@/components/common/use-hydrated";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Movie, MovieStatus, Profile } from "@/lib/types";
 
@@ -152,85 +155,6 @@ function getUserReaction(movie: Movie, userId: string) {
 	return movie.reaction_by_user?.[userId] ?? null;
 }
 
-function UserCommentBlock({
-	movie,
-	profile,
-}: {
-	movie: Movie;
-	profile: Profile;
-}) {
-	const comment = getUserComment(movie, profile.id);
-
-	return (
-		<div className="flex items-start gap-3">
-			<div className="grid size-10 shrink-0 place-items-center">
-				<UserAvatar profile={profile} />
-			</div>
-
-			<div className="min-w-0 flex-1">
-				<div className="flex min-w-0 items-center justify-between gap-2">
-					<p className="min-w-0 truncate text-sm font-bold leading-5 text-foreground">
-						{profile.display_name}
-					</p>
-
-					<MovieSignal
-						movie={movie}
-						profile={profile}
-
-						showAvatar={false}
-					/>
-				</div>
-
-				<p
-					className={[
-						"whitespace-pre-wrap break-words text-sm leading-5",
-						comment ? "text-muted-foreground" : "text-subtle-foreground",
-					].join(" ")}
-				>
-					{comment || "No comment yet."}
-				</p>
-			</div>
-		</div>
-	);
-}
-
-function MovieSignal({
-	movie,
-	profile,
-	showAvatar = true,
-}: {
-	movie: Movie;
-	profile: Profile;
-	showAvatar?: boolean;
-}) {
-	const rating = getUserRating(movie, profile.id);
-	const reaction = getUserReaction(movie, profile.id);
-
-	if (rating === null && !reaction) return null;
-
-	return (
-		<div
-			className={[
-				"inline-flex shrink-0 items-center gap-1 rounded-full text-primary-ink backdrop-blur-md h-5 px-2 leading-none",
-			].join(" ")}
-		>
-			{showAvatar ? <UserAvatar profile={profile} /> : null}
-
-			{rating !== null ? (
-				<span className="inline-flex items-center gap-0.5 font-bold">
-					<Star
-						size={14}
-						fill="currentColor"
-					/>
-					{rating.toFixed(1)}
-				</span>
-			) : null}
-
-			{reaction ? <span>{reaction}</span> : null}
-		</div>
-	);
-}
-
 function MovieCard({
 	movie,
 	onEdit,
@@ -243,7 +167,7 @@ function MovieCard({
 	onShowDetails: () => void;
 }) {
 	return (
-		<article className="content-fade-in relative h-full w-full overflow-hidden rounded-2xl bg-transparent shadow-none sm:bg-surface sm:shadow-[0_14px_32px_rgba(23,23,23,0.08)] dark:sm:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
+		<article style={{ viewTransitionName: `movie-${movie.id}` }} className="content-fade-in relative h-full w-full overflow-hidden rounded-2xl bg-transparent shadow-none sm:bg-surface sm:shadow-[0_14px_32px_rgba(23,23,23,0.08)] dark:sm:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
 			<button
 				type="button"
 				aria-label={`View details for ${movie.title}`}
@@ -256,7 +180,8 @@ function MovieCard({
 						alt={`${movie.title} poster`}
 						fill
 						sizes="(min-width: 1280px) 18vw, (min-width: 640px) 30vw, 80vw"
-						className="object-cover"
+						className="reveal-image object-cover"
+						onLoad={(event) => { event.currentTarget.dataset.loaded = ""; }}
 					/>
 				) : (
 					<div className="grid h-full place-items-center bg-primary p-4 text-center text-primary-foreground">
@@ -288,6 +213,55 @@ function MovieCard({
 	);
 }
 
+const statusLabels: Record<MovieStatus, string> = {
+	wishlist: "🔖 Wishlist",
+	watching: "🍿 Watching",
+	watched: "✅ Watched",
+};
+
+/** A punched perforation across the ticket: dashes between two half-circle notches. */
+function TicketPerforation() {
+	return <div aria-hidden="true" className="movie-pass-perf movie-pass-reveal" />;
+}
+
+/** One person's seat on the ticket: their rating, reaction and comment. */
+function TicketSeat({ movie, profile, seat }: { movie: Movie; profile: Profile; seat: string }) {
+	const rating = getUserRating(movie, profile.id);
+	const reaction = getUserReaction(movie, profile.id);
+	const comment = getUserComment(movie, profile.id);
+
+	return (
+		<div className="movie-pass-seat movie-pass-reveal">
+			<span className="movie-pass-seat-no" aria-label={`Seat ${seat}`}>{seat}</span>
+			<UserAvatar profile={profile} className="size-9 text-lg" imageSizes="2.25rem" />
+			<div className="min-w-0 flex-1">
+				<div className="flex min-w-0 items-center justify-between gap-2">
+					<p className="movie-pass-seat-name">{profile.display_name}</p>
+					{rating !== null || reaction ? (
+						<p className="movie-pass-score">
+							{rating !== null ? (
+								<span className="inline-flex items-center gap-0.5">
+									<Star size={13} fill="currentColor" aria-hidden="true" />
+									{rating.toFixed(1)}
+								</span>
+							) : null}
+							{reaction ? <span>{reaction}</span> : null}
+						</p>
+					) : null}
+				</div>
+				<p className={comment ? "movie-pass-comment" : "movie-pass-comment movie-pass-comment--empty"}>
+					{comment ? `“${comment}”` : "No comment yet."}
+				</p>
+			</div>
+		</div>
+	);
+}
+
+/**
+ * Movie details drawn as one big cinema ticket (no dialog chrome). Opening
+ * plays on the ticket itself: it drops in, its "Admit two" stub tears off the
+ * top, and the lines print onto the stock in turn. Tapping skips it.
+ */
 function MovieDetailsDialog({
 	movie: selectedDetail,
 	busy,
@@ -304,151 +278,130 @@ function MovieDetailsDialog({
 	onMoveStatus: (movie: Movie, status: MovieStatus) => void;
 }) {
 	const { content: movie, open } = useDialogPresence(selectedDetail);
+	const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+	const selectedId = selectedDetail?.id ?? null;
+	const [introFor, setIntroFor] = useState(selectedId);
+	const [introDone, setIntroDone] = useState(false);
+	// Focus the ticket itself on open: the close button is hidden during the
+	// intro, and focusing a button at the foot would scroll the ticket.
+	const ticketRef = useRef<HTMLElement>(null);
+
+	// Each opening plays the ticket intro afresh.
+	if (selectedId !== introFor) {
+		setIntroFor(selectedId);
+		if (selectedId) setIntroDone(false);
+	}
+
 	if (!movie) return null;
 
+	const playIntro = !introDone && !reducedMotion;
 	const nextStatus = getNextStatus(movie);
 	const NextIcon = nextStatus?.icon;
 	const categories = getMovieCategories(movie);
+	const ticketNo = movie.id.replace(/-/g, "").slice(0, 8).toUpperCase();
+	let line = 0;
+	const reveal = () => ({ "--i": line++ }) as CSSProperties;
 
 	return (
-		<NativeDialog
-			open={open}
-			onClose={onClose}
-			title={movie.title}
-			maxWidth="md"
-			showHandle={false}
-			showTitle={false}
-			closeLabel="Close movie details"
-			contentClassName="!p-0"
-		>
+		<Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
+			<DialogPortal>
+				<DialogOverlay />
+				<DialogPrimitive.Popup initialFocus={ticketRef} className="note-reader-bare note-reader mobile-sheet fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[calc(100svh-env(safe-area-inset-top)-1rem)] w-full flex-col text-foreground outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-h-[88svh] sm:w-[min(27rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+					<div
+						className={`flex min-h-0 flex-1 flex-col px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-16 sm:p-0 ${playIntro ? "cursor-pointer" : ""}`}
+						onClick={playIntro ? () => setIntroDone(true) : undefined}
+					>
+						<div className={`movie-pass-wrap ${playIntro ? "movie-pass--intro" : ""}`}>
+							{playIntro ? (
+								<div aria-hidden="true" className="movie-pass-stub" onAnimationEnd={() => setIntroDone(true)}>
+									<span>Admit</span>
+									<strong>♥ 2 ♥</strong>
+									<span>Our Space cinema</span>
+								</div>
+							) : null}
+							<DialogPrimitive.Close className={`movie-pass-close ${playIntro ? "invisible" : ""}`}>
+								<X size={18} aria-hidden="true" /><span className="sr-only">Close movie details</span>
+							</DialogPrimitive.Close>
+							<article ref={ticketRef} tabIndex={-1} className="movie-pass outline-none">
+								<p className="movie-pass-kicker movie-pass-reveal" style={reveal()}>
+									<span aria-hidden="true">✦</span> Admit two · Row ♥
+								</p>
 
-			<div className="grid min-h-0 sm:grid-cols-[15rem_1fr]">
-				<div className="relative overflow-visible bg-primary px-4 pb-0 pt-5 sm:overflow-hidden sm:bg-primary-subtle sm:p-0">
-					{movie.poster_url ? (
-						<>
-							<div className="absolute inset-0 overflow-hidden sm:hidden">
-								<Image
-									src={movie.poster_url}
-									alt=""
-									fill
-									sizes="100vw"
-									className="scale-110 object-cover opacity-90 blur-md"
-									aria-hidden="true"
-								/>
-								<div className="absolute inset-0 bg-primary/20" />
-							</div>
-						</>
-					) : null}
-					<div className="relative z-[1] mx-auto -mb-14 aspect-[2/3] w-[min(70vw,15rem)] overflow-hidden rounded-2xl bg-surface-hover shadow-[0_16px_40px_rgba(0,0,0,0.28)] sm:mb-0 sm:h-full sm:w-full sm:rounded-none sm:shadow-none">
-						{movie.poster_url ? (
-							<Image
-								src={movie.poster_url}
-								alt={`${movie.title} poster`}
-								fill
-								sizes="(min-width: 640px) 15rem, 100vw"
-								className="object-cover"
-							/>
-						) : (
-							<div className="grid h-full place-items-center bg-primary text-primary-foreground">
-								<Clapperboard size={52} />
-							</div>
-						)}
-					</div>
-				</div>
+								<div className="movie-pass-hero">
+									<div className="movie-pass-poster movie-pass-reveal" style={reveal()}>
+										<span aria-hidden="true" className="movie-pass-tape" />
+										<div className="relative aspect-[2/3] overflow-hidden rounded-[10px] bg-[#f3eef0]">
+											{movie.poster_url ? (
+												<Image
+													src={movie.poster_url}
+													alt={`${movie.title} poster`}
+													fill
+													sizes="9rem"
+													className="object-cover"
+												/>
+											) : (
+												<div className="grid h-full place-items-center text-[#c76f87]">
+													<Clapperboard size={34} />
+												</div>
+											)}
+										</div>
+									</div>
+									<div className="min-w-0 flex-1 movie-pass-reveal" style={reveal()}>
+										<p className="movie-pass-label">Now showing</p>
+										<DialogTitle className="movie-pass-title">{movie.title}</DialogTitle>
+										<DialogDescription className="sr-only">Movie details and both of your reviews</DialogDescription>
+										<div className="mt-3 flex flex-wrap gap-1.5">
+											{categories.map((category) => (
+												<span key={category} className="movie-pass-chip">🎬 {category}</span>
+											))}
+											<span className="movie-pass-chip movie-pass-chip--status">{statusLabels[movie.status]}</span>
+										</div>
+									</div>
+								</div>
 
-				<div className="flex min-h-0 flex-col gap-3 p-5 pt-24 sm:p-6">
-					<div>
-						<div>
-							<h2 className="font-serif text-3xl leading-tight text-foreground pr-10 [overflow-wrap:anywhere]">
-								{movie.title}
-							</h2>
+								<TicketPerforation />
+
+								<div className="grid gap-3.5">
+									{participants.map((participant, index) => (
+										<div key={participant.id} style={reveal()} className="contents">
+											<TicketSeat movie={movie} profile={participant} seat={`A${index + 1}`} />
+										</div>
+									))}
+								</div>
+
+								<TicketPerforation />
+
+								<div className="movie-pass-actions movie-pass-reveal" style={reveal()}>
+									<button type="button" className="movie-pass-button" onClick={() => onEdit(movie)}>
+										<Edit2 size={15} aria-hidden="true" />
+										Edit
+									</button>
+									{nextStatus ? (
+										<button
+											type="button"
+											className="movie-pass-button movie-pass-button--primary"
+											disabled={busy}
+											onClick={() => onMoveStatus(movie, nextStatus.status)}
+										>
+											{NextIcon ? <NextIcon size={15} aria-hidden="true" /> : null}
+											{busy ? "Updating..." : nextStatus.label}
+										</button>
+									) : null}
+								</div>
+
+								<footer className="movie-pass-footer movie-pass-reveal" style={reveal()} aria-hidden="true">
+									<span className="movie-pass-doodle">♡ ✦ ♡</span>
+									<span className="grid justify-items-end gap-1">
+										<span className="movie-pass-barcode" />
+										<span className="movie-pass-no">No. {ticketNo}</span>
+									</span>
+								</footer>
+							</article>
 						</div>
 					</div>
-
-					<div className="grid gap-2">
-						<div className="flex flex-wrap items-center gap-2">
-							{categories.map((category) => (
-								<span
-									key={category}
-									className="rounded-full bg-primary-subtle px-3 py-1.5 text-sm font-bold text-muted-foreground"
-								>
-									{category}
-								</span>
-							))}
-							<span className="rounded-full bg-primary-subtle px-3 py-1.5 text-sm font-bold text-muted-foreground">
-								{movie.status === "wishlist"
-									? "Wishlist"
-									: movie.status === "watching"
-										? "Watching"
-										: "Watched"}
-							</span>
-						</div>
-						{/* <div className="flex flex-wrap items-center gap-2">
-							{participants.map((participant) => (
-								<MovieSignal
-									key={participant.id}
-									movie={movie}
-									profile={participant}
-								/>
-							))}
-						</div> */}
-					</div>
-
-					<div className="mt-auto overflow-hidden rounded-2xl border border-primary-border bg-primary-subtle/55">
-						<div
-							className="
-			max-h-32 overflow-y-auto
-			[scrollbar-color:rgb(var(--theme-primary-rgb)/0.7)_transparent]
-			[scrollbar-width:thin]
-			[&::-webkit-scrollbar]:w-2
-			[&::-webkit-scrollbar-track]:bg-transparent
-			[&::-webkit-scrollbar-thumb]:min-h-6
-			[&::-webkit-scrollbar-thumb]:rounded-full
-			[&::-webkit-scrollbar-thumb]:border-2
-			[&::-webkit-scrollbar-thumb]:border-transparent
-			[&::-webkit-scrollbar-thumb]:bg-primary/70
-			[&::-webkit-scrollbar-thumb]:bg-clip-padding
-			hover:[&::-webkit-scrollbar-thumb]:bg-primary
-		"
-						>
-							<div className="grid gap-2 p-2.5">
-								{participants.map((participant) => (
-									<UserCommentBlock
-										key={participant.id}
-										movie={movie}
-										profile={participant}
-									/>
-								))}
-							</div>
-						</div>
-					</div>
-
-					<div className="flex flex-col gap-2">
-						<Button
-							type="button"
-							variant="outline"
-							className="h-11 w-full rounded-2xl"
-							onClick={() => onEdit(movie)}
-						>
-							<Edit2 size={16} />
-							Edit
-						</Button>
-						{nextStatus ? (
-							<Button
-								type="button"
-								variant="outline"
-								className="h-11 w-full rounded-2xl"
-								disabled={busy}
-								onClick={() => onMoveStatus(movie, nextStatus.status)}
-							>
-								{NextIcon ? <NextIcon size={16} /> : null}
-								{busy ? "Updating..." : nextStatus.label}
-							</Button>
-						) : null}
-					</div>
-				</div>
-			</div>
-		</NativeDialog>
+				</DialogPrimitive.Popup>
+			</DialogPortal>
+		</Dialog>
 	);
 }
 

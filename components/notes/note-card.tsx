@@ -62,7 +62,7 @@ export function NoteCard({
 	};
 
 	return (
-		<article className="app-card note-card relative flex h-full min-w-0 flex-col p-5">
+		<article className="app-card note-card relative flex h-full min-w-0 flex-col p-5" style={{ viewTransitionName: `note-${note.id}` }}>
 			{/* Every state shares one layout (status, envelope stage, title, sender) so the grid stays even. */}
 			<div className={`flex h-8 min-w-0 items-center gap-1.5 text-xs ${canEdit ? "pr-9" : ""}`}>
 				{locked ? (

@@ -14,6 +14,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { AnimatedNumber } from "@/components/common/animated-number";
 import { NativeSelect } from "@/components/ui/native-controls";
 import {
 	expenseCategoryColors,
@@ -359,6 +360,8 @@ export function FinanceCharts({
 											}
 											fillOpacity={0.18}
 											strokeWidth={2}
+											animationDuration={700}
+											animationEasing="ease-out"
 										/>
 									))}
 								</AreaChart>
@@ -382,7 +385,12 @@ export function FinanceCharts({
 										</span>
 									</div>
 									<p className="text-sm text-neutral-500">
-										Total: {formatCurrency(item.total, displayCurrency)}
+										Total:{" "}
+										<AnimatedNumber
+											fromZero
+											value={item.total}
+											format={(value) => formatCurrency(value, displayCurrency)}
+										/>
 									</p>
 								</div>
 
@@ -406,6 +414,11 @@ export function FinanceCharts({
 												innerRadius={40}
 												outerRadius={75}
 												paddingAngle={2}
+												startAngle={90}
+												endAngle={-270}
+												animationBegin={80}
+												animationDuration={700}
+												animationEasing="ease-out"
 												labelLine={false}
 												label={renderCustomizedLabel} // 💡 Gắn phần trăm vào tâm lát cắt
 											>

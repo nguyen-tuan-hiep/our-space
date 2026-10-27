@@ -29,6 +29,7 @@ interface FinancesPanelProps {
 	partnerAvatar: string;
 	timeZone: string;
 	onEditExpense: (expense: IndividualExpense) => void;
+	onExpenseDeleted: (expenseId: string) => void;
 	onLoadFinanceData: () => void;
 	onLogExpense: () => void;
 	periodControl?: ReactNode;
@@ -55,6 +56,7 @@ export function FinancesPanel({
 	partnerAvatar,
 	timeZone,
 	onEditExpense,
+	onExpenseDeleted,
 	onLoadFinanceData,
 	onLogExpense,
 	periodControl,
@@ -108,14 +110,17 @@ export function FinancesPanel({
 					<div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
 						<ExpenseFeed
 							title={`My ledger ${profileAvatar}`}
+							ownerName={coupleProfiles.find((item) => item.id === currentUserId)?.display_name}
 							expenses={myExpenses}
 							currentUserId={currentUserId}
 							readOnly={false}
 							timeZone={timeZone}
 							onEdit={onEditExpense}
+							onDeleted={onExpenseDeleted}
 						/>
 						<ExpenseFeed
 							title={`${partnerDisplayName}'s ledger ${partnerAvatar}`}
+							ownerName={partnerDisplayName}
 							expenses={partnerExpenses}
 							currentUserId={currentUserId}
 							readOnly

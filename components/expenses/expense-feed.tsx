@@ -1,10 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { ListFilter } from "lucide-react";
+import { Edit2, ListFilter } from "lucide-react";
 import { ActionMenu } from "@/components/common/action-menu";
 import { useToast } from "@/components/feedback/toast";
-import { NativeSelect } from "@/components/ui/native-controls";
+import { NativeDialog, NativeSelect } from "@/components/ui/native-controls";
+import { Button } from "@/components/ui/button";
+import { AnimatedNumber } from "@/components/common/animated-number";
+import { useDialogPresence } from "@/components/common/use-dialog-presence";
 import { deleteExpense } from "@/app/actions";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import {
@@ -22,6 +25,9 @@ interface ExpenseFeedProps {
 	readOnly: boolean;
 	timeZone: string;
 	onEdit?: (expense: IndividualExpense) => void;
+	onDeleted?: (expenseId: string) => void;
+	/** Whose ledger this is; shown as "Paid by" on receipts (expenses may lack `owner`). */
+	ownerName?: string;
 }
 
 export function ExpenseFeed({
@@ -31,10 +37,13 @@ export function ExpenseFeed({
 	readOnly,
 	timeZone,
 	onEdit,
+	onDeleted,
+	ownerName,
 }: ExpenseFeedProps) {
 	const toast = useToast();
 
 	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const [receipt, setReceipt] = useState<IndividualExpense | null>(null);
 	const [expenseToDelete, setExpenseToDelete] =
 		useState<IndividualExpense | null>(null);
 
@@ -174,7 +183,24 @@ export function ExpenseFeed({
 							return (
 								<div
 									key={expense.id}
-									className="rounded-2xl border border-primary-border bg-primary-subtle p-4 shadow-[0_10px_28px_rgba(30,25,20,0.05)] transition"
+									role="button"
+									tabIndex={0}
+									aria-label={`View receipt for ${expense.title}`}
+									aria-haspopup="dialog"
+									// The whole row opens its receipt; the action menu inside keeps its own clicks.
+									onClick={(event) => {
+										if ((event.target as HTMLElement).closest("button, a, [role='menu']") !== null) return;
+										setReceipt(expense);
+									}}
+									onKeyDown={(event) => {
+										if (event.target !== event.currentTarget) return;
+										if (event.key === "Enter" || event.key === " ") {
+											event.preventDefault();
+											setReceipt(expense);
+										}
+									}}
+									style={{ viewTransitionName: `expense-${expense.id}` }}
+									className="cursor-pointer rounded-2xl border border-primary-border bg-primary-subtle p-4 shadow-[0_10px_28px_rgba(30,25,20,0.05)] transition hover:border-primary active:scale-[0.99]"
 								>
 									<div className="flex items-start justify-between gap-3">
 										<div className="min-w-0 flex-1">
@@ -250,6 +276,19 @@ export function ExpenseFeed({
 				/>
 			</div>
 
+			<ExpenseReceiptDialog
+				expense={receipt}
+				ownerName={ownerName}
+				timeZone={timeZone}
+				canEdit={Boolean(receipt && !readOnly && receipt.owner_id === currentUserId)}
+				onClose={() => setReceipt(null)}
+				onEdit={(expense) => {
+					setReceipt(null);
+					// Let the receipt slide away before the edit form opens.
+					window.setTimeout(() => onEdit?.(expense), 260);
+				}}
+			/>
+
 			<ConfirmDialog
 				open={Boolean(expenseToDelete)}
 				title="Delete transaction?"
@@ -277,6 +316,7 @@ export function ExpenseFeed({
 
 						if (result.ok) {
 							setExpenseToDelete(null);
+							onDeleted?.(expenseToDelete.id);
 						}
 					});
 				}}
@@ -284,3 +324,88 @@ export function ExpenseFeed({
 		</div>
 	);
 }
+
+/**
+ * A transaction shown as a paper receipt: it feeds out of a printer slot line
+ * by line, and the total counts up once its line has printed.
+ */
+function ExpenseReceiptDialog({ expense: selected, ownerName, timeZone, canEdit, onClose, onEdit }: {
+	expense: IndividualExpense | null;
+	ownerName?: string;
+	timeZone: string;
+	canEdit: boolean;
+	onClose: () => void;
+	onEdit: (expense: IndividualExpense) => void;
+}) {
+	const { content: expense, open } = useDialogPresence(selected);
+	if (!expense) return null;
+
+	const lines: Array<[string, string]> = [
+		["Item", expense.title],
+		["Category", expense.category],
+		["Paid by", expense.owner?.display_name ?? ownerName ?? "—"],
+		["Currency", expense.currency],
+	];
+
+	return (
+		<NativeDialog
+			open={open}
+			onClose={onClose}
+			title={`Receipt for ${expense.title}`}
+			maxWidth="xs"
+			showTitle={false}
+			closeLabel="Close receipt"
+			contentClassName="!p-0"
+		>
+			<div key={expense.id} className="px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-7 sm:px-8 sm:pb-8">
+				<div aria-hidden="true" className="receipt-slot" />
+				{/* The shadow lives on a wrapper: the receipt's zig-zag mask would clip it. */}
+				<div className="receipt-shadow">
+				<div className="receipt">
+					<p className="receipt-line receipt-head" style={{ "--line": 0 } as React.CSSProperties}>Our Space ♥</p>
+					<p className="receipt-line receipt-sub" style={{ "--line": 1 } as React.CSSProperties}>
+						{formatAppDateTime(expense.transaction_date, timeZone)}
+					</p>
+					<hr className="receipt-rule receipt-line" style={{ "--line": 2 } as React.CSSProperties} />
+					{lines.map(([label, value], index) => (
+						<p key={label} className="receipt-line receipt-row" style={{ "--line": index + 3 } as React.CSSProperties}>
+							<span>{label}</span>
+							<span className="receipt-value">{value}</span>
+						</p>
+					))}
+					{expense.notes ? (
+						<p className="receipt-line receipt-note" style={{ "--line": lines.length + 3 } as React.CSSProperties}>
+							“{expense.notes}”
+						</p>
+					) : null}
+					<hr className="receipt-rule receipt-line" style={{ "--line": lines.length + 4 } as React.CSSProperties} />
+					<p className="receipt-line receipt-total" style={{ "--line": lines.length + 5 } as React.CSSProperties}>
+						<span>Total</span>
+						<AnimatedNumber
+							fromZero
+							delay={1100}
+							value={expense.amount}
+							format={(value) => formatCurrency(value, expense.currency)}
+						/>
+					</p>
+					<p className="receipt-line receipt-thanks" style={{ "--line": lines.length + 6 } as React.CSSProperties}>
+						Thank you, love
+					</p>
+				</div>
+				</div>
+				{canEdit ? (
+					<Button
+						type="button"
+						variant="outline"
+						className="receipt-actions mt-6 h-11 w-full rounded-2xl"
+						onClick={() => onEdit(expense)}
+					>
+						<Edit2 size={16} />
+						Edit transaction
+					</Button>
+				) : null}
+			</div>
+		</NativeDialog>
+	);
+}
+

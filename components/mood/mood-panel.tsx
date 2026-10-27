@@ -1,6 +1,7 @@
 "use client";
 
 import { PanelHeader } from "@/components/common/panel-header";
+import { useSlidingIndicator } from "@/components/common/use-sliding-indicator";
 import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState, useTransition } from "react";
 import { CalendarDays, HeartPulse, Pencil, Trash2 } from "lucide-react";
@@ -124,7 +125,10 @@ function personMoodCard({
 	label,
 	mood,
 	timeZone,
+	dateKey,
 }: {
+	/** Re-keys the card so it cross-fades when another day is selected. */
+	dateKey: string;
 	avatar: string;
 	label: string;
 	mood?: DailyMood;
@@ -133,7 +137,7 @@ function personMoodCard({
 	const option = getMoodOption(mood?.mood);
 
 	return (
-		<div className="app-card content-fade-in p-4">
+		<div key={dateKey} className="app-card diary-page p-4">
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-w-0 items-center gap-3">
 					<div className="grid size-12 place-items-center rounded-full bg-primary-subtle text-accent-foreground shadow-sm">
@@ -150,7 +154,7 @@ function personMoodCard({
 						</p>
 					</div>
 				</div>
-				<div className="text-3xl">{option?.emoji ?? "—"}</div>
+				<div key={option?.value ?? "none"} className={option ? "mood-stamp text-3xl" : "text-3xl text-muted-foreground"}>{option?.emoji ?? "—"}</div>
 			</div>
 			<p className="mt-3 text-sm font-semibold text-muted-foreground">
 				{option ? option.label : "No mood"}
@@ -254,6 +258,12 @@ export function MoodPanel({
 		setNote(selectedMood?.note ?? "");
 	}
 
+	// One highlight glides between the selected day and between mood choices.
+	const [dayGridRef, dayIndicatorRef] = useSlidingIndicator<HTMLDivElement, HTMLSpanElement>(
+		`${selectedDate}|${activePeriod}|${filterRange}|${loading}`,
+	);
+	const [moodGridRef, moodIndicatorRef] = useSlidingIndicator<HTMLDivElement, HTMLSpanElement>(`${mood}|${showInitialSkeleton}`);
+
 	if (showInitialSkeleton) {
 		return <MoodPanelSkeleton />;
 	}
@@ -305,7 +315,8 @@ export function MoodPanel({
 				</div>
 
 				<div className="mt-4">
-					<div className="grid grid-cols-7 gap-1 text-center sm:gap-1.5 lg:gap-2.5">
+					<div ref={dayGridRef} className="relative grid grid-cols-7 gap-1 text-center sm:gap-1.5 lg:gap-2.5">
+						<span ref={dayIndicatorRef} aria-hidden="true" className="sliding-indicator rounded-2xl bg-primary shadow-[0_12px_28px_rgba(30,25,20,0.24)]" />
 						{weekDayLabels.map((label) => (
 							<div
 								key={label}
@@ -341,12 +352,13 @@ export function MoodPanel({
 										type="button"
 										disabled={!cell.inPeriod}
 										aria-pressed={selected}
+										data-indicator-target={selected ? "" : undefined}
 										aria-label={`Mood for ${formatMoodDate(cell.dateKey, timeZone)}`}
 										onClick={() => setSelectedDate(cell.dateKey)}
 										className={[
 											"relative h-[4.7rem] min-w-0 overflow-hidden rounded-2xl border px-0.5 py-1.5 transition active:scale-[0.9] sm:h-auto sm:min-h-[5.1rem] sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
 											selected
-												? "border-primary bg-primary text-primary-foreground shadow-[0_12px_28px_rgba(30,25,20,0.24)]"
+												? "border-transparent bg-transparent text-primary-foreground"
 												: "border-primary-border bg-primary-subtle text-foreground hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground",
 											!cell.inPeriod && "pointer-events-none opacity-25",
 										]
@@ -374,7 +386,9 @@ export function MoodPanel({
 													!mineOption && !selected && "text-neutral-300",
 												].join(" ")}
 											>
-												{mineOption?.emoji ?? "♡"}
+												<span key={mineOption?.value ?? "none"} className={selected ? "mood-emoji-pop" : undefined}>
+													{mineOption?.emoji ?? "♡"}
+												</span>
 											</span>
 											{partnerOption ? (
 												<span className="absolute -bottom-0.5 -right-0.5 grid size-[1.3rem] place-items-center rounded-full border-surface bg-surface text-[13px] text-neutral-950 shadow-sm sm:size-5 sm:text-[12px] sm:-bottom-0.5 sm:-right-0.5 lg:size-6 lg:text-sm">
@@ -399,14 +413,17 @@ export function MoodPanel({
 				</div>
 			</div>
 
-			<div className="grid gap-3 sm:grid-cols-2">
+			{/* Picking a day turns these like diary pages; the mood is stamped on. */}
+			<div className="diary-spread grid gap-3 sm:grid-cols-2">
 				{personMoodCard({
+					dateKey: `me:${selectedDate}`,
 					avatar: profileAvatar,
 					label: `${profile.display_name} · You`,
 					mood: selectedMood,
 					timeZone,
 				})}
 				{personMoodCard({
+					dateKey: `partner:${selectedDate}`,
 					avatar: partnerAvatar,
 					label: partner.display_name,
 					mood: partnerSelectedMood,
@@ -443,7 +460,8 @@ export function MoodPanel({
 						name="mood"
 						value={mood}
 					/>
-					<div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+					<div ref={moodGridRef} className="relative grid grid-cols-4 gap-2 sm:grid-cols-8">
+						<span ref={moodIndicatorRef} aria-hidden="true" className="sliding-indicator rounded-2xl bg-primary shadow-[0_12px_28px_rgba(30,25,20,0.18)]" />
 						{moodOptions.map((option) => {
 							const selected = mood === option.value;
 							return (
@@ -451,15 +469,16 @@ export function MoodPanel({
 									key={option.value}
 									type="button"
 									aria-pressed={selected}
+									data-indicator-target={selected ? "" : undefined}
 									onClick={() => setMood(option.value)}
 									className={[
 										"group grid min-h-[4.8rem] place-items-center rounded-2xl border px-2 py-2 text-center transition active:scale-[0.9]",
 										selected
-											? "border-primary bg-primary text-primary-foreground shadow-[0_12px_28px_rgba(30,25,20,0.18)]"
+											? "border-transparent bg-transparent text-primary-foreground"
 											: "border-primary-border bg-primary-subtle text-foreground hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground",
 									].join(" ")}
 								>
-									<span className="text-2xl">{option.emoji}</span>
+									<span className={selected ? "mood-emoji-pop text-2xl" : "text-2xl"}>{option.emoji}</span>
 									<span
 										className={[
 											"text-[11px] font-bold",

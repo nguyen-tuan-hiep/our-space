@@ -205,8 +205,11 @@ export function ActionMenu({
 						onClick={onEdit}
 						className="group gap-3 rounded-2xl px-3 py-3 hover:bg-surface-hover"
 					>
-						<span className="grid size-9 place-items-center rounded-xl bg-primary-subtle text-primary-ink transition group-hover:bg-primary-hover group-hover:text-primary-foreground">
-							<Edit2 size={16} />
+						{/* The highlighted item recolours every descendant (focus:**:text-accent-foreground),
+						    and the icon's paths resolve `currentColor` from that dark text, so on the
+						    dark tile the stroke itself is set to the light foreground. */}
+						<span className="grid size-9 place-items-center rounded-xl bg-primary-subtle text-primary-ink transition group-hover:bg-primary-hover group-focus:bg-primary-hover">
+							<Edit2 size={16} className="group-hover:stroke-primary-foreground group-focus:stroke-primary-foreground" />
 						</span>
 						<span>
 							<span className="block font-bold text-foreground">
