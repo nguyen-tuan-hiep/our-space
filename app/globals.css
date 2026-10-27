@@ -1847,21 +1847,34 @@ html[data-scrolled] body::before { opacity: 1; }
  * strands them mid-screen until the next repaint. Below desktop the space page
  * therefore never scrolls the document: html/body are locked and <main> is the
  * scroll container, so the viewport fixed elements attach to never moves. */
-/* Gap between the floating bottom tabs and the screen edge: on home-indicator
- * iPhones it nearly fills the indicator area, keeping the dock off the corners. */
+/* Gaps between the floating bottom tabs and the screen edges. On home-indicator
+ * iPhones (PWA: the page reaches the rounded screen corners) the two states
+ * need different gaps:
+ * - expanded, the wide pill sits low and near the sides (about 12px side,
+ *   20px bottom), so it reads as part of the screen edge;
+ * - collapsed, the two 52px circles move in to about 32px from both the side
+ *   and the bottom, concentric with the ~55pt corner curve instead of crowding
+ *   it diagonally.
+ * Elsewhere (no safe area) everything stays at 14px. */
 :root {
-	--bottom-nav-offset: max(0.875rem, calc(env(safe-area-inset-bottom) - 0.125rem));
-	/* Side gap. On home-indicator iPhones (PWA: the page reaches the rounded
-	 * screen corners) it matches the bottom gap (~32px), so the 52px circles of
-	 * the collapsed dock sit concentric with the ~55pt corner curve instead of
-	 * crowding it diagonally; elsewhere both stay 14px. */
-	--dock-inset-x: var(--bottom-nav-offset);
+	--bottom-nav-offset: max(0.875rem, calc(env(safe-area-inset-bottom) - 0.875rem));
+	--dock-inset-x: max(0.875rem, calc(env(safe-area-inset-bottom) - 1.375rem));
+	--dock-corner-gap: max(0.875rem, calc(env(safe-area-inset-bottom) - 0.125rem));
 }
 /* Mobile tab dock: a full-width glass pill that collapses, while scrolling
  * down, into a circle the size of the round (+) action beside it (both 52px,
  * an easy thumb target). The track keeps its expanded width under
  * the shrinking pill and fades out, so tabs never reflow mid-animation. */
-.mobile-tab-dock { --dock-size: 3.25rem; --bar-w: calc(100vw - 2 * var(--dock-inset-x)); }
+.mobile-tab-dock {
+	--dock-size: 3.25rem;
+	--bar-w: calc(100vw - 2 * var(--dock-inset-x));
+	transition: padding 380ms var(--motion-ease), translate 380ms var(--motion-ease);
+}
+/* Collapsed: inset the circles from the expanded gaps to the corner gap. */
+.mobile-tab-dock[data-minimized] {
+	padding-inline: calc(var(--dock-corner-gap) - var(--dock-inset-x));
+	translate: 0 calc(var(--bottom-nav-offset) - var(--dock-corner-gap));
+}
 .mobile-tab-bar {
 	width: var(--bar-w);
 	height: 3.625rem;
