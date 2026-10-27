@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MemoryPanelSkeleton } from "@/components/our-space/tab-skeletons";
 import { getMemoryTypeColor } from "@/lib/constants";
 import type { MemoryMapEntry, Profile } from "@/lib/types";
+import { EmptyDoodle } from "@/components/common/doodles";
 
 interface MemoryMapPanelProps {
 	loading: boolean;
@@ -339,6 +340,7 @@ export function MemoryMapPanel({
 				</div>
 			) : (
 				<div className="empty-state">
+					<EmptyDoodle kind="memory" />
 					<h3 className="font-serif text-2xl text-foreground">Every place has a story</h3>
 					<p>Save your first place together, then add a photo or a little memory.</p>
 				</div>

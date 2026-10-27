@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/native-controls";
 import { memoryTypeOptions } from "@/lib/constants";
 import type { MemoryMapEntry, Profile } from "@/lib/types";
+import { celebrateSave } from "@/components/common/save-celebration";
 
 interface MemoryMapDialogProps {
 	open: boolean;
@@ -224,6 +225,7 @@ export function MemoryMapDialog({
 						if (result.ok) {
 							unsavedPhotoPublicIds.current.clear();
 							onSaved?.(result.memory);
+							if (!memory) celebrateSave("memory");
 							handleClose();
 						}
 					});

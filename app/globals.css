@@ -2579,6 +2579,268 @@ html[data-view-transition="root"]::view-transition-new(root) {
 	.pola-card { transition: none; }
 }
 
+/* Empty states: a doodle bobbing over a soft shadow (components/common/doodles.tsx). */
+.empty-doodle {
+	position: relative;
+	display: inline-grid;
+	width: 6.5rem;
+	flex-shrink: 0;
+	justify-items: center;
+}
+.empty-doodle--sm { width: 3.25rem; }
+.empty-doodle-art { display: block; width: 100%; animation: doodle-float 3.2s ease-in-out infinite; }
+.empty-doodle-art > svg { display: block; width: 100%; height: auto; }
+.empty-doodle-shadow {
+	width: 62%;
+	height: 0.45rem;
+	margin-top: 0.35rem;
+	border-radius: 50%;
+	background: rgb(40 30 40 / 0.14);
+	animation: doodle-shadow 3.2s ease-in-out infinite;
+}
+.empty-doodle--sm .empty-doodle-shadow { height: 0.3rem; margin-top: 0.2rem; }
+.empty-doodle-z {
+	position: absolute;
+	top: 0.4rem;
+	right: -0.1rem;
+	font-family: ui-serif, "New York", Georgia, serif;
+	font-size: 0.85rem;
+	font-style: italic;
+	font-weight: 700;
+	color: #92c2e8;
+	opacity: 0;
+	animation: doodle-z 3.6s ease-out calc(var(--z) * 1.2s) infinite;
+}
+@keyframes doodle-float {
+	0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+	50% { transform: translateY(-7px) rotate(1.5deg); }
+}
+@keyframes doodle-shadow {
+	0%, 100% { transform: scaleX(1); opacity: 1; }
+	50% { transform: scaleX(0.78); opacity: 0.6; }
+}
+@keyframes doodle-z {
+	0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+	20% { opacity: 1; }
+	100% { opacity: 0; transform: translate(14px, -26px) scale(1.15); }
+}
+
+/* Save celebrations (components/common/save-celebration.tsx): a short scene
+ * above the bottom tabs. Every scene ends with save-scene-out on the root,
+ * which is what removes it. */
+.save-scene {
+	position: fixed;
+	bottom: calc(var(--bottom-nav-offset, 1rem) + 5.5rem);
+	left: 50%;
+	z-index: 110;
+	width: 7rem;
+	height: 7rem;
+	margin-left: -3.5rem;
+	pointer-events: none;
+	animation: save-scene-out 300ms ease-in 1300ms forwards;
+}
+@media (min-width: 1024px) { .save-scene { bottom: 3rem; } }
+.save-scene-art { position: absolute; inset: auto 0 0; width: 100%; height: auto; filter: drop-shadow(0 8px 14px rgb(60 30 45 / 0.22)); }
+@keyframes save-scene-out { to { opacity: 0; } }
+@keyframes save-scene-pop {
+	0% { opacity: 0; transform: translateY(18px) scale(0.5); }
+	60% { opacity: 1; transform: translateY(-6px) scale(1.06); }
+	100% { opacity: 1; transform: none; }
+}
+/* note: the envelope pops up, its flap folds shut, then it flies off up-right
+ * leaving a trail of hearts. */
+.save-scene--note .save-scene-art {
+	animation: save-scene-pop 380ms var(--motion-ease) both, save-note-fly 620ms cubic-bezier(0.5, 0, 0.75, 0) 760ms forwards;
+}
+.save-scene--note .doodle-flap {
+	transform-box: view-box;
+	transform-origin: 60px 22px;
+	animation: save-note-flap 300ms ease-out 360ms both;
+}
+.save-scene-trail {
+	position: absolute;
+	left: 50%;
+	bottom: 45%;
+	font-size: 0.9rem;
+	color: #e89aae;
+	opacity: 0;
+	animation: save-note-trail 700ms ease-out calc(820ms + var(--t) * 90ms) forwards;
+}
+@keyframes save-note-flap {
+	from { transform: scaleY(-1); }
+	to { transform: scaleY(1); }
+}
+@keyframes save-note-fly {
+	to { opacity: 0; transform: translate(120px, -150px) rotate(18deg) scale(0.45); }
+}
+@keyframes save-note-trail {
+	0% { opacity: 0; transform: translate(calc(var(--t) * 22px), calc(var(--t) * -26px)) scale(0.6); }
+	30% { opacity: 1; }
+	100% { opacity: 0; transform: translate(calc(var(--t) * 22px + 6px), calc(var(--t) * -26px - 22px)) scale(1); }
+}
+/* expense: a coin drops into the piggy bank's slot and the piggy wiggles. */
+.save-scene--expense .save-scene-art {
+	transform-origin: 50% 100%;
+	animation: save-scene-pop 380ms var(--motion-ease) both, save-piggy-wiggle 420ms ease-in-out 820ms;
+}
+.save-scene-coin {
+	position: absolute;
+	top: -0.5rem;
+	left: 38%;
+	z-index: 0;
+	width: 1.75rem;
+	animation: save-coin-drop 520ms cubic-bezier(0.55, 0, 0.8, 0.4) 360ms both;
+}
+.save-scene-plus {
+	position: absolute;
+	top: 0.2rem;
+	right: 0.6rem;
+	font-size: 1.1rem;
+	font-weight: 800;
+	color: #c99a35;
+	opacity: 0;
+	animation: save-plus 600ms ease-out 860ms forwards;
+}
+@keyframes save-coin-drop {
+	0% { opacity: 0; transform: translateY(-40px) rotateY(0deg); }
+	15% { opacity: 1; }
+	85% { opacity: 1; transform: translateY(34px) rotateY(540deg); }
+	100% { opacity: 0; transform: translateY(42px) rotateY(600deg) scaleY(0.4); }
+}
+@keyframes save-piggy-wiggle {
+	0%, 100% { transform: none; }
+	25% { transform: rotate(-6deg) scale(1.04, 0.96); }
+	50% { transform: rotate(5deg); }
+	75% { transform: rotate(-3deg); }
+}
+@keyframes save-plus {
+	from { opacity: 0; transform: translateY(6px) scale(0.6); }
+	40% { opacity: 1; }
+	to { opacity: 0; transform: translateY(-18px) scale(1.1); }
+}
+/* movie: the popcorn bucket bounces in and kernels pop out every which way. */
+.save-scene--movie .save-scene-art { animation: save-scene-pop 380ms var(--motion-ease) both, save-bucket-hop 260ms ease-in-out 520ms; }
+.save-scene-kernel {
+	position: absolute;
+	top: 30%;
+	left: calc(50% - 0.45rem);
+	width: 0.9rem;
+	height: 0.8rem;
+	border: 2px solid #4a3a3f;
+	border-radius: 50% 45% 55% 40%;
+	background: #fff8e6;
+	opacity: 0;
+	animation: save-kernel 760ms cubic-bezier(0.2, 0.7, 0.4, 1) calc(480ms + var(--k) * 60ms) forwards;
+}
+@keyframes save-bucket-hop {
+	50% { transform: translateY(-5px) scale(1.04, 0.96); }
+}
+@keyframes save-kernel {
+	0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(0.5); }
+	55% { opacity: 1; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); }
+	100% { opacity: 0; transform: translate(calc(var(--dx) * 1.15), calc(var(--dy) * 0.55)) rotate(var(--rot)) scale(0.9); }
+}
+/* memory: a pin drops onto the map, bounces, and sends out a ripple. */
+.save-scene--memory .save-scene-art {
+	left: 25%;
+	width: 50%;
+	transform-origin: 50% 100%;
+	animation: save-pin-drop 620ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+.save-scene-ripple {
+	position: absolute;
+	bottom: -0.35rem;
+	left: 50%;
+	width: 3.5rem;
+	height: 1.1rem;
+	margin-left: -1.75rem;
+	border: 2px solid #e89aae;
+	border-radius: 50%;
+	opacity: 0;
+	animation: save-ripple 700ms ease-out 420ms forwards;
+}
+@keyframes save-pin-drop {
+	0% { opacity: 0; transform: translateY(-120px) scale(0.9, 1.1); }
+	55% { opacity: 1; transform: translateY(0) scale(1.1, 0.88); }
+	75% { transform: translateY(-10px) scale(0.96, 1.04); }
+	100% { opacity: 1; transform: none; }
+}
+@keyframes save-ripple {
+	from { opacity: 0.9; transform: scale(0.3); }
+	to { opacity: 0; transform: scale(1.6); }
+}
+
+/* Tab bar: the chosen tab's icon does its own little move once. */
+.tab-icon-pop { display: inline-flex; animation-duration: 560ms; animation-timing-function: var(--motion-ease); animation-fill-mode: both; }
+.tab-icon-pop--notes { transform-origin: 30% 100%; animation-name: tab-pop-flip; }
+.tab-icon-pop--finances { animation-name: tab-pop-spin; animation-duration: 620ms; }
+.tab-icon-pop--mood { animation-name: tab-pop-beat; animation-duration: 640ms; }
+.tab-icon-pop--memories { transform-origin: 50% 100%; animation-name: tab-pop-drop; }
+.tab-icon-pop--movies { transform-origin: 15% 85%; animation-name: tab-pop-clap; }
+.tab-icon-pop--personal { transform-origin: 50% 90%; animation-name: tab-pop-wave; animation-duration: 640ms; }
+@keyframes tab-pop-flip {
+	0% { transform: none; }
+	35% { transform: rotate(-14deg) scale(1.15); }
+	70% { transform: rotate(6deg); }
+	100% { transform: none; }
+}
+@keyframes tab-pop-spin {
+	from { transform: perspective(60px) rotateY(0); }
+	to { transform: perspective(60px) rotateY(360deg); }
+}
+@keyframes tab-pop-beat {
+	0%, 100% { transform: scale(1); }
+	20% { transform: scale(1.25); }
+	35% { transform: scale(0.95); }
+	55% { transform: scale(1.18); }
+	75% { transform: scale(1); }
+}
+@keyframes tab-pop-drop {
+	0% { transform: translateY(-8px) scale(0.9, 1.1); }
+	50% { transform: translateY(0) scale(1.15, 0.85); }
+	75% { transform: translateY(-3px) scale(0.97, 1.03); }
+	100% { transform: none; }
+}
+@keyframes tab-pop-clap {
+	0% { transform: none; }
+	30% { transform: rotate(-16deg); }
+	55% { transform: rotate(4deg) scale(1.08); }
+	100% { transform: none; }
+}
+@keyframes tab-pop-wave {
+	0%, 100% { transform: none; }
+	20% { transform: rotate(-12deg); }
+	45% { transform: rotate(10deg); }
+	70% { transform: rotate(-6deg); }
+}
+/* The round (+) turns a quarter and springs back when pressed. */
+.mobile-tab-action:active svg { transform: rotate(90deg) scale(0.9); }
+.mobile-tab-action svg { transition: transform 260ms cubic-bezier(0.3, 1.6, 0.5, 1); }
+
+/* Mood picker: sparkles shoot out from the emoji as a mood is picked. */
+.mood-sparkles { position: absolute; top: 50%; left: 50%; width: 0; height: 0; pointer-events: none; }
+.mood-sparkle {
+	position: absolute;
+	top: -0.4rem;
+	left: -0.35rem;
+	font-size: 0.7rem;
+	line-height: 1;
+	opacity: 0;
+	animation: mood-sparkle 640ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+.mood-sparkle--heart { font-size: 0.6rem; }
+@keyframes mood-sparkle {
+	0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(0.4); }
+	60% { opacity: 1; transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(1.1); }
+	100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--d) * -1.2)) scale(0.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.empty-doodle-art, .empty-doodle-shadow, .tab-icon-pop { animation: none; }
+	.empty-doodle-z, .mood-sparkles { display: none; }
+	.mobile-tab-action svg { transition: none; }
+}
+
 /* Receipt for a transaction: thermal paper with a torn zig-zag foot that feeds
  * out of a printer slot; each line prints in turn (--line), total last. */
 .receipt-slot {

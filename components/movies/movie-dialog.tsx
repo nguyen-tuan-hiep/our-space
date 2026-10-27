@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/native-controls";
 import { movieCategories, movieStatuses } from "@/lib/constants";
 import type { Movie, MovieStatus, Profile } from "@/lib/types";
+import { celebrateSave } from "@/components/common/save-celebration";
 
 const ratingOptions = Array.from({ length: 19 }, (_, index) =>
 	String(1 + index * 0.5),
@@ -210,6 +211,7 @@ export function MovieDialog({
 						if (result.ok) {
 							unsavedPosterPublicIds.current.clear();
 							onSaved?.(result.movie);
+							if (!movie) celebrateSave("movie");
 							handleClose();
 						}
 					});

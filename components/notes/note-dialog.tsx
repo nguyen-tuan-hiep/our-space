@@ -18,6 +18,7 @@ import {
 	normalizeTimeZoneValue,
 } from "@/lib/constants";
 import type { Profile, SharedNote } from "@/lib/types";
+import { celebrateSave } from "@/components/common/save-celebration";
 
 interface NoteDialogProps {
 	open: boolean;
@@ -108,6 +109,7 @@ export function NoteDialog({
 						});
 						if (result.ok) {
 							onSaved?.(result.note);
+							if (!note) celebrateSave("note");
 							handleClose();
 						}
 					});

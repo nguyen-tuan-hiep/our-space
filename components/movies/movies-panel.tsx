@@ -33,6 +33,7 @@ import { Dialog, DialogDescription, DialogOverlay, DialogPortal, DialogTitle } f
 import { useMediaQuery } from "@/components/common/use-hydrated";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Movie, MovieStatus, Profile } from "@/lib/types";
+import { EmptyDoodle } from "@/components/common/doodles";
 
 interface MoviesPanelProps {
 	loading: boolean;
@@ -492,10 +493,8 @@ export function MoviesPanel({
 			{/* With nothing in any list, one empty state replaces the three empty sections. */}
 			{!loading && movies.length === 0 ? (
 				<div className="app-card flex flex-col items-center px-6 py-14 text-center sm:py-20">
-					<span className="glass-chip grid size-14 place-items-center rounded-full text-foreground">
-						<Clapperboard size={24} aria-hidden="true" />
-					</span>
-					<h3 className="mt-5 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">Your movie list is empty</h3>
+					<EmptyDoodle kind="movies" />
+					<h3 className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">Your movie list is empty</h3>
 					<p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">Save films to watch together, then keep track of what you have seen and loved.</p>
 				</div>
 			) : (
@@ -592,7 +591,10 @@ export function MoviesPanel({
 								))}
 							</div>
 						) : (
-							<p className="px-4 text-sm text-muted-foreground">{column.empty}</p>
+							<div className="flex items-center gap-3 px-4">
+								<EmptyDoodle kind="movies" size="sm" />
+								<p className="text-sm text-muted-foreground">{column.empty}</p>
+							</div>
 						)}
 					</section>
 				))}

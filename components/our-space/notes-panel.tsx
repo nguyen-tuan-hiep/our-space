@@ -1,11 +1,12 @@
 import { PanelHeader } from "@/components/common/panel-header";
 import type { ReactNode } from "react";
-import { NotebookPen, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { NoteCard } from "@/components/notes/note-card";
 import { NotesPanelSkeleton } from "@/components/our-space/tab-skeletons";
 import { Button } from "@/components/ui/button";
 import type { FilterRange } from "@/lib/dashboard-utils";
 import type { SharedNote } from "@/lib/types";
+import { EmptyDoodle } from "@/components/common/doodles";
 
 interface NotesPanelProps {
 	currentUserId: string;
@@ -73,10 +74,8 @@ export function NotesPanel({
 					))
 				) : (
 					<div className="app-card col-span-full flex flex-col items-center px-6 py-14 text-center sm:py-20">
-						<span className="glass-chip grid size-14 place-items-center rounded-full text-foreground">
-							<NotebookPen size={24} aria-hidden="true" />
-						</span>
-						<h3 className="mt-5 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">A little space for your words</h3>
+						<EmptyDoodle kind="notes" />
+						<h3 className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">A little space for your words</h3>
 						<p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">No notes for this {filterRange} yet. Write a thought for your partner, or choose another period.</p>
 					</div>
 				)}

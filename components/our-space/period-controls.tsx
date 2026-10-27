@@ -476,7 +476,14 @@ export function MobileSpaceTabs({
                 ].join(" ")}
                 onClick={() => onSelectSection(item.value)}
               >
-                <Icon size={20} strokeWidth={highlighted ? 2.4 : 2} aria-hidden="true" />
+                {/* The chosen tab's icon does its own little move once (a page flip, a
+                    coin spin, a heartbeat…); not while dragging across the bar. */}
+                <span
+                  key={selected ? "on" : "off"}
+                  className={selected && dragX === null ? `tab-icon-pop tab-icon-pop--${item.value}` : "inline-flex"}
+                >
+                  <Icon size={20} strokeWidth={highlighted ? 2.4 : 2} aria-hidden="true" />
+                </span>
                 <span className="leading-3">{item.label}</span>
               </button>
             );
@@ -490,7 +497,12 @@ export function MobileSpaceTabs({
           className="mobile-tab-collapsed absolute inset-0 grid place-items-center text-foreground"
           onClick={() => setMinimized(false)}
         >
-          <ActiveIcon size={23} strokeWidth={2.3} aria-hidden="true" />
+          <span
+            key={minimized ? "min" : "full"}
+            className={minimized ? `tab-icon-pop tab-icon-pop--${items[selectedIndex].value}` : "inline-flex"}
+          >
+            <ActiveIcon size={23} strokeWidth={2.3} aria-hidden="true" />
+          </span>
         </button>
       </div>
       {/* Only while collapsed: the expanded bar keeps the full width for its tabs. */}

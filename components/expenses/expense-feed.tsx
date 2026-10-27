@@ -17,6 +17,7 @@ import {
 } from "@/lib/constants";
 import { formatAppDateTime } from "@/lib/date-format";
 import type { ExpenseCategory, IndividualExpense } from "@/lib/types";
+import { EmptyDoodle } from "@/components/common/doodles";
 
 interface ExpenseFeedProps {
 	title: string;
@@ -253,11 +254,14 @@ export function ExpenseFeed({
 							);
 						})
 					) : (
-						<p className="rounded-2xl border border-dashed border-primary-border bg-muted py-10 text-center text-muted-foreground">
-							{expenses.length
-								? "No transactions in this category. Choose another category to see more."
-								: "No transactions yet. Log an expense or choose another period."}
-						</p>
+						<div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-primary-border bg-muted px-4 py-8 text-center text-muted-foreground">
+							<EmptyDoodle kind="finance" />
+							<p>
+								{expenses.length
+									? "No transactions in this category. Choose another category to see more."
+									: "No transactions yet. Log an expense or choose another period."}
+							</p>
+						</div>
 					)}
 				</div>
 

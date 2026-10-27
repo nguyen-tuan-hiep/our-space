@@ -2,7 +2,7 @@
 
 import { PanelHeader } from "@/components/common/panel-header";
 import { useSlidingIndicator } from "@/components/common/use-sliding-indicator";
-import type { FormEvent, ReactNode } from "react";
+import type { CSSProperties, FormEvent, ReactNode } from "react";
 import { useMemo, useState, useTransition } from "react";
 import { CalendarDays, HeartPulse, Pencil, Trash2 } from "lucide-react";
 import { deleteMood, upsertMood } from "@/app/actions";
@@ -34,6 +34,31 @@ export const moodOptions: Array<{
 ];
 
 const moodMap = new Map(moodOptions.map((option) => [option.value, option]));
+
+// Eight sparkles around a picked mood: angle, distance, colour, and shape.
+const SPARKLES = Array.from({ length: 8 }, (_, index) => ({
+	angle: index * 45 + (index % 2 ? 12 : -8),
+	distance: index % 2 ? 26 : 34,
+	color: ["#e89aae", "#92c2e8", "#f6d27a"][index % 3],
+	heart: index % 3 === 1,
+}));
+
+/** A burst of tiny stars and hearts shooting out from a mood as it is picked. */
+function MoodSparkles() {
+	return (
+		<span aria-hidden="true" className="mood-sparkles">
+			{SPARKLES.map((sparkle, index) => (
+				<span
+					key={index}
+					className={sparkle.heart ? "mood-sparkle mood-sparkle--heart" : "mood-sparkle"}
+					style={{ "--a": `${sparkle.angle}deg`, "--d": `${sparkle.distance}px`, color: sparkle.color } as CSSProperties}
+				>
+					{sparkle.heart ? "♥" : "✦"}
+				</span>
+			))}
+		</span>
+	);
+}
 const weekDayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const dayMs = 24 * 60 * 60 * 1000;
 
@@ -221,6 +246,8 @@ export function MoodPanel({
 	}, [calendarCells, todayKey]);
 	const [selectedDate, setSelectedDate] = useState(defaultSelectedDate);
 	const [mood, setMood] = useState<MoodLevel>("great");
+	// Bumped on each pick, so the sparkles replay only when the user chooses.
+	const [sparkleBurst, setSparkleBurst] = useState(0);
 	const [note, setNote] = useState("");
 	const [pending, startTransition] = useTransition();
 
@@ -470,7 +497,10 @@ export function MoodPanel({
 									type="button"
 									aria-pressed={selected}
 									data-indicator-target={selected ? "" : undefined}
-									onClick={() => setMood(option.value)}
+									onClick={() => {
+										setMood(option.value);
+										setSparkleBurst((burst) => burst + 1);
+									}}
 									className={[
 										"group grid min-h-[4.8rem] place-items-center rounded-2xl border px-2 py-2 text-center transition active:scale-[0.9]",
 										selected
@@ -478,7 +508,10 @@ export function MoodPanel({
 											: "border-primary-border bg-primary-subtle text-foreground hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground",
 									].join(" ")}
 								>
-									<span className={selected ? "mood-emoji-pop text-2xl" : "text-2xl"}>{option.emoji}</span>
+									<span className="relative">
+										<span className={selected ? "mood-emoji-pop text-2xl" : "text-2xl"}>{option.emoji}</span>
+										{selected && sparkleBurst ? <MoodSparkles key={sparkleBurst} /> : null}
+									</span>
 									<span
 										className={[
 											"text-[11px] font-bold",

@@ -22,6 +22,7 @@ import {
   normalizeCurrencyCode,
 } from "@/lib/constants";
 import type { CurrencyCode, IndividualExpense, Profile } from "@/lib/types";
+import { celebrateSave } from "@/components/common/save-celebration";
 
 interface ExpenseDialogProps {
   open: boolean;
@@ -127,6 +128,7 @@ export function ExpenseDialog({
 
               if (result.ok) {
                 onSaved?.(result.expense);
+                if (!expense) celebrateSave("expense");
                 handleClose();
               }
             });
