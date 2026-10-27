@@ -90,40 +90,50 @@ export function NotesPanelSkeleton() {
 
 /* ---------------------------------------------------------------- Finance */
 
+/** The title set above a card: a small eyebrow over a heading. */
+function CardTitleSkeleton({ bar = "h-6 w-48 sm:h-7" }: { bar?: string }) {
+	return (
+		<div className="px-1">
+			<Line box="h-4" bar="h-3 w-24" />
+			<Line box="mt-1 h-[1.875rem] sm:h-[2.34375rem]" bar={bar} />
+		</div>
+	);
+}
+
 function PieCardSkeleton() {
 	return (
-		<div className="app-card flex min-w-0 flex-col justify-between overflow-hidden p-4">
-			<div className="mb-2 flex items-center justify-between gap-3">
-				<div className="min-w-0">
-					<Line box="h-5" bar="h-3.5 w-28" />
+		<section className="grid min-w-0 content-start gap-3">
+			<CardTitleSkeleton bar="h-6 w-40 sm:h-7" />
+			<div className="app-card flex min-w-0 flex-col justify-between overflow-hidden p-4 sm:p-5">
+				<div className="mb-2 flex items-center justify-between gap-3">
 					<Line box="h-5" bar="h-3.5 w-24" />
+					<Line box="h-4" bar="h-3 w-10" />
 				</div>
-				<Line box="h-4" bar="h-3 w-10" />
-			</div>
-			<div className="flex w-full min-w-0 flex-col items-center justify-center gap-4 sm:flex-row">
-				<Skeleton className="size-44 shrink-0 rounded-full sm:size-48" />
-				<div className="w-full flex-1 space-y-1.5">
-					{["w-3/4", "w-2/3"].map((width) => (
-						<Line key={width} box="h-5" bar={`h-3 ${width}`} />
-					))}
+				<div className="flex w-full min-w-0 flex-col items-center justify-center gap-4 sm:flex-row">
+					<Skeleton className="size-44 shrink-0 rounded-full sm:size-48" />
+					<div className="w-full flex-1 space-y-1.5">
+						{["w-3/4", "w-2/3"].map((width) => (
+							<Line key={width} box="h-5" bar={`h-3 ${width}`} />
+						))}
+					</div>
 				</div>
 			</div>
-		</div>
+		</section>
 	);
 }
 
 function LedgerSkeleton() {
 	return (
-		<div className="app-card p-4 sm:p-5">
-			<div className="mb-5">
-				<Line box="h-4" bar="h-3 w-16" />
-				<div className="mt-2 flex items-center gap-3">
-					<Line box="h-6" bar="h-5 w-36" />
+		<section className="grid min-w-0 gap-3">
+			<CardTitleSkeleton bar="h-6 w-36 sm:h-7" />
+			<div className="app-card p-4 sm:p-5">
+				<div className="mb-4 flex items-center gap-2">
+					<Skeleton className="h-10 min-w-0 flex-1 rounded-full sm:max-w-sm" />
 					<Skeleton className="ml-auto size-10 shrink-0 rounded-full" />
 				</div>
+				<Skeleton className="h-[8.0625rem] rounded-2xl" />
 			</div>
-			<Skeleton className="h-[8.0625rem] rounded-2xl" />
-		</div>
+		</section>
 	);
 }
 
@@ -131,42 +141,30 @@ export function FinancePanelSkeleton() {
 	return (
 		<div className="grid gap-4 sm:gap-5">
 			<PanelHeaderSkeleton actions={[periodActionSkeleton, primaryActionSkeleton("w-[9.25rem]")]} />
-			<div className="app-card w-full min-w-0 p-4 sm:p-5">
-				<div className="mb-5 flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:flex-wrap sm:items-end">
-					<div className="min-w-0">
-						<Line box="h-4" bar="h-3 w-28" />
-						<Line box="mt-1 h-[1.875rem] sm:mt-2 sm:h-[2.8125rem]" bar="h-6 w-48 sm:h-8 sm:w-64" />
+			<section className="grid min-w-0 gap-3">
+				<CardTitleSkeleton bar="h-6 w-56 sm:h-7" />
+				<div className="app-card min-w-0 p-4 sm:p-5">
+					<div className="mb-4 flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:flex-wrap sm:items-end">
 						{/* Exchange-rate line wraps to two lines on phones. */}
-						<div className="mt-2">
+						<div className="min-w-0">
 							<Line box="h-5" bar="h-3.5 w-72 max-w-full" />
 							<Line box="h-5 sm:hidden" bar="h-3.5 w-32" />
 						</div>
-					</div>
-					<div className="grid min-w-0 gap-2 sm:w-[10rem]">
-						<Line box="h-5" bar="h-3.5 w-16" />
-						<Skeleton className="h-12 w-full rounded-xl sm:h-11" />
-					</div>
-				</div>
-				<div className="grid min-w-0 gap-4 sm:gap-6">
-					<div className="app-card min-w-0 p-4">
-						<div className="mb-4">
-							<Line box="h-4" bar="h-3 w-28" />
-							<Line box="mt-1 h-[1.875rem] sm:mt-2 sm:h-[2.34375rem]" bar="h-6 w-56 sm:h-7" />
-						</div>
-						<div className="pb-2">
-							<Skeleton className="h-72 rounded-2xl" />
+						<div className="grid min-w-0 gap-2 sm:w-[10rem]">
+							<Line box="h-5" bar="h-3.5 w-16" />
+							<Skeleton className="h-12 w-full rounded-xl sm:h-11" />
 						</div>
 					</div>
-					<div className="grid min-w-0 gap-4 sm:gap-6 md:grid-cols-2">
-						<PieCardSkeleton />
-						<PieCardSkeleton />
+					<div className="pb-2">
+						<Skeleton className="h-72 rounded-2xl" />
 					</div>
 				</div>
+			</section>
+			<div className="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
+				<PieCardSkeleton />
+				<PieCardSkeleton />
 			</div>
-			<div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
-				<LedgerSkeleton />
-				<LedgerSkeleton />
-			</div>
+			<LedgerSkeleton />
 		</div>
 	);
 }
@@ -212,7 +210,7 @@ export function MoodPanelSkeleton() {
 					{Array.from({ length: 7 }).map((_, index) => (
 						<Skeleton
 							key={`day-${index}`}
-							className="h-[4.7rem] rounded-2xl sm:min-h-[5.1rem] lg:min-h-[6rem]"
+							className="h-[4.25rem] rounded-xl sm:h-auto sm:min-h-[5.1rem] sm:rounded-2xl lg:min-h-[6rem]"
 						/>
 					))}
 				</div>

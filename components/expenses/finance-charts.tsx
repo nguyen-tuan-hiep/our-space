@@ -15,6 +15,7 @@ import {
 	YAxis,
 } from "recharts";
 import { AnimatedNumber } from "@/components/common/animated-number";
+import { CardTitle } from "@/components/common/card-title";
 import { NativeSelect } from "@/components/ui/native-controls";
 import {
 	expenseCategoryColors,
@@ -249,70 +250,58 @@ export function FinanceCharts({
 	}, [chartData.length, isSmallDevice, yAxisWidth]);
 
 	return (
-		<div className="app-card content-fade-in w-full min-w-0 p-4 sm:p-5">
-			<div className="mb-5 flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:flex-wrap sm:items-end">
-				<div className="min-w-0">
-					<p className="eyebrow">Finance overview</p>
-					<h2 className="mt-1 font-serif text-2xl leading-tight sm:mt-2 sm:text-4xl">
-						{filterRange === "week" ? "Weekly ledgers" : "Monthly ledgers"}
-					</h2>
-					<p className="mt-2 text-sm text-neutral-500">
-						{rateLabel}
-						{exchangeRateUpdatedAt
-							? ` - updated ${formatAppDate(exchangeRateUpdatedAt, timeZone)}`
-							: ""}
-						{exchangeRateSource ? ` - ${exchangeRateSource}` : ""}
-					</p>
-				</div>
-
-				<div className="flex flex-wrap gap-3 sm:w-auto">
-					<NativeSelect
-						label="Currency"
-						id="display-currency"
-						name="display_currency"
-						value={displayCurrency}
-						onChange={(event) =>
-							setDisplayCurrency(event.target.value as CurrencyCode)
-						}
-						className="min-h-11"
-					>
-						{profileCurrencyOptions.map((option) => (
-							<option
-								key={option.currency}
-								value={option.currency}
-							>
-								{option.label}
-							</option>
-						))}
-						{otherCurrencyOptions.map((currency) => (
-							<option
-								key={currency}
-								value={currency}
-							>
-								{currency}
-							</option>
-						))}
-					</NativeSelect>
-				</div>
-			</div>
-
+		<div className="content-fade-in grid w-full min-w-0 gap-4 sm:gap-5">
 			{needsExchangeRate && !exchangeRates ? (
-				<div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100">
+				<div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100">
 					Live exchange rate is not available yet, so mixed-currency charts
 					cannot be converted. Refresh later or check the server network/API
 					setting.
 				</div>
 			) : null}
 
-			<div className="grid min-w-0 gap-4 sm:gap-6">
-				<div className="app-card min-w-0 p-4">
-					<div className="mb-4">
-						<p className="eyebrow">
-							{filterRange === "week" ? "Weekly ledgers" : "Monthly ledgers"}
+			<section className="grid min-w-0 gap-3">
+				<CardTitle eyebrow={filterRange === "week" ? "Weekly ledgers" : "Monthly ledgers"}>
+					Both ledgers in {displayCurrency}
+				</CardTitle>
+				<div className="app-card min-w-0 p-4 sm:p-5">
+					<div className="mb-4 flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:flex-wrap sm:items-end">
+						<p className="min-w-0 text-sm text-neutral-500">
+							{rateLabel}
+							{exchangeRateUpdatedAt
+								? ` - updated ${formatAppDate(exchangeRateUpdatedAt, timeZone)}`
+								: ""}
+							{exchangeRateSource ? ` - ${exchangeRateSource}` : ""}
 						</p>
-						<h3 className="mt-1 font-serif text-2xl leading-tight sm:mt-2 sm:text-3xl">
-							Both ledgers in {displayCurrency}
-						</h3>
+
+						<div className="flex flex-wrap gap-3 sm:w-auto">
+							<NativeSelect
+								label="Currency"
+								id="display-currency"
+								name="display_currency"
+								value={displayCurrency}
+								onChange={(event) =>
+									setDisplayCurrency(event.target.value as CurrencyCode)
+								}
+								className="min-h-11"
+							>
+								{profileCurrencyOptions.map((option) => (
+									<option
+										key={option.currency}
+										value={option.currency}
+									>
+										{option.label}
+									</option>
+								))}
+								{otherCurrencyOptions.map((currency) => (
+									<option
+										key={currency}
+										value={currency}
+									>
+										{currency}
+									</option>
+								))}
+							</NativeSelect>
+						</div>
 					</div>
 
 					<div className="w-full max-w-full overflow-x-auto overflow-y-hidden pb-2">
@@ -369,30 +358,24 @@ export function FinanceCharts({
 						</div>
 					</div>
 				</div>
+			</section>
 
-				<div className="grid min-w-0 gap-4 sm:gap-6 md:grid-cols-2">
-					{perPerson.map((item) => (
-						<div
-							key={item.profile.id}
-							className="app-card flex min-w-0 flex-col justify-between overflow-hidden p-4"
-						>
+			<div className="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
+				{perPerson.map((item) => (
+					<section key={item.profile.id} className="grid min-w-0 content-start gap-3">
+						<CardTitle eyebrow="Spending">
+							{item.profile.display_name} {item.profile.avatar_url ?? "🙂"}
+						</CardTitle>
+						<div className="app-card flex min-w-0 flex-col justify-between overflow-hidden p-4 sm:p-5">
 							<div className="mb-2 flex items-center justify-between gap-3">
-								<div className="min-w-0">
-									<div className="flex items-center gap-1.5 whitespace-nowrap">
-										<span className="text-sm font-semibold">
-											{item.profile.display_name}{" "}
-											{item.profile.avatar_url ?? "🙂"}
-										</span>
-									</div>
-									<p className="text-sm text-neutral-500">
-										Total:{" "}
-										<AnimatedNumber
-											fromZero
-											value={item.total}
-											format={(value) => formatCurrency(value, displayCurrency)}
-										/>
-									</p>
-								</div>
+								<p className="min-w-0 text-sm text-neutral-500">
+									Total:{" "}
+									<AnimatedNumber
+										fromZero
+										value={item.total}
+										format={(value) => formatCurrency(value, displayCurrency)}
+									/>
+								</p>
 
 								<span className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">
 									{displayCurrency}
@@ -472,8 +455,8 @@ export function FinanceCharts({
 								</div>
 							</div>
 						</div>
-					))}
-				</div>
+					</section>
+				))}
 			</div>
 		</div>
 	);

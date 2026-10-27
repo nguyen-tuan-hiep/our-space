@@ -1,6 +1,7 @@
 "use client";
 
 import { PanelHeader } from "@/components/common/panel-header";
+import { useDragSelect } from "@/components/common/use-drag-select";
 import { useSlidingIndicator } from "@/components/common/use-sliding-indicator";
 import type { CSSProperties, FormEvent, ReactNode } from "react";
 import { useMemo, useState, useTransition } from "react";
@@ -60,6 +61,8 @@ function MoodSparkles() {
 	);
 }
 const weekDayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const calendarViews = ["both", "you", "partner"] as const;
+type CalendarView = (typeof calendarViews)[number];
 const dayMs = 24 * 60 * 60 * 1000;
 
 function localDateKey(value: string | Date, timeZone: string) {
@@ -285,10 +288,17 @@ export function MoodPanel({
 		setNote(selectedMood?.note ?? "");
 	}
 
+	// Whose moods the calendar shows.
+	const [calendarView, setCalendarView] = useState<CalendarView>("both");
+	const changeCalendarView = (next: CalendarView) => {
+		if (next !== calendarView) setCalendarView(next);
+	};
+
 	// One highlight glides between the selected day and between mood choices.
 	const [dayGridRef, dayIndicatorRef] = useSlidingIndicator<HTMLDivElement, HTMLSpanElement>(
 		`${selectedDate}|${activePeriod}|${filterRange}|${loading}`,
 	);
+	const viewDrag = useDragSelect(calendarViews.length, (index) => changeCalendarView(calendarViews[index]));
 	const [moodGridRef, moodIndicatorRef] = useSlidingIndicator<HTMLDivElement, HTMLSpanElement>(`${mood}|${showInitialSkeleton}`);
 
 	if (showInitialSkeleton) {
@@ -333,12 +343,58 @@ export function MoodPanel({
 							<p className="font-serif text-2xl leading-tight">Mood calendar</p>
 						</div>
 						<p className="mt-1 text-xs font-semibold text-muted-foreground">
-							Big icon = you · small badge = partner
+							{calendarView === "both"
+								? `Top = you · bottom = ${partner.display_name}`
+								: calendarView === "you"
+									? "Only your moods"
+									: `Only ${partner.display_name}'s moods`}
 						</p>
 					</div>
 					<span className="rounded-full bg-surface-selected px-3 py-1 text-xs font-bold text-accent-foreground">
 						{filterRange === "week" ? "Week" : "Month"}
 					</span>
+				</div>
+
+				<div className="glass-chip mt-3 rounded-full p-1 sm:max-w-sm">
+					<div className="relative grid touch-pan-y grid-cols-3" {...viewDrag.trackProps}>
+						<span
+							aria-hidden="true"
+							data-dragging={viewDrag.lensX === null ? undefined : ""}
+							className="glass-selected tab-lens absolute inset-y-0 left-0 rounded-full border"
+							style={{
+								width: `calc(100% / ${calendarViews.length})`,
+								transform:
+									viewDrag.lensX === null
+										? `translateX(${calendarViews.indexOf(calendarView) * 100}%)`
+										: `translateX(${viewDrag.lensX}px)`,
+							}}
+						/>
+						{calendarViews.map((view, index) => {
+							const active = calendarView === view;
+							const highlighted = viewDrag.hoverIndex === null ? active : viewDrag.hoverIndex === index;
+							const label =
+								view === "both"
+									? "Both"
+									: view === "you"
+										? profile.display_name
+										: partner.display_name;
+
+							return (
+								<button
+									key={view}
+									type="button"
+									aria-pressed={active}
+									onClick={() => changeCalendarView(view)}
+									className={[
+										"relative z-10 min-w-0 select-none truncate rounded-full px-2 py-1.5 text-xs font-bold transition [-webkit-touch-callout:none]",
+										highlighted ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+									].join(" ")}
+								>
+									{label}
+								</button>
+							);
+						})}
+					</div>
 				</div>
 
 				<div className="mt-4">
@@ -354,10 +410,10 @@ export function MoodPanel({
 						))}
 
 						{loading ? (
-							Array.from({ length: 14 }).map((_, index) => (
+							Array.from({ length: filterRange === "week" ? 7 : 14 }).map((_, index) => (
 								<Skeleton
 									key={index}
-									className="h-[4.7rem] rounded-2xl sm:min-h-[5.1rem] lg:min-h-[6rem]"
+									className="h-[4.25rem] rounded-xl sm:h-auto sm:min-h-[5.1rem] sm:rounded-2xl lg:min-h-[6rem]"
 								/>
 							))
 						) : (
@@ -372,6 +428,7 @@ export function MoodPanel({
 								const partnerOption = getMoodOption(partnerMood?.mood);
 								const selected = selectedDate === cell.dateKey;
 								const isToday = todayKey === cell.dateKey;
+								const mainOption = calendarView === "partner" ? partnerOption : mineOption;
 
 								return (
 									<button
@@ -383,7 +440,7 @@ export function MoodPanel({
 										aria-label={`Mood for ${formatMoodDate(cell.dateKey, timeZone)}`}
 										onClick={() => setSelectedDate(cell.dateKey)}
 										className={[
-											"relative h-[4.7rem] min-w-0 overflow-hidden rounded-2xl border px-0.5 py-1.5 transition active:scale-[0.9] sm:h-auto sm:min-h-[5.1rem] sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
+											"relative h-[4.25rem] min-w-0 overflow-hidden rounded-xl border px-0 pb-1 pt-2 transition active:scale-[0.9] sm:h-auto sm:rounded-2xl sm:min-h-[5.1rem] sm:px-1.5 sm:py-2 lg:min-h-[6rem] lg:px-3 lg:py-3",
 											selected
 												? "border-transparent bg-transparent text-primary-foreground"
 												: "border-primary-border bg-primary-subtle text-foreground hover:border-primary hover:bg-primary-container-hover hover:text-accent-foreground",
@@ -403,23 +460,35 @@ export function MoodPanel({
 											{cell.date.getUTCDate()}
 										</span>
 
-										<span className="relative mx-auto mt-1 block size-10 sm:size-9 lg:mt-2 lg:size-11">
+										<span className="flex flex-col items-center">
 											<span
 												className={[
-													"grid size-10 place-items-center rounded-full text-2xl transition",
-													selected
-														? "bg-surface text-neutral-950"
-														: "bg-surface text-muted-foreground",
-													!mineOption && !selected && "text-neutral-300",
-												].join(" ")}
+													"mt-0.5 grid place-items-center rounded-full bg-surface transition sm:mt-1 lg:mt-2",
+													calendarView === "both"
+														? "size-[1.625rem] text-base sm:size-8 sm:text-xl lg:size-10 lg:text-2xl"
+														: "size-8 text-xl sm:size-9 sm:text-2xl lg:size-11",
+													selected ? "text-neutral-950" : "text-muted-foreground",
+													!mainOption && !selected && "text-neutral-300",
+												]
+													.filter(Boolean)
+													.join(" ")}
 											>
-												<span key={mineOption?.value ?? "none"} className={selected ? "mood-emoji-pop" : undefined}>
-													{mineOption?.emoji ?? "♡"}
+												<span key={mainOption?.value ?? "none"} className={selected ? "mood-emoji-pop" : undefined}>
+													{mainOption?.emoji ?? "♡"}
 												</span>
 											</span>
-											{partnerOption ? (
-												<span className="absolute -bottom-0.5 -right-0.5 grid size-[1.3rem] place-items-center rounded-full border-surface bg-surface text-[13px] text-neutral-950 shadow-sm sm:size-5 sm:text-[12px] sm:-bottom-0.5 sm:-right-0.5 lg:size-6 lg:text-sm">
-													{partnerOption.emoji}
+											{calendarView === "both" ? (
+												<span className="mt-px grid h-3.5 place-items-center text-[11px] leading-none sm:h-4 sm:text-sm lg:mt-1 lg:h-5 lg:text-base">
+													{partnerOption ? (
+														partnerOption.emoji
+													) : (
+														<span
+															className={[
+																"size-1 rounded-full",
+																selected ? "bg-primary-foreground/40" : "bg-primary-border",
+															].join(" ")}
+														/>
+													)}
 												</span>
 											) : null}
 										</span>
@@ -427,7 +496,7 @@ export function MoodPanel({
 										{isToday ? (
 											<span
 												className={[
-													"absolute left-1/2 top-1 h-1.5 w-1.5 -translate-x-1/2 rounded-full",
+													"absolute left-1/2 top-[3px] h-1 w-1 sm:top-1 sm:h-1.5 sm:w-1.5 -translate-x-1/2 rounded-full",
 													selected ? "bg-background" : "bg-primary",
 												].join(" ")}
 											/>

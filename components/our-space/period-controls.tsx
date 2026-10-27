@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "@/components/common/use-hydrated";
+import { useDragSelect } from "@/components/common/use-drag-select";
 import {
   CalendarDays,
   CircleDollarSign,
@@ -25,17 +26,78 @@ const PeriodPickerDialog = dynamic(
   { ssr: false },
 );
 
-function spaceTabClass(active: boolean) {
-  return [
-    "relative inline-flex min-h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-2xl px-2 text-sm font-semibold transition duration-200 sm:px-3 active:scale-[0.96]",
-    active
-      ? "glass-selected"
-      : "text-muted-foreground hover:bg-surface-hover hover:text-foreground",
-  ].join(" ");
+const spaceSections: Array<{
+  value: SpaceSection;
+  label: string;
+  icon: typeof NotebookPen;
+}> = [
+  { value: "notes", label: "Notes", icon: NotebookPen },
+  { value: "finances", label: "Finance", icon: CircleDollarSign },
+  { value: "mood", label: "Mood", icon: HeartPulse },
+  { value: "memories", label: "Memory", icon: MapPinned },
+  { value: "movies", label: "Movies", icon: Clapperboard },
+  { value: "personal", label: "Personal", icon: UserRound },
+];
+
+/**
+ * The glass selection lens under a tab row: it sits on the selected tab and,
+ * while a finger drags across the row, follows it 1:1.
+ */
+function SpaceTabLens({ selectedIndex, dragX }: { selectedIndex: number; dragX: number | null }) {
+  return (
+    <div
+      aria-hidden="true"
+      data-dragging={dragX === null ? undefined : ""}
+      className="glass-selected tab-lens absolute inset-y-0 left-0 rounded-full border"
+      style={{
+        width: `calc(100% / ${spaceSections.length})`,
+        transform: dragX === null ? `translateX(${selectedIndex * 100}%)` : `translateX(${dragX}px)`,
+      }}
+    />
+  );
 }
 
-function spaceTabIconClass(active: boolean) {
-  return `hidden min-[900px]:block shrink-0 ${active ? "text-current" : "text-subtle-foreground"}`;
+/** One tab: icon over label. While dragging, the tab under the lens reads as chosen. */
+function SpaceTabButton({
+  item,
+  selected,
+  highlighted,
+  dragging,
+  tabIndex,
+  onSelect,
+}: {
+  item: (typeof spaceSections)[number];
+  selected: boolean;
+  highlighted: boolean;
+  dragging: boolean;
+  tabIndex?: number;
+  onSelect: () => void;
+}) {
+  const Icon = item.icon;
+
+  return (
+    <button
+      type="button"
+      aria-current={selected ? "page" : undefined}
+      tabIndex={tabIndex}
+      className={[
+        "relative z-10 flex min-w-0 select-none flex-col items-center justify-center gap-0.5 rounded-full text-[10px] font-bold tracking-[-0.01em] transition duration-200 [-webkit-touch-callout:none]",
+        dragging ? "" : "active:scale-[0.96]",
+        highlighted ? "text-foreground" : "text-subtle-foreground",
+      ].join(" ")}
+      onClick={onSelect}
+    >
+      {/* The chosen tab's icon does its own little move once (a page flip, a
+          coin spin, a heartbeat…); not while dragging across the bar. */}
+      <span
+        key={selected ? "on" : "off"}
+        className={selected && !dragging ? `tab-icon-pop tab-icon-pop--${item.value}` : "inline-flex"}
+      >
+        <Icon size={20} strokeWidth={highlighted ? 2.4 : 2} aria-hidden="true" />
+      </span>
+      <span className="leading-3">{item.label}</span>
+    </button>
+  );
 }
 
 interface PeriodPickerButtonProps {
@@ -61,6 +123,8 @@ interface PeriodPickerButtonProps {
   onSelectMonth: (monthIndex: number) => void;
   onSelectWeekFromDate: (date: Date) => void;
   onTogglePeriodPicker: () => void;
+  /** Overrides the calendar button's look, e.g. to match the tab bar beside it. */
+  triggerClassName?: string;
 }
 
 export function PeriodPickerButton({
@@ -82,6 +146,7 @@ export function PeriodPickerButton({
   onSelectMonth,
   onSelectWeekFromDate,
   onTogglePeriodPicker,
+  triggerClassName = "glass-surface size-12 rounded-2xl",
 }: PeriodPickerButtonProps) {
   const viewportMatches = useMediaQuery(
     periodPickerViewport === "mobile"
@@ -124,7 +189,7 @@ export function PeriodPickerButton({
         aria-haspopup="dialog"
         aria-expanded={periodPickerOpen ? "true" : undefined}
         onClick={onTogglePeriodPicker}
-        className="glass-surface grid size-12 place-items-center rounded-2xl text-muted-foreground transition hover:text-foreground active:scale-[0.96]"
+        className={`${triggerClassName} grid place-items-center text-muted-foreground transition hover:text-foreground active:scale-[0.96]`}
       >
         <CalendarDays size={22} />
       </button>
@@ -163,93 +228,41 @@ export function PeriodControls({
   onSelectSection,
   ...periodPickerProps
 }: PeriodControlsProps) {
-  return (
-    <div className="glass-navigation sticky top-3 z-40 hidden rounded-[1.75rem] p-2 sm:block lg:hidden">
-      <div className="flex flex-col gap-3 sm:flex-row md:items-center md:gap-6">
-        <div
-          aria-label="Space sections"
-          className="glass-chip grid min-w-0 flex-1 grid-cols-6 rounded-[1.35rem] p-1"
-        >
-          <button
-            type="button"
-            aria-current={activeSection === "notes" ? "page" : undefined}
-            className={spaceTabClass(activeSection === "notes")}
-            onClick={() => onSelectSection("notes")}
-          >
-            <NotebookPen
-              size={18}
-              className={spaceTabIconClass(activeSection === "notes")}
-            />
-            Notes
-          </button>
-          <button
-            type="button"
-            aria-current={activeSection === "finances" ? "page" : undefined}
-            className={spaceTabClass(activeSection === "finances")}
-            onClick={() => onSelectSection("finances")}
-          >
-            <CircleDollarSign
-              size={18}
-              className={spaceTabIconClass(activeSection === "finances")}
-            />
-            Finances
-          </button>
-          <button
-            type="button"
-            aria-current={activeSection === "mood" ? "page" : undefined}
-            className={spaceTabClass(activeSection === "mood")}
-            onClick={() => onSelectSection("mood")}
-          >
-            <HeartPulse
-              size={18}
-              className={spaceTabIconClass(activeSection === "mood")}
-            />
-            Mood
-          </button>
-          <button
-            type="button"
-            aria-current={activeSection === "memories" ? "page" : undefined}
-            className={spaceTabClass(activeSection === "memories")}
-            onClick={() => onSelectSection("memories")}
-          >
-            <MapPinned
-              size={18}
-              className={spaceTabIconClass(activeSection === "memories")}
-            />
-            Memory
-          </button>
-          <button
-            type="button"
-            aria-current={activeSection === "movies" ? "page" : undefined}
-            className={spaceTabClass(activeSection === "movies")}
-            onClick={() => onSelectSection("movies")}
-          >
-            <Clapperboard
-              size={18}
-              className={spaceTabIconClass(activeSection === "movies")}
-            />
-            Movies
-          </button>
-          <button
-            type="button"
-            aria-current={activeSection === "personal" ? "page" : undefined}
-            className={spaceTabClass(activeSection === "personal")}
-            onClick={() => onSelectSection("personal")}
-          >
-            <UserRound
-              size={18}
-              className={spaceTabIconClass(activeSection === "personal")}
-            />
-            Personal
-          </button>
-        </div>
+  const selectedIndex = Math.max(
+    0,
+    spaceSections.findIndex((item) => item.value === activeSection),
+  );
+  const { lensX: dragX, hoverIndex, trackProps } = useDragSelect(spaceSections.length, (index) =>
+    onSelectSection(spaceSections[index].value),
+  );
 
-        {hidePeriodPicker ? null : (
-          <div className="ml-0 md:ml-auto">
-            <PeriodPickerButton {...periodPickerProps} />
-          </div>
-        )}
-      </div>
+  return (
+    <div className="sticky top-3 z-40 hidden items-center gap-3 sm:flex lg:hidden">
+      <nav aria-label="Space sections" className="glass-navigation min-w-0 flex-1 rounded-full p-1">
+        <div className="relative grid h-[3.125rem] touch-pan-y grid-cols-6" {...trackProps}>
+          <SpaceTabLens selectedIndex={selectedIndex} dragX={dragX} />
+          {spaceSections.map((item, index) => {
+            const selected = activeSection === item.value;
+            return (
+              <SpaceTabButton
+                key={item.value}
+                item={item}
+                selected={selected}
+                highlighted={hoverIndex === null ? selected : hoverIndex === index}
+                dragging={dragX !== null}
+                onSelect={() => onSelectSection(item.value)}
+              />
+            );
+          })}
+        </div>
+      </nav>
+
+      {hidePeriodPicker ? null : (
+        <PeriodPickerButton
+          {...periodPickerProps}
+          triggerClassName="glass-navigation size-[3.75rem] rounded-full"
+        />
+      )}
     </div>
   );
 }
@@ -353,18 +366,7 @@ export function MobileSpaceTabs({
   action?: { label: string; onClick: () => void };
   onSelectSection: (section: SpaceSection) => void;
 }) {
-  const items: Array<{
-    value: SpaceSection;
-    label: string;
-    icon: typeof NotebookPen;
-  }> = [
-    { value: "notes", label: "Notes", icon: NotebookPen },
-    { value: "finances", label: "Finance", icon: CircleDollarSign },
-    { value: "mood", label: "Mood", icon: HeartPulse },
-    { value: "memories", label: "Memory", icon: MapPinned },
-    { value: "movies", label: "Movies", icon: Clapperboard },
-    { value: "personal", label: "Personal", icon: UserRound },
-  ];
+  const items = spaceSections;
   const selectedIndex = Math.max(
     0,
     items.findIndex((item) => item.value === activeSection),
@@ -380,51 +382,12 @@ export function MobileSpaceTabs({
 
   const ActiveIcon = items[selectedIndex].icon;
 
-  // Press-and-drag across the bar (Apple's Liquid Glass tab bars): the selection
-  // lens follows the finger and the section under it is chosen on release. A plain
-  // tap still goes through each button's click; a drag only starts after a small
-  // horizontal move, and vertical swipes keep scrolling the page (touch-action).
-  const drag = useRef<{ id: number; startX: number; left: number; width: number; active: boolean } | null>(null);
-  // Lens position (px from the track start) and the track width it was measured on.
-  const [lens, setLens] = useState<{ x: number; width: number } | null>(null);
-  const dragX = lens?.x ?? null;
-  const columnWidth = (width: number) => width / items.length;
-  const lensLeft = (clientX: number, track: { left: number; width: number }) => {
-    const column = columnWidth(track.width);
-    return Math.min(Math.max(clientX - track.left - column / 2, 0), track.width - column);
-  };
-  const dragIndex = (x: number, width: number) => Math.round(x / columnWidth(width));
-
-  const onTrackPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (minimized || (event.pointerType === "mouse" && event.button !== 0)) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    drag.current = { id: event.pointerId, startX: event.clientX, left: rect.left, width: rect.width, active: false };
-  };
-  const onTrackPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const current = drag.current;
-    if (!current || current.id !== event.pointerId) return;
-    if (!current.active) {
-      if (Math.abs(event.clientX - current.startX) < 6) return;
-      current.active = true;
-      // Capturing makes the release land on the track, so no button click fires.
-      try {
-        event.currentTarget.setPointerCapture(event.pointerId);
-      } catch {
-        // The pointer may already be gone; the drag still works without capture.
-      }
-    }
-    setLens({ x: lensLeft(event.clientX, current), width: current.width });
-  };
-  const endTrackDrag = (event: ReactPointerEvent<HTMLDivElement>, commit: boolean) => {
-    const current = drag.current;
-    if (!current || current.id !== event.pointerId) return;
-    drag.current = null;
-    if (!current.active) return;
-    const index = dragIndex(lensLeft(event.clientX, current), current.width);
-    setLens(null);
-    if (commit) onSelectSection(items[index].value);
-  };
-  const hoverIndex = lens ? dragIndex(lens.x, lens.width) : null;
+  // Press-and-drag across the bar picks a section on release, like Liquid Glass tabs.
+  const { lensX: dragX, hoverIndex, trackProps } = useDragSelect(
+    items.length,
+    (index) => onSelectSection(items[index].value),
+    minimized,
+  );
 
   return (
     <>
@@ -443,49 +406,21 @@ export function MobileSpaceTabs({
       <div className="mobile-tab-bar glass-navigation relative overflow-hidden rounded-full">
         <div
           className="mobile-tab-track absolute inset-y-1 left-1 grid touch-pan-y grid-cols-6"
-          onPointerDown={onTrackPointerDown}
-          onPointerMove={onTrackPointerMove}
-          onPointerUp={(event) => endTrackDrag(event, true)}
-          onPointerCancel={(event) => endTrackDrag(event, false)}
+          {...trackProps}
         >
-          <div
-            aria-hidden="true"
-            data-dragging={dragX === null ? undefined : ""}
-            className="glass-selected mobile-bottom-tab-indicator absolute inset-y-0 left-0 rounded-full border"
-            style={{
-              width: "calc(100% / 6)",
-              transform: dragX === null ? `translateX(${selectedIndex * 100}%)` : `translateX(${dragX}px)`,
-            }}
-          />
-          {items.map((item) => {
-            const Icon = item.icon;
+          <SpaceTabLens selectedIndex={selectedIndex} dragX={dragX} />
+          {items.map((item, index) => {
             const selected = activeSection === item.value;
-            // While dragging, the tab under the lens reads as the one about to be chosen.
-            const highlighted = hoverIndex === null ? selected : hoverIndex === items.indexOf(item);
-
             return (
-              <button
+              <SpaceTabButton
                 key={item.value}
-                type="button"
-                aria-current={selected ? "page" : undefined}
+                item={item}
+                selected={selected}
+                highlighted={hoverIndex === null ? selected : hoverIndex === index}
+                dragging={dragX !== null}
                 tabIndex={minimized ? -1 : undefined}
-                className={[
-                  "relative z-10 flex min-w-0 select-none flex-col items-center justify-center gap-0.5 rounded-full text-[10px] font-bold tracking-[-0.01em] transition duration-200 [-webkit-touch-callout:none]",
-                  dragX === null ? "active:scale-[0.96]" : "",
-                  highlighted ? "text-foreground" : "text-subtle-foreground",
-                ].join(" ")}
-                onClick={() => onSelectSection(item.value)}
-              >
-                {/* The chosen tab's icon does its own little move once (a page flip, a
-                    coin spin, a heartbeat…); not while dragging across the bar. */}
-                <span
-                  key={selected ? "on" : "off"}
-                  className={selected && dragX === null ? `tab-icon-pop tab-icon-pop--${item.value}` : "inline-flex"}
-                >
-                  <Icon size={20} strokeWidth={highlighted ? 2.4 : 2} aria-hidden="true" />
-                </span>
-                <span className="leading-3">{item.label}</span>
-              </button>
+                onSelect={() => onSelectSection(item.value)}
+              />
             );
           })}
         </div>

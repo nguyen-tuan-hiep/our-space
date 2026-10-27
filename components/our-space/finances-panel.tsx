@@ -22,9 +22,7 @@ interface FinancesPanelProps {
 	financeLoaded: boolean;
 	financeLoading: boolean;
 	filteredExpenses: IndividualExpense[];
-	myExpenses: IndividualExpense[];
 	partnerDisplayName: string;
-	partnerExpenses: IndividualExpense[];
 	profileAvatar: string;
 	partnerAvatar: string;
 	timeZone: string;
@@ -49,9 +47,7 @@ export function FinancesPanel({
 	financeLoaded,
 	financeLoading,
 	filteredExpenses,
-	myExpenses,
 	partnerDisplayName,
-	partnerExpenses,
 	profileAvatar,
 	partnerAvatar,
 	timeZone,
@@ -107,26 +103,29 @@ export function FinancesPanel({
 						filterRange={filterRange}
 						selectedPeriod={activePeriod}
 					/>
-					<div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
-						<ExpenseFeed
-							title={`My ledger ${profileAvatar}`}
-							ownerName={coupleProfiles.find((item) => item.id === currentUserId)?.display_name}
-							expenses={myExpenses}
-							currentUserId={currentUserId}
-							readOnly={false}
-							timeZone={timeZone}
-							onEdit={onEditExpense}
-							onDeleted={onExpenseDeleted}
-						/>
-						<ExpenseFeed
-							title={`${partnerDisplayName}'s ledger ${partnerAvatar}`}
-							ownerName={partnerDisplayName}
-							expenses={partnerExpenses}
-							currentUserId={currentUserId}
-							readOnly
-							timeZone={timeZone}
-						/>
-					</div>
+					<ExpenseFeed
+						expenses={filteredExpenses}
+						currentUserId={currentUserId}
+						you={{
+							id: currentUserId,
+							name: coupleProfiles.find((item) => item.id === currentUserId)?.display_name ?? "You",
+							avatar: profileAvatar,
+						}}
+						partner={{
+							id: coupleProfiles.find((item) => item.id !== currentUserId)?.id ?? "",
+							name: partnerDisplayName,
+							avatar: partnerAvatar,
+						}}
+						referenceCurrency={
+							coupleProfiles.find((item) => item.id === currentUserId)?.currency ?? "USD"
+						}
+						exchangeRates={exchangeRates}
+						exchangeRatesBase={exchangeRatesBase}
+						filterRange={filterRange}
+						timeZone={timeZone}
+						onEdit={onEditExpense}
+						onDeleted={onExpenseDeleted}
+					/>
 				</>
 			)}
 		</div>

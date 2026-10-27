@@ -260,8 +260,8 @@ export function OurSpaceClient({
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [periodPickerOpen, setPeriodPickerOpen] = useState(false);
 	const [activeSection, setActiveSection] = useState<SpaceSection>("notes");
-	const [filterRange, setFilterRange] = useState<FilterRange>("week");
-	const [pickerRange, setPickerRange] = useState<FilterRange>("week");
+	const [filterRange, setFilterRange] = useState<FilterRange>("month");
+	const [pickerRange, setPickerRange] = useState<FilterRange>("month");
 	const initialClock = useMemo(
 		() => new Date(currentTimeIso),
 		[currentTimeIso],
@@ -383,14 +383,6 @@ export function OurSpaceClient({
 		[activePeriod, expenses, filterRange, profileTimeZone],
 	);
 
-	const myExpenses = useMemo(
-		() => filteredExpenses.filter((expense) => expense.owner_id === profile.id),
-		[filteredExpenses, profile.id],
-	);
-	const partnerExpenses = useMemo(
-		() => filteredExpenses.filter((expense) => expense.owner_id === partner.id),
-		[filteredExpenses, partner.id],
-	);
 	const filteredMoods = useMemo(
 		() =>
 			moods.filter((mood) =>
@@ -1224,9 +1216,7 @@ export function OurSpaceClient({
 							financeLoaded={financeLoaded}
 							financeLoading={financeLoading}
 							filteredExpenses={filteredExpenses}
-							myExpenses={myExpenses}
 							partnerDisplayName={partner.display_name}
-							partnerExpenses={partnerExpenses}
 							profileAvatar={profileAvatar}
 							partnerAvatar={partnerAvatar}
 							timeZone={profileTimeZone}
