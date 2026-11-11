@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Dancing_Script } from "next/font/google";
+import { Dancing_Script, Lora, Mali, Patrick_Hand } from "next/font/google";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { AppProviders } from "@/components/layout/app-providers";
@@ -61,6 +61,30 @@ const scriptFont = Dancing_Script({
   variable: "--font-script",
   display: "swap",
 });
+// Letter body faces the author can pick (lib/note-style.ts); loaded lazily, no preload.
+const bookFont = Lora({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500"],
+  style: ["normal", "italic"],
+  variable: "--font-lora",
+  display: "swap",
+  preload: false,
+});
+const casualFont = Mali({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500"],
+  variable: "--font-mali",
+  display: "swap",
+  preload: false,
+});
+const markerFont = Patrick_Hand({
+  subsets: ["latin", "vietnamese"],
+  weight: "400",
+  variable: "--font-patrick",
+  display: "swap",
+  preload: false,
+});
+const fontClassName = [scriptFont, bookFont, casualFont, markerFont].map((font) => font.variable).join(" ");
 
 // Brand colors are server-rendered; only light/dark appearance is a preference.
 const themeBootstrapScript = `
@@ -111,7 +135,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={scriptFont.variable}
+      className={fontClassName}
       style={brandThemeVariables as React.CSSProperties}
       suppressHydrationWarning
     >

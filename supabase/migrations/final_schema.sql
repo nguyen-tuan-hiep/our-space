@@ -67,12 +67,14 @@ create table public.notes (
   unlock_at timestamptz,
   unlock_time_zone text,
   read_at timestamptz,
+  style jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint notes_title_length_check check (char_length(title) between 1 and 120),
   constraint notes_content_length_check check (char_length(content) between 1 and 10000),
   constraint notes_not_self_check check (author_id <> recipient_id),
-  constraint notes_unlock_time_zone_length_check check (unlock_time_zone is null or char_length(unlock_time_zone) between 1 and 80)
+  constraint notes_unlock_time_zone_length_check check (unlock_time_zone is null or char_length(unlock_time_zone) between 1 and 80),
+  constraint notes_style_shape_check check (jsonb_typeof(style) = 'object' and pg_column_size(style) <= 4096)
 );
 
 create table public.individual_expenses (

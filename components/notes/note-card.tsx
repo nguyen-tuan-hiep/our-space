@@ -1,11 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { ArrowRight, LockKeyhole, MailOpen } from "lucide-react";
 import { useNoteLock } from "@/components/notes/use-note-lock";
 import { formatReadingTime, isUnreadLetter } from "@/components/notes/note-meta";
 import { NoteEnvelope } from "@/components/notes/note-envelope";
+import { normalizeNoteStyle } from "@/lib/note-style";
 import { ActionMenu } from "@/components/common/action-menu";
 import { useToast } from "@/components/feedback/toast";
 import { deleteNote } from "@/app/actions";
@@ -52,6 +53,7 @@ export function NoteCard({
 	const hideTitle = !canEdit && (unread || locked);
 	const sender = note.author?.display_name ?? "Partner";
 	const avatar = note.author?.avatar_url ?? "🙂";
+	const style = useMemo(() => normalizeNoteStyle(note.style), [note.style]);
 
 	const handleEditClick = () => {
 		onEdit(note);
@@ -108,6 +110,7 @@ export function NoteCard({
 				<span className="note-envelope-stage relative mt-1 flex h-[8.25rem] items-center justify-center">
 					<NoteEnvelope
 						className="h-20"
+						style={style}
 						open={opened}
 						letter={
 							<span className="block space-y-1.5 px-2.5 py-2">

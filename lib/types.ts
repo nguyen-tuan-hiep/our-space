@@ -65,6 +65,8 @@ export interface SharedNote {
   unlock_time_zone?: string | null;
   /** When the recipient first opened it; undefined until the read_at migration is applied. */
   read_at?: string | null;
+  /** Decoration choices (see lib/note-style.ts); untrusted until normalized. Undefined until the style migration is applied. */
+  style?: unknown;
   created_at: string;
   updated_at: string;
   author?: Pick<Profile, "id" | "display_name" | "avatar_url" | "currency">;

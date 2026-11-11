@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCoupleId } from "@/lib/couple-settings";
 import { getAppSession } from "@/lib/auth";
 import { getFinanceData } from "@/lib/data";
+import { parseNoteStyle } from "@/lib/note-style";
 import {
   defaultCountryCode,
   defaultCurrency,
@@ -589,20 +590,31 @@ function getNoteUnlockPayload(formData: FormData) {
 }
 
 /**
- * Write a note, retrying without `unlock_time_zone` when the column isn't there
- * yet (PostgREST PGRST204), so saving keeps working before the migration runs.
+ * Write a note, retrying without the columns that may not exist yet
+ * (PostgREST PGRST204: `unlock_time_zone`, `style`), so saving keeps working
+ * before those migrations run.
  */
-async function withoutMissingNoteTimeZone<T extends { unlock_time_zone: string | null }, R extends { error: { code?: string; message: string } | null }>(
+const OPTIONAL_NOTE_COLUMNS = ["unlock_time_zone", "style"] as const;
+
+async function withoutMissingNoteColumns<T extends object, R extends { error: { code?: string; message: string } | null }>(
   values: T,
   write: (values: Partial<T>) => PromiseLike<R>,
 ) {
-  const result = await write(values);
-  if (result.error?.code !== "PGRST204" || !result.error.message.includes("unlock_time_zone")) {
-    return result;
+  let current: Partial<T> = { ...values };
+  let result = await write(current);
+  for (const column of OPTIONAL_NOTE_COLUMNS) {
+    if (result.error?.code !== "PGRST204" || !result.error.message.includes(column)) continue;
+    const next = { ...current };
+    delete (next as Record<string, unknown>)[column];
+    current = next;
+    result = await write(current);
   }
-  const withoutTimeZone: Partial<T> = { ...values };
-  delete withoutTimeZone.unlock_time_zone;
-  return write(withoutTimeZone);
+  return result;
+}
+
+function getNoteStylePayload(formData: FormData) {
+  // Always store the normalized object, never the client's raw JSON.
+  return { style: parseNoteStyle(nullableStringValue(formData, "style")) };
 }
 
 export async function createNote(formData: FormData) {
@@ -614,9 +626,10 @@ export async function createNote(formData: FormData) {
     title: stringValue(formData, "title"),
     content: stringValue(formData, "content"),
     ...getNoteUnlockPayload(formData),
+    ...getNoteStylePayload(formData),
   };
 
-  const { data, error } = await withoutMissingNoteTimeZone(payload, (values) =>
+  const { data, error } = await withoutMissingNoteColumns(payload, (values) =>
     supabase
       .from("notes")
       .insert(values)
@@ -636,9 +649,10 @@ export async function updateNote(formData: FormData) {
     title: stringValue(formData, "title"),
     content: stringValue(formData, "content"),
     ...getNoteUnlockPayload(formData),
+    ...getNoteStylePayload(formData),
   };
 
-  const { data, error } = await withoutMissingNoteTimeZone(payload, (values) =>
+  const { data, error } = await withoutMissingNoteColumns(payload, (values) =>
     supabase
       .from("notes")
       .update(values)

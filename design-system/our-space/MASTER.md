@@ -42,6 +42,8 @@ One outer content layer, now glass: no nested decorative glass panels inside an 
 
 Notes show at most three preview lines and read in a separate dialog. Unread notes the user received (`read_at` null, set via the `mark_note_read` RPC) render as a CSS envelope card of the same size — a deliberate, decorative exception for new letters; opening one plays a short seal/flap/letter intro in the reader (skippable, removed under reduced motion). User emoji avatars and user-authored content remain; structural icons use Lucide. Read and edit dialogs use the same 360ms entrance / 220ms exit with opacity, translate and scale. Animate scrim opacity, tint and blur together. Keep detail content mounted during exit with `useDialogPresence`; defer initially-open dialog mounting by one effect so the first entrance also animates. Reduced motion suppresses spatial movement and is independent of the blur change — `prefers-reduced-motion` behavior is unaffected by this pivot.
 
+The letter itself may use the author's chosen envelope, seal, paper, ink, and sticker colors; this is the sole color exception to the monochrome app chrome.
+
 ## Anti-patterns to avoid
 - Glass-on-glass stacking (max one visible blur layer per screen region).
 - Glass on text, form fields, or buttons — these stay on solid/opaque fills for legibility and touch accuracy.

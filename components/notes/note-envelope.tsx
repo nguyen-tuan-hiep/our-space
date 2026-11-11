@@ -1,102 +1,139 @@
 import { useId, type ReactNode } from "react";
+import { SEAL_MOTIFS } from "@/components/notes/seal-motifs";
+import { DEFAULT_NOTE_STYLE, type NoteStyle, type SealMotifId, type WaxColorId } from "@/lib/note-style";
+import { envelopeStyleVars, waxHex, waxPalette } from "@/lib/note-style-css";
 
 /**
- * Gold wax seal: an uneven pressed blob, a raised rim around a recessed disc,
- * and a looped hand-drawn heart embossed in the middle.
+ * The pressed wax body: an uneven blob with a few soft drips where the wax
+ * squeezed out under the stamp. Drawn in Figma (frame "Wax seal / redesign")
+ * and exported as a path in the seal's 100x100 viewBox.
  */
-export function WaxSeal() {
+const WAX_BODY =
+	"M96.3 50C96.6 53.2 96.5 56.6 95.8 59.7C95.1 62.8 93.5 65.9 92 68.7C90.4 71.5 88.2 73.8 86.3 76.4C84.4 79 82.8 81.7 80.7 84C78.5 86.4 76.1 88.9 73.3 90.4C70.6 92 67.1 92.5 64 93.2C60.9 93.8 57.7 94.1 54.6 94.2C51.5 94.3 48.4 94.3 45.4 93.7C42.4 93.2 39.5 92 36.7 90.9C33.9 89.7 31.4 88.2 28.7 86.9C26 85.6 22.8 84.7 20.4 82.9C17.9 81.1 15.5 78.8 13.9 76.3C12.2 73.7 11.4 70.5 10.4 67.6C9.4 64.8 8.5 61.9 8 58.9C7.4 56 7.2 53 7 50C6.9 47 7.2 44.1 7.3 40.9C7.5 37.8 7.5 34.6 7.9 31.3C8.3 27.9 8.4 23.8 10 20.9C11.5 18 14.6 15.6 17.4 13.8C20.2 11.9 23.6 10.6 26.7 9.7C29.9 8.8 33.3 8.4 36.4 8.2C39.6 8.1 42.7 8.5 45.7 8.8C48.6 9.1 51.4 9.6 54.2 10C57 10.5 59.7 10.9 62.5 11.7C65.2 12.4 67.9 13.2 70.6 14.4C73.2 15.6 75.7 17 78.3 18.6C80.8 20.2 83.8 21.7 85.8 24C87.8 26.2 89 29.3 90.3 32.1C91.6 34.8 92.8 37.7 93.8 40.7C94.8 43.7 96 46.8 96.3 50Z";
+
+/**
+ * Wax seal: an uneven pressed body with a bevelled edge, a raised ring around
+ * a recessed disc, a motif embossed in the middle and a soft gloss, all in
+ * shades of one wax color. The bevels are blurred strokes clipped to their
+ * shapes, so there are no per-instance raster effects beyond a few blurs.
+ */
+export function WaxSeal({ color = "gold", motif = "heart", className = "envelope-seal-svg" }: {
+	color?: WaxColorId;
+	motif?: SealMotifId;
+	className?: string;
+}) {
 	// Per-instance ids so gradients still resolve when another seal is hidden.
 	const id = useId().replace(/:/g, "");
 	const wax = `wax-${id}`;
 	const rim = `rim-${id}`;
 	const disc = `disc-${id}`;
-	const heart = `heart-${id}`;
+	const emboss = `emboss-${id}`;
+	const bodyClip = `body-${id}`;
+	const discClip = `discclip-${id}`;
+	const soft = `soft-${id}`;
+	const fine = `fine-${id}`;
+	const gloss = `gloss-${id}`;
+	const tone = waxPalette(waxHex({ ...DEFAULT_NOTE_STYLE, seal: { color, motif } }));
+	const parts = SEAL_MOTIFS[motif];
+	const raised = parts.filter((part) => part.kind !== "groove");
+	const blur = (name: string, deviation: number) => (
+		<filter id={name} filterUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120">
+			<feGaussianBlur stdDeviation={deviation} />
+		</filter>
+	);
 
 	return (
-		<svg viewBox="0 0 100 100" className="envelope-seal-svg" aria-hidden="true">
+		<svg viewBox="0 0 100 100" className={className} aria-hidden="true">
 			<defs>
-				<radialGradient id={wax} cx="38%" cy="30%" r="75%">
-					<stop offset="0" stopColor="#e6c784" />
-					<stop offset="0.38" stopColor="#c99d58" />
-					<stop offset="0.75" stopColor="#ad823f" />
-					<stop offset="1" stopColor="#8a642d" />
+				<radialGradient id={wax} cx="0.38" cy="0.3" r="0.75">
+					<stop offset="0" stopColor={tone.light} />
+					<stop offset="0.38" stopColor={tone.mid} />
+					<stop offset="0.75" stopColor={tone.dark} />
+					<stop offset="1" stopColor={tone.deep} />
 				</radialGradient>
-				<linearGradient id={rim} x1="0" y1="0" x2="0.35" y2="1">
-					<stop offset="0" stopColor="#f2d99b" />
-					<stop offset="0.5" stopColor="#c59850" />
-					<stop offset="1" stopColor="#80592a" />
+				<linearGradient id={rim} x1="0.35" y1="0" x2="0.65" y2="0.94">
+					<stop offset="0" stopColor={tone.rimLight} />
+					<stop offset="0.5" stopColor={tone.mid} />
+					<stop offset="1" stopColor={tone.rimDark} />
 				</linearGradient>
-				<radialGradient id={disc} cx="42%" cy="36%" r="70%">
-					<stop offset="0" stopColor="#c9a05b" />
-					<stop offset="1" stopColor="#a47a3a" />
+				<radialGradient id={disc} cx="0.42" cy="0.36" r="0.7">
+					<stop offset="0" stopColor={tone.discLight} />
+					<stop offset="1" stopColor={tone.discDark} />
 				</radialGradient>
-				<linearGradient id={heart} x1="0" y1="0" x2="0.4" y2="1">
-					<stop offset="0" stopColor="#f3dca0" />
-					<stop offset="1" stopColor="#c0914a" />
+				<linearGradient id={emboss} gradientUnits="userSpaceOnUse" x1="40" y1="25" x2="60" y2="75">
+					<stop offset="0" stopColor={tone.motifLight} />
+					<stop offset="1" stopColor={tone.motifDark} />
 				</linearGradient>
+				<clipPath id={bodyClip}><path d={WAX_BODY} /></clipPath>
+				<clipPath id={discClip}><circle cx="50" cy="50" r="33.5" /></clipPath>
+				{blur(soft, 1.7)}
+				{blur(fine, 0.9)}
+				{blur(gloss, 1.8)}
 			</defs>
-			{/* Pressed wax spreading unevenly past the stamp. */}
-			<path
-				d="M50 4C70 3 88 14 94 32C99 47 97 66 88 80C79 93 62 98 46 96C28 95 12 85 6 68C1 52 4 33 14 20C23 9 36 4 50 4Z"
-				fill={`url(#${wax})`}
-				stroke="#6f4e1f"
-				strokeOpacity="0.35"
-				strokeWidth="1"
-			/>
-			{/* Raised rim, then the recessed stamped disc inside it. */}
-			<circle cx="50" cy="50" r="37" fill="none" stroke={`url(#${rim})`} strokeWidth="5.5" />
-			<circle cx="50" cy="50" r="34" fill={`url(#${disc})`} />
-			<circle cx="50" cy="50" r="34" fill="none" stroke="#5c3d12" strokeOpacity="0.35" strokeWidth="1" />
-			{/* Looped heart: shadow, body, then a fine highlight for the embossed edge. */}
-			<g fill="none" strokeLinecap="round" strokeLinejoin="round" transform="translate(50 55) scale(1.2) translate(-50 -57)">
-				<path
-					d="M48 78C44 74 30 62 29 49C28 39 35 32 42 33C49 34 52 41 52 47C52 52 48 53 47 50C46 46 50 40 56 37C63 33 71 37 71 45C71 55 60 66 49 76C46 79 45 83 48 84C51 85 53 81 50 78"
-					stroke="#5e4217"
-					strokeOpacity="0.55"
-					strokeWidth="3.8"
-					transform="translate(0.7 0.9)"
-				/>
-				<path
-					d="M48 78C44 74 30 62 29 49C28 39 35 32 42 33C49 34 52 41 52 47C52 52 48 53 47 50C46 46 50 40 56 37C63 33 71 37 71 45C71 55 60 66 49 76C46 79 45 83 48 84C51 85 53 81 50 78"
-					stroke={`url(#${heart})`}
-					strokeWidth="3.2"
-				/>
-				<path
-					d="M48 78C44 74 30 62 29 49C28 39 35 32 42 33C49 34 52 41 52 47C52 52 48 53 47 50C46 46 50 40 56 37C63 33 71 37 71 45C71 55 60 66 49 76C46 79 45 83 48 84C51 85 53 81 50 78"
-					stroke="#fff4d2"
-					strokeOpacity="0.55"
-					strokeWidth="0.8"
-					transform="translate(-0.5 -0.6)"
-				/>
+			{/* Pressed wax with squeezed-out drips, then its bevel: light inside the
+			    top-left edge, shade inside the bottom-right. */}
+			<path d={WAX_BODY} fill={`url(#${wax})`} stroke={tone.edge} strokeOpacity="0.35" strokeWidth="0.75" />
+			<g clipPath={`url(#${bodyClip})`} fill="none" filter={`url(#${soft})`}>
+				<path d={WAX_BODY} transform="translate(2 3)" stroke="#fff" strokeOpacity="0.45" strokeWidth="5" />
+				<path d={WAX_BODY} transform="translate(-2 -3)" stroke={tone.deep} strokeOpacity="0.55" strokeWidth="6" />
 			</g>
+			{/* Raised ring, then the recessed disc inside it. */}
+			<circle cx="50" cy="50" r="36" fill="none" stroke={tone.deep} strokeOpacity="0.35" strokeWidth="5.5" transform="translate(0.25 0.75)" filter={`url(#${fine})`} />
+			<circle cx="50" cy="50" r="36" fill="none" stroke={`url(#${rim})`} strokeWidth="5.5" />
+			<circle cx="50" cy="50" r="33.5" fill={`url(#${disc})`} stroke={tone.shadowInk} strokeOpacity="0.35" strokeWidth="0.4" />
+			<g clipPath={`url(#${discClip})`} fill="none" filter={`url(#${fine})`}>
+				<circle cx="50" cy="50" r="33.5" transform="translate(1 1.5)" stroke={tone.deep} strokeOpacity="0.6" strokeWidth="4" />
+				<circle cx="50" cy="50" r="33.5" transform="translate(-0.75 -1)" stroke="#fff" strokeOpacity="0.28" strokeWidth="3" />
+			</g>
+			{/* Motif, pressed into the disc: a shadow and a highlight copy under the
+			    raised shapes give the emboss; engraved grooves are cut into them. */}
+			<g fill="none" strokeLinecap="round" strokeLinejoin="round">
+				{raised.map((part, index) => (
+					<path key={`shadow-${index}`} d={part.d} transform="translate(0.9 1.1)" opacity="0.55" {...(part.kind === "line" ? { stroke: tone.shadowInk, strokeWidth: part.w + 0.6 } : { fill: tone.shadowInk })} />
+				))}
+				{raised.map((part, index) => (
+					<path key={`light-${index}`} d={part.d} transform="translate(-0.6 -0.7)" opacity="0.5" {...(part.kind === "line" ? { stroke: tone.highlight, strokeWidth: part.w + 0.4 } : { fill: tone.highlight })} />
+				))}
+				{parts.map((part, index) => {
+					if (part.kind === "line") return <path key={index} d={part.d} stroke={`url(#${emboss})`} strokeWidth={part.w} />;
+					if (part.kind === "groove") return <path key={index} d={part.d} stroke={tone.shadowInk} strokeOpacity="0.55" strokeWidth="0.9" />;
+					if (part.kind === "outline") return <path key={index} d={part.d} fill={`url(#${emboss})`} stroke={tone.shadowInk} strokeOpacity="0.5" strokeWidth="0.8" />;
+					return <path key={index} d={part.d} fill={`url(#${emboss})`} />;
+				})}
+			</g>
+			{/* Gloss where the wax catches the light. */}
+			<ellipse cx="33" cy="24.5" rx="7.5" ry="3" fill="#fff" fillOpacity="0.38" transform="rotate(35 33 24.5)" filter={`url(#${gloss})`} />
 		</svg>
 	);
 }
 
 /**
- * An ivory paper envelope drawn in layers: lined inside, letter, front pocket
- * with diagonal creases, a deep rounded flap, and a gold wax seal at its tip.
- * `open` shows it already opened (flap up, letter peeking out, seal set down
- * on the front); `opening`
- * plays the reader's sequence.
+ * A paper envelope drawn in layers: lined inside, letter, front pocket with
+ * diagonal creases, a deep rounded flap, and a wax seal at its tip, colored
+ * and printed from the note's `style`. `open` shows it already opened (flap
+ * up, letter peeking out, seal set down on the front); `opening` plays the
+ * reader's sequence.
  */
-export function NoteEnvelope({ letter, open = false, opening = false, className = "" }: {
+export function NoteEnvelope({ letter, open = false, opening = false, className = "", style = DEFAULT_NOTE_STYLE }: {
 	/** Content of the sheet inside; `false` leaves the slot empty (the reader animates its own sheet). */
 	letter?: ReactNode | false;
 	open?: boolean;
 	opening?: boolean;
 	className?: string;
+	style?: NoteStyle;
 }) {
 	return (
 		<div
 			aria-hidden="true"
+			data-envelope-flap={style.envelope.flap}
 			className={`envelope ${open ? "envelope--open" : ""} ${opening ? "envelope--opening" : ""} ${className}`}
+			style={envelopeStyleVars(style)}
 		>
 			<div className="envelope-back" />
 			{letter === false ? null : <div className="envelope-letter">{letter}</div>}
 			<div className="envelope-pocket" />
 			<div className="envelope-flap" />
-			<div className="envelope-seal"><WaxSeal /></div>
+			<div className="envelope-seal"><WaxSeal color={style.seal.color} motif={style.seal.motif} /></div>
 		</div>
 	);
 }

@@ -123,6 +123,7 @@ export function SpaceDialogs({
 				open={noteOpen}
 				onClose={onCloseNote}
 				recipient={partner}
+				sender={profile}
 				senderTimeZone={senderTimeZone}
 				note={editingNote}
 				onSaved={onNoteSaved}

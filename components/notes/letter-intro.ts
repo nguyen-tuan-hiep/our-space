@@ -3,7 +3,8 @@
  * the envelope (scaled to the envelope's letter slot and clipped to its height),
  * rises out once the flap is open, then unfolds into the full reading page.
  *
- * The offsets match the envelope's CSS timeline in globals.css: flap open by
+ * `paper` is the outer `.letter-sheet` (shadow, tape, edge mask); the page
+ * scrolls inside it. The offsets match the envelope's CSS timeline in globals.css: flap open by
  * ~900ms, letter rises 820–1380ms, envelope drops away 1380–1800ms.
  */
 const DURATION_MS = 2100;
