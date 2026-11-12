@@ -11,13 +11,15 @@ import { formatNoteDate } from "@/lib/note-date-style";
 
 const MAX_SHEET_WIDTH_PX = 480;
 
-export function NoteComposerPreview({ style, title, content, sender, timeZone, focus }: {
+export function NoteComposerPreview({ style, title, content, sender, timeZone, focus, envelopeOpen = false }: {
   style: NoteStyle;
   title: string;
   content: string;
   sender: string;
   timeZone: string;
   focus: "envelope" | "letter";
+  /** Shows the envelope with its flap up, for choosing the lining. */
+  envelopeOpen?: boolean;
 }) {
   const paperVars = useMemo(() => paperStyleVars(style), [style]);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -48,11 +50,15 @@ export function NoteComposerPreview({ style, title, content, sender, timeZone, f
     return () => { observer.disconnect(); window.removeEventListener("resize", updateSize); };
   }, [pages.length]);
 
+  const envW = sheetWidth * zoom >= 140 ? Math.round(sheetWidth * zoom) : 256;
+
   return (
     <div className="letter-vars grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4" style={paperVars}>
       <p className="sr-only" aria-live="polite">Preview: {describeNoteStyle(style)}.</p>
       <div aria-hidden="true" className={`${focus === "envelope" ? "grid" : "hidden lg:grid"} place-items-center py-2`}>
-        <NoteEnvelope className="w-52 sm:w-64 lg:w-80" style={style} letter={<span className="block space-y-1.5 px-2.5 py-2"><span className="block h-1 w-3/5 rounded-full bg-black/25" /><span className="block h-1 w-4/5 rounded-full bg-black/10" /></span>} />
+        <div className="transition-[padding] duration-300 motion-reduce:transition-none" style={{ width: envW, maxWidth: "100%", paddingTop: envelopeOpen ? Math.round(envW * 0.44) : 0 }}>
+          <NoteEnvelope className="w-full" open={envelopeOpen} style={style} letter={<span className="block space-y-1.5 px-2.5 py-2"><span className="block h-1 w-3/5 rounded-full bg-black/25" /><span className="block h-1 w-4/5 rounded-full bg-black/10" /></span>} />
+        </div>
       </div>
       <div ref={boxRef} className={`${focus === "letter" ? "flex" : "hidden lg:flex"} min-w-0 w-full flex-col items-center justify-center gap-2`}>
         <div style={{ width: sheetWidth * zoom, height: sheetWidth * 1.5 * zoom }} aria-hidden="true">

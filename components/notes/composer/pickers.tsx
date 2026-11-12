@@ -39,7 +39,7 @@ export function SwatchGrid<T extends string>({ label, hint, options, value, onCh
 }) {
 	return (
 		<OptionGroup label={label} hint={hint}>
-			<div className="flex flex-wrap gap-2.5">
+			<div className="grid grid-cols-10 gap-1.5">
 				{options.map((option) => {
 					const selected = option.id === value;
 					return (
@@ -50,8 +50,8 @@ export function SwatchGrid<T extends string>({ label, hint, options, value, onCh
 							title={option.label}
 							onClick={() => onChange(option.id)}
 							className={[
-								"relative grid size-10 place-items-center rounded-full border border-black/10 shadow-[inset_0_1px_1px_rgb(255_255_255/0.6),0_1px_2px_rgb(0_0_0/0.08)] transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-								selected ? "ring-2 ring-foreground ring-offset-2 ring-offset-background" : "hover:scale-105",
+								"relative grid aspect-square w-full place-items-center rounded-full border border-black/10 shadow-[inset_0_1px_1px_rgb(255_255_255/0.6),0_1px_2px_rgb(0_0_0/0.08)] transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+								selected ? "ring-2 ring-foreground ring-offset-1 ring-offset-background" : "hover:scale-105",
 							].join(" ")}
 							style={{ background: option.swatch }}
 						>
@@ -76,7 +76,7 @@ export interface TileOption<T extends string> {
 	badge?: string;
 }
 
-export function TileGrid<T extends string>({ label, hint, options, value, onChange, columns = "grid-cols-3 sm:grid-cols-4", previewClassName = "" }: {
+export function TileGrid<T extends string>({ label, hint, options, value, onChange, columns = "grid-cols-5", previewClassName = "" }: {
 	label: string;
 	hint?: string;
 	options: ReadonlyArray<TileOption<T>>;

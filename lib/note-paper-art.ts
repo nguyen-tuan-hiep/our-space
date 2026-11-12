@@ -11,6 +11,8 @@ import {
 } from "@/lib/note-style";
 import { hexMix, inkColors, paperTint, svgUri, washiRgb } from "@/lib/note-style-css";
 import { paperTile } from "@/lib/note-pattern-tiles";
+import { edgeMask } from "@/lib/note-edge-masks";
+import { textureTile, type TextureId } from "@/lib/note-paper-texture";
 
 /*
  * The letter sheet's art: background patterns and stickers, all drawn as SVG
@@ -39,6 +41,12 @@ export function paperColors(style: NoteStyle): PaperColors {
 
 const HEART = "M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z";
 const SPARK = "M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z";
+
+/** The paper's texture as a background layer, or `none` for smooth paper. Designed in Figma, see lib/note-paper-texture.ts. */
+export function paperTextureUri(id: TextureId) {
+	const tile = textureTile(id);
+	return tile ? `${svgUri(tile.svg)} 0 0 / ${tile.width}px ${tile.height}px repeat` : "none";
+}
 
 /** A background layer (with position/size) for the sheet, or `none`. The tiles are designed in Figma, see lib/note-pattern-tiles.ts. */
 export function paperPatternUri(id: PaperPatternId, colors: PaperColors) {
@@ -192,9 +200,11 @@ export function paperStyleVars(style: NoteStyle): CSSProperties {
 		"--accent": colors.accent,
 		"--paper-tint": paperTint(style),
 		"--paper-pattern": paperPatternUri(style.paper.pattern, colors),
+		"--paper-texture": paperTextureUri(style.paper.texture),
 		"--paper-stickers": style.paper.template === "none" ? stickerLayers(style.stickers, colors) : "none",
 		"--paper-template": template?.image ? `url("${template.image}") center / 100% 100% no-repeat` : "none",
 		"--tpl-pad": TEMPLATE_TEXT_INSET,
+		"--paper-edge-mask": edgeMask(style.paper.edge, style.paper.stampSize) ?? "none",
 		"--washi": washiRgb(style),
 		"--letter-font": letterFont(style).family,
 		"--title-font": detailFont(style.details.titleFont).family,
@@ -205,6 +215,7 @@ export function paperStyleVars(style: NoteStyle): CSSProperties {
 export function paperDataAttrs(style: NoteStyle) {
 	return {
 		"data-paper-edge": style.paper.edge,
+		"data-tape": style.paper.washi === "none" ? "none" : "on",
 		"data-stamp-size": style.paper.stampSize,
 		"data-letter-font": letterFont(style).handwritten ? "handwritten" : "print",
 		"data-title-font": detailFont(style.details.titleFont).handwritten ? "handwritten" : "print",

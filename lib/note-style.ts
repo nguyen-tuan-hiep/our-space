@@ -57,6 +57,18 @@ export const ENVELOPE_PATTERNS = [
 	{ id: "moons", label: "Moon & stars" },
 ] as const;
 
+/** What is printed on the lining inside the flap and behind the letter. */
+export const ENVELOPE_LININGS = [
+	{ id: "plain", label: "Plain" },
+	{ id: "diamond", label: "Diamond" },
+	{ id: "polka", label: "Dots" },
+	{ id: "pinstripe", label: "Stripes" },
+	{ id: "hearts", label: "Hearts" },
+	{ id: "stars", label: "Sparkles" },
+	{ id: "botanical", label: "Sprigs" },
+	{ id: "bows", label: "Bows" },
+] as const;
+
 export const WAX_COLORS = [
 	{ id: "gold", label: "Gold", hex: "#c99d58" },
 	{ id: "crimson", label: "Crimson", hex: "#b3303f" },
@@ -81,6 +93,13 @@ export const SEAL_MOTIFS_META = [
 	{ id: "sun", label: "Sun" },
 	{ id: "snowflake", label: "Snowflake" },
 	{ id: "sparkle", label: "Sparkle" },
+	{ id: "olive", label: "Olive branch" },
+	{ id: "fern", label: "Fern" },
+	{ id: "wheat", label: "Wheat" },
+	{ id: "feather", label: "Feather" },
+	{ id: "crown", label: "Crown" },
+	{ id: "bee", label: "Bee" },
+	{ id: "monogram", label: "Initials" },
 ] as const;
 
 export const PAPER_TINTS = [
@@ -120,32 +139,64 @@ export const PAPER_PATTERNS = [
  * corner art.
  */
 export const PAPER_TEMPLATES = [
-	{ id: "none", label: "Simple paper", image: "" },
-	{ id: "christmas-santa", label: "Santa", image: "/letter-templates/christmas-santa.webp" },
-	{ id: "christmas-tree", label: "Christmas tree", image: "/letter-templates/christmas-tree.webp" },
-	{ id: "winter-snowman", label: "Snowman", image: "/letter-templates/winter-snowman.webp" },
-	{ id: "tet", label: "Tết", image: "/letter-templates/tet.webp" },
-	{ id: "spring-sakura", label: "Sakura", image: "/letter-templates/spring-sakura.webp" },
-	{ id: "summer-seaside", label: "Seaside", image: "/letter-templates/summer-seaside.webp" },
-	{ id: "autumn-fox", label: "Autumn fox", image: "/letter-templates/autumn-fox.webp" },
-	{ id: "halloween", label: "Halloween", image: "/letter-templates/halloween.webp" },
-	{ id: "birthday-party", label: "Birthday", image: "/letter-templates/birthday-party.webp" },
-	{ id: "love", label: "Love", image: "/letter-templates/love.webp" },
-	{ id: "anniversary", label: "Lovebirds", image: "/letter-templates/anniversary.webp" },
-	{ id: "ribbon", label: "Ribbon", image: "/letter-templates/ribbon.webp" },
-	{ id: "twinkle", label: "Twinkle", image: "/letter-templates/twinkle.webp" },
-	{ id: "botanical", label: "Botanical", image: "/letter-templates/botanical.webp" },
-	{ id: "cat-nap", label: "Cat nap", image: "/letter-templates/cat-nap.webp" },
-	{ id: "graduation", label: "Graduation", image: "/letter-templates/graduation.webp" },
+	{ id: "none", label: "Simple paper", image: "", group: "none" },
+	{ id: "christmas-santa", label: "Santa", image: "/letter-templates/christmas-santa.webp", group: "events" },
+	{ id: "christmas-tree", label: "Christmas tree", image: "/letter-templates/christmas-tree.webp", group: "events" },
+	{ id: "winter-snowman", label: "Snowman", image: "/letter-templates/winter-snowman.webp", group: "events" },
+	{ id: "tet", label: "Tết", image: "/letter-templates/tet.webp", group: "events" },
+	{ id: "spring-sakura", label: "Sakura", image: "/letter-templates/spring-sakura.webp", group: "events" },
+	{ id: "summer-seaside", label: "Seaside", image: "/letter-templates/summer-seaside.webp", group: "events" },
+	{ id: "autumn-fox", label: "Autumn fox", image: "/letter-templates/autumn-fox.webp", group: "events" },
+	{ id: "halloween", label: "Halloween", image: "/letter-templates/halloween.webp", group: "events" },
+	{ id: "birthday-party", label: "Birthday", image: "/letter-templates/birthday-party.webp", group: "events" },
+	{ id: "love", label: "Love", image: "/letter-templates/love.webp", group: "events" },
+	{ id: "anniversary", label: "Lovebirds", image: "/letter-templates/anniversary.webp", group: "events" },
+	{ id: "ribbon", label: "Ribbon", image: "/letter-templates/ribbon.webp", group: "events" },
+	{ id: "twinkle", label: "Twinkle", image: "/letter-templates/twinkle.webp", group: "events" },
+	{ id: "botanical", label: "Botanical", image: "/letter-templates/botanical.webp", group: "events" },
+	{ id: "cat-nap", label: "Cat nap", image: "/letter-templates/cat-nap.webp", group: "events" },
+	{ id: "graduation", label: "Graduation", image: "/letter-templates/graduation.webp", group: "events" },
+	{ id: "zodiac-rat", label: "Tý · Rat", image: "/letter-templates/zodiac-rat.webp", group: "zodiac" },
+	{ id: "zodiac-buffalo", label: "Sửu · Buffalo", image: "/letter-templates/zodiac-buffalo.webp", group: "zodiac" },
+	{ id: "zodiac-tiger", label: "Dần · Tiger", image: "/letter-templates/zodiac-tiger.webp", group: "zodiac" },
+	{ id: "zodiac-cat", label: "Mão · Cat", image: "/letter-templates/zodiac-cat.webp", group: "zodiac" },
+	{ id: "zodiac-dragon", label: "Thìn · Dragon", image: "/letter-templates/zodiac-dragon.webp", group: "zodiac" },
+	{ id: "zodiac-snake", label: "Tỵ · Snake", image: "/letter-templates/zodiac-snake.webp", group: "zodiac" },
+	{ id: "zodiac-horse", label: "Ngọ · Horse", image: "/letter-templates/zodiac-horse.webp", group: "zodiac" },
+	{ id: "zodiac-goat", label: "Mùi · Goat", image: "/letter-templates/zodiac-goat.webp", group: "zodiac" },
+	{ id: "zodiac-monkey", label: "Thân · Monkey", image: "/letter-templates/zodiac-monkey.webp", group: "zodiac" },
+	{ id: "zodiac-rooster", label: "Dậu · Rooster", image: "/letter-templates/zodiac-rooster.webp", group: "zodiac" },
+	{ id: "zodiac-dog", label: "Tuất · Dog", image: "/letter-templates/zodiac-dog.webp", group: "zodiac" },
+	{ id: "zodiac-pig", label: "Hợi · Pig", image: "/letter-templates/zodiac-pig.webp", group: "zodiac" },
 ] as const;
 
 /** Text inset on a template sheet (top, right, bottom, left, % of the sheet's width). */
 export const TEMPLATE_TEXT_INSET = "9% 9% 15% 9%";
 
+export const PAPER_TEXTURES = [
+	{ id: "smooth", label: "Smooth" },
+	{ id: "laid", label: "Laid" },
+	{ id: "linen", label: "Linen" },
+	{ id: "cotton", label: "Cotton" },
+	{ id: "kraft", label: "Kraft" },
+	{ id: "handmade", label: "Handmade" },
+	{ id: "parchment", label: "Parchment" },
+	{ id: "recycled", label: "Recycled" },
+	{ id: "crumpled", label: "Crumpled" },
+	{ id: "stained", label: "Stained" },
+] as const;
+
 export const PAPER_EDGES = [
 	{ id: "flat", label: "Clean cut" },
+	{ id: "rounded", label: "Rounded" },
+	{ id: "deckle", label: "Deckle" },
 	{ id: "torn", label: "Torn" },
-	{ id: "stamp", label: "Stamp edge" },
+	{ id: "scallop", label: "Scallop" },
+	{ id: "zigzag", label: "Zigzag" },
+	{ id: "wave", label: "Wave" },
+	{ id: "stamp", label: "Stamp" },
+	{ id: "ticket", label: "Ticket" },
+	{ id: "snip", label: "Snipped" },
 ] as const;
 
 export const STAMP_SIZES = [
@@ -156,6 +207,7 @@ export const STAMP_SIZES = [
 
 /** rgb triples, used as `rgb(var(--washi) / alpha)`. */
 export const WASHI_COLORS = [
+	{ id: "none", label: "None", rgb: "0 0 0" },
 	{ id: "sky", label: "Sky", rgb: "146 194 232" },
 	{ id: "pink", label: "Pink", rgb: "240 170 190" },
 	{ id: "lilac", label: "Lilac", rgb: "190 170 230" },
@@ -229,12 +281,14 @@ export const MAX_STICKERS = STICKER_SLOTS.length;
 
 export type EnvelopeColorId = (typeof ENVELOPE_COLORS)[number]["id"];
 export type EnvelopeFlapId = (typeof ENVELOPE_FLAPS)[number]["id"];
+export type EnvelopeLiningId = (typeof ENVELOPE_LININGS)[number]["id"];
 export type EnvelopePatternId = (typeof ENVELOPE_PATTERNS)[number]["id"];
 export type WaxColorId = (typeof WAX_COLORS)[number]["id"];
 export type SealMotifId = (typeof SEAL_MOTIFS_META)[number]["id"];
 export type PaperTintId = (typeof PAPER_TINTS)[number]["id"];
 export type PaperPatternId = (typeof PAPER_PATTERNS)[number]["id"];
 export type PaperTemplateId = (typeof PAPER_TEMPLATES)[number]["id"];
+export type PaperTextureId = (typeof PAPER_TEXTURES)[number]["id"];
 export type PaperEdgeId = (typeof PAPER_EDGES)[number]["id"];
 export type StampSizeId = (typeof STAMP_SIZES)[number]["id"];
 export type WashiColorId = (typeof WASHI_COLORS)[number]["id"];
@@ -252,9 +306,9 @@ export interface NoteSticker {
 
 export interface NoteStyle {
 	v: typeof NOTE_STYLE_VERSION;
-	envelope: { color: EnvelopeColorId; pattern: EnvelopePatternId; flap: EnvelopeFlapId };
-	seal: { color: WaxColorId; motif: SealMotifId };
-	paper: { tint: PaperTintId; pattern: PaperPatternId; template: PaperTemplateId; edge: PaperEdgeId; stampSize: StampSizeId; washi: WashiColorId };
+	envelope: { color: EnvelopeColorId; pattern: EnvelopePatternId; flap: EnvelopeFlapId; texture: PaperTextureId; lining: EnvelopeLiningId };
+	seal: { color: WaxColorId; motif: SealMotifId; text: string };
+	paper: { tint: PaperTintId; pattern: PaperPatternId; template: PaperTemplateId; texture: PaperTextureId; edge: PaperEdgeId; stampSize: StampSizeId; washi: WashiColorId };
 	ink: { color: InkColorId; font: LetterFontId };
 	details: {
 		titleFont: LetterFontId;
@@ -270,9 +324,9 @@ export interface NoteStyle {
 /** Exactly the look notes had before decoration existed. */
 export const DEFAULT_NOTE_STYLE: NoteStyle = {
 	v: NOTE_STYLE_VERSION,
-	envelope: { color: "ivory", pattern: "none", flap: "classic" },
-	seal: { color: "gold", motif: "heart" },
-	paper: { tint: "white", pattern: "plain", template: "none", edge: "flat", stampSize: "classic", washi: "sky" },
+	envelope: { color: "ivory", pattern: "none", flap: "classic", texture: "smooth", lining: "diamond" },
+	seal: { color: "gold", motif: "heart", text: "" },
+	paper: { tint: "white", pattern: "plain", template: "none", texture: "smooth", edge: "flat", stampSize: "classic", washi: "sky" },
 	ink: { color: "plum", font: "classic" },
 	details: { titleFont: "classic", dateStyle: "classic", signatureFont: "script", signatureText: "", closingText: "With love," },
 	stickers: [],
@@ -330,15 +384,19 @@ export function normalizeNoteStyle(input: unknown): NoteStyle {
 			color: pick(ENVELOPE_COLORS, envelope.color, d.envelope.color),
 			pattern: pick(ENVELOPE_PATTERNS, envelope.pattern, d.envelope.pattern),
 			flap: pick(ENVELOPE_FLAPS, envelope.flap, d.envelope.flap),
+			texture: pick(PAPER_TEXTURES, envelope.texture, d.envelope.texture),
+			lining: pick(ENVELOPE_LININGS, envelope.lining, d.envelope.lining),
 		},
 		seal: {
 			color: pick(WAX_COLORS, seal.color, d.seal.color),
 			motif: pick(SEAL_MOTIFS_META, seal.motif, d.seal.motif),
+			text: typeof seal.text === "string" ? seal.text.replace(/\s+/g, "").slice(0, 2).toUpperCase() : "",
 		},
 		paper: {
 			tint: pick(PAPER_TINTS, paper.tint, d.paper.tint),
 			pattern: pick(PAPER_PATTERNS, paper.pattern, d.paper.pattern),
 			template: pick(PAPER_TEMPLATES, paper.template, d.paper.template),
+			texture: pick(PAPER_TEXTURES, paper.texture, d.paper.texture),
 			edge: pick(PAPER_EDGES, paper.edge, d.paper.edge),
 			stampSize: pick(STAMP_SIZES, paper.stampSize, d.paper.stampSize),
 			washi: pick(WASHI_COLORS, paper.washi, d.paper.washi),
@@ -386,14 +444,15 @@ function sample<L extends Catalog>(list: L, rng: () => number): L[number]["id"] 
 export function randomNoteStyle(rng: () => number = Math.random): NoteStyle {
 	const template = sample(PAPER_TEMPLATES, rng);
 	return normalizeNoteStyle({
-		envelope: { color: sample(ENVELOPE_COLORS, rng), pattern: sample(ENVELOPE_PATTERNS, rng), flap: sample(ENVELOPE_FLAPS, rng) },
-		seal: { color: sample(WAX_COLORS, rng), motif: sample(SEAL_MOTIFS_META, rng) },
+		envelope: { color: sample(ENVELOPE_COLORS, rng), pattern: sample(ENVELOPE_PATTERNS, rng), flap: sample(ENVELOPE_FLAPS, rng), texture: sample(PAPER_TEXTURES, rng), lining: sample(ENVELOPE_LININGS, rng) },
+		seal: { color: sample(WAX_COLORS, rng), motif: sample(SEAL_MOTIFS_META.filter((entry) => entry.id !== "monogram"), rng), text: "" },
 		paper: {
 			tint: sample(PAPER_TINTS, rng),
 			pattern: sample(PAPER_PATTERNS, rng),
 			template,
-			edge: template === "none" ? sample(PAPER_EDGES, rng) : "stamp",
-			stampSize: template === "none" ? sample(STAMP_SIZES, rng) : "fine",
+			texture: sample(PAPER_TEXTURES, rng),
+			edge: sample(PAPER_EDGES, rng),
+			stampSize: sample(STAMP_SIZES, rng),
 			washi: sample(WASHI_COLORS, rng),
 		},
 		ink: { color: sample(INK_COLORS, rng), font: sample(LETTER_FONTS, rng) },
@@ -413,7 +472,7 @@ export function describeNoteStyle(style: NoteStyle) {
 	const label = (list: ReadonlyArray<{ readonly id: string; readonly label: string }>, id: string) =>
 		list.find((entry) => entry.id === id)?.label ?? id;
 	const parts = [
-		`${label(ENVELOPE_COLORS, style.envelope.color)} ${label(ENVELOPE_FLAPS, style.envelope.flap).toLowerCase()} envelope${style.envelope.pattern === "none" ? "" : `, ${label(ENVELOPE_PATTERNS, style.envelope.pattern).toLowerCase()}`}`,
+		`${label(ENVELOPE_COLORS, style.envelope.color)} ${label(ENVELOPE_FLAPS, style.envelope.flap).toLowerCase()} envelope${style.envelope.pattern === "none" ? "" : `, ${label(ENVELOPE_PATTERNS, style.envelope.pattern).toLowerCase()}`}${style.envelope.texture === "smooth" ? "" : `, ${label(PAPER_TEXTURES, style.envelope.texture).toLowerCase()} texture`}`,
 		`${label(WAX_COLORS, style.seal.color).toLowerCase()} ${label(SEAL_MOTIFS_META, style.seal.motif).toLowerCase()} seal`,
 		`${label(PAPER_TINTS, style.paper.tint).toLowerCase()} ${label(PAPER_EDGES, style.paper.edge).toLowerCase()} paper${style.paper.template !== "none" ? `, ${label(PAPER_TEMPLATES, style.paper.template).toLowerCase()} template` : style.paper.pattern === "plain" ? "" : `, ${label(PAPER_PATTERNS, style.paper.pattern).toLowerCase()}`}`,
 		`${label(INK_COLORS, style.ink.color).toLowerCase()} ink in ${label(LETTER_FONTS, style.ink.font)}`,

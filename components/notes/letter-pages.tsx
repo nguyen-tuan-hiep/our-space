@@ -37,7 +37,7 @@ export function LetterPage({ style, title, body, sender, date, dateTime, reading
 					{closing ? <p className="letter-closing">{closing}</p> : null}
 					<div className="letter-signoff-row">
 						<p className="letter-signature">{style.details.signatureText || sender}</p>
-						<span aria-hidden="true" className="letter-seal"><WaxSeal color={style.seal.color} motif={style.seal.motif} /></span>
+						<span aria-hidden="true" className="letter-seal"><WaxSeal color={style.seal.color} motif={style.seal.motif} text={style.seal.text} /></span>
 					</div>
 				</footer>
 			</article>

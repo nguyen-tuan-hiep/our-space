@@ -111,7 +111,21 @@ export type PaperPrintId =
 	| "waves" | "botanical" | "clouds" | "checker" | "speckles";
 
 /** Prints for the letter sheet, in the note's ink, accent and softer accent. */
-export function paperTile(id: PaperPrintId, { ink, accent, soft }: PaperPatternColors): PatternTile | null {
+export function paperTile(id: PaperPrintId, colors: PaperPatternColors): PatternTile | null {
+	const print = paperPrint(id, colors);
+	if (!print) return null;
+	// Prints sit behind the writing, so they are kept faint; grain-like ones are already quiet.
+	const k = FADE[id];
+	return { ...print, svg: print.svg.replace(/(fill|stroke)-opacity='([\d.]+)'/g, (_, kind, value) => `${kind}-opacity='${+(Number(value) * k).toFixed(3)}'`) };
+}
+
+/** How much of each paper print's strength is kept. */
+const FADE: Record<PaperPrintId, number> = {
+	dots: 0.75, grid: 0.8, hearts: 0.4, stars: 0.5, confetti: 0.5, stripes: 0.7, floral: 0.42,
+	waves: 0.75, botanical: 0.5, clouds: 0.6, checker: 0.7, speckles: 0.8,
+};
+
+function paperPrint(id: PaperPrintId, { ink, accent, soft }: PaperPatternColors): PatternTile | null {
 	const capsule = (x: number, y: number, angle: number, fill: string, opacity: number) =>
 		`<rect x='${n(x - 5)}' y='${n(y - 2)}' width='10' height='4' rx='2' fill='${fill}' fill-opacity='${opacity}' transform='rotate(${angle} ${n(x)} ${n(y)})'/>`;
 	switch (id) {

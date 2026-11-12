@@ -1502,6 +1502,7 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 	--env-tone: var(--env-base);
 	--env-lining: var(--env-deep);
 	--envelope-pattern: none;
+	--envelope-texture: none;
 	--envelope-paper: #ffffff;
 	--envelope-ivory-top: var(--env-tone);
 	--envelope-ivory-bottom: color-mix(in srgb, var(--env-tone) 96.5%, black);
@@ -1552,6 +1553,7 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 		var(--envelope-creases) center / 100% 100% no-repeat,
 		var(--envelope-pocket-shade) center / 100% 100% no-repeat,
 		var(--envelope-pattern),
+		var(--envelope-texture),
 		var(--envelope-noise),
 		linear-gradient(180deg, var(--envelope-ivory-top), var(--envelope-ivory-bottom));
 	clip-path: polygon(0 0, 50% 58%, 100% 0, 100% 100%, 0 100%);
@@ -1561,7 +1563,7 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
  * rounded-V shape is a mask on ::before, and the wrapper's drop-shadow casts
  * that shape onto the pocket (a filter on the masked element would be clipped). */
 .envelope-flap {
-	--flap-fill: var(--envelope-flap-shade) top / 100% 63% no-repeat, var(--envelope-pattern), var(--envelope-noise), linear-gradient(180deg, var(--envelope-flap-top), var(--envelope-flap-bottom));
+	--flap-fill: var(--envelope-flap-shade) top / 100% 63% no-repeat, var(--envelope-pattern), var(--envelope-texture), var(--envelope-noise), linear-gradient(180deg, var(--envelope-flap-top), var(--envelope-flap-bottom));
 	z-index: 3;
 	inset: 0;
 	filter: var(--envelope-flap-shadow);
@@ -1705,6 +1707,7 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 	--accent: #b5556f;
 	--paper-tint: #fffefd;
 	--paper-pattern: none;
+	--paper-texture: none;
 	--paper-stickers:
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90' viewBox='0 0 120 90'%3E%3Cpath fill='%23e89aae' opacity='.5' transform='translate(18 34) rotate(-14) scale(1.5)' d='M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z'/%3E%3Cpath fill='%2392c2e8' opacity='.55' transform='translate(60 52) rotate(12) scale(.9)' d='M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z'/%3E%3Cpath fill='%23e89aae' opacity='.3' transform='translate(56 18) rotate(-6) scale(.6)' d='M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z'/%3E%3Cpath fill='%2392c2e8' opacity='.6' transform='translate(88 30) scale(.55)' d='M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z'/%3E%3C/svg%3E") left 0.5rem bottom 0.5rem / 7.5rem auto no-repeat,
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='50' viewBox='0 0 60 50'%3E%3Cpath fill='%2392c2e8' opacity='.6' transform='translate(6 8) scale(.85)' d='M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z'/%3E%3Cpath fill='%2392c2e8' opacity='.45' transform='translate(32 26) scale(.5)' d='M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z'/%3E%3Cpath fill='%23e89aae' opacity='.4' transform='translate(36 4) scale(.35)' d='M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z'/%3E%3C/svg%3E") left 1rem top 1rem / 3.5rem auto no-repeat;
@@ -1713,6 +1716,7 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 	/* Soft, slightly uneven corners read as cut paper, not a card. */
 	--sheet-radius: 18px 22px 16px 20px / 20px 16px 22px 18px;
 	--sheet-shadow:
+		0 0 0 0.5px rgb(60 45 40 / 0.2),
 		inset 0 0 0 1px rgb(60 40 50 / 0.05),
 		0 1px 2px rgb(0 0 0 / 0.1),
 		/* the lower corners lift a little off the desk */
@@ -1750,46 +1754,28 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 	transform: translateX(-50%) rotate(-2.5deg);
 	pointer-events: none;
 }
-/* Torn and stamp edges are masks on the sheet. A mask clips the box-shadow,
- * so those sheets cast a drop-shadow of their silhouette instead, and the
- * tape sits inside the edge rather than over it. */
-.letter-sheet[data-paper-edge="torn"],
-.letter-sheet[data-paper-edge="stamp"] {
+/* Cut edges are masks (profiles in lib/note-edge-masks.ts, designed in Figma,
+ * frame "Paper edges"). A mask also clips an element's own shadow, so the mask
+ * sits on the page inside the sheet and the sheet casts drop-shadows of the
+ * silhouette: a hairline so the edge reads on bright backgrounds, a contact
+ * shadow and a soft one for depth. The tape, on the sheet, stays whole. */
+.letter-sheet[data-paper-edge]:not([data-paper-edge="flat"]):not([data-paper-edge="rounded"]) {
 	border-radius: 0;
 	box-shadow: none;
-	filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.12)) drop-shadow(0 16px 26px rgb(0 0 0 / 0.14));
+	filter: drop-shadow(0 0 0.6px rgb(60 45 40 / 0.55)) drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.18)) drop-shadow(0 12px 20px rgb(0 0 0 / 0.16));
 }
-.letter-sheet[data-paper-edge="torn"]::before,
-.letter-sheet[data-paper-edge="stamp"]::before { top: 0.45rem; }
-.letter-sheet[data-paper-edge="torn"] {
-	-webkit-mask:
-		var(--paper-edge-torn-top) top / 100% 14px no-repeat,
-		linear-gradient(#000 0 0) 0 14px / 100% calc(100% - 28px) no-repeat,
-		var(--paper-edge-torn-bottom) bottom / 100% 14px no-repeat;
-	mask:
-		var(--paper-edge-torn-top) top / 100% 14px no-repeat,
-		linear-gradient(#000 0 0) 0 14px / 100% calc(100% - 28px) no-repeat,
-		var(--paper-edge-torn-bottom) bottom / 100% 14px no-repeat;
+.letter-sheet[data-paper-edge]:not([data-paper-edge="flat"]):not([data-paper-edge="rounded"]) > .letter-paper,
+.letter-sheet[data-paper-edge]:not([data-paper-edge="flat"]):not([data-paper-edge="rounded"]) > .letter-hinge .letter-hinge-front,
+.letter-sheet[data-paper-edge]:not([data-paper-edge="flat"]):not([data-paper-edge="rounded"]) > .letter-hinge .letter-hinge-back {
+	border-radius: 0;
+	-webkit-mask: var(--paper-edge-mask);
+	mask: var(--paper-edge-mask);
 }
-.letter-sheet[data-paper-edge="stamp"] {
-	--notch: 7px;
-	--stamp-hole: 4.5px;
-	--stamp-pitch: 16px;
-	-webkit-mask:
-		linear-gradient(#000 0 0) var(--notch) var(--notch) / calc(100% - 2 * var(--notch)) calc(100% - 2 * var(--notch)) no-repeat,
-		radial-gradient(circle at 50% 0, transparent calc(var(--stamp-hole) - 0.5px), #000 var(--stamp-hole)) top / var(--stamp-pitch) var(--notch) repeat-x,
-		radial-gradient(circle at 50% 100%, transparent calc(var(--stamp-hole) - 0.5px), #000 var(--stamp-hole)) bottom / var(--stamp-pitch) var(--notch) repeat-x,
-		radial-gradient(circle at 0 50%, transparent calc(var(--stamp-hole) - 0.5px), #000 var(--stamp-hole)) left / var(--notch) var(--stamp-pitch) repeat-y,
-		radial-gradient(circle at 100% 50%, transparent calc(var(--stamp-hole) - 0.5px), #000 var(--stamp-hole)) right / var(--notch) var(--stamp-pitch) repeat-y;
-	mask:
-		linear-gradient(#000 0 0) var(--notch) var(--notch) / calc(100% - 2 * var(--notch)) calc(100% - 2 * var(--notch)) no-repeat,
-		radial-gradient(circle at 50% 0, transparent calc(var(--stamp-hole) - 0.5px), #000 var(--stamp-hole)) top / var(--stamp-pitch) var(--notch) repeat-x,
-		radial-gradient(circle at 50% 100%, transparent calc(var(--stamp-hole) - 0.5px), #000 var(--stamp-hole)) bottom / var(--stamp-pitch) var(--notch) repeat-x,
-		radial-gradient(circle at 0 50%, transparent calc(var(--stamp-hole) - 0.5px), #000 var(--stamp-hole)) left / var(--notch) var(--stamp-pitch) repeat-y,
-		radial-gradient(circle at 100% 50%, transparent calc(var(--stamp-hole) - 0.5px), #000 var(--stamp-hole)) right / var(--notch) var(--stamp-pitch) repeat-y;
-}
-.letter-sheet[data-stamp-size="fine"] { --notch: 5px; --stamp-hole: 3px; --stamp-pitch: 12px; }
-.letter-sheet[data-stamp-size="bold"] { --notch: 9px; --stamp-hole: 5.5px; --stamp-pitch: 20px; }
+.letter-sheet[data-paper-edge="rounded"] { --sheet-radius: 30px; }
+.letter-sheet[data-tape="none"]::before { display: none; }
+/* While the letter is folded in the envelope, its tape stays hidden. */
+.letter-sheet[data-folding]::before { opacity: 0; }
+.letter-sheet::before { transition: opacity 0.3s ease; }
 /* Edge picker specimens show the paper silhouette without washi hiding it. */
 .paper-edge-swatch {
 	background: color-mix(in srgb, var(--foreground) 13%, var(--background));
@@ -1798,8 +1784,9 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 	display: block;
 	width: min(6.5rem, 78%);
 	height: 5.25rem;
-	filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.22)) drop-shadow(0 9px 8px rgb(0 0 0 / 0.12));
+	filter: drop-shadow(0 0 0.6px rgb(60 45 40 / 0.55)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.2)) drop-shadow(0 9px 8px rgb(0 0 0 / 0.12));
 }
+.paper-edge-swatch .paper-edge-sample[data-paper-edge="rounded"] { --sheet-radius: 16px; }
 .paper-edge-swatch .paper-edge-sample {
 	display: block;
 	width: 100%;
@@ -1818,6 +1805,7 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 	background:
 		var(--paper-stickers),
 		var(--paper-pattern),
+		var(--paper-texture),
 		linear-gradient(to bottom,
 			transparent calc(22% - 1px), rgb(70 60 70 / 0.07) calc(22% - 1px),
 			rgb(70 60 70 / 0.07) 22%, rgb(255 255 255 / 0.9) 22%,
@@ -1831,9 +1819,10 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 	/* Backgrounds scroll with the sheet so folds and stickers stay on the paper. */
 	background-attachment: local;
 }
-.letter-sheet[data-paper-template]:not([data-paper-template="none"])::before { display: none; }
 .letter-sheet[data-paper-template]:not([data-paper-template="none"]) .letter-paper {
-	background: var(--paper-template), var(--paper-tint);
+	/* The artwork multiplies with the paper color, so a tint recolors the sheet and the pattern shows through. */
+	background: var(--paper-template), var(--paper-pattern), var(--paper-texture), var(--paper-tint);
+	background-blend-mode: multiply, normal, normal, normal;
 	background-attachment: scroll;
 }
 /* Every template shares one text area (lib/note-style.ts), so switching
@@ -1888,7 +1877,8 @@ body { letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
 	color: #353039;
 	font: 600 0.75rem/1 var(--font-sans);
 }
-.letter-page-nav { position: absolute; z-index: 20; bottom: 0.75rem; left: 50%; transform: translateX(-50%); padding: 0.3rem 0.5rem; }
+/* Below the sheet, so it never covers the letter. */
+.letter-page-nav { position: absolute; z-index: 20; top: calc(100% + 0.75rem); left: 50%; transform: translateX(-50%); padding: 0.3rem 0.5rem; }
 .letter-preview-nav { padding: 0.25rem 0.5rem; }
 .letter-page-nav button,
 .letter-preview-nav button { display: grid; width: 1.8rem; height: 1.8rem; place-items: center; border-radius: 50%; }

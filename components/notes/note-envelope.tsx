@@ -17,9 +17,10 @@ const WAX_BODY =
  * shades of one wax color. The bevels are blurred strokes clipped to their
  * shapes, so there are no per-instance raster effects beyond a few blurs.
  */
-export function WaxSeal({ color = "gold", motif = "heart", className = "envelope-seal-svg" }: {
+export function WaxSeal({ color = "gold", motif = "heart", text = "", className = "envelope-seal-svg" }: {
 	color?: WaxColorId;
 	motif?: SealMotifId;
+	text?: string;
 	className?: string;
 }) {
 	// Per-instance ids so gradients still resolve when another seal is hidden.
@@ -33,9 +34,10 @@ export function WaxSeal({ color = "gold", motif = "heart", className = "envelope
 	const soft = `soft-${id}`;
 	const fine = `fine-${id}`;
 	const gloss = `gloss-${id}`;
-	const tone = waxPalette(waxHex({ ...DEFAULT_NOTE_STYLE, seal: { color, motif } }));
+	const tone = waxPalette(waxHex({ ...DEFAULT_NOTE_STYLE, seal: { color, motif, text } }));
 	const parts = SEAL_MOTIFS[motif];
-	const raised = parts.filter((part) => part.kind !== "groove");
+	const initials = (text || "M").slice(0, 2);
+	const discUs = `discus-${id}`;
 	const blur = (name: string, deviation: number) => (
 		<filter id={name} filterUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120">
 			<feGaussianBlur stdDeviation={deviation} />
@@ -57,6 +59,11 @@ export function WaxSeal({ color = "gold", motif = "heart", className = "envelope
 					<stop offset="1" stopColor={tone.rimDark} />
 				</linearGradient>
 				<radialGradient id={disc} cx="0.42" cy="0.36" r="0.7">
+					<stop offset="0" stopColor={tone.discLight} />
+					<stop offset="1" stopColor={tone.discDark} />
+				</radialGradient>
+				{/* The disc's own gradient in user space, so shapes drawn over a motif hide what is under them without a seam. */}
+				<radialGradient id={discUs} gradientUnits="userSpaceOnUse" cx="44.6" cy="40.6" r="46.9">
 					<stop offset="0" stopColor={tone.discLight} />
 					<stop offset="1" stopColor={tone.discDark} />
 				</radialGradient>
@@ -85,21 +92,39 @@ export function WaxSeal({ color = "gold", motif = "heart", className = "envelope
 				<circle cx="50" cy="50" r="33.5" transform="translate(1 1.5)" stroke={tone.deep} strokeOpacity="0.6" strokeWidth="4" />
 				<circle cx="50" cy="50" r="33.5" transform="translate(-0.75 -1)" stroke="#fff" strokeOpacity="0.28" strokeWidth="3" />
 			</g>
-			{/* Motif, pressed into the disc: a shadow and a highlight copy under the
-			    raised shapes give the emboss; engraved grooves are cut into them. */}
-			<g fill="none" strokeLinecap="round" strokeLinejoin="round">
-				{raised.map((part, index) => (
-					<path key={`shadow-${index}`} d={part.d} transform="translate(0.9 1.1)" opacity="0.55" {...(part.kind === "line" ? { stroke: tone.shadowInk, strokeWidth: part.w + 0.6 } : { fill: tone.shadowInk })} />
-				))}
-				{raised.map((part, index) => (
-					<path key={`light-${index}`} d={part.d} transform="translate(-0.6 -0.7)" opacity="0.5" {...(part.kind === "line" ? { stroke: tone.highlight, strokeWidth: part.w + 0.4 } : { fill: tone.highlight })} />
-				))}
+			{/* Motif pressed into the disc, drawn part by part so a shape hides the lines
+			    under it. Raised lines and shapes carry a shadow and a highlight copy;
+			    engraved grooves are a dark cut over a pale lower edge. */}
+			<g clipPath={`url(#${discClip})`} fill="none" strokeLinecap="round" strokeLinejoin="round">
 				{parts.map((part, index) => {
-					if (part.kind === "line") return <path key={index} d={part.d} stroke={`url(#${emboss})`} strokeWidth={part.w} />;
-					if (part.kind === "groove") return <path key={index} d={part.d} stroke={tone.shadowInk} strokeOpacity="0.55" strokeWidth="0.9" />;
-					if (part.kind === "outline") return <path key={index} d={part.d} fill={`url(#${emboss})`} stroke={tone.shadowInk} strokeOpacity="0.5" strokeWidth="0.8" />;
-					return <path key={index} d={part.d} fill={`url(#${emboss})`} />;
+					if (part.kind === "groove") {
+						const w = part.w ?? 0.8;
+						return (
+							<g key={index}>
+								<path d={part.d} transform="translate(0.5 0.6)" stroke="#fff" strokeOpacity="0.45" strokeWidth={w} />
+								<path d={part.d} stroke={tone.shadowInk} strokeOpacity="0.75" strokeWidth={w} />
+							</g>
+						);
+					}
+					const width = part.kind === "line" ? part.w : 1.5;
+					const stroked = part.kind === "line" || part.kind === "outline";
+					return (
+						<g key={index}>
+							{part.kind === "outline" ? <path d={part.d} fill={`url(#${discUs})`} /> : null}
+							{part.kind === "fill" ? <path d={part.d} transform="translate(0.9 1.1)" fill={tone.shadowInk} opacity="0.5" /> : <path d={part.d} transform="translate(0.8 1)" stroke={tone.shadowInk} strokeWidth={width + 0.5} opacity="0.5" />}
+							{part.kind === "fill" ? <path d={part.d} transform="translate(-0.6 -0.7)" fill={tone.highlight} opacity="0.55" /> : <path d={part.d} transform="translate(-0.5 -0.6)" stroke={tone.highlight} strokeWidth={width + 0.3} opacity="0.5" />}
+							{part.kind === "fill" ? <path d={part.d} fill={`url(#${emboss})`} /> : null}
+							{stroked ? <path d={part.d} stroke={`url(#${emboss})`} strokeWidth={width} /> : null}
+						</g>
+					);
 				})}
+				{motif === "monogram" ? (
+					<g textAnchor="middle" fontFamily="var(--font-script), 'Snell Roundhand', cursive" fontWeight="700" fontSize={initials.length > 1 ? 34 : 50}>
+						<text x="50.9" y="65.1" fill={tone.shadowInk} opacity="0.5">{initials}</text>
+						<text x="49.4" y="63.3" fill={tone.highlight} opacity="0.55">{initials}</text>
+						<text x="50" y="64.2" fill={`url(#${emboss})`}>{initials}</text>
+					</g>
+				) : null}
 			</g>
 			{/* Gloss where the wax catches the light. */}
 			<ellipse cx="33" cy="24.5" rx="7.5" ry="3" fill="#fff" fillOpacity="0.38" transform="rotate(35 33 24.5)" filter={`url(#${gloss})`} />
@@ -133,7 +158,7 @@ export function NoteEnvelope({ letter, open = false, opening = false, className 
 			{letter === false ? null : <div className="envelope-letter">{letter}</div>}
 			<div className="envelope-pocket" />
 			<div className="envelope-flap" />
-			<div className="envelope-seal"><WaxSeal color={style.seal.color} motif={style.seal.motif} /></div>
+			<div className="envelope-seal"><WaxSeal color={style.seal.color} motif={style.seal.motif} text={style.seal.text} /></div>
 		</div>
 	);
 }

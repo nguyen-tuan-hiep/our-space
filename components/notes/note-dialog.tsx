@@ -58,6 +58,7 @@ export function NoteDialog({
 	const [content, setContent] = useState("");
 	const [style, setStyle] = useState<NoteStyle>(() => normalizeNoteStyle(note?.style));
 	const [focus, setFocus] = useState<"envelope" | "letter">("envelope");
+	const [envelopeOpen, setEnvelopeOpen] = useState(false);
 	const [unlockDate, setUnlockDate] = useState<dayjs.Dayjs | null>(dayjs());
 	const [unlockTime, setUnlockTime] = useState<dayjs.Dayjs | null>(dayjs());
 	const [unlockTimeZone, setUnlockTimeZone] = useState(defaultTimeZone);
@@ -86,6 +87,7 @@ export function NoteDialog({
 		setStyle(normalizeNoteStyle(note?.style));
 		setStep("write");
 		setFocus("envelope");
+		setEnvelopeOpen(false);
 	}
 
 	function getUnlockIso() {
@@ -253,9 +255,10 @@ export function NoteDialog({
 								sender={sender?.display_name ?? "Me"}
 								timeZone={senderTimeZone}
 								focus={focus}
+								envelopeOpen={envelopeOpen}
 							/>
 						</div>
-						<DecoratePanel style={style} onChange={setStyle} onTabChange={onTabChange} />
+						<DecoratePanel style={style} onChange={setStyle} onTabChange={onTabChange} onEnvelopeOpenChange={setEnvelopeOpen} senderInitial={(sender?.display_name ?? "M").trim().charAt(0).toUpperCase() || "M"} />
 					</div>
 				) : null}
 			</form>

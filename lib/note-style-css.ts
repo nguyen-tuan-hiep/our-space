@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { envelopeTile } from "@/lib/note-pattern-tiles";
+import { textureTile } from "@/lib/note-paper-texture";
 import {
 	ENVELOPE_COLORS,
 	INK_COLORS,
@@ -118,6 +119,27 @@ export function envelopePatternUri(id: EnvelopePatternId, deep: string, light: b
 	return print ? `${svgUri(print.svg)} 0 0 / ${print.width}px ${print.height}px repeat` : "none";
 }
 
+/** The paper texture on the envelope's outside (the same tiles as the letter paper). */
+function envelopeTextureUri(style: NoteStyle) {
+	const tile = textureTile(style.envelope.texture);
+	return tile ? `${svgUri(tile.svg)} 0 0 / ${tile.width}px ${tile.height}px repeat` : "none";
+}
+
+const DIAMOND_LINING = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 0L0 12L12 24L24 12Z' fill='none' stroke='white' stroke-opacity='0.22' stroke-width='0.8' stroke-linecap='round'/><circle cx='12' cy='12' r='1.2' fill='black' fill-opacity='0.08'/></svg>";
+
+/** The print on the envelope's lining as a background layer, or `none` for a plain lining. */
+export function envelopeLiningLayer(lining: NoteStyle["envelope"]["lining"], deep: string) {
+	if (lining === "plain") return "none";
+	if (lining === "diamond") return `${svgUri(DIAMOND_LINING)} 0 0 / 12px 12px repeat`;
+	// The lining is a deeper shade than the paper, so its print is lighter than it.
+	const print = envelopeTile(lining, hexMix(deep, "#ffffff", 0.7));
+	return print ? `${svgUri(print.svg)} 0 0 / ${print.width}px ${print.height}px repeat` : "none";
+}
+
+function envelopeLiningVars(style: NoteStyle, deep: string): CSSProperties {
+	return { "--envelope-liner": envelopeLiningLayer(style.envelope.lining, deep) } as CSSProperties;
+}
+
 /** Custom properties for `.envelope`: base/deep tones, the peeking letter's paper and the print. */
 export function envelopeStyleVars(style: NoteStyle): CSSProperties {
 	const color = envelopeColors(style);
@@ -128,5 +150,7 @@ export function envelopeStyleVars(style: NoteStyle): CSSProperties {
 		"--envelope-paper": paperTint(style),
 		"--envelope-pattern": envelopePatternUri(style.envelope.pattern, color.deep, light),
 		"--envelope-flap-mask": envelopeFlapMask(style.envelope.flap),
+		"--envelope-texture": envelopeTextureUri(style),
+		...envelopeLiningVars(style, color.deep),
 	} as CSSProperties;
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
 import { RotateCcw, Shuffle } from "lucide-react";
-import { NativeButton, NativeTabs } from "@/components/ui/native-controls";
+import { NativeButton, NativeInput, NativeTabs } from "@/components/ui/native-controls";
 import { NoteEnvelope, WaxSeal } from "@/components/notes/note-envelope";
 import { SwatchGrid, TileGrid } from "@/components/notes/composer/pickers";
 import { DetailControls } from "@/components/notes/composer/detail-controls";
@@ -10,11 +10,13 @@ import {
 	DEFAULT_NOTE_STYLE,
 	ENVELOPE_COLORS,
 	ENVELOPE_FLAPS,
+	ENVELOPE_LININGS,
 	ENVELOPE_PATTERNS,
 	INK_COLORS,
 	LETTER_FONTS,
 	PAPER_EDGES,
 	PAPER_PATTERNS,
+	PAPER_TEXTURES,
 	PAPER_TEMPLATES,
 	PAPER_TINTS,
 	SEAL_MOTIFS_META,
@@ -24,8 +26,9 @@ import {
 	randomNoteStyle,
 	type NoteStyle,
 } from "@/lib/note-style";
-import { envelopeColors, envelopePatternUri, paperTint } from "@/lib/note-style-css";
-import { paperColors, paperPatternUri, paperStyleVars } from "@/lib/note-paper-art";
+import { envelopeColors, envelopeLiningLayer, envelopePatternUri, paperTint } from "@/lib/note-style-css";
+import { paperColors, paperPatternUri, paperStyleVars, paperTextureUri } from "@/lib/note-paper-art";
+import { edgeMask } from "@/lib/note-edge-masks";
 
 export type DecorateTab = "envelope" | "seal" | "paper" | "ink" | "details";
 
@@ -49,7 +52,11 @@ function PaperEdgeSample({ edge, stampSize, tint }: {
 }) {
 	return (
 		<span className="paper-edge-sample-shadow">
-			<span className="letter-sheet paper-edge-sample" data-paper-edge={edge} data-stamp-size={stampSize}>
+			<span
+				className="letter-sheet paper-edge-sample"
+				data-paper-edge={edge}
+				style={{ "--paper-edge-mask": edgeMask(edge, stampSize) ?? "none" } as CSSProperties}
+			>
 				<span className="letter-paper block h-full w-full" style={{ backgroundImage: "none", backgroundColor: tint }} />
 			</span>
 		</span>
@@ -57,13 +64,18 @@ function PaperEdgeSample({ edge, stampSize, tint }: {
 }
 
 /** Tabs of pickers that edit one NoteStyle; a Shuffle and a Reset sit above them. */
-export function DecoratePanel({ style, onChange, onTabChange }: {
+export function DecoratePanel({ style, onChange, onTabChange, onEnvelopeOpenChange, senderInitial = "M" }: {
 	style: NoteStyle;
 	onChange: (style: NoteStyle) => void;
 	onTabChange?: (tab: DecorateTab) => void;
+	/** The preview envelope opens while the lining is being chosen. */
+	onEnvelopeOpenChange?: (open: boolean) => void;
+	/** The author's initial, offered when the initials stamp is chosen. */
+	senderInitial?: string;
 }) {
 	const [tab, setTab] = useState<DecorateTab>("envelope");
 	const selectTab = (next: DecorateTab) => {
+		onEnvelopeOpenChange?.(false);
 		setTab(next);
 		onTabChange?.(next);
 	};
@@ -74,6 +86,17 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 	const paperVars = useMemo(() => paperStyleVars(style), [style]);
 	const envelope = envelopeColors(style);
 	const tint = paperTint(style);
+	const paperMode = style.paper.template === "none" ? "custom" : "template";
+	const lastTemplate = useRef<NoteStyle["paper"]["template"]>("love");
+	const choosePaperMode = (mode: "template" | "custom") => {
+		if (mode === "template") {
+			// Templates start on their own cream paper: clean cut, no pattern, no tape.
+			onChange({ ...style, paper: { ...style.paper, template: lastTemplate.current, edge: "flat", pattern: "plain", tint: "white", washi: "none" }, stickers: [] });
+			return;
+		}
+		if (style.paper.template !== "none") lastTemplate.current = style.paper.template;
+		onChange({ ...style, paper: { ...style.paper, template: "none", washi: style.paper.washi === "none" ? "sky" : style.paper.washi } });
+	};
 
 	return (
 		<div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5">
@@ -92,7 +115,12 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 			</div>
 
 			{tab === "envelope" ? (
-				<div role="tabpanel" className="grid gap-5">
+				<div
+					role="tabpanel"
+					className="grid gap-5"
+					onPointerDownCapture={(event) => onEnvelopeOpenChange?.(Boolean((event.target as HTMLElement).closest("[data-lining-group]")))}
+					onFocusCapture={(event) => onEnvelopeOpenChange?.(Boolean((event.target as HTMLElement).closest("[data-lining-group]")))}
+				>
 					<SwatchGrid
 						label="Envelope color"
 						options={ENVELOPE_COLORS.map((color) => ({ id: color.id, label: color.label, swatch: `linear-gradient(180deg, ${color.base}, ${color.deep})` }))}
@@ -108,7 +136,7 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 						}))}
 						value={style.envelope.flap}
 						onChange={(flap) => patch("envelope", { flap })}
-						columns="grid-cols-3"
+						columns="grid-cols-5"
 						previewClassName="!h-24"
 					/>
 					<TileGrid
@@ -121,9 +149,38 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 						}))}
 						value={style.envelope.pattern}
 						onChange={(pattern) => patch("envelope", { pattern })}
-						columns="grid-cols-4 sm:grid-cols-5"
+						columns="grid-cols-5"
 						previewClassName="!h-20"
 					/>
+					<TileGrid
+						label="Paper texture"
+						options={PAPER_TEXTURES.map((texture) => ({
+							id: texture.id,
+							label: texture.label,
+							preview: null,
+							previewStyle: { background: `${paperTextureUri(texture.id)}, ${envelope.base}` },
+						}))}
+						value={style.envelope.texture}
+						onChange={(textureId) => patch("envelope", { texture: textureId })}
+						columns="grid-cols-5"
+						previewClassName="!h-16"
+					/>
+					<div data-lining-group="">
+						<TileGrid
+							label="Lining"
+							hint="Inside the flap"
+							options={ENVELOPE_LININGS.map((lining) => ({
+								id: lining.id,
+								label: lining.label,
+								preview: null,
+								previewStyle: { background: `${envelopeLiningLayer(lining.id, envelope.deep)}, linear-gradient(0deg, color-mix(in srgb, ${envelope.deep} 92%, black), ${envelope.deep})` },
+							}))}
+							value={style.envelope.lining}
+							onChange={(lining) => patch("envelope", { lining })}
+							columns="grid-cols-5"
+							previewClassName="!h-16"
+						/>
+					</div>
 				</div>
 			) : null}
 
@@ -140,38 +197,57 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 						options={SEAL_MOTIFS_META.map((motif) => ({
 							id: motif.id,
 							label: motif.label,
-							preview: <WaxSeal color={style.seal.color} motif={motif.id} className="size-12 drop-shadow-[0_2px_2px_rgb(60_40_10/0.3)]" />,
+							preview: <WaxSeal color={style.seal.color} motif={motif.id} text={style.seal.text || senderInitial} className="size-12 drop-shadow-[0_2px_2px_rgb(60_40_10/0.3)]" />,
 						}))}
 						value={style.seal.motif}
-						onChange={(motif) => patch("seal", { motif })}
-						columns="grid-cols-4"
+						onChange={(motif) => patch("seal", { motif, ...(motif === "monogram" && !style.seal.text ? { text: senderInitial } : {}) })}
+						columns="grid-cols-5"
 						previewClassName="border-transparent"
 					/>
+					{style.seal.motif === "monogram" ? (
+						<NativeInput
+							label="Initials"
+							helperText="One or two letters, set in script."
+							maxLength={2}
+							value={style.seal.text}
+							onChange={(event) => patch("seal", { text: event.target.value.replace(/\s+/g, "").toUpperCase() })}
+						/>
+					) : null}
 				</div>
 			) : null}
 
 			{tab === "paper" ? (
 				<div role="tabpanel" className="grid gap-5">
-					<TileGrid
-						label="Template"
-						hint={style.paper.template === "none" ? undefined : "Artwork sits in the corners"}
-						options={PAPER_TEMPLATES.map((template) => ({
-							id: template.id,
-							label: template.label,
-							preview: template.image ? null : <span className="block h-24 w-16 rounded bg-white shadow-md" />,
-							previewStyle: { background: template.image ? `url(${template.image}) center / contain no-repeat, #ddd9d0` : "#ddd9d0" },
-						}))}
-						value={style.paper.template}
-						onChange={(template) => onChange({ ...style, paper: { ...style.paper, template, edge: template === "none" ? "flat" : "stamp", stampSize: "fine", pattern: "plain" }, stickers: [] })}
-						columns="grid-cols-3 sm:grid-cols-4"
-						previewClassName="!h-32"
+					<NativeTabs
+						value={paperMode}
+						options={[{ value: "template", label: "Template" }, { value: "custom", label: "Custom" }]}
+						onChange={choosePaperMode}
+						className="flex w-full [&>button]:flex-1"
 					/>
-					{style.paper.template !== "none" ? (
-						<p className="rounded-2xl border border-primary-border bg-primary-subtle p-4 text-sm text-muted-foreground">Templates are printed on cream paper. Choose Simple paper to pick its color, pattern, edge and washi tape.</p>
-					) : (
-					<>
+					{paperMode === "template" ? (
+						<>
+							{([["events", "Seasons & events"], ["zodiac", "Zodiac"]] as const).map(([group, label]) => (
+								<TileGrid
+									key={group}
+									label={label}
+									hint={group === "events" ? "Artwork sits in the corners" : undefined}
+									options={PAPER_TEMPLATES.filter((template) => template.group === group).map((template) => ({
+										id: template.id,
+										label: template.label,
+										preview: null,
+										previewStyle: { background: `url(${template.image}) center / contain no-repeat, #ddd9d0` },
+									}))}
+									value={style.paper.template}
+									onChange={(template) => { lastTemplate.current = template; patch("paper", { template }); }}
+									columns="grid-cols-5"
+									previewClassName="!h-32"
+								/>
+							))}
+						</>
+					) : null}
 					<SwatchGrid
 						label="Paper color"
+						hint={paperMode === "template" ? "Tints the artwork's paper" : undefined}
 						options={PAPER_TINTS.map((paper) => ({ id: paper.id, label: paper.label, swatch: paper.hex }))}
 						value={style.paper.tint}
 						onChange={(tintId) => patch("paper", { tint: tintId })}
@@ -186,7 +262,19 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 						}))}
 						value={style.paper.pattern}
 						onChange={(pattern) => patch("paper", { pattern })}
-						columns="grid-cols-4 sm:grid-cols-5"
+						columns="grid-cols-5"
+					/>
+					<TileGrid
+						label="Texture"
+						options={PAPER_TEXTURES.map((texture) => ({
+							id: texture.id,
+							label: texture.label,
+							preview: null,
+							previewStyle: { background: `${paperTextureUri(texture.id)}, ${tint}` },
+						}))}
+						value={style.paper.texture}
+						onChange={(textureId) => patch("paper", { texture: textureId })}
+						columns="grid-cols-5"
 					/>
 					<div className="letter-vars contents" style={paperVars}>
 						<TileGrid
@@ -198,8 +286,8 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 							}))}
 							value={style.paper.edge}
 							onChange={(edge) => patch("paper", { edge })}
-							columns="grid-cols-3"
-							previewClassName="paper-edge-swatch !h-28"
+							columns="grid-cols-5"
+							previewClassName="paper-edge-swatch !h-24"
 						/>
 					</div>
 					{style.paper.edge === "stamp" ? (
@@ -212,8 +300,8 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 							}))}
 							value={style.paper.stampSize}
 							onChange={(stampSize) => patch("paper", { stampSize })}
-							columns="grid-cols-3"
-							previewClassName="paper-edge-swatch !h-28"
+							columns="grid-cols-5"
+							previewClassName="paper-edge-swatch !h-24"
 						/>
 					) : null}
 					<SwatchGrid
@@ -221,13 +309,13 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 						options={WASHI_COLORS.map((washi) => ({
 							id: washi.id,
 							label: washi.label,
-							swatch: `repeating-linear-gradient(90deg, rgb(255 255 255 / 0.4) 0 4px, transparent 4px 8px), repeating-linear-gradient(0deg, rgb(255 255 255 / 0.4) 0 4px, transparent 4px 8px), rgb(${washi.rgb} / 0.85)`,
+							swatch: washi.id === "none"
+								? "linear-gradient(135deg, transparent 45%, #c0556a 45% 55%, transparent 55%), #fffefd"
+								: `repeating-linear-gradient(90deg, rgb(255 255 255 / 0.4) 0 4px, transparent 4px 8px), repeating-linear-gradient(0deg, rgb(255 255 255 / 0.4) 0 4px, transparent 4px 8px), rgb(${washi.rgb} / 0.85)`,
 						}))}
 						value={style.paper.washi}
 						onChange={(washi) => patch("paper", { washi })}
 					/>
-					</>
-					)}
 				</div>
 			) : null}
 
@@ -246,14 +334,14 @@ export function DecoratePanel({ style, onChange, onTabChange }: {
 							label: font.label,
 							preview: (
 								<span className="px-1 leading-none" style={{ fontFamily: font.family, color: colors.ink, fontSize: font.handwritten ? "1.5rem" : "1.2rem" }}>
-									Yêu em
+									Aa
 								</span>
 							),
 							previewStyle: { background: tint },
 						}))}
 						value={style.ink.font}
 						onChange={(font) => patch("ink", { font })}
-						columns="grid-cols-3 sm:grid-cols-5"
+						columns="grid-cols-5"
 					/>
 				</div>
 			) : null}

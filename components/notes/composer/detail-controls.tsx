@@ -25,7 +25,7 @@ export function DetailControls({ style, onChange }: {
 		<div role="tabpanel" className="grid min-w-0 gap-5">
 			<TileGrid
 				label="Title lettering"
-				options={fontOptions("Yêu em")}
+				options={fontOptions("Aa")}
 				value={style.details.titleFont}
 				onChange={(titleFont) => onChange({ titleFont })}
 				columns="grid-cols-3 sm:grid-cols-5"
@@ -51,7 +51,7 @@ export function DetailControls({ style, onChange }: {
 			/>
 			<TileGrid
 				label="Signature lettering"
-				options={fontOptions("Yêu em")}
+				options={fontOptions("Aa")}
 				value={style.details.signatureFont}
 				onChange={(signatureFont) => onChange({ signatureFont })}
 				columns="grid-cols-3 sm:grid-cols-5"
